@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conductor Login Form</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="company-logo">
+                </div>
+                <h2>Conductor App </h2>
+                <!-- <p>Please sign in to your corporate account</p> -->
+            </div>
+            
+            <form class="login-form" id="loginForm" novalidate>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <input type="email" id="email" name="email" autocomplete="email">
+                        <label for="email">Email</label>
+                        <span class="input-border"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper password-wrapper">
+                        <input type="password" id="password" name="password" autocomplete="current-password">
+                        <label for="password">Password</label>
+                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+                            <span class="toggle-icon"></span>
+                        </button>
+                        <span class="input-border"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="input-wrapper">
+                        <select id="role" name="role" required style="margin-top:8px;">
+                            <option value="">Select Role</option>
+                            <option value="professor">Professor</option>
+                            <option value="ta">Teaching Assistant</option>
+                            <option value="tutor">Tutor</option>
+                            <option value="student">Student</option>
+                        </select>
+
+                    </div>
+                </div>
+
+                <div class="form-options">
+                    <div class="remember-wrapper">
+
+                    </div>
+                    <a href="#" class="forgot-password">Reset password</a>
+                </div>
+
+                <button type="submit" class="login-btn">
+                    <span class="btn-text">Sign In</span>
+                    <span class="btn-loader"></span>
+                </button>
+            </form>
+
+            <!-- <div class="divider">
+                <span>or sign in with</span>
+            </div>
+
+            <div class="sso-options">
+                <button type="button" class="sso-btn azure-btn">
+                    <span class="sso-icon azure-icon"></span>
+                    <span>Microsoft Azure AD</span>
+                </button>
+                <button type="button" class="sso-btn okta-btn">
+                    <span class="sso-icon okta-icon"></span>
+                    <span>Okta</span>
+                </button>
+            </div>
+
+            <div class="footer-links">
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <span class="separator">•</span>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <span class="separator">•</span>
+                <a href="#" class="footer-link">Support</a>
+            </div> -->
+
+            <div class="success-message" id="successMessage">
+                <div class="success-icon">✓</div>
+                <h3>Authentication Successful</h3>
+                <p>Redirecting to your workspace...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../shared/js/form-utils.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
