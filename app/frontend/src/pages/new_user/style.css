@@ -1,5 +1,3 @@
-
-
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 * {
     margin: 0;
@@ -17,7 +15,6 @@ body {
     align-items: center;
     font-size: 13px;
 }
-/* Login form styling */
 .login_form {
     width: 100%;
     max-width: 350px;
@@ -31,7 +28,6 @@ body {
     font-size: 15px;
     text-align: center;
 }
-/* Google & Apple button styling */
 .login_form .login_option {
     display: flex;
     width: 100%;
@@ -39,7 +35,7 @@ body {
     align-items: center;
 }
 .login_form .login_option .option {
-    width: calc(100% / 2 - 12px);
+    width: 100%;
 }
 .login_form .login_option .option a {
     height: 34px;
@@ -59,7 +55,7 @@ body {
 }
 .login_form .login_option .option a:hover {
     background: #ededf5;
-    border-color: #626cd6;
+    border-color: #232946;
 }
 .login_form .login_option .option a img {
     max-width: 25px;
@@ -72,7 +68,6 @@ body {
     position: relative;
     margin-bottom: 24px;
 }
-/* Login option separator styling */
 .login_form .separator span {
     background: #fff;
     z-index: 1;
@@ -89,7 +84,6 @@ body {
     background: #C2C2C2;
     display: block;
 }
-
 form .input_box label {
     display: block;
     font-weight: 500;
@@ -109,7 +103,7 @@ form .input_box input {
     transition: 0.2s ease;
 }
 form .input_box input:focus {
-    border-color: #626cd6;
+    border-color: #232946;
 }
 form .input_box .password_title {
     display: flex;
@@ -121,7 +115,7 @@ form .input_box {
 }
 a {
     text-decoration: none;
-    color: #626cd6;
+    color: #232946;
     font-weight: 500;
     font-size: 12px;
 }
@@ -134,7 +128,7 @@ form button {
     border-radius: 5px;
     border: none;
     outline: none;
-        background: #1976d2;
+    background: #1976d2;
     color: #fff;
     font-size: 13px;
     font-weight: 500;
@@ -142,6 +136,7 @@ form button {
     cursor: pointer;
     margin-bottom: 14px;
     transition: 0.3s ease;
+    box-shadow: 0 2px 4px rgba(25, 118, 210, 0.08);
 }
 form button:hover {
     background: #1565c0;

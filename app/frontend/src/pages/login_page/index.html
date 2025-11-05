@@ -1,100 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Form in HTML and CSS | CodingNepal</title>
+    <link rel="stylesheet" href="style.css" />
+</head> -->
+<body>
+    <div class="login_form">
+        <!-- Login form container -->
+        <form action="#">
+            <!DOCTYPE html>
+            <html lang="en">
+
+            <head>
+
+                <meta charset="utf-8">
+                <meta http-equiv="X-UA-Compatible" content="IE=edge">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+                <meta name="description" content="">
+                <meta name="author" content="">
+
+                <title>Conductor App - Login</title>
+
+                <!-- Custom fonts for this template-->
+                <link href="vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+                <link
+                    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+                    rel="stylesheet">
+
+                <!-- Custom styles for this template
+                <link href="css/sb-admin-2.min.css" rel="stylesheet"> -->
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conductor Login Form</title>
+    <title>Login</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <div class="company-logo">
-                </div>
-                <h2>Conductor App </h2>
-                <!-- <p>Please sign in to your corporate account</p> -->
+    <div class="login_form">
+        <form>
+            <h3 style="margin-bottom: 28px;">Conductor App</h3>
+            <div class="input_box" style="margin-bottom: 22px;">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required />
             </div>
-            
-            <form class="login-form" id="loginForm" novalidate>
-
-                <div class="form-group">
-                    <div class="input-wrapper">
-                        <input type="email" id="email" name="email" autocomplete="email">
-                        <label for="email">Email</label>
-                        <span class="input-border"></span>
-                    </div>
+            <div class="input_box">
+                <div class="password_title">
+                    <label for="password">Password</label>
                 </div>
-
-                <div class="form-group">
-                    <div class="input-wrapper password-wrapper">
-                        <input type="password" id="password" name="password" autocomplete="current-password">
-                        <label for="password">Password</label>
-                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
-                            <span class="toggle-icon"></span>
-                        </button>
-                        <span class="input-border"></span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <div class="input-wrapper">
-                        <select id="role" name="role" required style="margin-top:8px;">
-                            <option value="">Select Role</option>
-                            <option value="professor">Professor</option>
-                            <option value="ta">Teaching Assistant</option>
-                            <option value="tutor">Tutor</option>
-                            <option value="student">Student</option>
-                        </select>
-
-                    </div>
-                </div>
-
-                <div class="form-options">
-                    <div class="remember-wrapper">
-
-                    </div>
-                    <a href="#" class="forgot-password">Reset password</a>
-                </div>
-
-                <button type="submit" class="login-btn">
-                    <span class="btn-text">Sign In</span>
-                    <span class="btn-loader"></span>
-                </button>
-            </form>
-
-            <!-- <div class="divider">
-                <span>or sign in with</span>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required />
             </div>
-
-            <div class="sso-options">
-                <button type="button" class="sso-btn azure-btn">
-                    <span class="sso-icon azure-icon"></span>
-                    <span>Microsoft Azure AD</span>
-                </button>
-                <button type="button" class="sso-btn okta-btn">
-                    <span class="sso-icon okta-icon"></span>
-                    <span>Okta</span>
-                </button>
+            <div class="input_box" style="display: flex; align-items: center; margin-bottom: 18px;">
+                <input type="checkbox" id="remember" name="remember" style="width:16px; height:16px; margin-right:8px;">
+                <label for="remember" style="font-size: 12px; font-weight: 500; cursor:pointer;">Remember me</label>
             </div>
+            <button type="submit">Login</button>
+            <button type="submit">Join a Course</button>
 
-            <div class="footer-links">
-                <a href="#" class="footer-link">Privacy Policy</a>
-                <span class="separator">•</span>
-                <a href="#" class="footer-link">Terms of Service</a>
-                <span class="separator">•</span>
-                <a href="#" class="footer-link">Support</a>
-            </div> -->
+            <p class="separator"><span>or</span></p>
+            <div class="login_option">
+                <div class="option" style="width:100%">
+                    <a href="#" style="justify-content:center;">
+                        <img src="/assets/logo/icons8-google.svg" alt="Google" style="max-width:25px; margin-right:10px;"/>Login with Google
 
-            <div class="success-message" id="successMessage">
-                <div class="success-icon">✓</div>
-                <h3>Authentication Successful</h3>
-                <p>Redirecting to your workspace...</p>
+                    </a>
+                </div>
             </div>
-        </div>
+            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                <a href="#">Forgot password?</a>
+                <a href="../new_user/index.html">Create an account</a>
+            </div>
+        </form>
     </div>
-
-    <script src="../../shared/js/form-utils.js"></script>
-    <script src="script.js"></script>
 </body>
 </html>

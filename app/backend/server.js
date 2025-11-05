@@ -4,11 +4,21 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+
 // Serve static files from frontend/public
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
-// Serve static files for each page (e.g., login)
+// Serve static assets (e.g., logos, images)
+app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
+
+
+// Serve static files for each role page
 app.use('/login', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
+app.use('/new_user', express.static(path.join(__dirname, '../frontend/src/pages/new_user')));
+app.use('/professor', express.static(path.join(__dirname, '../frontend/src/pages/professor')));
+app.use('/student', express.static(path.join(__dirname, '../frontend/src/pages/student')));
+app.use('/ta', express.static(path.join(__dirname, '../frontend/src/pages/ta')));
+app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 
 // Example API endpoint (for future backend logic)
 app.get('/api/health', (req, res) => {
