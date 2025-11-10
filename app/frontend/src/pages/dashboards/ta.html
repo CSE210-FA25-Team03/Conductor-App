@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TA Dashboard | Conductor</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="page" data-role="ta">
+        <header class="top-nav">
+            <div class="brand">Conductor <span>App</span></div>
+            <div class="nav-actions">
+                <button class="class-directory-btn">Class Directory</button>
+                <div class="profile">
+                    <button class="profile-trigger" aria-controls="profile-panel" aria-expanded="false">
+                        SO
+                    </button>
+                    <div class="profile-tooltip">
+                        <p>Samira Ortiz</p>
+                        <p>samira.ortiz@conductor.edu</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="dashboard-header">
+            <div>
+                <h1>Staff Dashboard</h1>
+                <small>TA view · Sections B1 & B2 · Updated 10 minutes ago</small>
+            </div>
+            <div class="status-badges">
+                <span class="badge">4 Teams</span>
+                <span class="badge success">2 On Track</span>
+                <span class="badge risk">1 Follow-up</span>
+            </div>
+        </section>
+
+        <section class="content-grid">
+            <article class="staff-card">
+                <header>
+                    <div class="avatar-block">SO</div>
+                    <div>
+                        <h2>Samira Ortiz</h2>
+                        <p class="role">Teaching Assistant · CSE 210</p>
+                    </div>
+                </header>
+                <div class="staff-meta">
+                    <div class="meta-row">
+                        <span class="meta-label">Staff name</span>
+                        <span>Samira Ortiz</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Role</span>
+                        <span>TA</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Teams</span>
+                        <span>Teams 7 - 10</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Next office hours</span>
+                        <span>Thu · 4:00 PM</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="meta-label">Badges</p>
+                    <div class="status-badges">
+                        <span class="badge">Feedback queue</span>
+                        <span class="badge success">Rubric ready</span>
+                        <span class="badge risk">Missing demo</span>
+                    </div>
+                </div>
+            </article>
+
+            <section class="teams-grid">
+                <article class="class-directory-card">
+                    <div>
+                        <h3>TA Quick Actions</h3>
+                        <p>Track assigned mentors, upload grading notes, and reconcile attendance for weekly studios.</p>
+                    </div>
+                    <a href="#">Open workspace →</a>
+                </article>
+
+                <div class="team-card">
+                    <header>
+                        <div>
+                            <small>Team 7</small>
+                            <h3>Insight Labs</h3>
+                        </div>
+                        <span class="badge success">On Track</span>
+                    </header>
+                    <p>Deliverable submitted · ready for rubric scoring.</p>
+                    <div class="avatar-stack">
+                        <span>DL</span>
+                        <span>VS</span>
+                        <span>HM</span>
+                        <span>+2</span>
+                    </div>
+                    <div class="card-actions">
+                        <span>Feedback due in 2 days</span>
+                        <button>Read more</button>
+                    </div>
+                </div>
+
+                <div class="team-card">
+                    <header>
+                        <div>
+                            <small>Team 8</small>
+                            <h3>Atlas AI</h3>
+                        </div>
+                        <span class="badge">Check-in</span>
+                    </header>
+                    <p>Waiting on usability recordings before sign-off.</p>
+                    <div class="avatar-stack">
+                        <span>PR</span>
+                        <span>LM</span>
+                        <span>GS</span>
+                        <span>+1</span>
+                    </div>
+                    <div class="card-actions">
+                        <span>Schedule 1:1</span>
+                        <button>Read more</button>
+                    </div>
+                </div>
+
+                <div class="team-card risk">
+                    <header>
+                        <div>
+                            <small>Team 9</small>
+                            <h3>Beacon AR</h3>
+                        </div>
+                        <span class="badge risk">Needs Support</span>
+                    </header>
+                    <p>Missed last stand-up; prototype blockers unresolved.</p>
+                    <div class="avatar-stack">
+                        <span>JW</span>
+                        <span>EL</span>
+                        <span>+2</span>
+                    </div>
+                    <div class="card-actions">
+                        <span>Escalate to Prof. Lin</span>
+                        <button>Read more</button>
+                    </div>
+                </div>
+
+                <div class="team-card empty">
+                    <header>
+                        <div>
+                            <small>No Team</small>
+                            <h3>Students pending</h3>
+                        </div>
+                        <span class="badge">2 awaiting</span>
+                    </header>
+                    <p>Students who left Team 6—pair with available projects.</p>
+                    <div class="card-actions">
+                        <span>Update by Friday</span>
+                        <button>Assign</button>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </div>
+
+    <section class="profile-panel" id="profile-panel" aria-hidden="true">
+        <article class="profile-card">
+            <header>
+                <div>
+                    <p class="meta-label">Profile</p>
+                    <h2>Samira Ortiz</h2>
+                    <p>samira.ortiz@conductor.edu · Staff ID: 59310</p>
+                </div>
+                <button class="close-profile" aria-label="Close profile panel">×</button>
+            </header>
+            <ul>
+                <li>
+                    <strong>Primary sections</strong>
+                    Studio B1 + B2 · Thursday labs · 28 active students
+                </li>
+                <li>
+                    <strong>Support focus</strong>
+                    Feedback coaching, rubric calibration, workshop logistics
+                </li>
+                <li>
+                    <strong>Availability</strong>
+                    Mon/Wed remote 9-11am · Thu on-campus 2-6pm
+                </li>
+            </ul>
+            <div>
+                <p class="meta-label">Courses supporting</p>
+                <div class="course-list">
+                    <div class="course-pill">
+                        <span>CSE 210</span>
+                        <small>Sections B1 & B2</small>
+                    </div>
+                    <div class="course-pill">
+                        <span>CSE 100</span>
+                        <small>Guest grader (spring)</small>
+                    </div>
+                    <div class="course-pill">
+                        <span>COGS 123</span>
+                        <small>Design communication mentor</small>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
