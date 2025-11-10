@@ -1,0 +1,29 @@
+{
+  "name": "conductor-app",
+  "version": "1.0.0",
+  "description": "Scalable Course Management Applications",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CSE210-FA25-Team03/Conductor-App.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues"
+  },
+  "homepage": "https://github.com/CSE210-FA25-Team03/Conductor-App#readme",
+  "dependencies": {
+    "cookie-session": "^2.1.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "openid-client": "^5.7.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

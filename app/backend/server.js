@@ -1,9 +1,23 @@
+require('dotenv').config();
 // Basic Express server to serve static frontend and prepare for backend features
 const express = require('express');
+const cookieSession = require('cookie-session');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Add cookie sessions for state + PKCE storage
+app.use(cookieSession({
+  name: 'session',
+  secret: process.env.SESSION_SECRET,
+  httpOnly: true,
+  secure: false, // true in production behind HTTPS
+  sameSite: 'lax',
+}));
+
+// --- Mount auth routes ---
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
 
 // Serve static files from frontend/public
 app.use(express.static(path.join(__dirname, '../frontend/public')));
