@@ -45,7 +45,7 @@
                 <div class="card-content">
                     <h2>Task Tracker</h2>
                     <p>Monitor assigned tasks, due dates, and progress updates.</p>
-                    <button class="card-btn">View Tasks</button>
+                    <button id="viewTasksBtn" class="card-btn">View Tasks</button>
                 </div>
             </article>
 
@@ -84,7 +84,11 @@
     </section>
 
     <script src="script.js"></script>
-
+        <script>
+            document.getElementById('viewTasksBtn').addEventListener('click', function() {
+            window.location.href = '/task_tracker/task_tracker.html';
+            });
+        </script>
         <script>
             // Dropdown logic
             const profileImg = document.getElementById('dashboardProfileImg');
@@ -120,19 +124,6 @@
                     var img2 = document.getElementById('dashboardProfileImgLarge');
                     if (img2) img2.src = savedImg;
                 }
-            });
-        </script>
-        <script>
-            window.addEventListener('DOMContentLoaded', function() {
-                var firstName = localStorage.getItem('firstName') || 'Avery';
-                var lastName = localStorage.getItem('lastName') || 'Lin';
-                var role = localStorage.getItem('role') || 'Professor';
-                var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
-                document.getElementById('profName').textContent = firstName + ' ' + lastName;
-                document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
-                document.getElementById('profRole').textContent = role + ' · CSE 210';
-                document.getElementById('profRoleMeta').textContent = role;
-                document.getElementById('profEmail').textContent = email;
             });
         </script>
 </body>
