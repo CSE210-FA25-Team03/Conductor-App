@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard | Conductor</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="page" data-role="student">
+        <header class="top-nav">
+            <div class="brand">Conductor <span>App</span></div>
+            <div class="nav-actions">
+                <button class="class-directory-btn">Course Directory</button>
+                <div class="profile">
+                    <button class="profile-trigger" aria-controls="profile-panel" aria-expanded="false">
+                        JL
+                    </button>
+                    <div class="profile-tooltip">
+                        <p>Jordan Lee</p>
+                        <p>jordan.lee@conductor.edu</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="dashboard-header">
+            <div>
+                <h1>Student Dashboard</h1>
+                <small>CSE 210 · Team Beacon · Updated 5 minutes ago</small>
+            </div>
+            <div class="status-badges">
+                <span class="badge success">Deliverable sent</span>
+                <span class="badge">Next sprint planning</span>
+            </div>
+        </section>
+
+        <section class="content-grid">
+            <article class="staff-card">
+                <header>
+                    <div class="avatar-block">JL</div>
+                    <div>
+                        <h2>Jordan Lee</h2>
+                        <p class="role">Product Lead · Team Beacon</p>
+                    </div>
+                </header>
+                <div class="staff-meta">
+                    <div class="meta-row">
+                        <span class="meta-label">Course</span>
+                        <span>CSE 210</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Mentor</span>
+                        <span>Samira Ortiz (TA)</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Professor</span>
+                        <span>Dr. Avery Lin</span>
+                    </div>
+                    <div class="meta-row">
+                        <span class="meta-label">Current sprint</span>
+                        <span>#5 · Interfaces</span>
+                    </div>
+                </div>
+                <div>
+                    <p class="meta-label">Focus items</p>
+                    <div class="status-badges">
+                        <span class="badge">User testing</span>
+                        <span class="badge success">Slides ready</span>
+                        <span class="badge risk">Need mentor review</span>
+                    </div>
+                </div>
+            </article>
+
+            <section class="teams-grid">
+                <article class="class-directory-card">
+                    <div>
+                        <h3>Upcoming checkpoints</h3>
+                        <p>Next critique with Prof. Lin happens Monday · upload artifacts before Sunday midnight.</p>
+                    </div>
+                    <a href="#">View checklist →</a>
+                </article>
+
+                <div class="team-card">
+                    <header>
+                        <div>
+                            <small>Team Beacon</small>
+                            <h3>Sprint Backlog</h3>
+                        </div>
+                        <span class="badge">4 Tasks</span>
+                    </header>
+                    <p>Prototype refinement, usability scripts, onboarding microcopy, metrics instrumentation.</p>
+                    <div class="card-actions">
+                        <span>Planning retro: Thu 6 PM</span>
+                        <button>Open board</button>
+                    </div>
+                </div>
+
+                <div class="team-card">
+                    <header>
+                        <div>
+                            <small>Studio deliverable</small>
+                            <h3>Week 5 Presentation</h3>
+                        </div>
+                        <span class="badge success">Submitted</span>
+                    </header>
+                    <p>Slides, annotated prototype, reflection doc uploaded to drive.</p>
+                    <div class="card-actions">
+                        <span>Feedback arrives Friday</span>
+                        <button>Review files</button>
+                    </div>
+                </div>
+
+                <div class="team-card risk">
+                    <header>
+                        <div>
+                            <small>Action item</small>
+                            <h3>Mentor follow-up</h3>
+                        </div>
+                        <span class="badge risk">Due soon</span>
+                    </header>
+                    <p>Schedule a 15-min sync with Samira to unblock metrics instrumentation.</p>
+                    <div class="card-actions">
+                        <span>Due tomorrow</span>
+                        <button>Schedule</button>
+                    </div>
+                </div>
+
+                <div class="team-card empty">
+                    <header>
+                        <div>
+                            <small>Resources</small>
+                            <h3>Course directory</h3>
+                        </div>
+                        <span class="badge">Browse peers</span>
+                    </header>
+                    <p>Explore other teams, find shared research, and reach out for peer critiques.</p>
+                    <div class="card-actions">
+                        <span>20 teams listed</span>
+                        <button>Open</button>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </div>
+
+    <section class="profile-panel" id="profile-panel" aria-hidden="true">
+        <article class="profile-card">
+            <header>
+                <div>
+                    <p class="meta-label">Profile</p>
+                    <h2>Jordan Lee</h2>
+                    <p>jordan.lee@conductor.edu · PID: A102938</p>
+                </div>
+                <button class="close-profile" aria-label="Close profile panel">×</button>
+            </header>
+            <ul>
+                <li>
+                    <strong>Role</strong>
+                    Product Lead, Team Beacon · joined Fall 2024 cohort
+                </li>
+                <li>
+                    <strong>Partner courses</strong>
+                    CSE 210 (primary), MGT 162 (innovation), DSC 170 (data storytelling)
+                </li>
+                <li>
+                    <strong>Interests</strong>
+                    Accessibility research, hardware prototyping, education tech
+                </li>
+            </ul>
+            <div>
+                <p class="meta-label">Current Courses</p>
+                <div class="course-list">
+                    <div class="course-pill">
+                        <span>CSE 210</span>
+                        <small>Software Engineering · 6 units</small>
+                    </div>
+                    <div class="course-pill">
+                        <span>MGT 162</span>
+                        <small>Case Study Lab · 4 units</small>
+                    </div>
+                    <div class="course-pill">
+                        <span>DSC 170</span>
+                        <small>Data Storytelling · 4 units</small>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

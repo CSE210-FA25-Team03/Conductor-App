@@ -19,6 +19,7 @@ app.use('/professor', express.static(path.join(__dirname, '../frontend/src/pages
 app.use('/student', express.static(path.join(__dirname, '../frontend/src/pages/student')));
 app.use('/ta', express.static(path.join(__dirname, '../frontend/src/pages/ta')));
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
+app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 
 // Example API endpoint (for future backend logic)
 app.get('/api/health', (req, res) => {
