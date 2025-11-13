@@ -48,7 +48,7 @@
                 <div class="card-content">
                     <h2>Team Card</h2>
                     <p>Access team assignments, progress updates, and collaboration tools.</p>
-                    <button class="card-btn">View Teams</button>
+                    <button class="card-btn" id="viewTeamsBtn">View Teams</button>
                 </div>
             </article>
 
@@ -68,6 +68,11 @@
     <!-- Profile panel removed, navigation now goes to profile page -->
 
     <script src="script.js"></script>
+    <script>
+        document.getElementById('viewTeamsBtn').addEventListener('click', function() {
+            window.location.href = '/team_card/team_card.html';
+        });
+    </script>
     <script>
         // Dropdown logic
         const profileImg = document.getElementById('dashboardProfileImg');
