@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile | Conductor</title>
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body>
+  <header class="top-nav">
+    <div class="brand">Conductor <span>App</span></div>
+    <div class="nav-actions">
+  <a href="#" id="backDashboard" class="back-btn">← Back to Dashboard</a>
+    </div>
+  </header>
+
+  <main class="profile-container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-photo">
+          <img id="profile-img" src="/assets/logo/user.png" alt="Profile Picture" />
+          <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:0.5rem;">
+            <label for="upload-photo" class="upload-btn" style="margin:0;">Change</label>
+            <label id="save-photo" class="upload-btn" style="display:none; margin:0; cursor:pointer;">Save</label>
+          </div>
+          <input type="file" id="upload-photo" accept="image/*" hidden />
+        </div>
+  <h1 id="profileFullName">Dr. Avery Lin</h1>
+  <p class="role" id="profileRole">Professor · CSE 210</p>
+      </div>
+
+      <div class="info-card">
+        <h2>Personal Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>First Name</label>
+            <input type="text" id="profileFirstName" value="" disabled />
+          </div>
+          <div class="info-item">
+            <label>Last Name</label>
+            <input type="text" id="profileLastName" value="" disabled />
+          </div>
+          <div class="info-item full">
+            <label>Role</label>
+            <input type="text" id="profileRoleField" value="" disabled />
+          </div>
+        </div>
+        <button class="edit-btn">Edit Information</button>
+      </div>
+
+      <div class="info-card">
+        <h2>Contact</h2>
+        <div class="info-grid">
+          <div class="info-item full">
+            <label>Email</label>
+            <input type="email" id="profileEmail" value="" disabled />
+          </div>
+        </div>
+        <button class="edit-btn">Edit Contact</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const uploadInput = document.getElementById('upload-photo');
+    const profileImg = document.getElementById('profile-img');
+    const savePhotoLabel = document.getElementById('save-photo');
+    let uploadedImgData = null;
+
+    // Load saved image from localStorage
+    window.addEventListener('DOMContentLoaded', function() {
+      const savedImg = localStorage.getItem('profileImg');
+      if (savedImg) profileImg.src = savedImg;
+    });
+
+    uploadInput.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          profileImg.src = e.target.result;
+          uploadedImgData = e.target.result;
+          savePhotoLabel.style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    savePhotoLabel.addEventListener('click', function() {
+      if (uploadedImgData) {
+        localStorage.setItem('profileImg', uploadedImgData);
+        savePhotoLabel.style.display = 'none';
+      }
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const section = btn.closest('.info-card');
+        const inputs = section.querySelectorAll('input');
+        const editing = btn.textContent === 'Save';
+        if (editing) {
+          inputs.forEach(i => i.disabled = true);
+          btn.textContent = 'Edit Information';
+          btn.classList.remove('saving');
+        } else {
+          inputs.forEach(i => i.disabled = false);
+          btn.textContent = 'Save';
+          btn.classList.add('saving');
+        }
+      });
+    });
+
+    // Populate profile info from localStorage
+    window.addEventListener('DOMContentLoaded', function() {
+      var firstName = localStorage.getItem('firstName') || 'Avery';
+      var lastName = localStorage.getItem('lastName') || 'Lin';
+      var role = localStorage.getItem('role') || 'Professor';
+      var email = localStorage.getItem('email') || 'avery.lin@university.edu';
+      document.getElementById('profileFullName').textContent = firstName + ' ' + lastName;
+      document.getElementById('profileFirstName').value = firstName;
+      document.getElementById('profileLastName').value = lastName;
+      document.getElementById('profileRole').textContent = role + ' · CSE 210';
+      document.getElementById('profileRoleField').value = role;
+      document.getElementById('profileEmail').value = email;
+    });
+
+    // Dynamic dashboard link based on role
+    document.getElementById('backDashboard').addEventListener('click', function(e) {
+      e.preventDefault();
+      var role = localStorage.getItem('role');
+      if (role === 'Professor') {
+        window.location.href = '/dashboards/professor.html';
+      } else if (role === 'Teaching Assistant') {
+        window.location.href = '/dashboards/ta.html';
+      } else if (role === 'team_lead') {
+        window.location.href = '/dashboards/team_lead.html';
+      } else {
+        window.location.href = '/dashboards/student.html';
+      }
+    });
+  </script>
+</body>
+</html>

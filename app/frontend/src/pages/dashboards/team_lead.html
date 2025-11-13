@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Teaching Assistant Dashboard | Conductor</title>
+    <title>Team Lead Dashboard | Conductor</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="page" data-role="teaching-assistant">
+    <div class="page" data-role="student">
         <header class="top-nav">
             <div class="brand">Conductor <span>App</span></div>
             <div class="nav-actions">
                 <div class="profile">
                     <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
                             <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
                             <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
                         </div>
@@ -25,8 +25,8 @@
 
         <section class="dashboard-header">
             <div>
-                <h1>Staff Dashboard</h1>
-                <small>Teaching Assistant view · CSE 210 </small>
+                <h1>Student Dashboard</h1>
+                <small>Team Lead view · CSE 210 </small>
             </div>
         </section>
 
@@ -41,11 +41,29 @@
             </article>
 
             <article class="dashboard-card">
-                <div class="card-icon">👥</div>
+                <div class="card-icon">🗂️</div>
                 <div class="card-content">
-                    <h2>Team Card</h2>
-                    <p>Access team assignments, progress updates, and collaboration tools.</p>
-                    <button class="card-btn" id="viewTeamsBtn">View Teams</button>
+                    <h2>Task Tracker</h2>
+                    <p>Monitor assigned tasks, due dates, and progress updates.</p>
+                    <button class="card-btn">View Tasks</button>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="card-icon">📝</div>
+                <div class="card-content">
+                    <h2>Meeting Notes</h2>
+                    <p>Create, organize, or review your meeting notes and class discussions.</p>
+                    <button class="card-btn">Open Notes</button>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="card-icon">📈</div>
+                <div class="card-content">
+                    <h2>Weekly Evaluation</h2>
+                    <p>Review performance summaries and submit weekly feedback reports.</p>
+                    <button class="card-btn">View Evaluation</button>
                 </div>
             </article>
 
@@ -63,13 +81,10 @@
 
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
     <!-- Profile panel removed, navigation now goes to profile page -->
+    </section>
 
     <script src="script.js"></script>
-        <script>
-            document.getElementById('viewTeamsBtn').addEventListener('click', function() {
-                window.location.href = '/team_card/team_card.html';
-            });
-        </script>
+
         <script>
             // Dropdown logic
             const profileImg = document.getElementById('dashboardProfileImg');
@@ -90,10 +105,12 @@
             });
             document.getElementById('logoutBtn').addEventListener('click', function(e) {
                 e.preventDefault();
+                // Clear localStorage and redirect to login
                 localStorage.clear();
                 window.location.href = '/login';
             });
         </script>
+
         <script>
             window.addEventListener('DOMContentLoaded', function() {
                 var savedImg = localStorage.getItem('profileImg');
