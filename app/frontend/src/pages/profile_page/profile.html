@@ -128,7 +128,7 @@
     document.getElementById('backDashboard').addEventListener('click', function(e) {
       e.preventDefault();
       var role = localStorage.getItem('role');
-      if (role === 'Professor') {
+      if (role === 'professor') {
         window.location.href = '/dashboards/professor.html';
       } else if (role === 'Teaching Assistant') {
         window.location.href = '/dashboards/ta.html';
