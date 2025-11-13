@@ -200,5 +200,61 @@
             }
         });
         </script>
+
+        <script>
+            // Fetch teams from API
+            async function loadTeams() {
+            try {
+                const response = await fetch('/api/teams');
+                const teams = await response.json();
+                
+                const teamsGrid = document.querySelector('.teams-grid');
+                teamsGrid.innerHTML = ''; // Clear hardcoded cards
+                
+                teams.forEach(team => {
+                const card = createTeamCard(team);
+                teamsGrid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading teams:', error);
+            }
+            }
+            
+            function createTeamCard(team) {
+            const card = document.createElement('div');
+            card.className = `team-card ${team.status === 'At Risk' ? 'risk' : ''}`;
+            
+            const statusClass = team.status === 'On Track' ? 'success' : 
+                                team.status === 'At Risk' ? 'risk' : '';
+            
+            card.innerHTML = `
+                <header>
+                <div>
+                    <small>${team.teamNumber}</small>
+                    <h3>${team.name}</h3>
+                </div>
+                <span class="badge ${statusClass}">${team.status}</span>
+                </header>
+                <p>${team.description}</p>
+                <div class="avatar-stack">
+                ${team.members.map(m => `<span>${m}</span>`).join('')}
+                </div>
+                <div class="card-actions">
+                <span>${team.nextSync || team.lastUpdate || team.actionRequired || ''}</span>
+                <button onclick="showTeamInfo(${team.id})">Card info</button>
+                </div>
+            `;
+            return card;
+            }
+            function showTeamInfo(teamId) {
+                fetch(`/api/teams/${teamId}`)
+                    .then(res => res.json())
+                    .then(team => {
+                        alert(`Team: ${team.name}\nStatus: ${team.status}\n${team.description}`);
+                    })
+                    .catch(err => console.error('Error:', err));
+            }
+            window.addEventListener('DOMContentLoaded', loadTeams);
+        </script>
 </body>
 </html>
