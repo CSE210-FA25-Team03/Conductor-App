@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Team Task Tracker | Conductor</title>
+    <link rel="stylesheet" href="/dashboards/style.css" />
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <div class="page">
+        
+        <!-- Header -->
+        <header class="top-nav">
+            <div class="brand">Conductor <span>App</span></div>
+
+            <div class="nav-actions">
+                <div class="profile">
+                    <div class="profile-dropdown-container" style="position:relative;">
+                        
+                        <img id="dashboardProfileImg"
+                             src="/assets/logo/user.png"
+                             style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+
+                        <div class="profile-dropdown" id="profileDropdown"
+                            style="display:none; position:absolute; top:40px; right:0;
+                                   background:#fff; border:1px solid #ddd; border-radius:8px;
+                                   box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                            
+                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; text-decoration:none;">Profile</a>
+                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Page Title -->
+        <section class="dashboard-header">
+            <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
+                <h1>Task Tracker</h1>
+                <a href="#" id="backDashboard" class="back-btn">← Back to Dashboard</a>
+            </div>
+        </section>
+
+        <!-- Task Tracker Board -->
+        <section class="task-tracker-section">
+            <div class="week-box">Week 1</div>
+
+            <div class="story-layout">
+
+                <div class="story-list">
+                    <div class="story-item active">Sprint Board Feature</div> <!---dummy--->
+                    <div class="story-item">Implement form validation</div>
+        
+
+                    <button class="story-add-btn">+ New Story Point</button>
+                </div>
+
+                <div class="task-board-wrapper">
+                    <div class="task-board">
+
+                        <div class="task-column todo-col">
+                            <div class="column-title-label todo-label">To Do</div>
+                            <div class="task-list"></div>
+                            <button class="task-add-btn">+ New task</button>
+                        </div>
+
+                        <div class="task-column progress-col">
+                            <div class="column-title-label progress-label">In Progress</div>
+                            <div class="task-list"></div>
+                            <button class="task-add-btn">+ New task</button>
+                        </div>
+
+                        <div class="task-column done-col">
+                            <div class="column-title-label done-label">Done</div>
+                            <div class="task-list"></div>
+                            <button class="task-add-btn">+ New task</button>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+
+    <!-- Dropdown script -->
+    <script>
+        const profileImg = document.getElementById('dashboardProfileImg');
+        const dropdown = document.getElementById('profileDropdown');
+
+        profileImg.addEventListener('mouseenter', () => {
+            dropdown.style.display = 'block';
+        });
+
+        profileImg.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+            }, 150);
+        });
+
+        dropdown.addEventListener('mouseenter', () => {
+            dropdown.style.display = 'block';
+        });
+
+        dropdown.addEventListener('mouseleave', () => {
+            dropdown.style.display = 'none';
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '/login';
+        });
+    </script>
+
+    <!-- Task tracker logic -->
+    <script src="script.js"></script>
+
+</body>
+</html>
