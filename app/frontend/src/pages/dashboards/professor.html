@@ -13,13 +13,9 @@
             <div class="nav-actions">
                 <button class="class-directory-btn">Staff Class Directory</button>
                 <div class="profile">
-                    <button class="profile-trigger" aria-controls="profile-panel" aria-expanded="false">
-                        AL
-                    </button>
-                    <div class="profile-tooltip">
-                        <p>Dr. Avery Lin</p>
-                        <p>avery.lin@conductor.edu</p>
-                    </div>
+                    <a href="/profile_page/profile.html" class="profile-link">
+                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" />
+                    </a>
                 </div>
             </div>
         </header>
@@ -27,207 +23,68 @@
         <section class="dashboard-header">
             <div>
                 <h1>Staff Dashboard</h1>
-                <small>Professor view · CSE 210 · Updated 3 minutes ago</small>
-            </div>
-            <div class="status-badges">
-                <span class="badge">6 Active Teams</span>
-                <span class="badge success">4 On Track</span>
-                <span class="badge risk">1 At Risk</span>
+                <small>Professor view · CSE 210 </small>
             </div>
         </section>
 
         <section class="content-grid">
-            <article class="staff-card">
-                <header>
-                    <div class="avatar-block">AL</div>
-                    <div>
-                        <h2>Dr. Avery Lin</h2>
-                        <p class="role">Lead Professor · CSE 210</p>
-                    </div>
-                </header>
-                <div class="staff-meta">
-                    <div class="meta-row">
-                        <span class="meta-label">Staff name</span>
-                        <span>Dr. Avery Lin</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">Role</span>
-                        <span>Professor</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">Team #</span>
-                        <span>Advises Teams 1 - 6</span>
-                    </div>
-                    <div class="meta-row">
-                        <span class="meta-label">Focus area</span>
-                        <span>Systems & Process Design</span>
-                    </div>
-                </div>
-                <div>
-                    <p class="meta-label">Badges</p>
-                    <div class="status-badges">
-                        <span class="badge">1:1s scheduled</span>
-                        <span class="badge success">Office hours live</span>
-                        <span class="badge risk">Team 3 flag</span>
-                    </div>
+            <article class="dashboard-card">
+                <div class="card-icon">📘</div>
+                <div class="card-content">
+                    <h2>Class Directory</h2>
+                    <p>View and manage all staff and student class information.</p>
+                    <button class="card-btn">Open</button>
                 </div>
             </article>
 
-            <section class="teams-grid">
-                <article class="class-directory-card">
-                    <div>
-                        <h3>Class Directory (Staff · Edit view)</h3>
-                        <p>Review and update rosters, redistribute mentors, and download attendance data for CSE 210.</p>
-                    </div>
-                    <a href="#">Open full directory →</a>
-                </article>
-
-                <div class="team-card">
-                    <header>
-                        <div>
-                            <small>Team 1</small>
-                            <h3>Design Systems</h3>
-                        </div>
-                        <span class="badge success">On Track</span>
-                    </header>
-                    <p>Focus: prototyping dashboards for the sustainability cohort.</p>
-                    <div class="avatar-stack">
-                        <span>AM</span>
-                        <span>JG</span>
-                        <span>RT</span>
-                        <span>+3</span>
-                    </div>
-                    <div class="card-actions">
-                        <span>Next sync: Tue 10:00 AM</span>
-                        <button>Card info</button>
-                    </div>
+            <article class="dashboard-card">
+                <div class="card-icon">👥</div>
+                <div class="card-content">
+                    <h2>Team Card</h2>
+                    <p>Access team assignments, progress updates, and collaboration tools.</p>
+                    <button class="card-btn">View Teams</button>
                 </div>
+            </article>
 
-                <div class="team-card">
-                    <header>
-                        <div>
-                            <small>Team 2</small>
-                            <h3>Portal Automation</h3>
-                        </div>
-                        <span class="badge">Needs Review</span>
-                    </header>
-                    <p>Members ready for usability review; awaiting professor sign-off.</p>
-                    <div class="avatar-stack">
-                        <span>CL</span>
-                        <span>HM</span>
-                        <span>SK</span>
-                        <span>+2</span>
-                    </div>
-                    <div class="card-actions">
-                        <span>Last update: 45 min ago</span>
-                        <button>Card info</button>
-                    </div>
+            <article class="dashboard-card">
+                <div class="card-icon">📊</div>
+                <div class="card-content">
+                    <h2>Evaluation Journal</h2>
+                    <p>Review performance metrics and grading insights for your classes.</p>
+                    <button class="card-btn">Open Journal</button>
                 </div>
-
-                <div class="team-card risk">
-                    <header>
-                        <div>
-                            <small>Team 3</small>
-                            <h3>IoT Safety</h3>
-                        </div>
-                        <span class="badge risk">At Risk</span>
-                    </header>
-                    <p>Prototype blocked by hardware order; needs escalation.</p>
-                    <div class="avatar-stack">
-                        <span>MB</span>
-                        <span>ZR</span>
-                        <span>LP</span>
-                        <span>+1</span>
-                    </div>
-                    <div class="card-actions">
-                        <span>Action required today</span>
-                        <button>Card info</button>
-                    </div>
-                </div>
-
-                <div class="team-card">
-                    <header>
-                        <div>
-                            <small>Team 4</small>
-                            <h3>Learning Analytics</h3>
-                        </div>
-                        <span class="badge success">Green</span>
-                    </header>
-                    <p>Deliverable submitted early; review scheduled Friday.</p>
-                    <div class="avatar-stack">
-                        <span>TP</span>
-                        <span>EZ</span>
-                        <span>AC</span>
-                        <span>+2</span>
-                    </div>
-                    <div class="card-actions">
-                        <span>Feedback due: Fri</span>
-                        <button>Card info</button>
-                    </div>
-                </div>
-
-                <div class="team-card empty">
-                    <header>
-                        <div>
-                            <small>No Team</small>
-                            <h3>Waiting list</h3>
-                        </div>
-                        <span class="badge">Assign soon</span>
-                    </header>
-                    <p>Students without a project yet—drag to a team card to assign.</p>
-                    <div class="card-actions">
-                        <span>3 students ready</span>
-                        <button>Review</button>
-                    </div>
-                </div>
-            </section>
+            </article>
         </section>
+
     </div>
 
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
-        <article class="profile-card">
-            <header>
-                <div>
-                    <p class="meta-label">Profile</p>
-                    <h2>Dr. Avery Lin</h2>
-                    <p>avery.lin@conductor.edu · Faculty ID: 47281</p>
-                </div>
-                <button class="close-profile" aria-label="Close profile panel">×</button>
-            </header>
-            <ul>
-                <li>
-                    <strong>Office hours</strong>
-                    Monday & Wednesday · 1:30 – 3:00 PM · Room 4302
-                </li>
-                <li>
-                    <strong>Courses mentored</strong>
-                    CSE 210 (current), CSE 148 (spring), COGS 120 (design lab)
-                </li>
-                <li>
-                    <strong>Teams assigned</strong>
-                    Teams 1-6 · 31 students total
-                </li>
-            </ul>
-            <div>
-                <p class="meta-label">Active Courses</p>
-                <div class="course-list">
-                    <div class="course-pill">
-                        <span>CSE 210</span>
-                        <small>Software Engineering · 6 teams</small>
-                    </div>
-                    <div class="course-pill">
-                        <span>CSE 148</span>
-                        <small>Human Factors · 4 teams</small>
-                    </div>
-                    <div class="course-pill">
-                        <span>COGS 120</span>
-                        <small>Interaction Design · 3 teams</small>
-                    </div>
-                </div>
-            </div>
-        </article>
-    </section>
+    <!-- Profile panel removed, navigation now goes to profile page -->
 
     <script src="script.js"></script>
+        <script>
+            window.addEventListener('DOMContentLoaded', function() {
+                var savedImg = localStorage.getItem('profileImg');
+                if (savedImg) {
+                    var img1 = document.getElementById('dashboardProfileImg');
+                    if (img1) img1.src = savedImg;
+                    var img2 = document.getElementById('dashboardProfileImgLarge');
+                    if (img2) img2.src = savedImg;
+                }
+            });
+        </script>
+        <script>
+            window.addEventListener('DOMContentLoaded', function() {
+                var firstName = localStorage.getItem('firstName') || 'Avery';
+                var lastName = localStorage.getItem('lastName') || 'Lin';
+                var role = localStorage.getItem('role') || 'Professor';
+                var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
+                document.getElementById('profName').textContent = firstName + ' ' + lastName;
+                document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
+                document.getElementById('profRole').textContent = role + ' · CSE 210';
+                document.getElementById('profRoleMeta').textContent = role;
+                document.getElementById('profEmail').textContent = email;
+            });
+        </script>
 </body>
 </html>

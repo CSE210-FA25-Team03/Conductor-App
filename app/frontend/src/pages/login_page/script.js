@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const roleRoutes = {
     professor: '../dashboards/professor.html',
-    ta: '../dashboards/ta.html',
+    'Teaching Assistant': '../dashboards/ta.html',
+    team_lead: '../dashboards/team_lead.html',
     student: '../dashboards/student.html',
   };
 
@@ -24,10 +25,23 @@ document.addEventListener('DOMContentLoaded', () => {
     form.style.display = 'none';
     successMessage.classList.add('show');
 
-    const target = roleRoutes[roleSelect.value] || '../dashboards/student.html';
+    // Save user info to localStorage
+    localStorage.setItem('firstName', document.getElementById('firstname').value);
+    localStorage.setItem('lastName', document.getElementById('lastname').value);
+    localStorage.setItem('email', document.getElementById('email').value);
+    localStorage.setItem('role', roleSelect.value);
+
+    let target = '../dashboards/student.html';
+    if (roleSelect.value === 'professor') {
+      target = '../dashboards/professor.html';
+    } else if (roleSelect.value === 'Teaching Assistant') {
+      target = '../dashboards/ta.html';
+    } else if (roleSelect.value === 'team_lead') {
+      target = '../dashboards/team_lead.html';
+    }
 
     setTimeout(() => {
-      window.location.href = target;
+  window.location.href = target;
     }, 800);
   });
 });
