@@ -12,9 +12,13 @@
             <div class="brand">Conductor <span>App</span></div>
             <div class="nav-actions">
                 <div class="profile">
-                    <a href="/profile_page/profile.html" class="profile-link">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:32px;height:32px;border-radius:50%;object-fit:cover;" />
-                    </a>
+                    <div class="profile-dropdown-container" style="position:relative;">
+                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
+                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -61,6 +65,30 @@
     <!-- Profile panel removed, navigation now goes to profile page -->
 
     <script src="script.js"></script>
+        <script>
+            // Dropdown logic
+            const profileImg = document.getElementById('dashboardProfileImg');
+            const dropdown = document.getElementById('profileDropdown');
+            profileImg.addEventListener('mouseenter', () => {
+                dropdown.style.display = 'block';
+            });
+            profileImg.addEventListener('mouseleave', () => {
+                setTimeout(() => {
+                    if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+                }, 150);
+            });
+            dropdown.addEventListener('mouseleave', () => {
+                dropdown.style.display = 'none';
+            });
+            dropdown.addEventListener('mouseenter', () => {
+                dropdown.style.display = 'block';
+            });
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.clear();
+                window.location.href = '/login';
+            });
+        </script>
         <script>
             window.addEventListener('DOMContentLoaded', function() {
                 var savedImg = localStorage.getItem('profileImg');
