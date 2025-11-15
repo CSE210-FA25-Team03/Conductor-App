@@ -1,0 +1,96 @@
+
+* {
+  
+  box-sizing: border-box;
+}
+body{
+  border: 1px solid blue;
+}
+header{
+  /* border: 1px solid rgb(241, 176, 102); */
+  display: flex;
+ 
+  justify-content: flex-end;
+}
+
+.header_top_row{
+  /*border: 1px solid rgb(223, 129, 22);*/ 
+  display: flex;
+  margin:0 auto; 
+  padding: 20px;
+  flex-wrap: wrap;
+
+}
+.name_role{
+    border: 1px solid rgb(37, 215, 52);
+
+    border-right: solid 1.5px black;
+    padding: 5px;
+    padding-right: 10px;
+}
+.next_to_name_role{
+  padding-left:15px;
+  border: 1px solid rgb(37, 215, 52);
+}
+.just_name{
+ font-size: 30px;
+ 
+}
+
+
+/*MAIN */
+
+main{
+    border: 1px solid rgb(155, 174, 228);
+    padding: 20px;
+}
+
+.dashboard{
+    border: 1px solid rgb(155, 174, 228);
+    margin-bottom: 10px;
+}
+.notes_journal_eval{
+    border: 1px solid rgb(155, 174, 228);
+    display: flex;
+    flex-wrap: wrap;
+    gap:10px;
+ 
+   
+
+}
+
+/*each indi componenet  */
+
+.notes{
+    border: 2px solid rgb(0, 12, 7);
+    padding:5px;
+    border-radius: 5px;
+    flex: 2;
+
+}
+
+.journal{
+    border: 2px solid rgb(31, 150, 94);
+    padding:5px;
+    border-radius: 5px;
+    flex:2;
+
+}
+
+.evaluation{
+    border: 2px solid rgb(0, 12, 7);
+    padding:5px;
+    border-radius: 5px;
+    flex:1;
+    
+}
+
+.eval_preview{
+    display: flex;
+}
+
+#eval_emotion{
+    height:40px;
+  
+}
+

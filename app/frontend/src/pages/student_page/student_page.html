@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+     <link rel="stylesheet" href="student_page_style.css">
+</head>
+<body>
+    <header>
+       // same header for all notification button and logo button
+    </header>
+  
+    <section class="student_header">
+        <div class="header_top_row">
+            <div class= "name_role">
+                <div class="just_name"><b>NAME</b></div>
+                <div class="just_role">Student</div>
+            </div>
+
+            <div class="next_to_name_role"> 
+                <i>Team #</i>
+                <br>
+                <i> TA assigned</i>
+            
+            </div>
+        <div>
+
+        <div class="pins"> 
+            Links:
+            <a href="#"> github</a>
+            <a href="#"> customized by user></a>
+        </div>
+     
+    </section>
+
+    <main class= "overview">
+        <section class="dashboard">
+            dashboar here
+        </section>
+        <div class = "notes_journal_eval">
+            <section class="notes">
+               <h3> Meeting Notes</h3>
+               <object
+               
+               data = "../dosc/temp_notes.pdf">
+
+               </object>
+            </section>
+            
+            <section class = "journal">
+                <h3> Work Journal</h3>
+                <button class="help_link">
+                    <span class="help_icon">?</span> Helpful Resources
+                </button>
+
+                <form class="journal_form">
+
+                    <label for="journal_date">Date:</label>
+                    <input type="date" id="journal_date" name="journal_date">
+
+                    <fieldset class="entry_type">
+                    <legend>Entry Type:</legend>
+
+                    <label>
+                        <input type="radio" name="journal_entry_type" value="guided"> Guided Form
+                    </label>
+
+                    <label>
+                        <input type="radio" name="journal_entry_type" value="blank"> Blank
+                    </label>
+                    </fieldset>
+
+                    <textarea id="journal_text" name="journal_text" rows="6" > Thoughts & Reflections</textarea>
+
+                    <div class="journal_buttons">
+                        <button type="submit" class="save_btn">Save</button>
+                        <button type="button" class="cancel_btn">Cancel</button>
+                    </div>    
+            </section>
+            
+            <section class="evaluation">
+                <h3> Weekly Evaluation</h3>
+                <div class="eval_preview">
+                    <img id="eval_emotion" src ="../assests/logo/happy.png" alt="notification bell" >
+                    <p id= "quote"> <i> "Yay! You are on track!"</i></p>
+                </div>
+            </section>
+
+        </div>
+      
+     
+    </main>
+
+    <footer>
+     <p>Footer</p>
+    </footer>
+    
+</body>
+</html>
