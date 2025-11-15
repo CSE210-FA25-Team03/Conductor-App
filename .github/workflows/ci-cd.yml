@@ -2,13 +2,16 @@ name: Conductor CI/CD
 
 on:
   push:
-    branches: [ ci-cd ]
+    branches: [ ci_cd ]     # run when you push to ci_cd
   pull_request:
-    branches: [ ci-cd ]
+    branches: [ ci_cd ]     # run on PRs targeting ci_cd
+  workflow_dispatch:         # adds "Run workflow" button in Actions tab
 
 jobs:
+  # ========= CI: build & test =========
   ci:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -17,7 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: npm
+          cache-dependency-path: app/backend/package-lock.json
 
+      # ---- Backend: install + test ----
       - name: Install backend dependencies
         working-directory: app/backend
         run: npm ci
@@ -26,25 +32,26 @@ jobs:
         working-directory: app/backend
         run: npm test
 
+      # ---- Frontend: basic check ----
       - name: Check frontend files exist
         run: |
           test -f app/frontend/public/index.html
           ls app/frontend/src/pages
 
-  # optional deploy job, still only on ci-cd branch
+  # ========= CD: create deployment artifact =========
   deploy:
     needs: ci
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/ci-cd'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Create deployment archive
-        run: tar -czf conductor-app.tar.gz app
+        run: |
+          tar -czf conductor-app.tar.gz app
 
-      - name: Upload artifact
+      - name: Upload deployment artifact
         uses: actions/upload-artifact@v4
         with:
           name: conductor-app-build
