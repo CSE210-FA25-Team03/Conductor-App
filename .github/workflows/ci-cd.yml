@@ -1,0 +1,64 @@
+name: Conductor CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # ========= CI: build & test =========
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/backend/package-lock.json
+
+      # ---- Backend: install + test ----
+      - name: Install backend dependencies
+        working-directory: app/backend
+        run: npm ci
+
+      - name: Run backend tests
+        working-directory: app/backend
+        run: npm test
+
+      # ---- Frontend: basic check ----
+      # (your frontend is static HTML/CSS/JS,
+      #  so we just sanity-check that key files exist)
+      - name: Check frontend files exist
+        run: |
+          test -f app/frontend/public/index.html
+          ls app/frontend/src/pages
+
+  # ========= CD: create deployment artifact =========
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Create a tarball containing the whole app folder.
+      # This simulates a "deployable build" of your app.
+      - name: Create deployment archive
+        run: |
+          tar -czf conductor-app.tar.gz app
+
+      # Upload the artifact so it can be downloaded and used
+      # to deploy on a server or graded by your professor.
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: conductor-app-build
+          path: conductor-app.tar.gz
