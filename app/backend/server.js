@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 app.use(express.json()); // Parse JSON bodies
-
+// test if forced PR to merge is set up correctly
 // Serve static files from frontend/public
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
