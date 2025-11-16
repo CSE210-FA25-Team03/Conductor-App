@@ -5,7 +5,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 app.use(express.json()); // Parse JSON bodies
-// test if forced PR to merge is set up correctly
+// test if forced PR to merge is set up correctly again
 // Serve static files from frontend/public
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
@@ -124,6 +124,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
+
+// Export app for testing
+module.exports = app;
+
