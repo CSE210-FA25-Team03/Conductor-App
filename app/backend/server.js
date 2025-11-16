@@ -21,6 +21,7 @@ app.get('/login/', (req, res) => {
 app.use('/team_card', express.static(path.join(__dirname, '../frontend/src/pages/team_card')));
 app.use('/new_user', express.static(path.join(__dirname, '../frontend/src/pages/new_user')));
 app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pages/task_tracker'))); 
+app.use('/class_directory', express.static(path.join(__dirname, '../frontend/src/pages/class_directory')));
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
