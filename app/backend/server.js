@@ -6,25 +6,7 @@ const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 app.use(express.json()); // Parse JSON bodies
 
-// Serve static files from frontend/public
-app.use(express.static(path.join(__dirname, '../frontend/public')));
-
-// Serve static assets (e.g., logos, images)
-app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
-
-
-// Serve static files for each role page
-app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
-app.use('/login', express.static(path.join(__dirname, '../frontend/src/pages/login_page'), { index: 'login.html' }));
-app.get('/login/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/src/pages/login_page/login.html'));
-});
-app.use('/team_card', express.static(path.join(__dirname, '../frontend/src/pages/team_card')));
-app.use('/new_user', express.static(path.join(__dirname, '../frontend/src/pages/new_user')));
-app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pages/task_tracker'))); 
-app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
-app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
-app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
+// IMPORTANT: Define API routes BEFORE static file middleware
 // Example API endpoint (for future backend logic)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -72,6 +54,114 @@ function getMembers() {
     console.error('Error reading members.json:', error);
     return [];
   }
+}
+
+// Helper function to read GitHub config
+function getGitHubConfig() {
+  const filePath = path.join(__dirname, 'data', 'github-config.json');
+  if (!fs.existsSync(filePath)) {
+    return { owner: '', repo: '', token: '' };
+  }
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading github-config.json:', error);
+    return { owner: '', repo: '', token: '' };
+  }
+}
+
+// Helper function to save GitHub config
+function saveGitHubConfig(config) {
+  const filePath = path.join(__dirname, 'data', 'github-config.json');
+  fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf8');
+}
+
+// Helper function to fetch GitHub issues
+async function fetchGitHubIssues(owner, repo, token = '') {
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=100`;
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'Conductor-App'
+    };
+    
+    if (token) {
+      headers['Authorization'] = `token ${token}`;
+    }
+
+    const response = await fetch(url, { headers });
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+    }
+
+    const issues = await response.json();
+    
+    // Filter out pull requests (they have pull_request property)
+    return issues.filter(issue => !issue.pull_request);
+  } catch (error) {
+    console.error('Error fetching GitHub issues:', error);
+    throw error;
+  }
+}
+
+// Helper function to map GitHub issue to task format
+function mapGitHubIssueToTask(issue) {
+  // Map GitHub issue state to task tracker columns
+  let group = 'todo';
+  if (issue.state === 'closed') {
+    group = 'done';
+  } else if (issue.labels && issue.labels.some(label => 
+    label.name.toLowerCase().includes('in-progress') || 
+    label.name.toLowerCase().includes('progress') ||
+    label.name.toLowerCase().includes('doing')
+  )) {
+    group = 'progress';
+  }
+
+  // Extract assignee name (map GitHub username to member name if possible)
+  let assignee = 'None';
+  if (issue.assignee) {
+    assignee = issue.assignee.login;
+    // Try to match with members list
+    const members = getMembers();
+    const matchedMember = members.find(m => 
+      m.name.toLowerCase().includes(issue.assignee.login.toLowerCase()) ||
+      issue.assignee.login.toLowerCase().includes(m.name.toLowerCase().split(' ')[0])
+    );
+    if (matchedMember) {
+      assignee = matchedMember.name;
+    }
+  }
+  
+  // Extract difficulty from labels (easy, medium, hard)
+  let badge = 'medium';
+  if (issue.labels) {
+    const labelNames = issue.labels.map(l => l.name.toLowerCase());
+    if (labelNames.some(n => n.includes('easy') || n.includes('low') || n.includes('trivial'))) {
+      badge = 'easy';
+    } else if (labelNames.some(n => n.includes('hard') || n.includes('high') || n.includes('difficult'))) {
+      badge = 'hard';
+    }
+  }
+
+  // Format due date (if milestone exists)
+  let due = 'TBD';
+  if (issue.milestone && issue.milestone.due_on) {
+    const dueDate = new Date(issue.milestone.due_on);
+    due = dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  return {
+    title: issue.title,
+    badge: badge,
+    due: issue.state === 'closed' ? 'Completed' : due,
+    assignee: assignee,
+    githubIssueNumber: issue.number,
+    githubUrl: issue.html_url,
+    githubState: issue.state
+  };
 }
 
 // GET all teams - hardcoded data for now
@@ -169,6 +259,134 @@ app.put('/api/tasks', (req, res) => {
   res.json(tasks);
 });
 
+// GET GitHub configuration
+app.get('/api/github/config', (req, res) => {
+  const config = getGitHubConfig();
+  // Don't send token to frontend for security
+  res.json({ owner: config.owner, repo: config.repo });
+});
+
+// POST - Update GitHub configuration
+app.post('/api/github/config', (req, res) => {
+  const { owner, repo, token } = req.body;
+  const config = { owner, repo, token: token || '' };
+  saveGitHubConfig(config);
+  res.json({ owner, repo, message: 'Configuration saved' });
+});
+
+// GET - Fetch GitHub issues and return as tasks
+app.get('/api/github/issues', async (req, res) => {
+  try {
+    const config = getGitHubConfig();
+    
+    if (!config.owner || !config.repo) {
+      return res.status(400).json({ 
+        error: 'GitHub repository not configured. Please set owner and repo.' 
+      });
+    }
+
+    const issues = await fetchGitHubIssues(config.owner, config.repo, config.token);
+    const mappedTasks = issues.map(mapGitHubIssueToTask);
+    
+    res.json({
+      issues: mappedTasks,
+      count: mappedTasks.length,
+      repo: `${config.owner}/${config.repo}`
+    });
+  } catch (error) {
+    console.error('Error fetching GitHub issues:', error);
+    res.status(500).json({ 
+      error: 'Failed to fetch GitHub issues', 
+      message: error.message 
+    });
+  }
+});
+
+// POST - Sync GitHub issues to tasks (import into task tracker)
+app.post('/api/github/sync', async (req, res) => {
+  try {
+    const config = getGitHubConfig();
+    
+    if (!config.owner || !config.repo) {
+      return res.status(400).json({ 
+        error: 'GitHub repository not configured' 
+      });
+    }
+
+    const issues = await fetchGitHubIssues(config.owner, config.repo, config.token);
+    const mappedTasks = issues.map(mapGitHubIssueToTask);
+    
+    // Get current tasks
+    const currentTasks = getTasks();
+    
+    // Create a story point for GitHub issues if it doesn't exist
+    const githubStoryName = `GitHub: ${config.owner}/${config.repo}`;
+    if (!currentTasks[githubStoryName]) {
+      currentTasks[githubStoryName] = { todo: [], progress: [], done: [] };
+    }
+    
+    // Group tasks by their mapped group (todo, progress, done)
+    const groupedTasks = { todo: [], progress: [], done: [] };
+    mappedTasks.forEach(task => {
+      // Determine group based on GitHub state and labels
+      let group = 'todo';
+      if (task.githubState === 'closed') {
+        group = 'done';
+      } else {
+        // Check if issue has in-progress label
+        const originalIssue = issues.find(i => i.number === task.githubIssueNumber);
+        if (originalIssue && originalIssue.labels) {
+          const labelNames = originalIssue.labels.map(l => l.name.toLowerCase());
+          if (labelNames.some(n => n.includes('in-progress') || n.includes('progress') || n.includes('doing'))) {
+            group = 'progress';
+          }
+        }
+      }
+      groupedTasks[group].push(task);
+    });
+    
+    // Update the GitHub story with synced tasks
+    currentTasks[githubStoryName] = groupedTasks;
+    
+    // Save tasks
+    saveTasks(currentTasks);
+    
+    res.json({
+      message: 'GitHub issues synced successfully',
+      synced: mappedTasks.length,
+      story: githubStoryName
+    });
+  } catch (error) {
+    console.error('Error syncing GitHub issues:', error);
+    res.status(500).json({ 
+      error: 'Failed to sync GitHub issues', 
+      message: error.message 
+    });
+  }
+});
+
+// ============================================
+// STATIC FILE SERVING - Must come AFTER API routes
+// ============================================
+
+// Serve static files from frontend/public
+app.use(express.static(path.join(__dirname, '../frontend/public')));
+
+// Serve static assets (e.g., logos, images)
+app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
+
+// Serve static files for each role page
+app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
+app.use('/login', express.static(path.join(__dirname, '../frontend/src/pages/login_page'), { index: 'login.html' }));
+app.get('/login/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/src/pages/login_page/login.html'));
+});
+app.use('/team_card', express.static(path.join(__dirname, '../frontend/src/pages/team_card')));
+app.use('/new_user', express.static(path.join(__dirname, '../frontend/src/pages/new_user')));
+app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pages/task_tracker'))); 
+app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
+app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
+app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
 
 // Fallback: serve index.html for root
 app.get('/', (req, res) => {

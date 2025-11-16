@@ -35,5 +35,20 @@
     "todo": [],
     "progress": [],
     "done": []
+  },
+  "GitHub: HanisPHY/test-repo": {
+    "todo": [
+      {
+        "title": "issue 1",
+        "badge": "medium",
+        "due": "TBD",
+        "assignee": "HanisPHY",
+        "githubIssueNumber": 1,
+        "githubUrl": "https://github.com/HanisPHY/test-repo/issues/1",
+        "githubState": "open"
+      }
+    ],
+    "progress": [],
+    "done": []
   }
 }

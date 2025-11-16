@@ -116,6 +116,176 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
+
+    // GitHub Config Modal
+    const modal = document.getElementById('githubConfigModal');
+    const configBtn = document.getElementById('githubConfigBtn');
+    const syncBtn = document.getElementById('githubSyncBtn');
+    const closeBtn = document.querySelector('.modal-close');
+    const cancelBtn = document.getElementById('cancelGitHubConfig');
+    const saveBtn = document.getElementById('saveGitHubConfig');
+    const testBtn = document.getElementById('testGitHubConnection');
+    const statusDiv = document.getElementById('githubConfigStatus');
+
+    // Debug: Check if elements are found
+    console.log('GitHub modal elements:', {
+        modal: !!modal,
+        configBtn: !!configBtn,
+        syncBtn: !!syncBtn,
+        testBtn: !!testBtn,
+        statusDiv: !!statusDiv
+    });
+
+    // Open modal
+    if (configBtn) {
+        configBtn.addEventListener('click', async () => {
+            modal.style.display = 'block';
+            const config = await loadGitHubConfig();
+            document.getElementById('githubOwner').value = config.owner || '';
+            document.getElementById('githubRepo').value = config.repo || '';
+            document.getElementById('githubToken').value = '';
+            statusDiv.className = 'status-message';
+            statusDiv.style.display = 'none';
+        });
+    }
+
+    // Close modal
+    function closeModal() {
+        modal.style.display = 'none';
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+    
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+
+    // Save configuration
+    if (saveBtn) {
+        saveBtn.addEventListener('click', async () => {
+            const owner = document.getElementById('githubOwner').value.trim();
+            const repo = document.getElementById('githubRepo').value.trim();
+            const token = document.getElementById('githubToken').value.trim();
+
+            if (!owner || !repo) {
+                statusDiv.className = 'status-message error';
+                statusDiv.textContent = 'Please enter both owner and repository name';
+                statusDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                await saveGitHubConfig(owner, repo, token);
+                statusDiv.className = 'status-message success';
+                statusDiv.textContent = 'Configuration saved successfully!';
+                statusDiv.style.display = 'block';
+            } catch (error) {
+                statusDiv.className = 'status-message error';
+                statusDiv.textContent = `Error: ${error.message}`;
+                statusDiv.style.display = 'block';
+            }
+        });
+    }
+
+    // Test connection
+    if (testBtn) {
+        console.log('Test button found, attaching click handler');
+        testBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            try {
+                console.log('Test connection button clicked');
+                
+                if (!statusDiv) {
+                    console.error('Status div not found!');
+                    alert('Error: Status div not found. Please refresh the page.');
+                    return;
+                }
+                
+                const ownerInput = document.getElementById('githubOwner');
+                const repoInput = document.getElementById('githubRepo');
+                const tokenInput = document.getElementById('githubToken');
+                
+                if (!ownerInput || !repoInput) {
+                    console.error('Form inputs not found!');
+                    alert('Error: Form inputs not found. Please refresh the page.');
+                    return;
+                }
+                
+                const owner = ownerInput.value.trim();
+                const repo = repoInput.value.trim();
+                const token = tokenInput ? tokenInput.value.trim() : '';
+
+                console.log('Form values:', { owner, repo, token: token ? '***' : '' });
+
+                if (!owner || !repo) {
+                    statusDiv.className = 'status-message error';
+                    statusDiv.textContent = 'Please enter both owner and repository name';
+                    statusDiv.style.display = 'block';
+                    return;
+                }
+
+                // Save config first
+                console.log('Saving GitHub config...');
+                try {
+                    await saveGitHubConfig(owner, repo, token);
+                    console.log('Config saved');
+                } catch (saveError) {
+                    console.error('Error saving config:', saveError);
+                    statusDiv.className = 'status-message error';
+                    statusDiv.textContent = `Error saving config: ${saveError.message}`;
+                    statusDiv.style.display = 'block';
+                    return;
+                }
+
+                statusDiv.className = 'status-message';
+                statusDiv.textContent = 'Testing connection...';
+                statusDiv.style.display = 'block';
+
+                console.log('Testing GitHub connection...');
+                const result = await testGitHubConnection(owner, repo, token);
+                console.log('Test result:', result);
+                
+                if (result && result.success) {
+                    statusDiv.className = 'status-message success';
+                    statusDiv.textContent = `Connection successful! Found ${result.count} issues.`;
+                } else {
+                    statusDiv.className = 'status-message error';
+                    statusDiv.textContent = `Connection failed: ${result ? result.message : 'Unknown error'}`;
+                }
+                statusDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error in test connection:', error);
+                if (statusDiv) {
+                    statusDiv.className = 'status-message error';
+                    statusDiv.textContent = `Error: ${error.message || 'Unknown error occurred'}`;
+                    statusDiv.style.display = 'block';
+                } else {
+                    alert(`Error: ${error.message || 'Unknown error occurred'}`);
+                }
+            }
+        });
+    } else {
+        console.error('Test button not found! Button ID: testGitHubConnection');
+    }
+
+    // Sync button
+    if (syncBtn) {
+        syncBtn.addEventListener('click', async () => {
+            if (confirm('This will sync GitHub issues into your task tracker. Continue?')) {
+                syncBtn.disabled = true;
+                syncBtn.textContent = 'Syncing...';
+                try {
+                    await syncGitHubIssues();
+                } finally {
+                    syncBtn.disabled = false;
+                    syncBtn.textContent = '🔄 Sync GitHub';
+                }
+            }
+        });
+    }
 });
 
 // Load members from API
@@ -426,4 +596,117 @@ function getTaskDataFromCard(card) {
         due: card.querySelector(".task-due").textContent.replace("Due:", "").trim(),
         assignee: assignee
     };
+}
+
+// GitHub Integration Functions
+async function loadGitHubConfig() {
+    try {
+        const response = await fetch('/api/github/config');
+        const config = await response.json();
+        return config;
+    } catch (error) {
+        console.error('Error loading GitHub config:', error);
+        return { owner: '', repo: '' };
+    }
+}
+
+async function saveGitHubConfig(owner, repo, token) {
+    try {
+        console.log('Sending POST to /api/github/config with:', { owner, repo, token: token ? '***' : '' });
+        const response = await fetch('/api/github/config', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ owner, repo, token })
+        });
+        
+        console.log('Response status:', response.status, response.statusText);
+        console.log('Response headers:', response.headers.get('content-type'));
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            const text = await response.text();
+            console.error('Non-JSON response received:', text.substring(0, 200));
+            throw new Error(`Server returned ${response.status}: Expected JSON but got ${contentType || 'unknown'}`);
+        }
+        
+        const result = await response.json();
+        console.log('Config save result:', result);
+        return result;
+    } catch (error) {
+        console.error('Error saving GitHub config:', error);
+        throw error;
+    }
+}
+
+async function syncGitHubIssues() {
+    try {
+        const response = await fetch('/api/github/sync', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to sync GitHub issues');
+        }
+        
+        const result = await response.json();
+        
+        // Reload tasks after sync
+        await loadTasks();
+        
+        // Reinitialize story items to include the new GitHub story
+        initializeStoryItems();
+        attachStoryItemEvents();
+        
+        // Switch to the GitHub story if it exists
+        const stories = document.querySelectorAll('.story-item');
+        let githubStoryFound = false;
+        stories.forEach(story => {
+            if (story.textContent.includes('GitHub:')) {
+                story.click();
+                githubStoryFound = true;
+            }
+        });
+        
+        if (!githubStoryFound && stories.length > 0) {
+            // If no GitHub story found, just render the first story
+            stories[0].click();
+        }
+        
+        alert(`Successfully synced ${result.synced} issues from GitHub!`);
+    } catch (error) {
+        console.error('Error syncing GitHub issues:', error);
+        alert(`Error syncing GitHub issues: ${error.message}`);
+    }
+}
+
+async function testGitHubConnection(owner, repo, token) {
+    try {
+        console.log('Fetching GitHub issues from API...');
+        const response = await fetch('/api/github/issues');
+        console.log('Response status:', response.status, response.statusText);
+        
+        const data = await response.json();
+        console.log('Response data:', data);
+        
+        if (!response.ok) {
+            // Handle error response
+            const errorMessage = data.message || data.error || `HTTP ${response.status}: ${response.statusText}`;
+            console.error('GitHub API error:', errorMessage);
+            return { success: false, message: errorMessage };
+        }
+        
+        return { success: true, count: data.count || 0 };
+    } catch (error) {
+        console.error('Error in testGitHubConnection:', error);
+        return { 
+            success: false, 
+            message: error.message || 'Failed to connect to GitHub API. Check console for details.' 
+        };
+    }
 }
