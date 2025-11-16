@@ -1,0 +1,201 @@
+/* Evaluation Rubric Styles */
+
+/* Evaluation Rubric Styles - Structured like profile.css */
+:root {
+    --bg: #f5f5f7;
+    --panel-bg: rgba(255,255,255,0.96);
+    --border: #e2e2e7;
+    --radius: 14px;
+    --shadow: 0 6px 20px rgba(0,0,0,0.08);
+    --text-muted: #6b7280;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --table-header: #eaf1fb;
+    --table-row: #f9fafb;
+}
+
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    color: #111;
+}
+
+/* --- Header --- */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    padding: 0.8rem 1.5rem 1.5rem 1.5rem;
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    margin-bottom: 2.2rem;
+}
+
+.brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #2a3a5e;
+}
+.brand span {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+/* --- Main Page Panel --- */
+.page[data-role="professor"] {
+    max-width: 900px;
+    margin: 2.5rem auto;
+    background: var(--panel-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2.5rem 2.5rem 2.7rem 2.5rem;
+}
+
+/* --- Dashboard Header --- */
+.dashboard-header h1 {
+    font-size: 1.7rem;
+    text-align: center; /* Center the title */
+    margin-bottom: 2rem;
+    color: #2a3a5e;
+}
+.dashboard-header small {
+    color: var(--text-muted);
+}
+
+/* --- Evaluation Form Table --- */
+.evaluation-form {
+    display: flex;
+    justify-content: center; /* Center the table horizontally */
+    margin-top: 2rem;
+}
+
+.evaluation-form-table {
+    width: 100%;
+    max-width: 1200px; /* Prevent table from stretching full width */
+    border-collapse: collapse;
+    background: var(--table-row);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.evaluation-form-table th, .evaluation-form-table td {
+    padding: 1.1rem 0.8rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+}
+.evaluation-form-table th {
+    background: var(--table-header);
+    color: #2a3a5e;
+    font-weight: 600;
+    font-size: 1.08rem;
+}
+.evaluation-form-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* --- Switch --- */
+.evaluation-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+.evaluation-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.evaluation-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #cfd8dc;
+    border-radius: 24px;
+    transition: background 0.2s;
+}
+.evaluation-switch input:checked + .evaluation-slider {
+    background: var(--accent);
+}
+.evaluation-slider:before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+.evaluation-switch input:checked + .evaluation-slider:before {
+    transform: translateX(20px);
+}
+
+/* --- Weight Controls --- */
+.evaluation-weight-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.evaluation-weight-btn {
+    background: var(--table-header);
+    border: none;
+    color: var(--accent);
+    font-size: 1.2rem;
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.evaluation-weight-btn:hover {
+    background: #d0e3ff;
+}
+.evaluation-weight-input {
+    width: 48px;
+    padding: 6px 0;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-align: center;
+    font-size: 1rem;
+    background: #fff;
+    color: #222;
+}
+
+/* --- Responsive --- */
+@media (max-width: 700px) {
+    .page[data-role="professor"] {
+        padding: 1rem 0.3rem;
+    }
+    .evaluation-form-table th, .evaluation-form-table td {
+        padding: 0.7rem 0.2rem;
+        font-size: 0.98rem;
+    }
+}
+
+/* --- Save Button --- */
+.evaluation-form-actions {
+    display: flex;
+    justify-content: center; /* Center the button */
+    margin-top: 1.8rem; /* Space from the table */
+}
+
+#saveBtn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#saveBtn:hover {
+    background: var(--accent-hover);
+}
