@@ -1,3 +1,8 @@
+/**
+ * Backend entry point for our Conductor App.
+ * Defines health check routes and initializes the Express server.
+ * @module server
+ */
 // Basic Express server to serve static frontend and prepare for backend features
 const express = require('express');
 const path = require('path');
@@ -25,10 +30,18 @@ app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
-// Example API endpoint (for future backend logic)
-app.get('/api/health', (req, res) => {
+/**
+ * Health check endpoint.
+ * @function healthCheck
+ * @memberof module:server
+ * @param {Object} _req - Express request (unused)
+ * @param {Object} res - Express response
+ */
+function healthCheck(_req, res) {
   res.json({ status: 'ok' });
-});
+}
+
+app.get('/api/health', healthCheck);
 
 // Helper function to read teams
 function getTeams() {
