@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Class Directory</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <button id="backBtn">← Back</button>
+        <h2>STAFF CLASS DIRECTORY</h2>
+
+        <div class="course-info">
+            <div class="course-line">CSE 210</div>
+            <div class="course-line">FA 25</div>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- Left Panel: Staff & TAs -->
+        <section class="left-panel">
+
+            <!-- Instructor Info Block -->
+            <div class="card">
+                <h3>Instructor Info</h3>
+                <div class="avatar-block">
+                    <div class="avatar"></div>
+                    <input type="file" class="avatar-input" accept="image/*">
+                </div>
+                <label>Full Name</label>
+                <input type="text" id="instructorName">
+
+                <label>Audio Pronunciation</label>
+                <button class="small-btn">Play</button>
+                <button class="small-btn">Upload/Record</button>
+
+                <label>Pronouns</label>
+                <input type="text" id="instructorPronoun">
+
+                <label>Email</label>
+                <input type="email" id="instructorEmail">
+
+                <label>Contact</label>
+                <input type="text" id="instructorContact">
+
+                <label>Availability</label>
+                <input type="text" id="instructorAvailability">
+
+                <button id="addInstructorBtn">Add Instructor</button>
+            </div>
+
+            <!-- Add TA Section -->
+            <div class="card">
+                <h3>TA INFO</h3>
+                <div class="avatar-block">
+                    <div class="avatar"></div>
+                    <input type="file" class="avatar-input" accept="image/*">
+                </div>
+                <label>Full Name</label>
+                <input type="text" id="taName">
+
+                <label>Audio Pronunciation</label>
+                <button class="small-btn">Play</button>
+                <button class="small-btn">Upload/Record</button>
+
+                <label>Pronouns</label>
+                <input type="text" id="taPronoun">
+
+                <label>Email</label>
+                <input type="email" id="taEmail">
+
+                <label>Contact</label>
+                <input type="text" id="taContact">
+
+                <label>Availability</label>
+                <input type="text" id="taAvailability">
+
+                <div class="card team-card">
+                    <h3>Team Assigned</h3>
+
+                    <div class="team-list">
+
+                        <!-- Example team row -->
+                        <div class="team-row">
+                            <div>
+                                <label>Team Number</label>
+                                <input type="text" class="team-number" placeholder="e.g., 12">
+                            </div>
+
+                            <div>
+                                <label>Team Name</label>
+                                <input type="text" class="team-name" placeholder="e.g. Yes Yes Yes">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <button id="addTaBtn">Add TA</button>
+            </div>
+
+            <!-- Add Tutor Section -->
+            <div class="card">
+                <h3>Tutor INFO</h3>
+                <div class="avatar-block">
+                    <div class="avatar"></div>
+                    <input type="file" class="avatar-input" accept="image/*">
+                </div>
+                <label>Full Name</label>
+                <input type="text" id="taName">
+
+                <label>Audio Pronunciation</label>
+                <button class="small-btn">Play</button>
+                <button class="small-btn">Upload/Record</button>
+
+                <label>Pronouns</label>
+                <input type="text" id="tutorPronoun">
+
+                <label>Email</label>
+                <input type="email" id="tutorEmail">
+
+                <label>Contact</label>
+                <input type="text" id="tutorContact">
+
+                <label>Availability</label>
+                <input type="text" id="tutorAvailability">
+
+                <button id="addTaBtn">Add Tutor</button>
+            </div>
+
+        </section>
+
+        <!-- Course Calendar (Right Panel) -->
+        <section class="calendar-panel card">
+            <h3>Course Calendar</h3>
+            <table class="calendar-table">
+                <tr>
+                    <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th>
+                </tr>
+                <tr>
+                    <td></td><td></td>
+                    <td>LAB<br>3–5PM</td>
+                    <td></td><td>10AM</td>
+                </tr>
+            </table>
+            <button id="addGoogleCalBtn" class="google-btn">Add to Google Calendar</button>
+        </section>
+
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

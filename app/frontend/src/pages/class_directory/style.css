@@ -1,0 +1,158 @@
+body {
+    font-family: "Montserrat", sans-serif;
+    margin: 0;
+    background: #f4f4f4;
+}
+
+header {
+    background: #3b6ff5;
+    color: white;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    position: relative;
+}
+
+.course-info {
+    background: white;
+    color: #3b6ff5;
+    border-radius: 8px;
+    padding: 6px 12px;
+    text-align: right;
+    border: 2px solid #3b6ff5;
+    line-height: 1.2;
+    font-weight: bold;
+}
+
+.course-line {
+    font-size: 14px;
+}
+
+#backBtn {
+    background: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.container {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+}
+
+.left-panel {
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.calendar-panel {
+    width: 45%;
+}
+
+.card {
+    background: rgb(255, 255, 255);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 6px rgba(0,0,0,0.15);
+}
+
+label {
+    font-size: 14px;
+    margin-top: 10px;
+    display: block;
+}
+
+input {
+    width: 100%;
+    padding: 6px;
+    margin-top: 3px;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+}
+
+.small-btn {
+    padding: 5px 10px;
+    margin-top: 8px;
+}
+
+.circle-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: #d8e3ff;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+#addTaBtn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    background: #3b6ff5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#addInstructorBtn {
+    margin-top: 15px;
+    width: 100%;
+    padding: 10px;
+    background: #3b6ff5;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.calendar-table th,
+.calendar-table td {
+    border: 1px solid #bbb;
+    padding: 10px;
+}
+
+.google-btn {
+    margin-top: 15px;
+    width: 100%;
+    background: #2ecc71;
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.team-card {
+    margin-top: 20px;
+}
+
+.team-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.team-row {
+    display: flex;
+    gap: 20px;
+}
+
+.team-row div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
