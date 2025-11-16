@@ -25,6 +25,7 @@ app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
+app.use('/evaluation_rubric', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_rubric')));
 // Example API endpoint (for future backend logic)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
