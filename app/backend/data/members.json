@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "name": "Grace Ito",
+    "initials": "GI",
+    "role": "student"
+  },
+  {
+    "id": 2,
+    "name": "Lucas Nguyen",
+    "initials": "LN",
+    "role": "student"
+  },
+  {
+    "id": 3,
+    "name": "Jordan Patel",
+    "initials": "JP",
+    "role": "student"
+  },
+  {
+    "id": 4,
+    "name": "Alex Morgan",
+    "initials": "AM",
+    "role": "student"
+  },
+  {
+    "id": 5,
+    "name": "Jamie Garcia",
+    "initials": "JG",
+    "role": "student"
+  },
+  {
+    "id": 6,
+    "name": "Riley Thompson",
+    "initials": "RT",
+    "role": "student"
+  },
+  {
+    "id": 7,
+    "name": "Casey Lee",
+    "initials": "CL",
+    "role": "student"
+  },
+  {
+    "id": 8,
+    "name": "Harper Martinez",
+    "initials": "HM",
+    "role": "student"
+  },
+  {
+    "id": 9,
+    "name": "Sam Kim",
+    "initials": "SK",
+    "role": "student"
+  }
+]
+

@@ -139,6 +139,12 @@
     font-weight: 700;
 }
 
+/* Bold style for assigned tasks */
+.task-card .task-title[style*="font-weight: bold"],
+.task-card.assigned .task-title {
+    font-weight: bold !important;
+}
+
 /* Meta info */
 .task-meta {
     display: flex;
@@ -195,4 +201,37 @@
 .task-column.drag-over {
     background: rgba(0,0,0,0.05);
     border: 2px dashed #888;
+}
+
+/* Assignee dropdown styling */
+.task-assignee-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.task-assignee-label {
+    font-size: 0.85rem;
+    color: #444;
+}
+
+.task-assignee-select {
+    padding: 4px 8px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    background: white;
+    color: #444;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.task-assignee-select:hover {
+    border-color: #999;
+}
+
+.task-assignee-select:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
 }

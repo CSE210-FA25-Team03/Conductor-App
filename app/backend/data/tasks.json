@@ -1,0 +1,39 @@
+{
+  "Sprint Board Feature": {
+    "todo": [
+      {
+        "title": "Design wireframe",
+        "badge": "medium",
+        "due": "Feb 22",
+        "assignee": "Grace Ito"
+      },
+      {
+        "title": "New Task test",
+        "badge": "medium",
+        "due": "TBD",
+        "assignee": "Jordan Patel"
+      }
+    ],
+    "progress": [
+      {
+        "title": "Backend linking",
+        "badge": "hard",
+        "due": "Feb 24",
+        "assignee": "Lucas Nguyen"
+      }
+    ],
+    "done": [
+      {
+        "title": "Setup repo",
+        "badge": "easy",
+        "due": "Completed",
+        "assignee": "Jordan Patel"
+      }
+    ]
+  },
+  "Implement form validation": {
+    "todo": [],
+    "progress": [],
+    "done": []
+  }
+}

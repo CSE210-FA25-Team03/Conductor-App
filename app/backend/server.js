@@ -42,6 +42,38 @@ function saveTeams(teams) {
   fs.writeFileSync(filePath, JSON.stringify(teams, null, 2), 'utf8');
 }
 
+// Helper function to read tasks
+function getTasks() {
+  const filePath = path.join(__dirname, 'data', 'tasks.json');
+  if (!fs.existsSync(filePath)) {
+    return {};
+  }
+  const data = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(data);
+}
+
+// Helper function to write tasks back to file
+function saveTasks(tasks) {
+  const filePath = path.join(__dirname, 'data', 'tasks.json');
+  fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), 'utf8');
+}
+
+// Helper function to read members
+function getMembers() {
+  const filePath = path.join(__dirname, 'data', 'members.json');
+  if (!fs.existsSync(filePath)) {
+    console.error('members.json file not found');
+    return [];
+  }
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading members.json:', error);
+    return [];
+  }
+}
+
 // GET all teams - hardcoded data for now
 app.get('/api/teams', (req, res) => {
   const teams = getTeams();
@@ -116,6 +148,25 @@ app.put('/api/teams/:id', (req, res) => {
   
   // Return the updated team
   res.json(updatedTeam);
+});
+
+// GET all members
+app.get('/api/members', (req, res) => {
+  const members = getMembers();
+  res.json(members);
+});
+
+// GET all tasks
+app.get('/api/tasks', (req, res) => {
+  const tasks = getTasks();
+  res.json(tasks);
+});
+
+// PUT - Update tasks (replace entire tasks object)
+app.put('/api/tasks', (req, res) => {
+  const tasks = req.body;
+  saveTasks(tasks);
+  res.json(tasks);
 });
 
 
