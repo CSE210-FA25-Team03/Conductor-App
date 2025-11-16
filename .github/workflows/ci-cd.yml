@@ -28,6 +28,10 @@ jobs:
         working-directory: app/backend
         run: npm install
 
+      - name: Run backend lint
+        working-directory: app/backend
+        run: npm run lint
+
       - name: Run backend tests
         working-directory: app/backend
         run: npm test
@@ -37,6 +41,14 @@ jobs:
         run: |
           test -f app/frontend/public/index.html
           ls app/frontend/src/pages
+          
+      - name: Install frontend dependencies
+        working-directory: app/frontend
+        run: npm install
+
+      - name: Run frontend lint
+        working-directory: app/frontend
+        run: npm run lint
 
   # ========= CD: create deployment artifact =========
   deploy:
