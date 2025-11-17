@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node --test",
     "lint": "eslint .",
-    "start": "node server.js"
+    "start": "node server.js",
+    "docs": "jsdoc -c jsdoc.json"
   },
   "keywords": [],
   "author": "",
@@ -19,6 +20,8 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "eslint": "^9.39.1",
-    "globals": "^16.5.0"
+    "globals": "^16.5.0",
+    "jsdoc": "^4.0.5",
+    "supertest": "^7.1.4"
   }
 }
