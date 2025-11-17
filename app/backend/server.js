@@ -3,15 +3,20 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const fs = require('fs');
+
+// Import repository factory
+const repositoryFactory = require('./repositories/repositoryFactory');
+
 app.use(express.json()); // Parse JSON bodies
+
+// Initialize repository
+const teamsRepository = repositoryFactory.createTeamsRepository();
 
 // Serve static files from frontend/public
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 // Serve static assets (e.g., logos, images)
 app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
-
 
 // Serve static files for each role page
 app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
@@ -25,99 +30,84 @@ app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
+
 // Example API endpoint (for future backend logic)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-// Helper function to read teams
-function getTeams() {
-  const filePath = path.join(__dirname, 'data', 'teams.json');
-  const data = fs.readFileSync(filePath, 'utf8');
-  return JSON.parse(data);
-}
-// Helper function to write teams back to file
-function saveTeams(teams) {
-  const filePath = path.join(__dirname, 'data', 'teams.json');
-  fs.writeFileSync(filePath, JSON.stringify(teams, null, 2), 'utf8');
-}
-
-// GET all teams - hardcoded data for now
-app.get('/api/teams', (req, res) => {
-  const teams = getTeams();
-  res.json(teams);
+// GET all teams
+app.get('/api/teams', async (req, res) => {
+  try {
+    const teams = await teamsRepository.getAllTeams();
+    res.json(teams);
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+    res.status(500).json({ error: 'Failed to fetch teams' });
+  }
 });
 
 // GET single team by ID
-app.get('/api/teams/:id', (req, res) => {
-  const teamId = parseInt(req.params.id);
-  const teams = getTeams();
-  const team = teams.find(t => t.id === teamId);
-  if (!team) {
-    return res.status(404).json({ error: 'Team not found' });
+app.get('/api/teams/:id', async (req, res) => {
+  try {
+    const teamId = parseInt(req.params.id);
+    const team = await teamsRepository.getTeamById(teamId);
+    
+    if (!team) {
+      return res.status(404).json({ error: 'Team not found' });
+    }
+    
+    res.json(team);
+  } catch (error) {
+    console.error('Error fetching team:', error);
+    res.status(500).json({ error: 'Failed to fetch team' });
   }
-  res.json(team);
 });
 
 // POST - Create a new team
-app.post('/api/teams', (req, res) => {
-  const teams = getTeams();
-  
-  // Find the highest ID and add 1 for the new team
-  const maxId = teams.length > 0 ? Math.max(...teams.map(t => t.id)) : 0;
-  const newId = maxId + 1;
-  
-  // Create new team object
-  const newTeam = {
-    id: newId,
-    teamNumber: req.body.teamNumber || `Team ${newId}`,
-    name: req.body.name || '',
-    status: req.body.status || 'Needs Review',
-    description: req.body.description || '',
-    members: req.body.members || [],
-    ...(req.body.nextSync && { nextSync: req.body.nextSync }),
-    ...(req.body.lastUpdate && { lastUpdate: req.body.lastUpdate }),
-    ...(req.body.actionRequired && { actionRequired: req.body.actionRequired })
-  };
-  
-  // Add new team to array
-  teams.push(newTeam);
-  
-  // Save to file
-  saveTeams(teams);
-  
-  // Return the newly created team
-  res.status(201).json(newTeam);
+app.post('/api/teams', async (req, res) => {
+  try {
+    const newTeam = await teamsRepository.createTeam(req.body);
+    res.status(201).json(newTeam);
+  } catch (error) {
+    console.error('Error creating team:', error);
+    res.status(500).json({ error: 'Failed to create team' });
+  }
 });
 
 // PUT - Update an existing team
-app.put('/api/teams/:id', (req, res) => {
-  const teamId = parseInt(req.params.id);
-  const teams = getTeams();
-  
-  // Find the team to update
-  const teamIndex = teams.findIndex(t => t.id === teamId);
-  
-  if (teamIndex === -1) {
-    return res.status(404).json({ error: 'Team not found' });
+app.put('/api/teams/:id', async (req, res) => {
+  try {
+    const teamId = parseInt(req.params.id);
+    const updatedTeam = await teamsRepository.updateTeam(teamId, req.body);
+    
+    if (!updatedTeam) {
+      return res.status(404).json({ error: 'Team not found' });
+    }
+    
+    res.json(updatedTeam);
+  } catch (error) {
+    console.error('Error updating team:', error);
+    res.status(500).json({ error: 'Failed to update team' });
   }
-  
-  // Update the team with new data (merge with existing)
-  const updatedTeam = {
-    ...teams[teamIndex],
-    ...req.body,
-    id: teamId // Ensure ID can't be changed
-  };
-  
-  teams[teamIndex] = updatedTeam;
-  
-  // Save to file
-  saveTeams(teams);
-  
-  // Return the updated team
-  res.json(updatedTeam);
 });
 
+// DELETE - Delete a team (bonus endpoint)
+app.delete('/api/teams/:id', async (req, res) => {
+  try {
+    const teamId = parseInt(req.params.id);
+    const deleted = await teamsRepository.deleteTeam(teamId);
+    
+    if (!deleted) {
+      return res.status(404).json({ error: 'Team not found' });
+    }
+    
+    res.status(204).send(); // No content on successful delete
+  } catch (error) {
+    console.error('Error deleting team:', error);
+    res.status(500).json({ error: 'Failed to delete team' });
+  }
+});
 
 // Fallback: serve index.html for root
 app.get('/', (req, res) => {
