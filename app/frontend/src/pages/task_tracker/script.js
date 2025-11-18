@@ -685,7 +685,7 @@ async function syncGitHubIssues() {
     }
 }
 
-async function testGitHubConnection(owner, repo, token) {
+async function testGitHubConnection() {
     try {
         console.log('Fetching GitHub issues from API...');
         const response = await fetch('/api/github/issues');

@@ -1,3 +1,8 @@
+/**
+ * Backend entry point for our Conductor App.
+ * Defines health check routes and initializes the Express server.
+ * @module server
+ */
 // Basic Express server to serve static frontend and prepare for backend features
 const express = require('express');
 const path = require('path');
@@ -5,12 +10,38 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 app.use(express.json()); // Parse JSON bodies
+// test if forced PR to merge is set up correctly again
+// Serve static files from frontend/public
+app.use(express.static(path.join(__dirname, '../frontend/public')));
 
-// IMPORTANT: Define API routes BEFORE static file middleware
-// Example API endpoint (for future backend logic)
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+// Serve static assets (e.g., logos, images)
+app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
+
+
+// Serve static files for each role page
+app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
+app.use('/login', express.static(path.join(__dirname, '../frontend/src/pages/login_page'), { index: 'login.html' }));
+app.get('/login/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/src/pages/login_page/login.html'));
 });
+app.use('/team_card', express.static(path.join(__dirname, '../frontend/src/pages/team_card')));
+app.use('/new_user', express.static(path.join(__dirname, '../frontend/src/pages/new_user')));
+app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pages/task_tracker'))); 
+app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
+app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
+app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
+/**
+ * Health check endpoint.
+ * @function healthCheck
+ * @memberof module:server
+ * @param {Object} _req - Express request (unused)
+ * @param {Object} res - Express response
+ */
+function healthCheck(_req, res) {
+  res.json({ status: 'ok' });
+}
+
+app.get('/api/health', healthCheck);
 
 // Helper function to read teams
 function getTeams() {
@@ -109,15 +140,15 @@ async function fetchGitHubIssues(owner, repo, token = '') {
 // Helper function to map GitHub issue to task format
 function mapGitHubIssueToTask(issue) {
   // Map GitHub issue state to task tracker columns
-  let group = 'todo';
+  let _group = 'todo';
   if (issue.state === 'closed') {
-    group = 'done';
+    _group = 'done';
   } else if (issue.labels && issue.labels.some(label => 
     label.name.toLowerCase().includes('in-progress') || 
     label.name.toLowerCase().includes('progress') ||
     label.name.toLowerCase().includes('doing')
   )) {
-    group = 'progress';
+    _group = 'progress';
   }
 
   // Extract assignee name (map GitHub username to member name if possible)
@@ -393,6 +424,12 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
+
+// Export app for testing
+module.exports = app;
+
