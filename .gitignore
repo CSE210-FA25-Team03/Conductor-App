@@ -3,3 +3,4 @@ npm-debug.log*
 *.log
 .env
 app/backend/docs/
+.DS_Store
