@@ -1,52 +1,60 @@
 [
-    {
-        "course":
-        {
-            "course_code": "CSE 210",
-            "term_year": "FA25"
-        },
-        "instructors": [
-            {
-                "staff_picture": "app/frontend/assets/logo/user.png",
-                "audio_pronounciation": "xxx",
-                "staff_name": "xxx",
-                "pronounciation": "xxx",
-                "pronoun": "xxx",
-                "contact": "xxx",
-                "availability": "xxx"
-            }
-        ],
-        "TAs": [
-            {
-                "staff_picture": "app/frontend/assets/logo/user.png",
-                "audio_pronounciation": "xxx",
-                "staff_name": "xxx",
-                "pronounciation": "xxx",
-                "pronoun": "xxx",
-                "contact": "xxx",
-                "availability": "xxx"
-            }
-        ],
-        "tutors": [
-            {
-                "staff_picture": "app/frontend/assets/logo/user.png",
-                "audio_pronounciation": "xxx",
-                "staff_name": "xxx",
-                "pronounciation": "xxx",
-                "pronoun": "xxx",
-                "contact": "xxx",
-                "availability": "xxx"
-            }
-        ],
-        "Teams": [
-            {
-                "team_id": "1",
-                "team_name": "xxx"
-            },
-            {
-                "team_id": "2",
-                "team_name": "xxx"
-            }
-        ]
-    }
+  {
+    "course": {
+      "course_code": "CSE 210",
+      "term_year": "FA25"
+    },
+    "instructors": [
+      {
+        "staff_picture": "app/frontend/assets/logo/user.png",
+        "audio_pronounciation": "xxx",
+        "staff_name": "xxx",
+        "pronounciation": "xxx",
+        "pronoun": "xxx",
+        "contact": "xxx",
+        "availability": "xxx"
+      },
+      {
+        "staff_picture": "app/frontend/assets/logo/user.png",
+        "audio_pronounciation": "",
+        "staff_name": "test",
+        "pronounciation": "",
+        "pronoun": "he/him",
+        "contact": "test@ucsd.edu | test@ucsd.edu",
+        "availability": "Mon 2-4PM"
+      }
+    ],
+    "TAs": [
+      {
+        "staff_picture": "app/frontend/assets/logo/user.png",
+        "audio_pronounciation": "xxx",
+        "staff_name": "xxx",
+        "pronounciation": "xxx",
+        "pronoun": "xxx",
+        "contact": "xxx",
+        "availability": "xxx"
+      }
+    ],
+    "tutors": [
+      {
+        "staff_picture": "app/frontend/assets/logo/user.png",
+        "audio_pronounciation": "xxx",
+        "staff_name": "xxx",
+        "pronounciation": "xxx",
+        "pronoun": "xxx",
+        "contact": "xxx",
+        "availability": "xxx"
+      }
+    ],
+    "Teams": [
+      {
+        "team_id": "1",
+        "team_name": "xxx"
+      },
+      {
+        "team_id": "2",
+        "team_name": "xxx"
+      }
+    ]
+  }
 ]

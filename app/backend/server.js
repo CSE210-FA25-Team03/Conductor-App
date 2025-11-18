@@ -4,6 +4,7 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
+const { CallTracker } = require('assert/strict');
 app.use(express.json()); // Parse JSON bodies
 
 // Serve static files from frontend/public
@@ -25,6 +26,21 @@ app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
+app.use('/class_directory', express.static(path.join(__dirname, '../frontend/src/pages/class_directory')));
+
+// Class Directory helper functions
+const classDirectoryPath = path.join(__dirname, 'data', 'class_directory.json');
+function getClassDirectory() {
+  const raw = fs.readFileSync(classDirectoryPath, 'utf8');
+  return JSON.parse(raw);
+}
+
+function saveClassDirectory(data) {
+  fs.writeFileSync(classDirectoryPath, JSON.stringify(data, null, 2), 'utf8');
+}
+
+// API endpoint to get class directory data
+
 // Example API endpoint (for future backend logic)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
@@ -116,6 +132,204 @@ app.put('/api/teams/:id', (req, res) => {
   
   // Return the updated team
   res.json(updatedTeam);
+});
+
+// Class Directory basic API
+app.get('/api/class_directory', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    res.json(data);
+  } catch (error) {
+    console.error('Error reading class directory:', error);
+    res.status(500).json({ error: 'Failed to read class directory' });
+  }
+});
+
+app.get('api/class-directory/course', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    const entry = data[0] || null;
+    if (!entry) return res.status(404).json({ error: 'No course found' });
+    res.json(entry.course);
+  } catch (error) {
+    console.error('Error reading course:', error);
+    res.status(500).json({ error: 'Failed to read course' });
+  }
+});
+
+// Get instructors list
+app.get('api/class-directory/instructors', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    const entry = data[0] || null;
+    if (!entry) return res.status(404).json({ error: 'No instructors found' });
+    res.json(entry.instructors || []);
+  } catch (error) {
+    console.error('Error reading instructors:', error);
+    res.status(500).json({ error: 'Failed to read instructors' });
+  }
+});
+
+// Get TAs list
+app.get('api/class-directory/tas', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    const entry = data[0] || null;
+    if (!entry) return res.status(404).json({ error: 'No TAs found' });
+    res.json(entry.TAs || []);
+  } catch (error) {
+    console.error('Error reading TAs:', error);
+    res.status(500).json({ error: 'Failed to read TAs' });
+  }
+});
+
+// Get tutors list
+app.get('api/class-directory/tutors', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    const entry = data[0] || null;
+    if (!entry) return res.status(404).json({ error: 'No tutors found' });
+    res.json(entry.tutors || []);
+  } catch (error) {
+    console.error('Error reading tutors:', error);
+    res.status(500).json({ error: 'Failed to read tutors' });
+  }
+});
+
+// Get Teams list
+app.get('api/class-directory/teams', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    const entry = data[0] || null;
+    if (!entry) return res.status(404).json({ error: 'No teams found' });
+    res.json(entry.Teams || []);
+  } catch (error) {
+    console.error('Error reading teams:', error);
+    res.status(500).json({ error: 'Failed to read teams' });
+  }
+});
+
+// Add Instructor
+app.post('/api/class-directory/instructors', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    if (data.length === 0) {
+      return res.status(404).json({ error: 'No class directory found' });
+    }
+
+    const entry = data[0];
+
+    const newInstructor = {
+      staff_picture: req.body.staff_picture || 'app/frontend/assets/logo/user.png',
+      audio_pronounciation: req.body.audio_pronounciation || '',
+      staff_name: req.body.staff_name || '',
+      pronounciation: req.body.pronounciation || '',
+      pronoun: req.body.pronoun || '',
+      contact: req.body.contact || '',
+      availability: req.body.availability || ''
+    };
+
+    entry.instructors = entry.instructors || [];
+    entry.instructors.push(newInstructor);
+
+    saveClassDirectory(data);
+    res.status(201).json(newInstructor);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add instructor' });
+  }
+});
+
+// Add TA
+app.post('/api/class-directory/tas', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    if (data.length === 0) {
+      return res.status(404).json({ error: 'No class directory found' });
+    }
+
+    const entry = data[0];
+
+    const newTa = {
+      staff_picture: req.body.staff_picture || 'app/frontend/assets/logo/user.png',
+      audio_pronounciation: req.body.audio_pronounciation || '',
+      staff_name: req.body.staff_name || '',
+      pronounciation: req.body.pronounciation || '',
+      pronoun: req.body.pronoun || '',
+      contact: req.body.contact || '',
+      availability: req.body.availability || ''
+    };
+
+    entry.TAs = entry.TAs || [];
+    entry.TAs.push(newTa);
+
+    saveClassDirectory(data);
+    res.status(201).json(newTa);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add TA' });
+  }
+});
+
+// Add Tutor
+app.post('/api/class-directory/tutors', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    if (data.length === 0) {
+      return res.status(404).json({ error: 'No class directory found' });
+    }
+
+    const entry = data[0];
+
+    const newTutor = {
+      staff_picture: req.body.staff_picture || 'app/frontend/assets/logo/user.png',
+      audio_pronounciation: req.body.audio_pronounciation || '',
+      staff_name: req.body.staff_name || '',
+      pronounciation: req.body.pronounciation || '',
+      pronoun: req.body.pronoun || '',
+      contact: req.body.contact || '',
+      availability: req.body.availability || ''
+    };
+
+    entry.tutors = entry.tutors || [];
+    entry.tutors.push(newTutor);
+
+    saveClassDirectory(data);
+    res.status(201).json(newTutor);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add tutor' });
+  }
+});
+
+// Add Team
+app.post('/api/class-directory/teams', (req, res) => {
+  try {
+    const data = getClassDirectory();
+    if (data.length === 0) {
+      return res.status(404).json({ error: 'No class directory found' });
+    }
+
+    const entry = data[0];
+
+    const newTeam = {
+      team_id: req.body.team_id,
+      team_name: req.body.team_name || ''
+    };
+
+    if (!newTeam.team_id) {
+      return res.status(400).json({ error: 'team_id is required' });
+    }
+
+    entry.Teams = entry.Teams || [];
+    entry.Teams.push(newTeam);
+
+    saveClassDirectory(data);
+    res.status(201).json(newTeam);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to add team' });
+  }
 });
 
 

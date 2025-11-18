@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Staff Class Directory</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header>
@@ -11,8 +11,8 @@
         <h2>STAFF CLASS DIRECTORY</h2>
 
         <div class="course-info">
-            <div class="course-line">CSE 210</div>
-            <div class="course-line">FA 25</div>
+            <div id="courseCode" class="course-line">--</div>
+            <div id="courseTerm" class="course-line">--</div>
         </div>
     </header>
 
@@ -23,111 +23,118 @@
 
             <!-- Instructor Info Block -->
             <div class="card">
-                <h3>Instructor Info</h3>
-                <div class="avatar-block">
-                    <div class="avatar"></div>
-                    <input type="file" class="avatar-input" accept="image/*">
+                <div class="card-heading">
+                    <h3>Instructor Info</h3>
+                    <span class="card-subtitle">Loaded from /api/class_directory</span>
                 </div>
-                <label>Full Name</label>
-                <input type="text" id="instructorName">
 
-                <label>Audio Pronunciation</label>
-                <button class="small-btn">Play</button>
-                <button class="small-btn">Upload/Record</button>
+                <div id="instructorsList" class="staff-list"></div>
 
-                <label>Pronouns</label>
-                <input type="text" id="instructorPronoun">
+                <form id="instructorForm" class="staff-form">
+                    <div class="avatar-block">
+                        <div class="avatar"></div>
+                        <input type="file" class="avatar-input" accept="image/*">
+                    </div>
+                    <label for="instructorName">Full Name</label>
+                    <input type="text" id="instructorName" placeholder="e.g., Prof. Doe" required>
 
-                <label>Email</label>
-                <input type="email" id="instructorEmail">
+                    <label>Audio Pronunciation</label>
+                    <button type="button" class="small-btn" disabled>Play</button>
+                    <button type="button" class="small-btn" disabled>Upload/Record</button>
 
-                <label>Contact</label>
-                <input type="text" id="instructorContact">
+                    <label for="instructorPronoun">Pronouns</label>
+                    <input type="text" id="instructorPronoun" placeholder="she/her">
 
-                <label>Availability</label>
-                <input type="text" id="instructorAvailability">
+                    <label for="instructorEmail">Email</label>
+                    <input type="email" id="instructorEmail" placeholder="name@ucsd.edu">
 
-                <button id="addInstructorBtn">Add Instructor</button>
+                    <label for="instructorContact">Contact</label>
+                    <input type="text" id="instructorContact">
+
+                    <label for="instructorAvailability">Availability</label>
+                    <input type="text" id="instructorAvailability" placeholder="Mon/Wed 2-4pm">
+
+                    <button type="submit" id="addInstructorBtn">Add Instructor</button>
+                </form>
             </div>
 
             <!-- Add TA Section -->
             <div class="card">
-                <h3>TA INFO</h3>
-                <div class="avatar-block">
-                    <div class="avatar"></div>
-                    <input type="file" class="avatar-input" accept="image/*">
+                <div class="card-heading">
+                    <h3>TA Info</h3>
+                    <span class="card-subtitle">Updated via /api/class-directory/tas</span>
                 </div>
-                <label>Full Name</label>
-                <input type="text" id="taName">
 
-                <label>Audio Pronunciation</label>
-                <button class="small-btn">Play</button>
-                <button class="small-btn">Upload/Record</button>
+                <div id="tasList" class="staff-list"></div>
 
-                <label>Pronouns</label>
-                <input type="text" id="taPronoun">
+                <form id="taForm" class="staff-form">
+                    <div class="avatar-block">
+                        <div class="avatar"></div>
+                        <input type="file" class="avatar-input" accept="image/*">
+                    </div>
+                    <label for="taName">Full Name</label>
+                    <input type="text" id="taName" placeholder="e.g., Sam TA" required>
 
-                <label>Email</label>
-                <input type="email" id="taEmail">
+                    <label>Audio Pronunciation</label>
+                    <button type="button" class="small-btn" disabled>Play</button>
+                    <button type="button" class="small-btn" disabled>Upload/Record</button>
 
-                <label>Contact</label>
-                <input type="text" id="taContact">
+                    <label for="taPronoun">Pronouns</label>
+                    <input type="text" id="taPronoun" placeholder="they/them">
 
-                <label>Availability</label>
-                <input type="text" id="taAvailability">
+                    <label for="taEmail">Email</label>
+                    <input type="email" id="taEmail" placeholder="ta@ucsd.edu">
 
-                <div class="card team-card">
-                    <h3>Team Assigned</h3>
+                    <label for="taContact">Contact</label>
+                    <input type="text" id="taContact">
 
-                    <div class="team-list">
+                    <label for="taAvailability">Availability</label>
+                    <input type="text" id="taAvailability" placeholder="Office hours TBD">
 
-                        <!-- Example team row -->
-                        <div class="team-row">
-                            <div>
-                                <label>Team Number</label>
-                                <input type="text" class="team-number" placeholder="e.g., 12">
-                            </div>
-
-                            <div>
-                                <label>Team Name</label>
-                                <input type="text" class="team-name" placeholder="e.g. Yes Yes Yes">
-                            </div>
-                        </div>
-
+                    <div class="card team-card">
+                        <h4>Teams Covered</h4>
+                        <div id="teamsList" class="team-list"></div>
                     </div>
 
-                </div>
-
-                <button id="addTaBtn">Add TA</button>
+                    <button type="submit" id="addTaBtn">Add TA</button>
+                </form>
             </div>
 
             <!-- Add Tutor Section -->
             <div class="card">
-                <h3>Tutor INFO</h3>
-                <div class="avatar-block">
-                    <div class="avatar"></div>
-                    <input type="file" class="avatar-input" accept="image/*">
+                <div class="card-heading">
+                    <h3>Tutor Info</h3>
+                    <span class="card-subtitle">Updated via /api/class-directory/tutors</span>
                 </div>
-                <label>Full Name</label>
-                <input type="text" id="taName">
 
-                <label>Audio Pronunciation</label>
-                <button class="small-btn">Play</button>
-                <button class="small-btn">Upload/Record</button>
+                <div id="tutorsList" class="staff-list"></div>
 
-                <label>Pronouns</label>
-                <input type="text" id="tutorPronoun">
+                <form id="tutorForm" class="staff-form">
+                    <div class="avatar-block">
+                        <div class="avatar"></div>
+                        <input type="file" class="avatar-input" accept="image/*">
+                    </div>
+                    <label for="tutorName">Full Name</label>
+                    <input type="text" id="tutorName" placeholder="e.g., Taylor Tutor" required>
 
-                <label>Email</label>
-                <input type="email" id="tutorEmail">
+                    <label>Audio Pronunciation</label>
+                    <button type="button" class="small-btn" disabled>Play</button>
+                    <button type="button" class="small-btn" disabled>Upload/Record</button>
 
-                <label>Contact</label>
-                <input type="text" id="tutorContact">
+                    <label for="tutorPronoun">Pronouns</label>
+                    <input type="text" id="tutorPronoun">
 
-                <label>Availability</label>
-                <input type="text" id="tutorAvailability">
+                    <label for="tutorEmail">Email</label>
+                    <input type="email" id="tutorEmail" placeholder="tutor@ucsd.edu">
 
-                <button id="addTaBtn">Add Tutor</button>
+                    <label for="tutorContact">Contact</label>
+                    <input type="text" id="tutorContact">
+
+                    <label for="tutorAvailability">Availability</label>
+                    <input type="text" id="tutorAvailability">
+
+                    <button type="submit" id="addTutorBtn">Add Tutor</button>
+                </form>
             </div>
 
         </section>

@@ -61,6 +61,19 @@ header {
     box-shadow: 0 0 6px rgba(0,0,0,0.15);
 }
 
+.card-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 10px;
+}
+
+.card-subtitle {
+    font-size: 12px;
+    color: #6b748e;
+    text-transform: uppercase;
+}
+
 label {
     font-size: 14px;
     margin-top: 10px;
@@ -140,10 +153,36 @@ input {
     margin-top: 20px;
 }
 
-.team-list {
+.team-list, .staff-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
+}
+
+.staff-row, .team-row {
+    border: 1px solid #e0e7ff;
+    border-radius: 8px;
+    padding: 12px;
+    background: #f3f6ff;
+}
+
+.staff-row strong {
+    display: block;
+    font-size: 15px;
+    margin-bottom: 6px;
+    color: #1f2b50;
+}
+
+.staff-row span {
+    display: block;
+    font-size: 13px;
+    color: #4e5d80;
+}
+
+.empty-copy {
+    font-size: 13px;
+    color: #6b748e;
+    margin: 0;
 }
 
 .team-row {
