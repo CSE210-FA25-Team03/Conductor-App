@@ -3,14 +3,21 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "lint:js": "eslint .",
-    "lint:css": "stylelint \"src/**/*.css\"",
-    "lint:html": "htmlhint \"public/**/*.html\"",
+"scripts": {
+  "lint:js": "eslint .",
+  "lint:css": "stylelint \"src/**/*.css\"",
+  "lint:html": "htmlhint \"public/**/*.html\"",
 
-    "lint": "npm run lint:js && npm run lint:css && npm run lint:html",
-    "test": "echo \"No frontend tests yet\""
-  },
+  "lint": "npm run lint:js && npm run lint:css && npm run lint:html",
+
+  "lint:js:fix": "eslint . --fix",
+  "lint:css:fix": "stylelint \"src/**/*.css\" --fix",
+  "lint:html:fix": "htmlhint \"public/**/*.html\" --fix",
+
+  "lint:fix": "npm run lint:js:fix && npm run lint:css:fix && npm run lint:html:fix",
+
+  "test": "echo \"No frontend tests yet\""
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
