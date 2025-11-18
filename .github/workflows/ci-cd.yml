@@ -2,10 +2,10 @@ name: Conductor CI/CD
 
 on:
   push:
-    branches: [ ci_cd ]     # run when you push to ci_cd
+    branches: [ main ]
   pull_request:
-    branches: [ ci_cd ]     # run on PRs targeting ci_cd
-  workflow_dispatch:         # adds "Run workflow" button in Actions tab
+    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   # ========= CI: build & test =========
