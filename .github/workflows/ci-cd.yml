@@ -61,6 +61,10 @@ jobs:
         working-directory: app/frontend
         run: npm run lint
 
+      - name: Run Cypress
+        working-directory: app/frontend
+        run: npm run cy:run
+
   # ========= CD: create deployment artifact =========
   deploy:
     needs: ci
