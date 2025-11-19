@@ -78,11 +78,3 @@ Full technical justifications and architectural reasoning for these planned addi
 
 Only short summaries are shown here due to page length constraints.
 
-
-## **References**
-
-Detailed ADRs covering cloud selection, CI/CD strategy, testing methodology, logging, and deployment planning can be found in:
-
-> **`Conductor-App/specs/pitch/adrs`**
-
-These documents provide full context for all design choices and long-term architectural direction.
