@@ -40,15 +40,6 @@ body {
   gap: 16px;
 }
 
-.brand {
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.brand span {
-  color: var(--primary);
-}
 
 .nav-actions {
   display: flex;
@@ -137,11 +128,6 @@ body {
   color: var(--subtle);
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 24px;
-}
 
 .staff-card,
 .team-card,
