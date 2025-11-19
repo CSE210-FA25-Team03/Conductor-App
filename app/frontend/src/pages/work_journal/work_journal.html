@@ -39,6 +39,15 @@
         <h2 class="wj-title">Daily Work Journal Form</h2>
 
         <form id="workJournalForm">
+            
+            <div class="wj-field">
+                <label for="repoLink">
+                    GitHub repo:
+                    <a href="https://github.com/CSE210-FA25-Team03/Conductor-App" target="_blank" rel="noopener noreferrer">
+                        https://github.com/CSE210-FA25-Team03/Conductor-App
+                    </a>
+                </label>
+            </div>
 
             <div class="wj-field">
                 <label for="tasksDone">What did you work on today?</label>
@@ -66,11 +75,6 @@
                     <option value="professor">Professor</option>
                 </select>
                 <textarea id="reachOutMessage" placeholder="Optional message..."></textarea>
-            </div>
-
-            <div class="wj-field">
-                <label for="repoLink">GitHub repo (optional)</label>
-                <input type="url" id="repoLink" placeholder="https://github.com/...">
             </div>
 
             <div class="wj-field">
@@ -222,7 +226,6 @@
                 sentimentNotes: document.getElementById("sentimentNotes").value,
                 reachOut: document.getElementById("reachOut").value,
                 reachOutMessage: document.getElementById("reachOutMessage").value,
-                repoLink: document.getElementById("repoLink").value,
                 date: new Date().toISOString()
             };
 
