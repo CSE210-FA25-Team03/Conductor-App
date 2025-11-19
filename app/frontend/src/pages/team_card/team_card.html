@@ -36,74 +36,156 @@
 
     </div>
 
+    <!-- Team Details Modal - moved outside page div -->
+    <div id="teamModal" class="team-modal" style="display: none;">
+        <div class="team-modal-content">
+            <span class="team-modal-close">&times;</span>
+            
+            <div class="team-modal-header">
+                <h2 id="modalTeamName">Team Name</h2>
+                <span id="modalTeamStatus" class="badge">Status</span>
+            </div>
+            
+            <div class="team-modal-body">
+                <div class="modal-section">
+                    <h3>Description</h3>
+                    <p id="modalDescription">Team description goes here...</p>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Status Description</h3>
+                    <p id="modalStatusDesc">What the team is currently working on...</p>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Progress</h3>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div id="modalProgressBar" class="progress-fill" style="width: 0%;"></div>
+                        </div>
+                        <span id="modalProgressText" class="progress-text">0%</span>
+                    </div>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Teaching Assistant</h3>
+                    <p id="modalTA" class="ta-name">TA Name</p>
+                </div>
+                
+                <div class="modal-section">
+                    <h3>Team Members</h3>
+                    <ul id="modalMembers" class="members-list">
+                        <!-- Members will be populated here -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
     <!-- Profile panel removed, navigation now goes to profile page -->
 
     <script src="script.js"></script>
 
         <script>
-            // Dropdown logic
-            const profileImg = document.getElementById('dashboardProfileImg');
-            const dropdown = document.getElementById('profileDropdown');
-            profileImg.addEventListener('mouseenter', () => {
-                dropdown.style.display = 'block';
-            });
-            profileImg.addEventListener('mouseleave', () => {
-                setTimeout(() => {
-                    if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
-                }, 150);
-            });
-            dropdown.addEventListener('mouseleave', () => {
-                dropdown.style.display = 'none';
-            });
-            dropdown.addEventListener('mouseenter', () => {
-                dropdown.style.display = 'block';
-            });
-            document.getElementById('logoutBtn').addEventListener('click', function(e) {
-                e.preventDefault();
-                // Clear localStorage and redirect to login
-                localStorage.clear();
-                window.location.href = '/login';
-            });
-        </script>
-
-        <script>
-            window.addEventListener('DOMContentLoaded', function() {
-                var savedImg = localStorage.getItem('profileImg');
-                if (savedImg) {
-                    var img1 = document.getElementById('dashboardProfileImg');
-                    if (img1) img1.src = savedImg;
-                    var img2 = document.getElementById('dashboardProfileImgLarge');
-                    if (img2) img2.src = savedImg;
+            // Define showTeamInfo function first and make it globally accessible
+            function showTeamInfo(team) {
+                console.log('showTeamInfo called with team:', team);
+                
+                // Use actual team data, with defaults for missing fields
+                const teamData = {
+                    name: team.name || "Unnamed Team",
+                    description: team.description || "No description available.",
+                    status: team.status || "Needs Review",
+                    statusDescription: team.description || "Currently working on team projects and assignments.",
+                    progress: team.status === 'On Track' ? 75 : team.status === 'At Risk' ? 45 : 60, // Default progress based on status
+                    ta: "Sarah Chen", // Default TA (can be enhanced later)
+                    members: (team.members || [])
+                        .filter(member => {
+                            // Filter out entries that start with "+" (like "+2", "+3") as they're just indicators
+                            if (typeof member === 'string' && member.startsWith('+')) {
+                                return false;
+                            }
+                            return true;
+                        })
+                        .map((member, index) => {
+                            // If member is a string (like "AM"), create a simple entry
+                            // Otherwise assume it's an object
+                            if (typeof member === 'string') {
+                                return {
+                                    name: member, // Will show initials like "AM"
+                                    isLeader: index === 0, // First member is leader
+                                    score: 85 + Math.floor(Math.random() * 15) // Random score between 85-100
+                                };
+                            } else {
+                                // If member is already an object with name, isLeader, score
+                                return member;
+                            }
+                        })
+                };
+                
+                try {
+                    // Populate modal with data
+                    const modalName = document.getElementById('modalTeamName');
+                    const modalDesc = document.getElementById('modalDescription');
+                    const modalStatusDesc = document.getElementById('modalStatusDesc');
+                    const modalTA = document.getElementById('modalTA');
+                    
+                    if (!modalName || !modalDesc || !modalStatusDesc || !modalTA) {
+                        console.error('Modal elements not found');
+                        return;
+                    }
+                    
+                    modalName.textContent = teamData.name;
+                    modalDesc.textContent = teamData.description;
+                    modalStatusDesc.textContent = teamData.statusDescription;
+                    modalTA.textContent = teamData.ta;
+                    
+                    // Set status badge
+                    const statusBadge = document.getElementById('modalTeamStatus');
+                    if (statusBadge) {
+                        statusBadge.textContent = teamData.status;
+                        statusBadge.className = `badge ${teamData.status === 'On Track' ? 'success' : teamData.status === 'At Risk' ? 'risk' : ''}`;
+                    }
+                    
+                    // Set progress bar
+                    const progressBar = document.getElementById('modalProgressBar');
+                    const progressText = document.getElementById('modalProgressText');
+                    if (progressBar && progressText) {
+                        progressBar.style.width = `${teamData.progress}%`;
+                        progressText.textContent = `${teamData.progress}%`;
+                    }
+                    
+                    // Populate members list
+                    const membersList = document.getElementById('modalMembers');
+                    if (membersList) {
+                        membersList.innerHTML = teamData.members.map(member => `
+                            <li class="member-item">
+                                <span class="member-name">
+                                    ${member.name}
+                                    ${member.isLeader ? '<span class="leader-badge">👑 Leader</span>' : ''}
+                                </span>
+                                <span class="member-score">Score: ${member.score}</span>
+                            </li>
+                        `).join('');
+                    }
+                    
+                    // Show modal
+                    const modal = document.getElementById('teamModal');
+                    if (modal) {
+                        console.log('Showing modal');
+                        modal.style.display = 'flex';
+                    } else {
+                        console.error('Modal element not found');
+                    }
+                } catch (error) {
+                    console.error('Error showing team info:', error);
                 }
-            });
-        </script>
-        <script>
-            window.addEventListener('DOMContentLoaded', function() {
-                var firstName = localStorage.getItem('firstName') || 'Avery';
-                var lastName = localStorage.getItem('lastName') || 'Lin';
-                var role = localStorage.getItem('role') || 'Professor';
-                var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
-                document.getElementById('profName').textContent = firstName + ' ' + lastName;
-                document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
-                document.getElementById('profRole').textContent = role + ' · CSE 210';
-                document.getElementById('profRoleMeta').textContent = role;
-                document.getElementById('profEmail').textContent = email;
-            });
-
-        // Dynamic dashboard link based on role
-        document.getElementById('backDashboard').addEventListener('click', function(e) {
-            e.preventDefault();
-            var role = localStorage.getItem('role');
-            if (role === 'professor') {
-                window.location.href = '/dashboards/professor.html';
-            } else {
-                window.location.href = '/dashboards/ta.html';
             }
-        });
-        </script>
-
-        <script>
+            
+            // Make function globally accessible
+            window.showTeamInfo = showTeamInfo;
+            
             // Fetch teams from API
             async function loadTeams() {
             try {
@@ -143,20 +225,54 @@
                 </div>
                 <div class="card-actions">
                 <span>${team.nextSync || team.lastUpdate || team.actionRequired || ''}</span>
-                <button onclick="showTeamInfo(${team.id})">Card info</button>
+                <button class="card-info-btn" data-team-id="${team.id}">Card info</button>
                 </div>
             `;
+            
+            // Add event listener to the button - pass the entire team object
+            const button = card.querySelector('.card-info-btn');
+            if (button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Button clicked for team:', team);
+                    showTeamInfo(team); // Pass the entire team object instead of just ID
+                });
+            } else {
+                console.error('Button not found in card');
+            }
+            
             return card;
             }
-            function showTeamInfo(teamId) {
-                fetch(`/api/teams/${teamId}`)
-                    .then(res => res.json())
-                    .then(team => {
-                        alert(`Team: ${team.name}\nStatus: ${team.status}\n${team.description}`);
-                    })
-                    .catch(err => console.error('Error:', err));
-            }
+            
+            // Close modal functionality
+            window.addEventListener('DOMContentLoaded', function() {
+                const modal = document.getElementById('teamModal');
+                const closeBtn = document.querySelector('.team-modal-close');
+                
+                if (closeBtn && modal) {
+                    closeBtn.addEventListener('click', function() {
+                        modal.style.display = 'none';
+                    });
+                }
+                
+                window.addEventListener('click', function(event) {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+                
+                // Close on Escape key
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape' && modal && modal.style.display === 'flex') {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+
+            // Load teams when page loads
             window.addEventListener('DOMContentLoaded', loadTeams);
+
         </script>
 </body>
 </html>
