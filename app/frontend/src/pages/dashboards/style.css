@@ -40,15 +40,6 @@ body {
   gap: 16px;
 }
 
-.brand {
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-}
-
-.brand span {
-  color: var(--primary);
-}
 
 .nav-actions {
   display: flex;
@@ -137,11 +128,6 @@ body {
   color: var(--subtle);
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 24px;
-}
 
 .staff-card,
 .team-card,
@@ -494,4 +480,20 @@ body {
   font-weight: 800;
 }
 
+.eval-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: rgba(100, 100, 100, 0.15); /* transparent grey button */
+    color: black;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.eval-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
 
