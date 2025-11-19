@@ -1,0 +1,115 @@
+/* Work Journal Styles */
+
+/* Work Journal Styles */
+:root {
+    --bg: #f5f5f7;
+    --panel-bg: rgba(255,255,255,0.96);
+    --border: #e2e2e7;
+    --radius: 14px;
+    --shadow: 0 6px 20px rgba(0,0,0,0.08);
+    --text-muted: #6b7280;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --table-header: #eaf1fb;
+    --table-row: #f9fafb;
+}
+
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    color: #111;
+}
+
+/* --- Header --- */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    padding: 0.8rem 1.5rem 1.5rem;
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    margin-bottom: 2.2rem;
+}
+
+.brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #2a3a5e;
+}
+.brand span {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+
+/* --- Main Page Panel --- */
+
+.work-journal-container {
+  max-width: 750px;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+}
+
+.wj-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.wj-field {
+  margin-bottom: 1.6rem;
+}
+
+.wj-field label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+.wj-field textarea,
+.wj-field input,
+.wj-field select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.sentiment-options {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: .8rem;
+}
+
+.wj-btn {
+  background: #4b6bfb;
+  color: white;
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+}
+
+.wj-btn:hover {
+  background: #3a56d0;
+}
+
+.wj-success {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: #e9ffe9;
+  border: 1px solid #b2ffb2;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #1b7d1b;
+}
