@@ -2,7 +2,7 @@ name: Conductor CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, ci_cd ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -32,10 +32,10 @@ jobs:
         working-directory: app/backend
         run: npm run lint
 
-      - name: Run backend tests
+      - name: Run backend tests (Jest)
         working-directory: app/backend
         run: npm test
-        
+
       - name: Generate backend docs (JSDoc)
         working-directory: app/backend
         run: npm run docs
