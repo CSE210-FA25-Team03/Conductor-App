@@ -1,3 +1,8 @@
+/**
+ * Backend entry point for our Conductor App.
+ * Defines health check routes and initializes the Express server.
+ * @module server
+ */
 // Basic Express server to serve static frontend and prepare for backend features
 const express = require('express');
 const path = require('path');
@@ -5,7 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const fs = require('fs');
 app.use(express.json()); // Parse JSON bodies
-
+// test if forced PR to merge is set up correctly again
 // Serve static files from frontend/public
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
@@ -25,10 +30,18 @@ app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
-// Example API endpoint (for future backend logic)
-app.get('/api/health', (req, res) => {
+/**
+ * Health check endpoint.
+ * @function healthCheck
+ * @memberof module:server
+ * @param {Object} _req - Express request (unused)
+ * @param {Object} res - Express response
+ */
+function healthCheck(_req, res) {
   res.json({ status: 'ok' });
-});
+}
+
+app.get('/api/health', healthCheck);
 
 // Helper function to read teams
 function getTeams() {
@@ -40,6 +53,146 @@ function getTeams() {
 function saveTeams(teams) {
   const filePath = path.join(__dirname, 'data', 'teams.json');
   fs.writeFileSync(filePath, JSON.stringify(teams, null, 2), 'utf8');
+}
+
+// Helper function to read tasks
+function getTasks() {
+  const filePath = path.join(__dirname, 'data', 'tasks.json');
+  if (!fs.existsSync(filePath)) {
+    return {};
+  }
+  const data = fs.readFileSync(filePath, 'utf8');
+  return JSON.parse(data);
+}
+
+// Helper function to write tasks back to file
+function saveTasks(tasks) {
+  const filePath = path.join(__dirname, 'data', 'tasks.json');
+  fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), 'utf8');
+}
+
+// Helper function to read members
+function getMembers() {
+  const filePath = path.join(__dirname, 'data', 'members.json');
+  if (!fs.existsSync(filePath)) {
+    console.error('members.json file not found');
+    return [];
+  }
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading members.json:', error);
+    return [];
+  }
+}
+
+// Helper function to read GitHub config
+function getGitHubConfig() {
+  const filePath = path.join(__dirname, 'data', 'github-config.json');
+  if (!fs.existsSync(filePath)) {
+    return { owner: '', repo: '', token: '' };
+  }
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading github-config.json:', error);
+    return { owner: '', repo: '', token: '' };
+  }
+}
+
+// Helper function to save GitHub config
+function saveGitHubConfig(config) {
+  const filePath = path.join(__dirname, 'data', 'github-config.json');
+  fs.writeFileSync(filePath, JSON.stringify(config, null, 2), 'utf8');
+}
+
+// Helper function to fetch GitHub issues
+async function fetchGitHubIssues(owner, repo, token = '') {
+  try {
+    const url = `https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=100`;
+    const headers = {
+      'Accept': 'application/vnd.github.v3+json',
+      'User-Agent': 'Conductor-App'
+    };
+    
+    if (token) {
+      headers['Authorization'] = `token ${token}`;
+    }
+
+    const response = await fetch(url, { headers });
+    
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+    }
+
+    const issues = await response.json();
+    
+    // Filter out pull requests (they have pull_request property)
+    return issues.filter(issue => !issue.pull_request);
+  } catch (error) {
+    console.error('Error fetching GitHub issues:', error);
+    throw error;
+  }
+}
+
+// Helper function to map GitHub issue to task format
+function mapGitHubIssueToTask(issue) {
+  // Map GitHub issue state to task tracker columns
+  let _group = 'todo';
+  if (issue.state === 'closed') {
+    _group = 'done';
+  } else if (issue.labels && issue.labels.some(label => 
+    label.name.toLowerCase().includes('in-progress') || 
+    label.name.toLowerCase().includes('progress') ||
+    label.name.toLowerCase().includes('doing')
+  )) {
+    _group = 'progress';
+  }
+
+  // Extract assignee name (map GitHub username to member name if possible)
+  let assignee = 'None';
+  if (issue.assignee) {
+    assignee = issue.assignee.login;
+    // Try to match with members list
+    const members = getMembers();
+    const matchedMember = members.find(m => 
+      m.name.toLowerCase().includes(issue.assignee.login.toLowerCase()) ||
+      issue.assignee.login.toLowerCase().includes(m.name.toLowerCase().split(' ')[0])
+    );
+    if (matchedMember) {
+      assignee = matchedMember.name;
+    }
+  }
+  
+  // Extract difficulty from labels (easy, medium, hard)
+  let badge = 'medium';
+  if (issue.labels) {
+    const labelNames = issue.labels.map(l => l.name.toLowerCase());
+    if (labelNames.some(n => n.includes('easy') || n.includes('low') || n.includes('trivial'))) {
+      badge = 'easy';
+    } else if (labelNames.some(n => n.includes('hard') || n.includes('high') || n.includes('difficult'))) {
+      badge = 'hard';
+    }
+  }
+
+  // Format due date (if milestone exists)
+  let due = 'TBD';
+  if (issue.milestone && issue.milestone.due_on) {
+    const dueDate = new Date(issue.milestone.due_on);
+    due = dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  return {
+    title: issue.title,
+    badge: badge,
+    due: issue.state === 'closed' ? 'Completed' : due,
+    assignee: assignee,
+    githubIssueNumber: issue.number,
+    githubUrl: issue.html_url,
+    githubState: issue.state
+  };
 }
 
 // GET all teams - hardcoded data for now
@@ -265,14 +418,18 @@ app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
-app.use('/evaluation_rubric', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_rubric')));
-app.use('/work_journal', express.static(path.join(__dirname, '../frontend/src/pages/work_journal')));
 
 // Fallback: serve index.html for root
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
+  });
+}
+
+// Export app for testing
+module.exports = app;
+
