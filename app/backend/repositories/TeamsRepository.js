@@ -16,7 +16,7 @@ class TeamsRepository {
      * @param {number} id - Team ID
      * @returns {Promise<Object|null>} Team object or null if not found
      */
-    async getTeamById(id) {
+    async getTeamById(_id) {
       throw new Error('getTeamById() must be implemented');
     }
   
@@ -25,7 +25,7 @@ class TeamsRepository {
      * @param {Object} teamData - Team data object
      * @returns {Promise<Object>} Created team object with ID
      */
-    async createTeam(teamData) {
+    async createTeam(_teamData) {
       throw new Error('createTeam() must be implemented');
     }
   
@@ -35,7 +35,7 @@ class TeamsRepository {
      * @param {Object} teamData - Updated team data
      * @returns {Promise<Object|null>} Updated team object or null if not found
      */
-    async updateTeam(id, teamData) {
+    async updateTeam(_id, _teamData) {
       throw new Error('updateTeam() must be implemented');
     }
   
@@ -44,7 +44,7 @@ class TeamsRepository {
      * @param {number} id - Team ID
      * @returns {Promise<boolean>} True if deleted, false if not found
      */
-    async deleteTeam(id) {
+    async deleteTeam(_id) {
       throw new Error('deleteTeam() must be implemented');
     }
   }
