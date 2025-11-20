@@ -35,7 +35,7 @@ app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
-
+app.use('/work_journal', express.static(path.join(__dirname, '../frontend/src/pages/work_journal')));
 /**
  * Health check endpoint.
  * @function healthCheck

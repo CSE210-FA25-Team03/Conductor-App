@@ -74,12 +74,27 @@
                     <option value="ta">Teaching Assistant</option>
                     <option value="professor">Professor</option>
                 </select>
-                <textarea id="reachOutMessage" placeholder="Optional message..."></textarea>
-            </div>
+                <br>
 
-            <div class="wj-field">
-                <label>Attach files (optional)</label>
-                <input type="file" id="wjFiles" multiple>
+                <textarea id="reachOutMessage" placeholder="Message..." style="display:none;"></textarea>
+            </div>
+            <script>
+                const reachOutSelect = document.getElementById('reachOut');
+                const reachOutMsg = document.getElementById('reachOutMessage');
+                reachOutSelect.addEventListener('change', function() {
+                    if (this.value === 'team_lead' || this.value === 'ta' || this.value === 'professor') {
+                        reachOutMsg.style.display = '';
+                    } else {
+                        reachOutMsg.style.display = 'none';
+                        reachOutMsg.value = '';
+                    }
+                });
+            </script>
+            
+
+            <div class="sentiment-options">
+                    <label><input type="radio" name="status" value="public"> Public</label>
+                    <label><input type="radio" name="status" value="private"> Private (Only visible to Staff)</label>
             </div>
 
             <button class="wj-btn" type="submit">Submit Journal Entry</button>
