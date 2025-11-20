@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Student Messages – TA Work Evaluation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --panel: #ffffff;
+      --border: #d4d4d8;
+      --accent: #2563eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --bubble-student: #e0edff;
+      --bubble-ta: #f3f4f6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 16px 12px 24px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      gap: 12px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .back-btn {
+      border: 1px solid var(--border);
+      background: #f3f4f6;
+      border-radius: 999px;
+      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .back-btn span.icon {
+      font-size: 0.9rem;
+    }
+
+    .conversation-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .student-name {
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .student-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .student-tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+    }
+
+    .conversation-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .header-right {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .header-pill {
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      border: 1px solid var(--border);
+    }
+
+    .header-pill span {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .chat-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    .chat-body {
+      padding: 12px 12px 8px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+      max-height: calc(100vh - 220px);
+      background: #f9fafb;
+    }
+
+    .system-message {
+      align-self: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #e5e7eb;
+    }
+
+    .day-divider {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin: 2px 0 6px;
+    }
+
+    .day-divider::before,
+    .day-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: #e5e7eb;
+    }
+
+    .message-row {
+      display: flex;
+    }
+
+    .message-row.student {
+      justify-content: flex-start;
+    }
+
+    .message-row.ta {
+      justify-content: flex-end;
+    }
+
+    .message-bubble {
+      max-width: 72%;
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .message-row.student .message-bubble {
+      background: var(--bubble-student);
+      border: 1px solid #c7ddff;
+    }
+
+    .message-row.ta .message-bubble {
+      background: var(--bubble-ta);
+      border: 1px solid #e5e7eb;
+    }
+
+    .message-time {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .message-row.ta + .message-time {
+      text-align: right;
+    }
+
+    .composer {
+      border-top: 1px solid var(--border);
+      padding: 10px 12px 12px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .composer-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar-small {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #374151;
+      border: 1px solid #d4d4d8;
+    }
+
+    .composer-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      padding: 4px 6px 4px 10px;
+      gap: 8px;
+    }
+
+    .composer-input {
+      flex: 1;
+      border: 0;
+      background: transparent;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .composer-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .icon-button {
+      border: 0;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+    }
+
+    .icon-button:hover {
+      background: #e5e7eb;
+    }
+
+    .send-button {
+      border-radius: 999px;
+      padding: 6px 11px;
+      border: 0;
+      background: var(--accent);
+      color: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .send-button span.icon {
+      font-size: 0.9rem;
+    }
+
+    .send-button:hover {
+      background: #1d4ed8;
+    }
+
+    .send-button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    .composer-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .error-banner {
+      display: none;
+      font-size: 0.78rem;
+      color: #991b1b;
+      background: #fee2e2;
+      border-radius: 6px;
+      padding: 4px 8px;
+      align-self: stretch;
+      border: 1px solid #fecaca;
+    }
+
+    .error-banner.visible {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    @media (max-width: 640px) {
+      .chat-body {
+        max-height: calc(100vh - 240px);
+      }
+      .message-bubble {
+        max-width: 85%;
+      }
+    }
+  </style>
+</head>
+<body data-page="chat">
+  <div class="page">
+    <header>
+      <div class="header-left">
+        <button class="back-btn" id="back-btn">
+          <span class="icon">←</span>
+          <span>Teams</span>
+        </button>
+        <div class="conversation-meta">
+          <div class="student-name">
+            <span class="student-status-dot"></span>
+            <span id="chat-student-name">Loading…</span>
+            <span class="student-tag" id="chat-team-tag">Team</span>
+          </div>
+          <div class="conversation-subtitle" id="chat-subtitle">
+            Showing full message history for this student.
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="header-pill">
+          Last activity: <span id="chat-last-activity">–</span>
+        </div>
+        <div>Scroll up to see older messages.</div>
+      </div>
+    </header>
+
+    <div class="chat-shell">
+      <div class="chat-body" id="chat-body">
+        <div class="system-message" id="chat-system-message">
+          Messages will appear here. Start by sending a note or reviewing their past questions.
+        </div>
+      </div>
+
+      <div class="composer">
+        <div class="error-banner" id="chat-error">
+          <span>⚠️</span>
+          <span id="chat-error-text">Something went wrong.</span>
+        </div>
+
+        <div class="composer-top">
+          <div class="avatar-small" id="chat-avatar-initials">TA</div>
+          <div class="composer-main">
+            <input
+              id="chat-input"
+              class="composer-input"
+              type="text"
+              placeholder="Send a message as the TA (feedback, hints, follow-up questions)…"
+              autocomplete="off"
+            />
+            <button class="icon-button" type="button" title="Add a quick reaction (non-functional)">
+              😊
+            </button>
+            <button class="send-button" id="chat-send-btn" type="button">
+              <span class="icon">➤</span>
+              <span>Send</span>
+            </button>
+          </div>
+        </div>
+        <div class="composer-hint">
+          <span>Enter to send, Shift+Enter for a new line.</span>
+          <span id="message-count-label">0 messages</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

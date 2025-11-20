@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TA Work Evaluation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" />
+  <style>
+    :root {
+      --bg: #f3f6fb;
+      --card-bg: #ffffff;
+      --accent: #3b82f6;
+      --accent-soft: #e0edff;
+      --border: #d4d4d8;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px 32px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    .pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #c4d7ff;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(260px, 1fr);
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    @media (max-width: 840px) {
+      main {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 14px 14px 10px;
+      border: 1px solid var(--border);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    .card-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-title-pill {
+      font-size: 0.75rem;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4f46e5;
+    }
+
+    .card-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 10px;
+    }
+
+    .team-card {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 10px;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .team-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .team-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .team-tag {
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #dbeafe;
+    }
+
+    .team-stats {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .student-list {
+      border-radius: 6px;
+      background: #f9fafb;
+      margin: 0;
+      padding: 4px;
+      list-style: none;
+    }
+
+    .student-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 5px 6px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.1s ease;
+      font-size: 0.83rem;
+    }
+
+    .student-row:not(:last-child) {
+      margin-bottom: 2px;
+    }
+
+    .student-row:hover {
+      background: #e5f0ff;
+    }
+
+    .student-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: #dbeafe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #1d4ed8;
+      flex-shrink: 0;
+      border: 1px solid #bfdbfe;
+    }
+
+    .student-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .student-meta {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .student-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .unread-badge {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: #2563eb;
+    }
+
+    .unread-label {
+      font-size: 0.7rem;
+      color: #2563eb;
+      font-weight: 600;
+    }
+
+    .read-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #cbd5e1;
+    }
+
+    .read-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      color: var(--text-muted);
+    }
+
+    .stat-chip {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #dbeafe;
+    }
+
+    .stat-chip.red {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+
+    .hint kbd {
+      padding: 2px 5px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      font-size: 0.75em;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New",
+        monospace;
+    }
+
+    .footer-note {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body data-page="teams">
+  <div class="page">
+    <header>
+      <div>
+        <h1>TA Work Evaluation</h1>
+        <div class="subtitle">
+          Select a student to open the message thread and review their work.
+        </div>
+      </div>
+      <div class="pill">
+        <span class="pill-dot"></span>
+        Messages for this lab
+      </div>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              Teams overview
+              <span class="card-title-pill">5 students per team</span>
+            </div>
+            <div class="card-meta" id="team-summary-meta">
+              Loading team stats…
+            </div>
+          </div>
+        </div>
+
+        <div class="teams-grid" id="teams-container">
+          <!-- Teams & students will be injected by script.js -->
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Inbox summary</div>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Unread conversations</span>
+            <span class="stat-chip" id="stat-unread">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Total students</span>
+            <span class="stat-chip" id="stat-total">0</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Messages today</span>
+            <span class="stat-chip red" id="stat-today">0</span>
+          </div>
+          <p class="hint">
+            Click a student row to open their messages. New messages are marked with a blue dot.
+          </p>
+        </section>
+
+        <section class="card">
+          <div class="card-header">
+            <div class="card-title">Legend</div>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">
+              <span class="unread-badge"></span>
+              &nbsp;New messages
+            </span>
+            <span class="stat-chip">Attention needed</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">
+              <span class="read-dot"></span>
+              &nbsp;All seen
+            </span>
+            <span class="stat-chip">Reviewed</span>
+          </div>
+          <p class="footer-note">
+            Each conversation shows the full history between the TA and the student.
+          </p>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script src="script.js" defer></script>
+</body>
+</html>
