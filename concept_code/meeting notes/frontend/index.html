@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Class & Team Calendar</title>
+  <!-- FullCalendar CSS -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      color: #222;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: row;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Left: Controls & forms */
+    #sidebar {
+      width: 320px;
+      border-right: 1px solid #ddd;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #fafafa;
+    }
+
+    h2 {
+      margin: 0 0 4px 0;
+      font-size: 18px;
+    }
+
+    h3 {
+      margin: 8px 0 4px 0;
+      font-size: 16px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    select, input, textarea {
+      width: 100%;
+      padding: 4px 6px;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .section {
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      padding: 8px;
+      background: white;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #555;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      background: #e3f2fd;
+      color: #0d47a1;
+      font-weight: 600;
+      margin-left: 4px;
+    }
+
+    button {
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #1976d2;
+      background: #2196f3;
+      color: white;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      border-color: #aaa;
+      background: #eee;
+      color: #333;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    .row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
+
+    /* Middle: Calendar */
+    #calendar-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #calendar {
+      flex: 1;
+      padding: 8px;
+    }
+
+    /* Right: Notes panel */
+    #notes-panel {
+      width: 320px;
+      border-left: 1px solid #ddd;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: #fafafa;
+    }
+
+    #notes-list {
+      flex: 1;
+      overflow-y: auto;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      padding: 8px;
+      font-size: 13px;
+    }
+
+    .note-item {
+      border-bottom: 1px solid #eee;
+      padding: 4px 0;
+    }
+
+    .note-item:last-child {
+      border-bottom: none;
+    }
+
+    .note-timestamp {
+      font-size: 11px;
+      color: #777;
+    }
+
+    #notes-form textarea {
+      min-height: 80px;
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-right: 4px;
+      text-transform: uppercase;
+    }
+
+    .pill-class { background:#e3f2fd; color:#0d47a1; }
+    .pill-assignment { background:#fff3e0; color:#e65100; }
+    .pill-meeting { background:#e8f5e9; color:#1b5e20; }
+    .pill-task { background:#fce4ec; color:#880e4f; }
+
+    .muted {
+      color: #888;
+      font-size: 12px;
+    }
+
+    .chip {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      border: 1px solid #ccc;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+
+    .days-checkboxes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .days-checkboxes label {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid #ccc;
+      padding: 1px 6px;
+      margin-bottom: 0;
+    }
+
+    .days-checkboxes input {
+      width: auto;
+      margin-bottom: 0;
+    }
+
+    #current-event-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- SIDEBAR (Left) -->
+    <div id="sidebar">
+      <div class="section">
+        <h2>
+          Calendar
+        </h2>
+        <div class="small">
+          Looks like Google Calendar but fully local.
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>Login as</h3>
+        <label for="user-select">User</label>
+        <select id="user-select"></select>
+        <div id="user-info" class="small"></div>
+      </div>
+
+      <div class="section" id="professor-tools" style="display:none;">
+        <h3>
+          Professor tools
+          <span class="role-badge">PROFESSOR</span>
+        </h3>
+        <div class="small">
+          Post recurring class schedules and assignment deadlines.
+        </div>
+
+        <form id="prof-event-form">
+          <label>Event type</label>
+          <select id="prof-event-type">
+            <option value="class">Class (recurring)</option>
+            <option value="assignment">Assignment (deadline)</option>
+          </select>
+
+          <div class="small">
+            For classes: pick days & time once, it repeats every week.
+          </div>
+
+          <label>Title</label>
+          <input type="text" id="prof-title" placeholder="e.g. CS101 Lecture" required />
+
+          <label>Description</label>
+          <textarea id="prof-description" placeholder="Optional details"></textarea>
+
+          <label>
+            <input type="checkbox" id="prof-recurring" checked />
+            Recurring weekly?
+          </label>
+
+          <div id="prof-recurring-fields">
+            <label>Days of week</label>
+            <div class="days-checkboxes" id="prof-days">
+              <!-- Filled by JS -->
+            </div>
+
+            <div class="row">
+              <div>
+                <label>Start time</label>
+                <input type="time" id="prof-start-time" value="17:00" />
+              </div>
+              <div>
+                <label>End time</label>
+                <input type="time" id="prof-end-time" value="18:20" />
+              </div>
+            </div>
+          </div>
+
+          <div id="prof-once-fields" style="display:none;">
+            <label>Deadline date/time</label>
+            <input type="datetime-local" id="prof-deadline" />
+          </div>
+
+          <button type="submit">Create event</button>
+        </form>
+      </div>
+
+      <div class="section" id="team-leader-tools" style="display:none;">
+        <h3>
+          Team leader tools
+          <span class="role-badge">TEAM LEADER</span>
+        </h3>
+        <div class="small">
+          Schedule meetings/tasks; your team sees this on top of the class calendar.
+        </div>
+
+        <form id="tl-event-form">
+          <label>Event type</label>
+          <select id="tl-event-type">
+            <option value="meeting">Meeting</option>
+            <option value="task">Task / Internal deadline</option>
+          </select>
+
+          <label>Title</label>
+          <input type="text" id="tl-title" placeholder="e.g. Weekly Sync" required />
+
+          <label>Description</label>
+          <textarea id="tl-description" placeholder="Optional details, agenda, etc."></textarea>
+
+          <label>
+            <input type="checkbox" id="tl-recurring" checked />
+            Recurring weekly?
+          </label>
+
+          <div id="tl-recurring-fields">
+            <label>Days of week</label>
+            <div class="days-checkboxes" id="tl-days">
+              <!-- Filled by JS -->
+            </div>
+
+            <div class="row">
+              <div>
+                <label>Start time</label>
+                <input type="time" id="tl-start-time" value="18:00" />
+              </div>
+              <div>
+                <label>End time</label>
+                <input type="time" id="tl-end-time" value="19:00" />
+              </div>
+            </div>
+          </div>
+
+          <div id="tl-once-fields" style="display:none;">
+            <label>Start</label>
+            <input type="datetime-local" id="tl-start" />
+            <label>End</label>
+            <input type="datetime-local" id="tl-end" />
+            <label>Deadline (optional)</label>
+            <input type="datetime-local" id="tl-deadline" />
+          </div>
+
+          <button type="submit">Create event</button>
+        </form>
+      </div>
+
+      <div class="section">
+        <h3>Legend</h3>
+        <div>
+          <span class="pill pill-class">Class</span>
+          <span class="pill pill-assignment">Assignment</span>
+          <span class="pill pill-meeting">Meeting</span>
+          <span class="pill pill-task">Task</span>
+        </div>
+        <div class="small" style="margin-top:4px;">
+          All students share the same professor calendar. Team events are on top.
+        </div>
+      </div>
+    </div>
+
+    <!-- CALENDAR (Middle) -->
+    <div id="calendar-container">
+      <div id="calendar"></div>
+    </div>
+
+    <!-- NOTES PANEL (Right) -->
+    <div id="notes-panel">
+      <div class="section">
+        <h3>Notes</h3>
+        <div id="current-event-title" class="muted">
+          Click a class / meeting to write notes.
+        </div>
+        <div class="small" style="margin-top:4px;">
+          Notes are <b>private per student</b>, tied to each event. Think of it like a
+          timeline of your thoughts for that specific class/meeting.
+        </div>
+      </div>
+
+      <div id="notes-list">
+        <div class="muted">
+          No event selected yet.
+        </div>
+      </div>
+
+      <div class="section" id="notes-form-section">
+        <form id="notes-form">
+          <label for="note-content">New note</label>
+          <textarea id="note-content" placeholder="Write what was decided / your action items / ideas..."></textarea>
+          <button type="submit" id="note-submit" disabled>Add note</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+
+  <script>
+    const API_BASE = '';
+
+    let currentUser = null;
+    let calendar = null;
+    let currentEvent = null;
+
+    const userSelectEl = document.getElementById('user-select');
+    const userInfoEl = document.getElementById('user-info');
+    const professorToolsEl = document.getElementById('professor-tools');
+    const tlToolsEl = document.getElementById('team-leader-tools');
+
+    const calendarEl = document.getElementById('calendar');
+
+    const notesPanelTitleEl = document.getElementById('current-event-title');
+    const notesListEl = document.getElementById('notes-list');
+    const notesFormEl = document.getElementById('notes-form');
+    const noteContentEl = document.getElementById('note-content');
+    const noteSubmitEl = document.getElementById('note-submit');
+
+    // Professor form
+    const profFormEl = document.getElementById('prof-event-form');
+    const profTypeEl = document.getElementById('prof-event-type');
+    const profTitleEl = document.getElementById('prof-title');
+    const profDescriptionEl = document.getElementById('prof-description');
+    const profRecurringEl = document.getElementById('prof-recurring');
+    const profRecurringFieldsEl = document.getElementById('prof-recurring-fields');
+    const profOnceFieldsEl = document.getElementById('prof-once-fields');
+    const profDaysContainer = document.getElementById('prof-days');
+    const profStartTimeEl = document.getElementById('prof-start-time');
+    const profEndTimeEl = document.getElementById('prof-end-time');
+    const profDeadlineEl = document.getElementById('prof-deadline');
+
+    // TL form
+    const tlFormEl = document.getElementById('tl-event-form');
+    const tlTypeEl = document.getElementById('tl-event-type');
+    const tlTitleEl = document.getElementById('tl-title');
+    const tlDescriptionEl = document.getElementById('tl-description');
+    const tlRecurringEl = document.getElementById('tl-recurring');
+    const tlRecurringFieldsEl = document.getElementById('tl-recurring-fields');
+    const tlOnceFieldsEl = document.getElementById('tl-once-fields');
+    const tlDaysContainer = document.getElementById('tl-days');
+    const tlStartTimeEl = document.getElementById('tl-start-time');
+    const tlEndTimeEl = document.getElementById('tl-end-time');
+    const tlStartEl = document.getElementById('tl-start');
+    const tlEndEl = document.getElementById('tl-end');
+    const tlDeadlineEl = document.getElementById('tl-deadline');
+
+    // Days of week UI helper
+    const DAYS = [
+      { label: 'Sun', value: 0 },
+      { label: 'Mon', value: 1 },
+      { label: 'Tue', value: 2 },
+      { label: 'Wed', value: 3 },
+      { label: 'Thu', value: 4 },
+      { label: 'Fri', value: 5 },
+      { label: 'Sat', value: 6 }
+    ];
+
+    function renderDayCheckboxes(container, namePrefix) {
+      container.innerHTML = '';
+      DAYS.forEach(d => {
+        const id = `${namePrefix}-${d.value}`;
+        const label = document.createElement('label');
+        label.htmlFor = id;
+
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.id = id;
+        input.value = d.value;
+
+        // Example default: Tue/Thu for prof, Wed for TL (set after render)
+        label.appendChild(input);
+        label.appendChild(document.createTextNode(d.label));
+        container.appendChild(label);
+      });
+    }
+
+    function getCheckedDays(container) {
+      const arr = [];
+      const inputs = container.querySelectorAll('input[type="checkbox"]');
+      inputs.forEach(inp => {
+        if (inp.checked) arr.push(parseInt(inp.value, 10));
+      });
+      return arr;
+    }
+
+    function setDefaultDays(container, values) {
+      const inputs = container.querySelectorAll('input[type="checkbox"]');
+      inputs.forEach(inp => {
+        inp.checked = values.includes(parseInt(inp.value, 10));
+      });
+    }
+
+    // Fetch helper with currentUser header
+    async function apiFetch(path, options = {}) {
+      const headers = options.headers || {};
+      if (currentUser) {
+        headers['X-User-Id'] = String(currentUser.id);
+      }
+      headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+      const res = await fetch(API_BASE + path, {
+        ...options,
+        headers
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`HTTP ${res.status}: ${text}`);
+      }
+      return res.json();
+    }
+
+    // Initialize users dropdown
+    async function initUsers() {
+      const list = await apiFetch('/api/users', { headers: { 'Content-Type': 'application/json' } });
+      userSelectEl.innerHTML = '';
+      list.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = `${u.name} (${u.role})`;
+        userSelectEl.appendChild(opt);
+      });
+
+      // default to first user
+      currentUser = list[0];
+      userSelectEl.value = currentUser.id;
+      updateUserUI();
+    }
+
+    function updateUserUI() {
+      if (!currentUser) return;
+      userInfoEl.textContent =
+        `Logged in as ${currentUser.name} – role: ${currentUser.role}` +
+        (currentUser.teamId ? ` (Team ${currentUser.teamId})` : '');
+
+      professorToolsEl.style.display = currentUser.role === 'professor' ? '' : 'none';
+      tlToolsEl.style.display = currentUser.role === 'team_leader' ? '' : 'none';
+
+      // Notes writing: all roles can write for now, you can restrict to students/TL if needed
+      noteSubmitEl.disabled = currentEvent === null;
+    }
+
+    // Init calendar
+    function initCalendar() {
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'timeGridWeek',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        slotMinTime: '08:00:00',
+        slotMaxTime: '22:00:00',
+        nowIndicator: true,
+        selectable: false,
+        editable: false, // IMPORTANT: students cannot change calendar
+        eventClick: onEventClick,
+        eventDidMount: (info) => {
+          // Add type pill to event element for quick visual (creative touch)
+          const type = info.event.extendedProps.type;
+          if (!type) return;
+          const pill = document.createElement('span');
+          pill.classList.add('pill');
+          if (type === 'class') pill.classList.add('pill-class');
+          if (type === 'assignment') pill.classList.add('pill-assignment');
+          if (type === 'meeting') pill.classList.add('pill-meeting');
+          if (type === 'task') pill.classList.add('pill-task');
+          pill.textContent = type;
+          pill.style.marginRight = '4px';
+
+          const titleEl = info.el.querySelector('.fc-event-title');
+          if (titleEl && !titleEl.dataset.typePillAdded) {
+            titleEl.prepend(pill);
+            titleEl.dataset.typePillAdded = 'true';
+          }
+
+          // If assignment with deadline, show small suffix in title
+          if (type === 'assignment' && info.event.extendedProps.deadline) {
+            const DlSpan = document.createElement('span');
+            DlSpan.style.fontSize = '10px';
+            DlSpan.style.marginLeft = '4px';
+            DlSpan.textContent = '(deadline)';
+            titleEl && titleEl.appendChild(DlSpan);
+          }
+        }
+      });
+
+      calendar.render();
+    }
+
+    // Load events from backend and put into calendar
+    async function loadEvents() {
+      if (!calendar || !currentUser) return;
+      const events = await apiFetch('/api/events');
+      calendar.removeAllEvents();
+
+      events.forEach(ev => {
+        const calendarEvent = {
+          id: String(ev.id),
+          title: ev.title,
+          description: ev.description,
+          type: ev.type,
+          scope: ev.scope,
+          teamId: ev.teamId,
+          deadline: ev.deadline
+        };
+
+        if (ev.isRecurring) {
+          calendarEvent.daysOfWeek = ev.daysOfWeek;
+          calendarEvent.startTime = ev.startTime;
+          calendarEvent.endTime = ev.endTime;
+        } else {
+          calendarEvent.start = ev.start;
+          calendarEvent.end = ev.end;
+        }
+
+        // Different colors for course vs team scope
+        if (ev.scope === 'course') {
+          calendarEvent.backgroundColor = '#bbdefb';
+          calendarEvent.borderColor = '#1976d2';
+        } else {
+          calendarEvent.backgroundColor = '#c8e6c9';
+          calendarEvent.borderColor = '#2e7d32';
+        }
+
+        calendar.addEvent(calendarEvent);
+      });
+    }
+
+    // When an event is clicked, show notes panel
+    async function onEventClick(info) {
+      currentEvent = info.event;
+      updateNotesHeader();
+      await loadNotes();
+      noteSubmitEl.disabled = false;
+    }
+
+    function updateNotesHeader() {
+      if (!currentEvent) {
+        notesPanelTitleEl.textContent = 'Click a class / meeting to write notes.';
+        return;
+      }
+      const type = currentEvent.extendedProps.type;
+      const scope = currentEvent.extendedProps.scope;
+      const parts = [];
+      if (type) parts.push(type.toUpperCase());
+      if (scope === 'course') parts.push('COURSE');
+      if (scope === 'team') parts.push('TEAM');
+      const context = parts.length ? ` [${parts.join(' · ')}]` : '';
+      notesPanelTitleEl.textContent = `${currentEvent.title}${context}`;
+    }
+
+    // Load notes for current event
+    async function loadNotes() {
+      if (!currentEvent || !currentUser) {
+        notesListEl.innerHTML = '<div class="muted">No event selected.</div>';
+        return;
+      }
+
+      const eventId = currentEvent.id;
+      try {
+        const data = await apiFetch(`/api/events/${eventId}/notes`);
+        if (!data.length) {
+          notesListEl.innerHTML =
+            '<div class="muted">No notes yet. Be the first version of yourself who takes notes ✏️</div>';
+          return;
+        }
+
+        notesListEl.innerHTML = '';
+        data.forEach(n => {
+          const div = document.createElement('div');
+          div.classList.add('note-item');
+
+          const ts = document.createElement('div');
+          ts.classList.add('note-timestamp');
+          const d = new Date(n.createdAt);
+          ts.textContent = d.toLocaleString();
+
+          const content = document.createElement('div');
+          content.textContent = n.content;
+
+          div.appendChild(ts);
+          div.appendChild(content);
+          notesListEl.appendChild(div);
+        });
+      } catch (err) {
+        notesListEl.innerHTML = `<div class="muted">Error loading notes: ${err.message}</div>`;
+      }
+    }
+
+    // Submit note
+    notesFormEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentEvent || !currentUser) return;
+      const text = noteContentEl.value.trim();
+      if (!text) return;
+      try {
+        await apiFetch(`/api/events/${currentEvent.id}/notes`, {
+          method: 'POST',
+          body: JSON.stringify({ content: text })
+        });
+        noteContentEl.value = '';
+        await loadNotes();
+      } catch (err) {
+        alert('Error adding note: ' + err.message);
+      }
+    });
+
+    // Professor form behavior
+    profRecurringEl.addEventListener('change', () => {
+      const isRec = profRecurringEl.checked;
+      profRecurringFieldsEl.style.display = isRec ? '' : 'none';
+      profOnceFieldsEl.style.display = isRec ? 'none' : '';
+    });
+
+    profTypeEl.addEventListener('change', () => {
+      const type = profTypeEl.value;
+      if (type === 'class') {
+        profRecurringEl.checked = true;
+        profRecurringEl.disabled = true;
+        profRecurringFieldsEl.style.display = '';
+        profOnceFieldsEl.style.display = 'none';
+      } else {
+        profRecurringEl.disabled = false;
+      }
+    });
+
+    profFormEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser || currentUser.role !== 'professor') return;
+
+      const type = profTypeEl.value;
+      const title = profTitleEl.value.trim();
+      const description = profDescriptionEl.value.trim();
+      const isRecurring = profRecurringEl.checked;
+
+      if (!title) {
+        alert('Title is required.');
+        return;
+      }
+
+      const payload = {
+        type,
+        title,
+        description,
+        isRecurring
+      };
+
+      if (isRecurring) {
+        const days = getCheckedDays(profDaysContainer);
+        if (!days.length) {
+          alert('Pick at least one day of week for the class.');
+          return;
+        }
+        payload.daysOfWeek = days;
+        payload.startTime = profStartTimeEl.value || '17:00';
+        payload.endTime = profEndTimeEl.value || '18:20';
+      } else {
+        const dl = profDeadlineEl.value;
+        if (!dl) {
+          alert('Deadline is required for non-recurring assignment.');
+          return;
+        }
+        payload.start = dl;
+        payload.end = dl;
+        payload.deadline = dl;
+      }
+
+      try {
+        await apiFetch('/api/events', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        profTitleEl.value = '';
+        profDescriptionEl.value = '';
+        await loadEvents();
+      } catch (err) {
+        alert('Error creating event: ' + err.message);
+      }
+    });
+
+    // Team leader form behavior
+    tlRecurringEl.addEventListener('change', () => {
+      const isRec = tlRecurringEl.checked;
+      tlRecurringFieldsEl.style.display = isRec ? '' : 'none';
+      tlOnceFieldsEl.style.display = isRec ? 'none' : '';
+    });
+
+    tlFormEl.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!currentUser || currentUser.role !== 'team_leader') return;
+
+      const type = tlTypeEl.value;
+      const title = tlTitleEl.value.trim();
+      const description = tlDescriptionEl.value.trim();
+      const isRecurring = tlRecurringEl.checked;
+
+      if (!title) {
+        alert('Title is required.');
+        return;
+      }
+
+      const payload = {
+        type,
+        title,
+        description,
+        isRecurring
+      };
+
+      if (isRecurring) {
+        const days = getCheckedDays(tlDaysContainer);
+        if (!days.length) {
+          alert('Pick at least one day of week.');
+          return;
+        }
+        payload.daysOfWeek = days;
+        payload.startTime = tlStartTimeEl.value || '18:00';
+        payload.endTime = tlEndTimeEl.value || '19:00';
+      } else {
+        const start = tlStartEl.value;
+        const end = tlEndEl.value;
+        if (!start || !end) {
+          alert('Start and end are required for non-recurring events.');
+          return;
+        }
+        payload.start = start;
+        payload.end = end;
+        if (tlDeadlineEl.value) {
+          payload.deadline = tlDeadlineEl.value;
+        }
+      }
+
+      try {
+        await apiFetch('/api/events', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        tlTitleEl.value = '';
+        tlDescriptionEl.value = '';
+        await loadEvents();
+      } catch (err) {
+        alert('Error creating event: ' + err.message);
+      }
+    });
+
+    // User change
+    userSelectEl.addEventListener('change', async () => {
+      const id = parseInt(userSelectEl.value, 10);
+      const list = await apiFetch('/api/users');
+      currentUser = list.find(u => u.id === id) || list[0];
+      updateUserUI();
+      currentEvent = null;
+      updateNotesHeader();
+      noteContentEl.value = '';
+      noteSubmitEl.disabled = true;
+      notesListEl.innerHTML = '<div class="muted">No event selected.</div>';
+      await loadEvents();
+    });
+
+    // Initialize all
+    (async function init() {
+      // Setup day checkboxes
+      renderDayCheckboxes(profDaysContainer, 'prof-day');
+      renderDayCheckboxes(tlDaysContainer, 'tl-day');
+      setDefaultDays(profDaysContainer, [2, 4]); // Tue/Thu
+      setDefaultDays(tlDaysContainer, [3]);      // Wed
+
+      initCalendar();
+      await initUsers();
+      await loadEvents();
+    })();
+  </script>
+</body>
+</html>
