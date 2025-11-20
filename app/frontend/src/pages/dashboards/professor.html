@@ -38,7 +38,7 @@
                 <div class="card-content">
                     <h2>Class Directory</h2>
                     <p>View and manage all staff and student class information.</p>
-                    <button class="card-btn">Open</button>
+                    <button class="card-btn" id="viewClassBtn">Open</button>
                 </div>
             </article>
 
@@ -70,6 +70,11 @@
     <script>
         document.getElementById('viewTeamsBtn').addEventListener('click', function() {
             window.location.href = '/team_card/team_card.html';
+        });
+    </script>
+    <script>
+        document.getElementById('viewClassBtn').addEventListener('click', function() {
+            window.location.href = '/class_directory/class_directory.html';
         });
     </script>
     <script>

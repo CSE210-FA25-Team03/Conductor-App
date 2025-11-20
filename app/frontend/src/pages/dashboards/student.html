@@ -35,8 +35,8 @@
                 <div class="card-icon">📘</div>
                 <div class="card-content">
                     <h2>Class Directory</h2>
-                    <p>View and manage all staff and student class information.</p>
-                    <button class="card-btn">Open</button>
+                    <p>Browse staff info, deadlines, and team assignments.</p>
+                    <button id="viewClassDirectoryBtn" class="card-btn">Open</button>
                 </div>
             </article>
 
@@ -78,6 +78,11 @@
         <script>
             document.getElementById('viewTasksBtn').addEventListener('click', function() {
             window.location.href = '/task_tracker/task_tracker.html';
+            });
+        </script>
+        <script>
+            document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
+                window.location.href = '/class_directory_student/class_directory_student.html';
             });
         </script>
         <script>

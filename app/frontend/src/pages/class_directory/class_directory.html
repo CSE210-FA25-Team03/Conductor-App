@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Staff Class Directory</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
 </head>
 <body>
     <header>
@@ -16,31 +17,88 @@
         </div>
     </header>
 
-    <main class="container">
+    <main class="page-layout">
+        <section class="class-summary card">
+            <div class="summary-text">
+                <p class="summary-eyebrow">Class Overview</p>
+                <h3 id="summaryTitle">Course Snapshot</h3>
+                <p id="courseDescription" class="summary-body">
+                    Welcome to your staff directory. Use this space to highlight expectations, logistics, or quick reminders for the course.
+                </p>
+            </div>
+            <div class="summary-tags">
+                <div class="summary-tag">
+                    <span class="tag-label">Current Term</span>
+                    <strong id="summaryTerm">--</strong>
+                </div>
+                <div class="summary-tag">
+                    <span class="tag-label">Support Staff</span>
+                    <strong id="summaryStaffCount">0</strong>
+                </div>
+            </div>
+        </section>
 
-        <!-- Left Panel: Staff & TAs -->
-        <section class="left-panel">
+        <section class="calendar-section card">
+            <div class="calendar-header">
+                <div>
+                    <h3>Course Calendar</h3>
+                    <p>Canvas-style deadlines with quick add/remove support.</p>
+                </div>
+                <button id="addGoogleCalBtn" class="google-btn">Add to Google Calendar</button>
+            </div>
 
+            <div id="calendar"></div>
+
+            <div class="event-management">
+                <form id="eventForm" class="event-form">
+                    <h4>Add Deadline</h4>
+                    <label for="eventTitle">Title</label>
+                    <input type="text" id="eventTitle" placeholder="e.g., HW3 Draft" required>
+
+                    <label for="eventDescription">Details</label>
+                    <textarea id="eventDescription" rows="3" placeholder="Optional context"></textarea>
+
+                    <label for="eventDueDate">Due Date</label>
+                    <input type="datetime-local" id="eventDueDate" required>
+
+                    <button type="submit">Save Event</button>
+                </form>
+
+                <div class="event-list">
+                    <div class="card-heading">
+                        <h4>Upcoming Deadlines</h4>
+                        <span class="card-subtitle">Tap calendar items to view/delete</span>
+                    </div>
+                    <div id="eventsList" class="event-items"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="directory-section">
             <!-- Instructor Info Block -->
-            <div class="card">
-                <div class="card-heading">
-                    <h3>Instructor Info</h3>
-                    <span class="card-subtitle">Loaded from /api/class_directory</span>
+            <div class="card staff-card">
+                <div class="card-heading with-actions">
+                    <div>
+                        <h3>Instructor Info</h3>
+                        <span class="card-subtitle">Loaded from /api/class_directory</span>
+                    </div>
+                    <button type="button" class="ghost-btn" data-open-form="instructor">+ Add</button>
                 </div>
 
                 <div id="instructorsList" class="staff-list"></div>
 
-                <form id="instructorForm" class="staff-form">
-                    <div class="avatar-block">
-                        <div class="avatar"></div>
-                        <input type="file" class="avatar-input" accept="image/*">
+                <form id="instructorForm" class="staff-form hidden">
+                    <div class="form-title">
+                        <h4 id="instructorFormTitle">Add Instructor</h4>
+                        <p>Provide details for the instructional lead.</p>
                     </div>
+                    <input type="hidden" id="instructorId">
+
+                    <label for="instructorPicture">Photo URL</label>
+                    <input type="text" id="instructorPicture" placeholder="/assets/logo/user.png">
+
                     <label for="instructorName">Full Name</label>
                     <input type="text" id="instructorName" placeholder="e.g., Prof. Doe" required>
-
-                    <label>Audio Pronunciation</label>
-                    <button type="button" class="small-btn" disabled>Play</button>
-                    <button type="button" class="small-btn" disabled>Upload/Record</button>
 
                     <label for="instructorPronoun">Pronouns</label>
                     <input type="text" id="instructorPronoun" placeholder="she/her">
@@ -49,35 +107,42 @@
                     <input type="email" id="instructorEmail" placeholder="name@ucsd.edu">
 
                     <label for="instructorContact">Contact</label>
-                    <input type="text" id="instructorContact">
+                    <input type="text" id="instructorContact" placeholder="Slack, phone, etc.">
 
                     <label for="instructorAvailability">Availability</label>
                     <input type="text" id="instructorAvailability" placeholder="Mon/Wed 2-4pm">
 
-                    <button type="submit" id="addInstructorBtn">Add Instructor</button>
+                    <div class="form-actions">
+                        <button type="button" class="ghost-btn" data-cancel-form="instructor">Cancel</button>
+                        <button type="submit">Save Instructor</button>
+                    </div>
                 </form>
             </div>
 
             <!-- Add TA Section -->
-            <div class="card">
-                <div class="card-heading">
-                    <h3>TA Info</h3>
-                    <span class="card-subtitle">Updated via /api/class-directory/tas</span>
+            <div class="card staff-card">
+                <div class="card-heading with-actions">
+                    <div>
+                        <h3>TA Info</h3>
+                        <span class="card-subtitle">Updated via /api/class-directory/tas</span>
+                    </div>
+                    <button type="button" class="ghost-btn" data-open-form="ta">+ Add</button>
                 </div>
 
                 <div id="tasList" class="staff-list"></div>
 
-                <form id="taForm" class="staff-form">
-                    <div class="avatar-block">
-                        <div class="avatar"></div>
-                        <input type="file" class="avatar-input" accept="image/*">
+                <form id="taForm" class="staff-form hidden">
+                    <div class="form-title">
+                        <h4 id="taFormTitle">Add Teaching Assistant</h4>
+                        <p>Log office hours, contact details, and support scope.</p>
                     </div>
+                    <input type="hidden" id="taId">
+
+                    <label for="taPicture">Photo URL</label>
+                    <input type="text" id="taPicture" placeholder="/assets/logo/user.png">
+
                     <label for="taName">Full Name</label>
                     <input type="text" id="taName" placeholder="e.g., Sam TA" required>
-
-                    <label>Audio Pronunciation</label>
-                    <button type="button" class="small-btn" disabled>Play</button>
-                    <button type="button" class="small-btn" disabled>Upload/Record</button>
 
                     <label for="taPronoun">Pronouns</label>
                     <input type="text" id="taPronoun" placeholder="they/them">
@@ -86,77 +151,86 @@
                     <input type="email" id="taEmail" placeholder="ta@ucsd.edu">
 
                     <label for="taContact">Contact</label>
-                    <input type="text" id="taContact">
+                    <input type="text" id="taContact" placeholder="Zoom, Discord, etc.">
 
                     <label for="taAvailability">Availability</label>
                     <input type="text" id="taAvailability" placeholder="Office hours TBD">
 
-                    <div class="card team-card">
-                        <h4>Teams Covered</h4>
-                        <div id="teamsList" class="team-list"></div>
+                    <div class="form-actions">
+                        <button type="button" class="ghost-btn" data-cancel-form="ta">Cancel</button>
+                        <button type="submit">Save TA</button>
                     </div>
-
-                    <button type="submit" id="addTaBtn">Add TA</button>
                 </form>
             </div>
 
             <!-- Add Tutor Section -->
-            <div class="card">
-                <div class="card-heading">
-                    <h3>Tutor Info</h3>
-                    <span class="card-subtitle">Updated via /api/class-directory/tutors</span>
+            <div class="card staff-card">
+                <div class="card-heading with-actions">
+                    <div>
+                        <h3>Tutor Info</h3>
+                        <span class="card-subtitle">Updated via /api/class-directory/tutors</span>
+                    </div>
+                    <button type="button" class="ghost-btn" data-open-form="tutor">+ Add</button>
                 </div>
 
                 <div id="tutorsList" class="staff-list"></div>
 
-                <form id="tutorForm" class="staff-form">
-                    <div class="avatar-block">
-                        <div class="avatar"></div>
-                        <input type="file" class="avatar-input" accept="image/*">
+                <form id="tutorForm" class="staff-form hidden">
+                    <div class="form-title">
+                        <h4 id="tutorFormTitle">Add Tutor</h4>
+                        <p>Capture specialities and meeting details.</p>
                     </div>
+                    <input type="hidden" id="tutorId">
+
+                    <label for="tutorPicture">Photo URL</label>
+                    <input type="text" id="tutorPicture" placeholder="/assets/logo/user.png">
+
                     <label for="tutorName">Full Name</label>
                     <input type="text" id="tutorName" placeholder="e.g., Taylor Tutor" required>
 
-                    <label>Audio Pronunciation</label>
-                    <button type="button" class="small-btn" disabled>Play</button>
-                    <button type="button" class="small-btn" disabled>Upload/Record</button>
-
                     <label for="tutorPronoun">Pronouns</label>
-                    <input type="text" id="tutorPronoun">
+                    <input type="text" id="tutorPronoun" placeholder="they/them">
 
                     <label for="tutorEmail">Email</label>
                     <input type="email" id="tutorEmail" placeholder="tutor@ucsd.edu">
 
                     <label for="tutorContact">Contact</label>
-                    <input type="text" id="tutorContact">
+                    <input type="text" id="tutorContact" placeholder="Communication channel">
 
                     <label for="tutorAvailability">Availability</label>
-                    <input type="text" id="tutorAvailability">
+                    <input type="text" id="tutorAvailability" placeholder="Weekly shifts">
 
-                    <button type="submit" id="addTutorBtn">Add Tutor</button>
+                    <div class="form-actions">
+                        <button type="button" class="ghost-btn" data-cancel-form="tutor">Cancel</button>
+                        <button type="submit">Save Tutor</button>
+                    </div>
                 </form>
             </div>
 
-        </section>
+            <!-- Team Section -->
+            <div class="card">
+                <div class="card-heading">
+                    <h3>Teams</h3>
+                    <span class="card-subtitle">Synced with /api/class-directory/teams</span>
+                </div>
 
-        <!-- Course Calendar (Right Panel) -->
-        <section class="calendar-panel card">
-            <h3>Course Calendar</h3>
-            <table class="calendar-table">
-                <tr>
-                    <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th>
-                </tr>
-                <tr>
-                    <td></td><td></td>
-                    <td>LAB<br>3–5PM</td>
-                    <td></td><td>10AM</td>
-                </tr>
-            </table>
-            <button id="addGoogleCalBtn" class="google-btn">Add to Google Calendar</button>
-        </section>
+                <div id="teamsList" class="team-list"></div>
 
+                <form id="teamForm" class="team-form">
+                    <h4>Add Team</h4>
+                    <label for="teamNumberInput">Team Number</label>
+                    <input type="text" id="teamNumberInput" placeholder="e.g., 12" required>
+
+                    <label for="teamNameInput">Team Name</label>
+                    <input type="text" id="teamNameInput" placeholder="e.g., Quantum Cats" required>
+
+                    <button type="submit">Add Team</button>
+                </form>
+            </div>
+        </section>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
