@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Group Formation Settings - Professor</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 0 10px;
+    }
+    h1, h2, h3 {
+      margin-bottom: 5px;
+    }
+    .card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 15px;
+      border-radius: 4px;
+    }
+    label {
+      display: block;
+      margin-top: 8px;
+    }
+    input[type="text"], input[type="number"] {
+      width: 200px;
+      padding: 4px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+    th, td {
+      padding: 6px;
+      text-align: left;
+      font-size: 14px;
+    }
+    .groups-container {
+      margin-top: 20px;
+    }
+    .group-card {
+      border: 1px solid #aaa;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+    }
+    .error {
+      color: red;
+      margin-top: 5px;
+    }
+    .small {
+      font-size: 12px;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <h1>Group Formation Settings (Professor)</h1>
+
+  <p class="small">
+    1. Define skills/tags and their priorities (weights).<br />
+    2. Students go to <code>/student</code> to self-rate.<br />
+    3. Come back here and click "Generate Groups".
+  </p>
+
+  <div class="card">
+    <h2>Define Skills / Tags</h2>
+    <form id="skillForm">
+      <label>
+        Skill name:
+        <input type="text" id="skillName" required />
+      </label>
+      <label>
+        Priority weight (1–10):
+        <input type="number" id="skillWeight" min="1" max="10" value="5" required />
+      </label>
+      <button type="submit">Add Skill</button>
+      <div id="skillError" class="error"></div>
+    </form>
+
+    <h3>Current Skills &amp; Priorities</h3>
+    <table id="skillsTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Skill</th>
+          <th>Weight</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Students Overview</h2>
+    <p class="small">These are the students who have already rated themselves.</p>
+    <table id="studentsTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Ratings (Skill: Level)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Generate Groups</h2>
+    <label>
+      Group size:
+      <input type="number" id="groupSize" value="4" min="1" />
+    </label>
+    <button id="generateGroupsBtn">Generate Groups</button>
+    <div id="groupError" class="error"></div>
+  </div>
+
+  <div class="groups-container" id="groupsContainer">
+    <h2>Generated Groups</h2>
+    <div id="groupsOutput"></div>
+  </div>
+
+  <script>
+    async function fetchSkills() {
+      const res = await fetch("/api/skills");
+      return res.json();
+    }
+
+    async function fetchStudents() {
+      const res = await fetch("/api/students");
+      return res.json();
+    }
+
+    function renderSkills(skills) {
+      const tbody = document.querySelector("#skillsTable tbody");
+      tbody.innerHTML = "";
+      skills.forEach((skill, idx) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${skill.name}</td>
+          <td>${skill.weight}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderStudents(students) {
+      const tbody = document.querySelector("#studentsTable tbody");
+      tbody.innerHTML = "";
+      students.forEach((student, idx) => {
+        const ratingsText = Object.entries(student.ratings || {})
+          .map(([skill, level]) => `${skill}: ${level}`)
+          .join(", ");
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${student.name}</td>
+          <td>${ratingsText}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderGroups(data) {
+      const container = document.getElementById("groupsOutput");
+      container.innerHTML = "";
+
+      if (!data || !data.groups || data.groups.length === 0) {
+        container.textContent = "No groups generated.";
+        return;
+      }
+
+      const header = document.createElement("p");
+      header.innerHTML = `
+        <strong>Summary:</strong>
+        ${data.totalStudents} students, ${data.totalGroups} groups, group size = ${data.groupSize}
+      `;
+      container.appendChild(header);
+
+      data.groups.forEach(group => {
+        const div = document.createElement("div");
+        div.className = "group-card";
+
+        const membersList = group.students
+          .map(
+            s =>
+              `${s.name} (id: ${s.id})`
+          )
+          .join("<br />");
+
+        const skillsLines = Object.entries(group.skillsScore || {})
+          .map(([skill, score]) => `${skill}: ${score}`)
+          .join("<br />");
+
+        div.innerHTML = `
+          <h3>Group ${group.id}</h3>
+          <p><strong>Members:</strong><br />${membersList || "(none)"}</p>
+          <p><strong>Total Score:</strong> ${group.totalScore}</p>
+          <p><strong>Per-skill Score:</strong><br />${skillsLines || "(no skills)"}</p>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // Initial load
+    async function init() {
+      const [skills, students] = await Promise.all([
+        fetchSkills(),
+        fetchStudents()
+      ]);
+      renderSkills(skills);
+      renderStudents(students);
+    }
+
+    // Add skill form
+    document.getElementById("skillForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const nameInput = document.getElementById("skillName");
+      const weightInput = document.getElementById("skillWeight");
+      const errorDiv = document.getElementById("skillError");
+      errorDiv.textContent = "";
+
+      const name = nameInput.value.trim();
+      const weight = weightInput.value;
+
+      if (!name) {
+        errorDiv.textContent = "Skill name is required.";
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/skills", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, weight })
+        });
+
+        if (!res.ok) {
+          const data = await res.json();
+          errorDiv.textContent = data.error || "Error adding skill.";
+          return;
+        }
+
+        nameInput.value = "";
+        weightInput.value = "5";
+
+        const updatedSkills = await fetchSkills();
+        renderSkills(updatedSkills);
+      } catch (err) {
+        console.error(err);
+        errorDiv.textContent = "Network error.";
+      }
+    });
+
+    // Generate groups
+    document
+      .getElementById("generateGroupsBtn")
+      .addEventListener("click", async () => {
+        const groupSizeInput = document.getElementById("groupSize");
+        const errorDiv = document.getElementById("groupError");
+        errorDiv.textContent = "";
+
+        const groupSize = Number(groupSizeInput.value) || 4;
+
+        try {
+          const res = await fetch("/api/form-groups", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ groupSize })
+          });
+
+          const data = await res.json();
+          if (!res.ok) {
+            errorDiv.textContent = data.error || "Error forming groups.";
+            return;
+          }
+
+          // refresh students (in case new ones arrived)
+          const students = await fetchStudents();
+          renderStudents(students);
+
+          renderGroups(data);
+        } catch (err) {
+          console.error(err);
+          errorDiv.textContent = "Network error.";
+        }
+      });
+
+    init();
+  </script>
+</body>
+</html>
