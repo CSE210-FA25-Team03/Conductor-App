@@ -2,7 +2,7 @@ name: Conductor CI/CD
 
 on:
   push:
-    branches: [ main, ci_cd ]
+    branches: [ ci_cd ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
