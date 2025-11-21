@@ -67,7 +67,7 @@
                     <div class="task-board">
 
                         <div class="task-column todo-col">
-                            <div class="column-title-label todo-label">To Do</div>
+                            <div class="column-title-label todo-label">Todo</div>
                             <div class="task-list"></div>
                             <button class="task-add-btn">+ New task</button>
                         </div>
@@ -100,8 +100,9 @@
             </div>
             
             <div style="margin-bottom:16px;">
-                <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Owner:</label>
-                <input type="text" id="githubOwner" placeholder="e.g., octocat" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Organization Name <span style="color:#d73a49;">*Required*</span>:</label>
+                <input type="text" id="githubOwner" placeholder="e.g., CSE210-FA25-Team03" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                <small style="color:#666; font-size:12px; display:block; margin-top:4px;">The GitHub organization name (for org projects) or username (for personal projects)</small>
             </div>
             
             <div style="margin-bottom:16px;">
@@ -110,9 +111,27 @@
             </div>
             
             <div style="margin-bottom:16px;">
-                <label style="display:block; margin-bottom:6px; font-weight:600;">Personal Access Token (optional):</label>
-                <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-                <small style="color:#666; font-size:12px;">Required for private repos. Create one at: github.com/settings/tokens</small>
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Project ID:</label>
+                <input type="text" id="githubProjectId" placeholder="e.g., 1" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                <small style="color:#666; font-size:12px;">Project number from your project URL (e.g., github.com/orgs/OWNER/projects/1 → number is 1)</small>
+            </div>
+            
+            <div style="margin-bottom:16px; padding:12px; background:#fff3cd; border-radius:6px; border-left:4px solid #ffc107;">
+                <strong style="display:block; margin-bottom:8px;">🔑 Personal Access Token:</strong>
+                <p style="margin:0; font-size:12px; color:#666;">
+                    Generate personal access token (classic). Need to select scopes of <code>repo</code>, <code>read:org</code> and <code>project</code>.<br>
+                    Set the token in your <code>.env</code> file as <code>GITHUB_TOKEN=your_token_here</code><br>
+                    Create token at: <a href="https://github.com/settings/tokens" target="_blank" style="color:#0366d6;">github.com/settings/tokens</a>
+                </p>
+            </div>
+            
+            <div style="margin-bottom:16px; padding:12px; background:#f6f8fa; border-radius:6px; border-left:4px solid #0366d6;">
+                <strong style="display:block; margin-bottom:8px;">💡 Troubleshooting Organization Access:</strong>
+                <ul style="margin:0; padding-left:20px; font-size:12px; color:#666;">
+                    <li>Ask your organization owner to enable "Personal access tokens" in organization settings</li>
+                    <li>Projects v2 (new GitHub Projects) are automatically detected and supported</li>
+                    <li>If issues persist, try using the repository's Issues API instead (leave Project ID empty)</li>
+                </ul>
             </div>
             
             <div id="githubConfigStatus" class="status-message" style="display:none; padding:12px; border-radius:6px; margin-bottom:16px;"></div>

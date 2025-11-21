@@ -50,5 +50,157 @@
     ],
     "progress": [],
     "done": []
+  },
+  "GitHub: CSE210-FA25-Team03/Conductor-App": {
+    "todo": [
+      {
+        "title": "Professor UI Flow Wireframes",
+        "badge": "medium",
+        "due": "Nov 11",
+        "assignee": "ansarav",
+        "githubIssueNumber": 2,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/2",
+        "githubState": "OPEN"
+      },
+      {
+        "title": "Login Page and User Wireframes",
+        "badge": "medium",
+        "due": "Nov 11",
+        "assignee": "ansarav",
+        "githubIssueNumber": 1,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/1",
+        "githubState": "OPEN"
+      },
+      {
+        "title": "TAs UI Flow Wireframes",
+        "badge": "medium",
+        "due": "Nov 11",
+        "assignee": "ansarav",
+        "githubIssueNumber": 4,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/4",
+        "githubState": "OPEN"
+      },
+      {
+        "title": "Google Authenciation",
+        "badge": "medium",
+        "due": "Nov 11",
+        "assignee": "Bobby-Zhu",
+        "githubIssueNumber": 11,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/11",
+        "githubState": "OPEN"
+      },
+      {
+        "title": "Work Journal UI implementation",
+        "badge": "medium",
+        "due": "Nov 24",
+        "assignee": "adityamelkote",
+        "githubIssueNumber": 36,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/36",
+        "githubState": "OPEN"
+      },
+      {
+        "title": "Add Assignee Priority Sorting + Highlight Assigned Tasks",
+        "badge": "medium",
+        "due": "Nov 24",
+        "assignee": "HanisPHY",
+        "githubIssueNumber": 45,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/45",
+        "githubState": "OPEN"
+      }
+    ],
+    "progress": [
+      {
+        "title": "CI/CD Pipeline",
+        "badge": "medium",
+        "due": "Nov 24",
+        "assignee": "abhishekdhakaab",
+        "githubIssueNumber": 23,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/23",
+        "githubState": "OPEN"
+      }
+    ],
+    "done": [
+      {
+        "title": "Evaluation Rubric",
+        "badge": "medium",
+        "due": "Nov 24",
+        "assignee": "dttran0",
+        "githubIssueNumber": 24,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/24",
+        "githubState": "CLOSED"
+      },
+      {
+        "title": "Students UI Flow Wireframes",
+        "badge": "medium",
+        "due": "Nov 11",
+        "assignee": "ansarav",
+        "githubIssueNumber": 3,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/3",
+        "githubState": "CLOSED"
+      },
+      {
+        "title": "Login Page Implementation",
+        "badge": "medium",
+        "due": "Nov 11",
+        "assignee": "dttran0",
+        "githubIssueNumber": 5,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/5",
+        "githubState": "CLOSED"
+      },
+      {
+        "title": "Homepage Dashboard",
+        "badge": "medium",
+        "due": "Nov 11",
+        "assignee": "adityamelkote",
+        "githubIssueNumber": 6,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/6",
+        "githubState": "CLOSED"
+      },
+      {
+        "title": "Team Card Backend",
+        "badge": "medium",
+        "due": "Nov 24",
+        "assignee": "cyang406",
+        "githubIssueNumber": 19,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/19",
+        "githubState": "CLOSED"
+      },
+      {
+        "title": "Implement Task Tracker Frontend & Dashboard Integration",
+        "badge": "medium",
+        "due": "Nov 24",
+        "assignee": "kkimmmi",
+        "githubIssueNumber": 20,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/20",
+        "githubState": "CLOSED"
+      },
+      {
+        "title": "Demo Database and backend flow",
+        "badge": "medium",
+        "due": "TBD",
+        "assignee": "None",
+        "githubIssueNumber": 22,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/22",
+        "githubState": "CLOSED"
+      },
+      {
+        "title": "Integration of GitHub API to team task tracker.",
+        "badge": "medium",
+        "due": "Nov 24",
+        "assignee": "HanisPHY",
+        "githubIssueNumber": 28,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/28",
+        "githubState": "CLOSED"
+      },
+      {
+        "title": "Technical Knowledge Sharing Presentation",
+        "badge": "medium",
+        "due": "Nov 24",
+        "assignee": "ansarav",
+        "githubIssueNumber": 47,
+        "githubUrl": "https://github.com/CSE210-FA25-Team03/Conductor-App/issues/47",
+        "githubState": "CLOSED"
+      }
+    ]
   }
 }

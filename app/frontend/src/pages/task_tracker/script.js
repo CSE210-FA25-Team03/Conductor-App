@@ -127,14 +127,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const testBtn = document.getElementById('testGitHubConnection');
     const statusDiv = document.getElementById('githubConfigStatus');
 
-    // Debug: Check if elements are found
-    console.log('GitHub modal elements:', {
-        modal: !!modal,
-        configBtn: !!configBtn,
-        syncBtn: !!syncBtn,
-        testBtn: !!testBtn,
-        statusDiv: !!statusDiv
-    });
 
     // Open modal
     if (configBtn) {
@@ -143,11 +135,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             const config = await loadGitHubConfig();
             document.getElementById('githubOwner').value = config.owner || '';
             document.getElementById('githubRepo').value = config.repo || '';
-            document.getElementById('githubToken').value = '';
+            document.getElementById('githubProjectId').value = config.projectId || '';
             statusDiv.className = 'status-message';
             statusDiv.style.display = 'none';
         });
     }
+
 
     // Close modal
     function closeModal() {
@@ -166,7 +159,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         saveBtn.addEventListener('click', async () => {
             const owner = document.getElementById('githubOwner').value.trim();
             const repo = document.getElementById('githubRepo').value.trim();
-            const token = document.getElementById('githubToken').value.trim();
+            const projectId = document.getElementById('githubProjectId').value.trim();
 
             if (!owner || !repo) {
                 statusDiv.className = 'status-message error';
@@ -176,11 +169,13 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
 
             try {
-                await saveGitHubConfig(owner, repo, token);
+                await saveGitHubConfig(owner, repo, projectId);
+                
                 statusDiv.className = 'status-message success';
-                statusDiv.textContent = 'Configuration saved successfully!';
+                statusDiv.textContent = `Configuration saved successfully!${projectId ? ` Project ID: ${projectId}` : ' (No Project ID set)'}`;
                 statusDiv.style.display = 'block';
             } catch (error) {
+                console.error('Error saving config:', error);
                 statusDiv.className = 'status-message error';
                 statusDiv.textContent = `Error: ${error.message}`;
                 statusDiv.style.display = 'block';
@@ -190,35 +185,28 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Test connection
     if (testBtn) {
-        console.log('Test button found, attaching click handler');
         testBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             e.stopPropagation();
             
             try {
-                console.log('Test connection button clicked');
-                
                 if (!statusDiv) {
-                    console.error('Status div not found!');
                     alert('Error: Status div not found. Please refresh the page.');
                     return;
                 }
                 
                 const ownerInput = document.getElementById('githubOwner');
                 const repoInput = document.getElementById('githubRepo');
-                const tokenInput = document.getElementById('githubToken');
+                const projectIdInput = document.getElementById('githubProjectId');
                 
                 if (!ownerInput || !repoInput) {
-                    console.error('Form inputs not found!');
                     alert('Error: Form inputs not found. Please refresh the page.');
                     return;
                 }
                 
                 const owner = ownerInput.value.trim();
                 const repo = repoInput.value.trim();
-                const token = tokenInput ? tokenInput.value.trim() : '';
-
-                console.log('Form values:', { owner, repo, token: token ? '***' : '' });
+                const projectId = projectIdInput ? projectIdInput.value.trim() : '';
 
                 if (!owner || !repo) {
                     statusDiv.className = 'status-message error';
@@ -227,13 +215,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                     return;
                 }
 
-                // Save config first
-                console.log('Saving GitHub config...');
+                // Save config first (including projectId)
                 try {
-                    await saveGitHubConfig(owner, repo, token);
-                    console.log('Config saved');
+                    await saveGitHubConfig(owner, repo, projectId);
                 } catch (saveError) {
-                    console.error('Error saving config:', saveError);
                     statusDiv.className = 'status-message error';
                     statusDiv.textContent = `Error saving config: ${saveError.message}`;
                     statusDiv.style.display = 'block';
@@ -244,9 +229,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 statusDiv.textContent = 'Testing connection...';
                 statusDiv.style.display = 'block';
 
-                console.log('Testing GitHub connection...');
-                const result = await testGitHubConnection(owner, repo, token);
-                console.log('Test result:', result);
+                const result = await testGitHubConnection();
                 
                 if (result && result.success) {
                     statusDiv.className = 'status-message success';
@@ -606,34 +589,27 @@ async function loadGitHubConfig() {
         return config;
     } catch (error) {
         console.error('Error loading GitHub config:', error);
-        return { owner: '', repo: '' };
+        return { owner: '', repo: '', projectId: '' };
     }
 }
 
-async function saveGitHubConfig(owner, repo, token) {
+async function saveGitHubConfig(owner, repo, projectId) {
     try {
-        console.log('Sending POST to /api/github/config with:', { owner, repo, token: token ? '***' : '' });
         const response = await fetch('/api/github/config', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ owner, repo, token })
+            body: JSON.stringify({ owner, repo, projectId: projectId || '' })
         });
-        
-        console.log('Response status:', response.status, response.statusText);
-        console.log('Response headers:', response.headers.get('content-type'));
         
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
             const text = await response.text();
-            console.error('Non-JSON response received:', text.substring(0, 200));
             throw new Error(`Server returned ${response.status}: Expected JSON but got ${contentType || 'unknown'}`);
         }
         
-        const result = await response.json();
-        console.log('Config save result:', result);
-        return result;
+        return await response.json();
     } catch (error) {
         console.error('Error saving GitHub config:', error);
         throw error;
@@ -642,6 +618,19 @@ async function saveGitHubConfig(owner, repo, token) {
 
 async function syncGitHubIssues() {
     try {
+        const config = await loadGitHubConfig();
+        
+        if (!config.projectId || config.projectId.trim() === '') {
+            const proceed = confirm(
+                'Project ID is not configured. Without it, tasks will not be placed in correct columns.\n\n' +
+                'The sync will use Issues API instead of Projects API.\n\n' +
+                'Do you want to continue anyway?'
+            );
+            if (!proceed) {
+                return;
+            }
+        }
+        
         const response = await fetch('/api/github/sync', {
             method: 'POST',
             headers: {
@@ -674,11 +663,16 @@ async function syncGitHubIssues() {
         });
         
         if (!githubStoryFound && stories.length > 0) {
-            // If no GitHub story found, just render the first story
             stories[0].click();
         }
         
-        alert(`Successfully synced ${result.synced} issues from GitHub!`);
+        const message = result.usedProjectsApi 
+            ? (result.usedProjectsV2 
+                ? `Successfully synced ${result.synced} items from GitHub Projects v2!`
+                : `Successfully synced ${result.synced} items from GitHub Projects v1!`)
+            : `Synced ${result.synced} issues from GitHub (using Issues API - Projects API not configured)`;
+        
+        alert(message);
     } catch (error) {
         console.error('Error syncing GitHub issues:', error);
         alert(`Error syncing GitHub issues: ${error.message}`);
@@ -687,17 +681,11 @@ async function syncGitHubIssues() {
 
 async function testGitHubConnection() {
     try {
-        console.log('Fetching GitHub issues from API...');
         const response = await fetch('/api/github/issues');
-        console.log('Response status:', response.status, response.statusText);
-        
         const data = await response.json();
-        console.log('Response data:', data);
         
         if (!response.ok) {
-            // Handle error response
             const errorMessage = data.message || data.error || `HTTP ${response.status}: ${response.statusText}`;
-            console.error('GitHub API error:', errorMessage);
             return { success: false, message: errorMessage };
         }
         
@@ -706,7 +694,7 @@ async function testGitHubConnection() {
         console.error('Error in testGitHubConnection:', error);
         return { 
             success: false, 
-            message: error.message || 'Failed to connect to GitHub API. Check console for details.' 
+            message: error.message || 'Failed to connect to GitHub API.' 
         };
     }
 }
