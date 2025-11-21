@@ -84,17 +84,19 @@
                 reachOutSelect.addEventListener('change', function() {
                     if (this.value === 'team_lead' || this.value === 'ta' || this.value === 'professor') {
                         reachOutMsg.style.display = '';
+                        reachOutMsg.required = true;
                     } else {
                         reachOutMsg.style.display = 'none';
                         reachOutMsg.value = '';
+                        reachOutMsg.required = false;
                     }
                 });
             </script>
             
 
             <div class="sentiment-options">
-                    <label><input type="radio" name="status" value="public"> Public</label>
-                    <label><input type="radio" name="status" value="private"> Private (Only visible to Staff)</label>
+                    <label><input type="radio" name="status" value="public" required> Public</label>
+                    <label><input type="radio" name="status" value="private" required> Private (Only visible to Staff)</label>
             </div>
 
             <button class="wj-btn" type="submit">Submit Journal Entry</button>
