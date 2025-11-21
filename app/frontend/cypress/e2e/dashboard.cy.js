@@ -23,7 +23,7 @@ describe("Student Dashboard UI", () => {
     // Check for specific card titles (case-insensitive)
     cy.contains("h2", "Class Directory", { matchCase: false }).should("exist");
     cy.contains("h2", "Task Tracker", { matchCase: false }).should("exist");
-    cy.contains("h2", "Meeting Notes", { matchCase: false }).should("exist");
+    cy.contains("h2", "Work Journal", { matchCase: false }).should("exist");
     cy.contains("h2", "Weekly Evaluation", { matchCase: false }).should("exist");
   });
 });
