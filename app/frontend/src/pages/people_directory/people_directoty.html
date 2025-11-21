@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+
+</head>
+<body>
+    <div class="directory-container">
+
+    <!-- TABS -->
+    <div class="tabs">
+        <button class="tab active" id="staffTab">Staff</button>
+        <button class="tab" id="studentsTab">Students</button>
+    </div>
+
+    <!-- STAFF VIEW (default visible) -->
+    <div id="staffView" class="tab-content active">
+
+        <section class="box-section">
+    <h2>Professors</h2>
+    <div class="content-box staff-card">
+
+        <!-- Row template 1 -->
+        <div class="staff-row">
+            <img src="https://via.placeholder.com/60" class="staff-photo">
+            <div class="staff-info">
+                <strong>Dr. Maria Morales</strong>
+                <div>Pronunciation: mah-REE-ah moh-RAHL-es</div>
+                <div>Pronouns: she/her</div>
+            </div>
+
+            <div class="staff-contact">
+                <div>Email: mmorales@ucsd.edu</div>
+                <div>Class Chat: Slack</div>
+                <div>Phone: (555) 234-1123</div>
+            </div>
+
+            <div class="staff-availability">
+                <div>General: M–F 10am–4pm</div>
+                <div>Specific: Tue/Thu 1–3pm</div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+        <section class="box-section">
+    <h2>TAs</h2>
+    <div class="content-box staff-card">
+
+        <!-- Dummy TA -->
+        <div class="staff-row">
+            <img src="https://via.placeholder.com/60" class="staff-photo">
+            <div class="staff-info">
+                <strong>Alex Kim</strong>
+                <div>Pronunciation: ah-leks keem</div>
+                <div>Pronouns: he/him</div>
+            </div>
+
+            <div class="staff-contact">
+                <div>Email: akim@ucsd.edu</div>
+                <div>Class Chat: TA Discord</div>
+                <div>Phone: (555) 442-9855</div>
+            </div>
+
+            <div class="staff-availability">
+                <div>General: Afternoons</div>
+                <div>Specific: Wed 4–6pm</div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+        <section class="box-section">
+    <h2>Tutors</h2>
+    <div class="content-box staff-card">
+
+        <!-- Dummy Tutor -->
+        <div class="staff-row">
+            <img src="https://via.placeholder.com/60" class="staff-photo">
+            <div class="staff-info">
+                <strong>Samira Lopez</strong>
+                <div>Pronunciation: suh-MEE-rah loh-PEZ</div>
+                <div>Pronouns: she/they</div>
+            </div>
+
+            <div class="staff-contact">
+                <div>Email: slopez@ucsd.edu</div>
+                <div>Class Chat: GroupMe</div>
+                <div>Phone: (555) 881-1903</div>
+            </div>
+
+            <div class="staff-availability">
+                <div>General: Evenings</div>
+                <div>Specific: Fri 3–5pm</div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+        <section class="box-section placeholder">
+            <h2>Activity (placeholder)</h2>
+            <div class="content-box light"></div>
+        </section>
+
+        <section class="box-section placeholder">
+            <h2>Attendance (placeholder)</h2>
+            <div class="content-box light"></div>
+        </section>
+    </div>
+
+    <!-- STUDENTS VIEW -->
+<div id="studentsView" class="tab-content">
+
+    <!-- Search + Filter Section -->
+    <section class="box-section">
+        <h2>Students</h2>
+
+        <!-- Search/filter wrapper -->
+        <div class="student-search-filter">
+
+            <!-- Search Box -->
+            <div class="student-search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search by Name or Group #" id="studentSearchInput">
+            </div>
+
+            <!-- Filter: Team leads only -->
+            <div class="teamlead-filter">
+                <label>
+                    <input type="checkbox" id="teamLeadToggle">
+                    Show only team leads
+                </label>
+            </div>
+
+        </div>
+
+        <!-- Directory results container -->
+        <div class="student-directory-box">
+            <!-- Placeholder for future student rows/cards -->
+       <div class="student-row" data-name="Priya Patel" data-group="4" data-teamlead="true">
+    Priya Patel — Group 4 — Team Lead
+</div>
+
+<div class="student-row" data-name="Jordan Reyes" data-group="4" data-teamlead="false">
+    Jordan Reyes — Group 4
+</div>
+
+<div class="student-row" data-name="Grace Lin" data-group="7" data-teamlead="true">
+    Grace Lin — Group 7 — Team Lead
+</div>
+
+<div class="student-row" data-name="Marco Diaz" data-group="2" data-teamlead="false">
+    Marco Diaz — Group 2
+</div>
+
+        </div>
+    </section>
+
+</div>
+
+
+</div>
+    <script src="script.js"></script>
+
+
+
+</body>
+</html>
