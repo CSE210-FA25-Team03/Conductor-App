@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "test": "node --test",
+    "test": "jest",
     "lint": "eslint .",
     "start": "node server.js",
     "docs": "jsdoc -c jsdoc.json"
@@ -21,6 +21,7 @@
     "@eslint/js": "^9.39.1",
     "eslint": "^9.39.1",
     "globals": "^16.5.0",
+    "jest": "^30.2.0",
     "jsdoc": "^4.0.5",
     "supertest": "^7.1.4"
   }

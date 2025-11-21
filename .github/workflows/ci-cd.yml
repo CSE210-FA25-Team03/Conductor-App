@@ -2,7 +2,7 @@ name: Conductor CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ ci_cd_clean ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -32,10 +32,10 @@ jobs:
         working-directory: app/backend
         run: npm run lint
 
-      - name: Run backend tests
+      - name: Run backend tests (Jest)
         working-directory: app/backend
         run: npm test
-        
+
       - name: Generate backend docs (JSDoc)
         working-directory: app/backend
         run: npm run docs
@@ -45,7 +45,13 @@ jobs:
         with:
           name: backend-jsdoc
           path: app/backend/docs
-
+          
+      - name: Run Codacy code quality (backend only)
+        uses: codacy/codacy-analysis-cli-action@v4
+        with:
+          api-token: ${{ secrets.CODACY_API_TOKEN }}
+          directory: ${{ github.workspace }}/app/backend
+          verbose: true
 
       # ---- Frontend: basic check ----
       - name: Check frontend files exist
@@ -60,6 +66,10 @@ jobs:
       - name: Run frontend lint
         working-directory: app/frontend
         run: npm run lint
+
+      - name: Run Cypress
+        working-directory: app/frontend
+        run: npm run cy:run
 
   # ========= CD: create deployment artifact =========
   deploy:
