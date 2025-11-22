@@ -63,15 +63,7 @@ function loadSkills() {
         </td>
       </tr>`;
   });
-// Delete skill handler
-skillsTableBody.addEventListener("click", function(e) {
-  if (e.target.closest(".delete-skill-btn")) {
-    const idx = Number(e.target.closest(".delete-skill-btn").dataset.index);
-    skills.splice(idx, 1);
-    localStorage.setItem("skills", JSON.stringify(skills));
-    loadSkills();
-  }
-});
+// Delete skill handler (moved outside loadSkills to avoid multiple bindings)
 }
 
 /* =======================================================
@@ -81,7 +73,22 @@ skillsTableBody.addEventListener("click", function(e) {
 function loadStudents() {
   studentsTableBody.innerHTML = "";
 
-  dummyStudents.forEach((s, i) => {
+  // Get submitted ratings from localStorage
+  const submitted = JSON.parse(localStorage.getItem('studentRatings')) || [];
+  // Merge dummyStudents and submitted ratings
+  const allStudents = [...dummyStudents];
+  submitted.forEach(sub => {
+    // If already in dummyStudents, update ratings
+    const idx = allStudents.findIndex(s => s.email === sub.email);
+    if (idx !== -1) {
+      allStudents[idx].ratings = sub.ratings;
+      allStudents[idx].name = sub.name;
+    } else {
+      allStudents.push({ id: allStudents.length + 1, name: sub.name, email: sub.email, ratings: sub.ratings });
+    }
+  });
+
+  allStudents.forEach((s, i) => {
     const ratingStr = Object.entries(s.ratings)
       .map(([skill, level]) => `${skill}: ${level}`)
       .join(", ");
