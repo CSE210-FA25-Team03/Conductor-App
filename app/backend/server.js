@@ -1,6 +1,9 @@
 // --- Group Formation Backend API ---
+const path = require('path');
+const fs = require('fs');
 const groupFormationPath = path.join(__dirname, 'data', 'group-formation.json');
 
+// ...existing code...
 function readGroupFormation() {
   if (!fs.existsSync(groupFormationPath)) {
     return { skills: [], studentRatings: [], teamLeadRatings: [] };
@@ -69,8 +72,8 @@ app.use('/group_formation/team_lead_group_form.html', (req, res) => {
  */
 // Basic Express server to serve static frontend and prepare for backend features
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
+// const path = require('path');
+// const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
