@@ -14,57 +14,57 @@ function writeGroupFormation(data) {
   fs.writeFileSync(groupFormationPath, JSON.stringify(data, null, 2), 'utf8');
 }
 
-// GET skills
-app.get('/api/group-formation/skills', (req, res) => {
-  const data = readGroupFormation();
-  res.json(data.skills || []);
-});
-// POST skills (replace all)
-app.post('/api/group-formation/skills', (req, res) => {
-  const data = readGroupFormation();
-  data.skills = req.body.skills || [];
-  writeGroupFormation(data);
-  res.json({ message: 'Skills updated', skills: data.skills });
-});
+// // GET skills
+// app.get('/api/group-formation/skills', (req, res) => {
+//   const data = readGroupFormation();
+//   res.json(data.skills || []);
+// });
+// // POST skills (replace all)
+// app.post('/api/group-formation/skills', (req, res) => {
+//   const data = readGroupFormation();
+//   data.skills = req.body.skills || [];
+//   writeGroupFormation(data);
+//   res.json({ message: 'Skills updated', skills: data.skills });
+// });
 
-// GET student ratings
-app.get('/api/group-formation/student-ratings', (req, res) => {
-  const data = readGroupFormation();
-  res.json(data.studentRatings || []);
-});
-// POST student rating (add or update)
-app.post('/api/group-formation/student-ratings', (req, res) => {
-  const data = readGroupFormation();
-  const { name, email, ratings } = req.body;
-  if (!email || !ratings) return res.status(400).json({ error: 'Missing email or ratings' });
-  data.studentRatings = (data.studentRatings || []).filter(s => s.email !== email);
-  data.studentRatings.push({ name, email, ratings });
-  writeGroupFormation(data);
-  res.json({ message: 'Student rating saved', student: { name, email, ratings } });
-});
+// // GET student ratings
+// app.get('/api/group-formation/student-ratings', (req, res) => {
+//   const data = readGroupFormation();
+//   res.json(data.studentRatings || []);
+// });
+// // POST student rating (add or update)
+// app.post('/api/group-formation/student-ratings', (req, res) => {
+//   const data = readGroupFormation();
+//   const { name, email, ratings } = req.body;
+//   if (!email || !ratings) return res.status(400).json({ error: 'Missing email or ratings' });
+//   data.studentRatings = (data.studentRatings || []).filter(s => s.email !== email);
+//   data.studentRatings.push({ name, email, ratings });
+//   writeGroupFormation(data);
+//   res.json({ message: 'Student rating saved', student: { name, email, ratings } });
+// });
 
-// GET team lead ratings
-app.get('/api/group-formation/team-lead-ratings', (req, res) => {
-  const data = readGroupFormation();
-  res.json(data.teamLeadRatings || []);
-});
-// POST team lead rating (add or update)
-app.post('/api/group-formation/team-lead-ratings', (req, res) => {
-  const data = readGroupFormation();
-  const { name, email, ratings } = req.body;
-  if (!email || !ratings) return res.status(400).json({ error: 'Missing email or ratings' });
-  data.teamLeadRatings = (data.teamLeadRatings || []).filter(s => s.email !== email);
-  data.teamLeadRatings.push({ name, email, ratings });
-  writeGroupFormation(data);
-  res.json({ message: 'Team lead rating saved', teamLead: { name, email, ratings } });
-});
-// Serve student and team lead group formation forms
-app.use('/group_formation/student_group_form.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/src/pages/group_formation/student_group_form.html'));
-});
-app.use('/group_formation/team_lead_group_form.html', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/src/pages/group_formation/team_lead_group_form.html'));
-});
+// // GET team lead ratings
+// app.get('/api/group-formation/team-lead-ratings', (req, res) => {
+//   const data = readGroupFormation();
+//   res.json(data.teamLeadRatings || []);
+// });
+// // POST team lead rating (add or update)
+// app.post('/api/group-formation/team-lead-ratings', (req, res) => {
+//   const data = readGroupFormation();
+//   const { name, email, ratings } = req.body;
+//   if (!email || !ratings) return res.status(400).json({ error: 'Missing email or ratings' });
+//   data.teamLeadRatings = (data.teamLeadRatings || []).filter(s => s.email !== email);
+//   data.teamLeadRatings.push({ name, email, ratings });
+//   writeGroupFormation(data);
+//   res.json({ message: 'Team lead rating saved', teamLead: { name, email, ratings } });
+// });
+// // Serve student and team lead group formation forms
+// app.use('/group_formation/student_group_form.html', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../frontend/src/pages/group_formation/student_group_form.html'));
+// });
+// app.use('/group_formation/team_lead_group_form.html', (req, res) => {
+//   res.sendFile(path.join(__dirname, '../frontend/src/pages/group_formation/team_lead_group_form.html'));
+// });
 /**
  * Backend entry point for our Conductor App.
  * Defines health check routes and initializes the Express server.
@@ -257,6 +257,60 @@ function mapGitHubIssueToTask(issue) {
     githubState: issue.state
   };
 }
+
+// team formation GET POST
+
+// GET skills
+app.get('/api/group-formation/skills', (req, res) => {
+  const data = readGroupFormation();
+  res.json(data.skills || []);
+});
+// POST skills (replace all)
+app.post('/api/group-formation/skills', (req, res) => {
+  const data = readGroupFormation();
+  data.skills = req.body.skills || [];
+  writeGroupFormation(data);
+  res.json({ message: 'Skills updated', skills: data.skills });
+});
+
+// GET student ratings
+app.get('/api/group-formation/student-ratings', (req, res) => {
+  const data = readGroupFormation();
+  res.json(data.studentRatings || []);
+});
+// POST student rating (add or update)
+app.post('/api/group-formation/student-ratings', (req, res) => {
+  const data = readGroupFormation();
+  const { name, email, ratings } = req.body;
+  if (!email || !ratings) return res.status(400).json({ error: 'Missing email or ratings' });
+  data.studentRatings = (data.studentRatings || []).filter(s => s.email !== email);
+  data.studentRatings.push({ name, email, ratings });
+  writeGroupFormation(data);
+  res.json({ message: 'Student rating saved', student: { name, email, ratings } });
+});
+
+// GET team lead ratings
+app.get('/api/group-formation/team-lead-ratings', (req, res) => {
+  const data = readGroupFormation();
+  res.json(data.teamLeadRatings || []);
+});
+// POST team lead rating (add or update)
+app.post('/api/group-formation/team-lead-ratings', (req, res) => {
+  const data = readGroupFormation();
+  const { name, email, ratings } = req.body;
+  if (!email || !ratings) return res.status(400).json({ error: 'Missing email or ratings' });
+  data.teamLeadRatings = (data.teamLeadRatings || []).filter(s => s.email !== email);
+  data.teamLeadRatings.push({ name, email, ratings });
+  writeGroupFormation(data);
+  res.json({ message: 'Team lead rating saved', teamLead: { name, email, ratings } });
+});
+// Serve student and team lead group formation forms
+app.use('/group_formation/student_group_form.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/src/pages/group_formation/student_group_form.html'));
+});
+app.use('/group_formation/team_lead_group_form.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/src/pages/group_formation/team_lead_group_form.html'));
+});
 
 // GET all teams
 app.get('/api/teams', async (req, res) => {
