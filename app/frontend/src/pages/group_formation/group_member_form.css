@@ -61,7 +61,7 @@ body {
 .primary-btn:hover {
     background: var(--accent-hover);
 }
-#skillsInputs {
+#skills-inputs {
     display: flex;
     flex-direction: column;
     gap: 1rem;

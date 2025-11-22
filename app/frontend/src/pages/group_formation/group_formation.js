@@ -2,7 +2,6 @@
    Dummy Data (fallback only)
 ======================================================= */
 
-const DEFAULT_SKILLS = [];
 
 const dummyStudents = [
   {
