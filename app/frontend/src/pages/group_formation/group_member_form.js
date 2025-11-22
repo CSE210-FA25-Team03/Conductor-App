@@ -1,5 +1,5 @@
 // Group Member Group Formation Form Logic
-const skillsInputsDiv = document.getElementById('skillsInputs');
+const skillsInputsDiv = document.getElementById('skills-inputs');
 const form = document.getElementById('memberSkillForm');
 const submitMessage = document.getElementById('submitMessage');
 const formTitle = document.getElementById('formTitle');

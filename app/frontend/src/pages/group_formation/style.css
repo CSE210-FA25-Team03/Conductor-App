@@ -70,7 +70,9 @@ body {
 
 .panel {
   background: var(--panel-bg);
+
   @media (max-width: 900px) {
+
     .container {
       width: 98%;
       padding: 0 0.5rem;
@@ -230,17 +232,6 @@ input {
   margin-bottom: 1rem;
 }
 
-.delete-skill-btn {
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 6px;
-    transition: background 0.2s, transform 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
 
 .delete-skill-btn:hover {
     background: rgba(211, 47, 47, 0.1);
