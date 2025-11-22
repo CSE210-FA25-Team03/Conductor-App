@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Class Directory</title>
+  <link rel="stylesheet" href="directory_style.css">
+</head>
+
+<body>
+
+  <header>
+    <a href="#">← Back</a>
+    <h2>CLASS DIRECTORY</h2>
+  </header>
+
+  
+  <form class="directory_form">
+
+<div class="top_row">
+    <fieldset class="course_info">
+      <legend>Course Information</legend>
+
+      <label for="course_title">Course Title</label>
+      <input type="text" id="course_title" name="course_title" value="CSE210">
+        <br>
+      <label for="course_term">Quarter / Semester</label>
+      <input type="text" id="course_term" name="course_term" value="FA25">
+    </fieldset>
+
+
+    <fieldset class="instructor_info">
+      <legend>Instructor Information</legend>
+
+      <label for="instructor_name">Name</label>
+      <input type="text" id="instructor_name" name="instructor_name" value="Thomas Powell">
+      <br>
+      <label for="instructor_email">Email</label>
+      <input type="email" id="instructor_email" name="instructor_email" value="xxx@ucsd.edu">
+    </fieldset>
+
+    
+</div>
+    <fieldset class="ta_info">
+      <legend>TA Information</legend>
+
+      <label for="ta_name">Name</label>
+      <input type="text" id="ta_name" name="ta_name" value="Sammed K">
+
+      <label for="ta_email">Email</label>
+      <input type="email" id="ta_email" name="ta_email" value="xxx@ucsd.edu">
+
+      <button type="button" class="staff_only add_ta_btn">+ Add new TA</button>
+    </fieldset>
+
+
+    <fieldset class="tutor_info">
+      <legend>Tutor Information</legend>
+
+      <label for="tutor_name">Name</label>
+      <input type="text" id="tutor_name" name="tutor_name" value="Andrew Pan">
+
+      <label for="tutor_email">Email</label>
+      <input type="email" id="tutor_email" name="tutor_email" value="xxx@ucsd.edu">
+
+      <button type="button" class="staff_only add_tutor_btn">+ Add new Tutor</button>
+    </fieldset>
+
+
+    <button type="submit" class="save_button">Save Directory</button>
+
+  </form>
+
+</body>
+</html>
