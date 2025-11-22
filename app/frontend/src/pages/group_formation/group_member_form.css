@@ -1,0 +1,102 @@
+:root {
+    --bg: #f5f5f7;
+    --panel-bg: rgba(255,255,255,0.96);
+    --border: #e2e2e7;
+    --radius: 14px;
+    --shadow: 0 6px 20px rgba(0,0,0,0.08);
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+}
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    color: #111;
+}
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    padding: 0.8rem 1.5rem 1.5rem;
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    margin-bottom: 2.2rem;
+}
+.brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #2a3a5e;
+}
+.brand span {
+    color: var(--accent);
+    font-weight: 700;
+}
+.container {
+    width: 90%;
+    max-width: 600px;
+    margin: auto;
+}
+.panel {
+    background: var(--panel-bg);
+    padding: 1.8rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border);
+}
+.primary-btn {
+    padding: 12px;
+    background: var(--accent);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+    width: 100%;
+    margin-top: 1.2rem;
+}
+.primary-btn:hover {
+    background: var(--accent-hover);
+}
+#skillsInputs {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.skill-row {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+.skill-label {
+    flex: 1;
+    font-weight: 500;
+}
+.skill-input {
+    width: 80px;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    font-size: 1rem;
+}
+
+.eval-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: rgba(100, 100, 100, 0.15); /* transparent grey button */
+    color: black;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.eval-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
