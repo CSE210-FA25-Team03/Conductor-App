@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eval Journal</title>
+    <link rel="stylesheet" href="style.css" />
+
+</head>
+<body>
+    <div class="eval-container">
+
+    <!-- HEADER -->
+    <section class="eval-header">
+        <h1>Eval Team #</h1>
+    </section>
+
+    <div class="eval-main">
+
+        <!-- LEFT COLUMN — ALL EVAL CARDS -->
+        <section class="eval-cards">
+            <h2>All Eval Cards (Group & Individual)</h2>
+            <div class="eval-cards-box">
+                <!-- placeholder -->
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN — NEW NOTE CREATION -->
+        <!-- ====== NEW EVALUATION PANEL ====== -->
+<aside class="new-eval">
+
+    <h3>New Eval Note</h3>
+
+    <!-- To: @student or @team -->
+    <div class="eval-field">
+        <label>To:</label>
+        <input type="text" placeholder="@student_or_team">
+    </div>
+
+    <!-- Time / Date -->
+    <div class="eval-field">
+        <label>Time / Date</label>
+        <div class="placeholder-box"></div>
+    </div>
+
+    <!-- Private Notes -->
+    <div class="eval-field">
+        <label>Private Notes</label>
+        <textarea placeholder="Private notes (only staff can see)"></textarea>
+    </div>
+
+    <!-- Public Notes -->
+    <div class="eval-field">
+        <label>Public Notes</label>
+        <textarea placeholder="Notes visible to student"></textarea>
+    </div>
+
+    <!-- ===== Sentiment Score ===== -->
+    <div class="sentiment-section">
+        <h4>Sentiment Score</h4>
+
+        <!-- OPTION A: EMOJI SELECT -->
+        <div class="emoji-select">
+            <span class="emoji-option"> =D </span>
+            <span class="emoji-option">- _-</span>
+            <span class="emoji-option"> :[ </span>
+        </div>
+
+        <!-- OPTION B: TOGGLE RUBRIC -->
+        <details class="rubric-toggle">
+            <summary>Use Rubric Instead</summary>
+
+            <div class="rubric-category">
+                <label>Independence & Leadership</label>
+                <input type="number" min="0" max="5" placeholder="0–5">
+            </div>
+
+            <div class="rubric-category">
+                <label>Technical Contributions</label>
+                <input type="number" min="0" max="5" placeholder="0–5">
+            </div>
+
+            <div class="rubric-category">
+                <label>Teamwork</label>
+                <input type="number" min="0" max="5" placeholder="0–5">
+            </div>
+
+            <div class="rubric-score-box">
+                <p>Total Score: <span>__ / 15</span></p>
+                <p>Mapped Emotion: <span>=D  / - _- /  :[</span></p>
+            </div>
+        </details>
+
+    </div>
+</aside>
+
+
+    </div>
+
+    <!-- BOTTOM SECTION — WORK JOURNALS -->
+    <section class="work-journals">
+        <h2>Recent Work Journals (Group / Individual)</h2>
+        <div class="work-journal-box">
+            <!-- placeholder -->
+        </div>
+    </section>
+
+</div>
+
+</body>
+</html>

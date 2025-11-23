@@ -1,0 +1,145 @@
+/* Container */
+.directory-container {
+    width: 95%;
+    margin: 20px auto;
+}
+
+/* TABS */
+.tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 0px;
+}
+
+.tab {
+    padding: 10px 20px;
+    background: #f3e5d0;
+    border: 1px solid #d1b48a;
+    border-radius: 10px 10px 0 0;
+    border-bottom: none;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.tab.active {
+    background: white;
+    font-weight: bold;
+}
+
+/* CONTENT AREA UNDER TABS */
+.tab-content {
+    display: none;
+    background: white;
+    border: 1px solid #d1b48a;
+    border-radius: 0 10px 10px 10px;
+    padding: 20px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Box sections */
+.box-section {
+    margin-bottom: 30px;
+    border: solid 1px red;
+}
+
+.box-section h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+/* Beige content boxes */
+.content-box {
+    background: #fdebd1;
+    padding: 20px;
+    border: 1px solid #d1b48a;
+    border-radius: 8px;
+    height: 150px;
+}
+
+/* Placeholder style */
+.content-box.light {
+    background: #f7f2eb;
+}
+
+
+/* Student section layout */
+.student-search-filter {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Search bar */
+.student-search-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    border: 1px solid #c9a373;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.student-search-box input {
+    width: 100%;
+    border: none;
+    outline: none;
+}
+
+/* Team lead filter */
+.teamlead-filter {
+    border: 1px solid #c9a373;
+    padding: 8px 12px;
+    background: #fff7ed;
+    border-radius: 8px;
+}
+
+/* Directory placeholder */
+.student-directory-box {
+    border: 1px solid #c9a373;
+    background: #f9e5c8;
+    height: 500px; /* placeholder */
+    border-radius: 8px;
+}
+
+
+/* Staff card layout */
+.staff-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* One row per staff member */
+.staff-row {
+    display: grid;
+    grid-template-columns: 70px 1fr 1fr 1fr;
+    gap: 20px;
+    padding: 10px;
+    background: #fffaf3;
+    border: 1px solid #d1b48a;
+    border-radius: 8px;
+}
+
+/* Staff photo */
+.staff-photo {
+    width: 100%;
+    height: 100%;
+    
+    object-fit: cover;
+}
+
+/* Info blocks */
+.staff-info,
+.staff-contact,
+.staff-availability {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 14px;
+}

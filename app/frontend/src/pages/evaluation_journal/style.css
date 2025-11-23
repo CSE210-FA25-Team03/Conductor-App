@@ -1,0 +1,177 @@
+/* Overall page container */
+.eval-container {
+    width: 95%;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+.eval-header {
+    background: #fde7c8;
+    padding: 20px;
+    border: 1px solid #d1b48a;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.eval-header h1 {
+    margin: 0;
+}
+
+/* MAIN GRID: left cards + right new-note column */
+.eval-main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* LEFT COLUMN */
+.eval-cards {
+    background: #fde7c8;
+    padding: 20px;
+    border: 1px solid #d1b48a;
+    border-radius: 8px;
+}
+
+.eval-cards-box {
+    background: #f9e5c8;
+    border: 1px solid #cfa97a;
+    height: 300px;      /* placeholder height */
+    border-radius: 8px;
+}
+
+/* RIGHT COLUMN (new eval note) */
+.new-eval {
+    background: #fde7c8;
+    padding: 20px;
+    border: 1px solid #d1b48a;
+    border-radius: 8px;
+}
+
+.new-eval-box {
+    background: #f9e5c8;
+    border: 1px solid #cfa97a;
+    height: 300px;      /* placeholder height */
+    border-radius: 8px;
+}
+
+/* BOTTOM: Work Journals */
+.work-journals {
+    background: #fde7c8;
+    padding: 20px;
+    border: 1px solid #d1b48a;
+    border-radius: 8px;
+}
+
+.work-journal-box {
+    background: #f9e5c8;
+    border: 1px solid #cfa97a;
+    height: 180px;      /* placeholder */
+    border-radius: 8px;
+}
+
+/* ============ NEW EVAL SIDEBAR ============ */
+
+.new-eval {
+    width: 280px;
+    background: #fdebd1;
+    border: 1px solid #d1b48a;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.new-eval h3 {
+    margin-bottom: 15px;
+}
+
+.eval-field {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+}
+
+.eval-field label {
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.eval-field input,
+.eval-field textarea {
+    border: 1px solid #c9a373;
+    padding: 8px;
+    border-radius: 6px;
+    background: white;
+}
+
+.eval-field textarea {
+    height: 60px;
+    resize: none;
+}
+
+.placeholder-box {
+    height: 35px;
+    border: 1px dashed #c9a373;
+    background: #fff7ed;
+    border-radius: 6px;
+}
+
+/* ============ SENTIMENT ============ */
+
+.sentiment-section {
+    margin-top: 20px;
+    padding-top: 10px;
+    border-top: 2px solid #d1b48a;
+}
+
+.sentiment-section h4 {
+    margin-bottom: 10px;
+}
+
+/* Emoji selection */
+.emoji-select {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.emoji-option {
+    font-size: 26px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+}
+
+.emoji-option:hover {
+    background: #fff2d9;
+    border-color: #d1b48a;
+}
+
+/* Rubric toggle */
+.rubric-toggle summary {
+    cursor: pointer;
+    padding: 6px 0;
+    font-weight: bold;
+}
+
+.rubric-category {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.rubric-category input {
+    padding: 6px;
+    border: 1px solid #c9a373;
+    border-radius: 6px;
+    width: 80px;
+}
+
+.rubric-score-box {
+    margin-top: 10px;
+    padding: 10px;
+    background: #fff7ed;
+    border: 1px dashed #c9a373;
+    border-radius: 6px;
+}
