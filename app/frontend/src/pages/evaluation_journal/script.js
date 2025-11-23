@@ -9,6 +9,7 @@ const totalText = document.getElementById("scoreTotal");
 
 const addBtn = document.getElementById("addEvalBtn");
 const cardsBox = document.getElementById("evalCardsBox");
+const cardsHeader = document.getElementById("cardsHeader");
 
 const toInput = document.getElementById("toInput");
 const privateInput = document.getElementById("privateInput");
@@ -82,6 +83,56 @@ function updateScore() {
 
 scoreInputs.forEach(i => i.oninput = updateScore);
 
+// === NEW: helper to filter eval cards by "To" value ===
+function filterCardsByTo(toValue) {
+  const trimmed = (toValue || "").trim();
+  const cards = cardsBox.querySelectorAll(".eval-card");
+
+  if (!cards.length) return;
+
+  const normalized = trimmed.toLowerCase();
+
+  // NEW: if empty OR "@Team", show all cards (team view / default view)
+  if (!trimmed || normalized === "@team") {
+    cards.forEach(card => {
+      card.style.display = "";
+    });
+
+    if (cardsHeader) {
+      cardsHeader.textContent = "All Eval Cards (Group & Individual)";
+    }
+    return;
+  }
+
+  // Otherwise, show only cards whose "to" exactly matches (case-insensitive)
+  cards.forEach(card => {
+    const cardTo = (card.dataset.to || "").toLowerCase();
+    card.style.display = (cardTo === normalized) ? "" : "none";
+  });
+
+  if (cardsHeader) {
+    cardsHeader.textContent = `Eval Cards for ${trimmed}`;
+  }
+}
+
+// NEW: trigger filtering AFTER user finishes typing and clicks away from "To:"
+if (toInput) {
+  toInput.addEventListener("blur", () => {
+    filterCardsByTo(toInput.value);
+  });
+}
+
+// NEW (optional convenience): clicking the header clears filter & shows all cards
+if (cardsHeader) {
+  cardsHeader.addEventListener("click", () => {
+    filterCardsByTo("");
+    // also clear the input so it's obvious no filter is applied
+    if (toInput) {
+      toInput.value = "";
+    }
+  });
+}
+
 /* Add Card */
 addBtn.onclick = () => {
   const to = toInput.value.trim();
@@ -109,6 +160,9 @@ addBtn.onclick = () => {
   `;
 
   cardsBox.prepend(card);
+
+  // NEW: after adding a card, filter to this "To" value
+  filterCardsByTo(to);
 
   // reset inputs
   toInput.value = "";
