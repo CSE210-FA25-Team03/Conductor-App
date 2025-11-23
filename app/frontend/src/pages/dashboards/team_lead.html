@@ -7,14 +7,14 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div class="page" data-role="student">
+    <div class="page" data-role="team-lead">
         <header class="top-nav">
             <div class="brand">Conductor <span>App</span></div>
             <div class="nav-actions">
                 <div class="profile">
                     <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
                             <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
                             <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
                         </div>
@@ -25,8 +25,8 @@
 
         <section class="dashboard-header">
             <div>
-                <h1>Student Dashboard</h1>
-                <small>Team Lead view · CSE 210 </small>
+                <h1>Team Lead Dashboard</h1>
+                <small>Team Beacon · Weekly rituals</small>
             </div>
         </section>
 
@@ -35,22 +35,22 @@
                 <div class="card-icon">📘</div>
                 <div class="card-content">
                     <h2>Class Directory</h2>
-                    <p>View and manage all staff and student class information.</p>
-                    <button class="card-btn">Open</button>
+                    <p>Jump to your section roster, mentor assignments, and office hours.</p>
+                    <button class="card-btn">Open Directory</button>
                 </div>
             </article>
 
             <article class="dashboard-card">
                 <div class="card-icon">🗂️</div>
                 <div class="card-content">
-                    <h2>Task Tracker</h2>
-                    <p>Monitor assigned tasks, due dates, and progress updates.</p>
-                    <button id="viewTasksBtn" class="card-btn">View Tasks</button>
+                    <h2>Team Task Tracker</h2>
+                    <p>Highlight priority tasks and keep owners aligned.</p>
+                    <button class="card-btn" id="viewTasksBtn">View Tasks</button>
                 </div>
             </article>
 
             <article class="dashboard-card">
-                <div class="card-icon">📝</div>
+                <div class="card-icon">👥</div>
                 <div class="card-content">
                     <h2>Work Journal</h2>
                     <p>Create, organize, or review your meeting notes and class discussions.</p>
@@ -62,17 +62,8 @@
                 <div class="card-icon">📈</div>
                 <div class="card-content">
                     <h2>Weekly Evaluation</h2>
-                    <p>Review performance summaries and submit weekly feedback reports.</p>
-                    <button class="card-btn">View Evaluation</button>
-                </div>
-            </article>
-
-            <article class="dashboard-card">
-                <div class="card-icon">📊</div>
-                <div class="card-content">
-                    <h2>Evaluation Journal</h2>
-                    <p>Review performance metrics and grading insights for your classes.</p>
-                    <button class="card-btn">Open Journal</button>
+                    <p>Set the mood score and collect direct quotes for each week.</p>
+                    <button class="card-btn evaluation-trigger" data-member-id="1" aria-expanded="false">View Evaluation</button>
                 </div>
             </article>
         </section>
@@ -83,10 +74,38 @@
     <!-- Profile panel removed, navigation now goes to profile page -->
     </section>
 
+    <section class="evaluation-panel" aria-hidden="true">
+        <article class="evaluation-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Weekly evaluation</p>
+                    <h2 data-eval-context>Beacon AR · Team Lead</h2>
+                    <p>Use the week selector to swap notes and mood scores.</p>
+                </div>
+                <button class="close-evaluation" aria-label="Close weekly evaluation">×</button>
+            </header>
+            <div class="evaluation-filter">
+                <label for="lead-week">Filter by week</label>
+                <select id="lead-week" data-week-filter></select>
+            </div>
+            <div class="mood-display">
+                <div class="evaluation-face" data-mood-face>🙂</div>
+                <div>
+                    <p class="mood-status" data-mood-status>Making progress</p>
+                    <p class="mood-meta" data-mood-meta>Captured for Week 6</p>
+                </div>
+            </div>
+            <div class="notes-panel">
+                <label>Evaluation notes</label>
+                <p data-eval-notes>Notes for the selected week will appear here.</p>
+            </div>
+        </article>
+    </section>
+
     <script src="script.js"></script>
         <script>
             document.getElementById('viewTasksBtn').addEventListener('click', function() {
-            window.location.href = '/task_tracker/task_tracker.html';
+                window.location.href = '/task_tracker/task_tracker.html';
             });
         </script>
         <script>
@@ -114,12 +133,10 @@
             });
             document.getElementById('logoutBtn').addEventListener('click', function(e) {
                 e.preventDefault();
-                // Clear localStorage and redirect to login
                 localStorage.clear();
                 window.location.href = '/login';
             });
         </script>
-
         <script>
             window.addEventListener('DOMContentLoaded', function() {
                 var savedImg = localStorage.getItem('profileImg');
