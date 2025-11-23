@@ -6,6 +6,14 @@ body {
   color: #151b35;
 }
 
+/*place holder*/
+.eval-field input::placeholder,
+.eval-field textarea::placeholder {
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  color: #9aa0c3;
+}
+
 /* Layout */
 .eval-container {
   max-width: 1200px;
@@ -16,29 +24,32 @@ body {
 /* Page title */
 .eval-page-title {
   margin-top: 100px;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .eval-page-title h1 {
   font-size: 2.2rem;
-  letter-spacing: 0.4px;
+  font-weight: 700;
 }
 
-/* Team header */
+/* Team tag */
 .eval-header {
-  background: #ffffff;
-  border-radius: 14px;
-  border: 1px solid #e1e4f2;
-  padding: 13px 16px;
-  margin-bottom: 20px;
+  margin: 10px 0 20px 0;
 }
 
-.eval-header h1 {
-  font-size: 1.3rem;
-  margin: 0;
+.tag-box {
+  display: inline-block;
+  padding: 8px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: white;
+  border: 1px solid #d8dcf0;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+  color: #2f3bb5;
 }
 
-/* Main grid */
+/* Main grid layout */
 .eval-main {
   display: grid;
   grid-template-columns: 2fr 1fr;
@@ -46,7 +57,7 @@ body {
   margin-bottom: 40px;
 }
 
-/* Panels */
+/* Panel boxes */
 .eval-cards,
 .new-eval,
 .work-journals {
@@ -57,21 +68,21 @@ body {
   box-shadow: 0 25px 45px rgba(21, 27, 53, 0.08);
 }
 
-/* Eval card panel */
+/* Eval cards container */
 .eval-cards {
   display: flex;
   flex-direction: column;
 }
 
-
-.eval-cards-box {
+/* Card area grid */
+.eval-cards-box,
+.work-journal-box {
   flex: 1;
-
   min-height: 340px;
-  max-height: 600px;   
-  background: #f9fbff;
+  max-height: 600px;
+  background: #f3f6ff;
   border-radius: 12px;
-  border: 1px dashed #e1e4f2;
+  border: 1px dashed #d6defa;
   padding: 14px;
 
   display: grid;
@@ -79,10 +90,34 @@ body {
   gap: 12px;
 
   align-content: start;
-  overflow-y: auto;    
+  overflow-y: auto;
 }
 
-/* CARD DESIGN  */
+/* Empty state message */
+.empty-message {
+  grid-column: 1 / -1;
+  width: 100%;
+  text-align: center;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  height: 200px;
+
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #8a90b4;
+}
+
+.empty-sub {
+  font-size: 1rem;
+  color: #b2b7d3;
+  margin-top: 8px;
+}
+
+/* CARD DESIGN */
 .eval-card {
   background: #ffffff;
   border: 1px solid #e1e4f2;
@@ -110,7 +145,21 @@ body {
   border-radius: 14px 14px 0 0;
 }
 
-/* Card text clamp */
+/* To name */
+.card-to-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #151b35;
+}
+
+/* Date small */
+.card-date {
+  font-size: 0.75rem;
+  color: #9aa0c3;
+  margin-bottom: 6px;
+}
+
+/* Sections inside card */
 .eval-card-section {
   font-size: 0.85rem;
   color: #151b35;
@@ -121,8 +170,11 @@ body {
   overflow: hidden;
 }
 
+/* More button bottom-right */
 .more-btn {
-  margin-top: auto;
+  position: absolute;
+  bottom: 10px;
+  right: 12px;
   font-size: 0.85rem;
   font-weight: 600;
   color: #2f3bb5;
@@ -133,13 +185,12 @@ body {
 .eval-cards-box::-webkit-scrollbar {
   width: 8px;
 }
-
 .eval-cards-box::-webkit-scrollbar-thumb {
   background: #c1c7e0;
   border-radius: 10px;
 }
 
-/* Work journals */
+/* Work journals box */
 .work-journals {
   margin-top: 40px;
 }
@@ -148,11 +199,11 @@ body {
   height: 240px;
   margin-top: 12px;
   border-radius: 12px;
-  background: #f9fbff;
-  border: 1px dashed #e1e4f2;
+  background: #f3f6ff;
+  border: 1px dashed #d6defa;
 }
 
-/* New Eval */
+/* urge new card*/
 .new-eval {
   min-width: 330px;
 }
@@ -175,7 +226,7 @@ body {
   cursor: pointer;
 }
 
-/* Inputs */
+/* Input fields */
 .eval-field {
   display: flex;
   flex-direction: column;
@@ -196,7 +247,7 @@ body {
   min-height: 60px;
 }
 
-/* Sentiment section */
+/* Sentiment */
 .sentiment-section {
   margin-top: 16px;
   padding-top: 16px;
@@ -220,7 +271,7 @@ body {
   box-shadow: 0 0 0 2px #2f3bb5;
 }
 
-/* Toggle */
+/* Sentiment toggle buttons */
 .sentiment-toggle {
   display: flex;
   border: 2px solid #2f3bb5;
@@ -244,7 +295,7 @@ body {
   color: white;
 }
 
-/* Rubric */
+/* Rubric panel */
 .rubric-panel {
   display: none;
 }
@@ -266,7 +317,7 @@ body {
   padding: 2px 4px;
 }
 
-/* Progress bar */
+/* Rubric progress bar */
 .sentiment-bar {
   height: 8px;
   background: #e1e4f2;
@@ -285,7 +336,6 @@ body {
   font-size: 0.9rem;
 }
 
-/*  MODAL */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -312,4 +362,31 @@ body {
   color: #2f3bb5;
   cursor: pointer;
   margin-bottom: 10px;
+}
+
+.modal-content div {
+  margin-bottom: 8px;
+}
+
+/* Journal Cards  */
+.journal-card {
+  width: 96%;
+  min-height: 220px;
+  height: auto;
+  padding: 18px 20px;
+}
+
+.work-journal-box {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.work-journal-box .journal-card::before {
+  background: #2f3bb5;
+}
+
+.work-journal-box .eval-card-section {
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
