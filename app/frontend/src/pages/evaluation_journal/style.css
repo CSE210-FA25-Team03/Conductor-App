@@ -68,15 +68,14 @@ body {
   box-shadow: 0 25px 45px rgba(21, 27, 53, 0.08);
 }
 
-/* Eval cards container */
+/* Eval cards container (grid) */
 .eval-cards {
   display: flex;
   flex-direction: column;
 }
 
-/* Card area grid */
-.eval-cards-box,
-.work-journal-box {
+/* Card area grid (only for eval cards) */
+.eval-cards-box {
   flex: 1;
   min-height: 340px;
   max-height: 600px;
@@ -181,7 +180,7 @@ body {
   cursor: pointer;
 }
 
-/* Scrollbar */
+/* Scrollbar for eval cards */
 .eval-cards-box::-webkit-scrollbar {
   width: 8px;
 }
@@ -190,17 +189,27 @@ body {
   border-radius: 10px;
 }
 
-/* Work journals box */
+/* Work journals box (SEPARATED: flex vertical stack) */
 .work-journals {
   margin-top: 40px;
 }
 
+/* keep height/margin/background etc. and ensure flex column layout */
 .work-journal-box {
-  height: 240px;
+  flex: 1;
+  min-height: 240px;
+  max-height: 600px;
   margin-top: 12px;
   border-radius: 12px;
   background: #f3f6ff;
   border: 1px dashed #d6defa;
+
+  /* vertical stack */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 14px;
+  overflow-y: auto;
 }
 
 /* urge new card*/
@@ -374,12 +383,6 @@ body {
   min-height: 220px;
   height: auto;
   padding: 18px 20px;
-}
-
-.work-journal-box {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 16px !important;
 }
 
 .work-journal-box .journal-card::before {
