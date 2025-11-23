@@ -1,111 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eval Journal</title>
-    <link rel="stylesheet" href="style.css" />
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Evaluation Journal</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-    <div class="eval-container">
 
-    <!-- HEADER -->
-    <section class="eval-header">
-        <h1>Eval Team #</h1>
+<div class="eval-container">
+
+  <!-- Page Title -->
+  <section class="eval-page-title">
+    <h1>Evaluation Journal</h1>
+  </section>
+
+  <!-- Team Header -->
+  <section class="eval-header">
+    <h1>Eval Team #</h1>
+  </section>
+
+  <!-- Main Layout -->
+  <div class="eval-main">
+
+    <!-- LEFT: Eval Cards -->
+    <section class="eval-cards">
+      <h2>All Eval Cards (Group & Individual)</h2>
+      <div class="eval-cards-box" id="evalCardsBox"></div>
     </section>
 
-    <div class="eval-main">
+    <!-- RIGHT: New Eval -->
+    <aside class="new-eval">
 
-        <!-- LEFT COLUMN — ALL EVAL CARDS -->
-        <section class="eval-cards">
-            <h2>All Eval Cards (Group & Individual)</h2>
-            <div class="eval-cards-box">
-                <!-- placeholder -->
-            </div>
-        </section>
+      <div class="new-eval-header">
+        <h3>New Eval Note</h3>
+        <button id="addEvalBtn" class="add-plus-btn">+</button>
+      </div>
 
-        <!-- RIGHT COLUMN — NEW NOTE CREATION -->
-        <!-- ====== NEW EVALUATION PANEL ====== -->
-<aside class="new-eval">
-
-    <h3>New Eval Note</h3>
-
-    <!-- To: @student or @team -->
-    <div class="eval-field">
-        <label>To:</label>
-        <input type="text" placeholder="@student_or_team">
-    </div>
-
-    <!-- Time / Date -->
-    <div class="eval-field">
+      <!-- Date / Time -->
+      <div class="eval-field">
         <label>Time / Date</label>
-        <div class="placeholder-box"></div>
-    </div>
+        <div class="date-display" id="dateDisplay"></div>
+      </div>
 
-    <!-- Private Notes -->
-    <div class="eval-field">
+      <div class="eval-field">
+        <label>To:</label>
+        <input type="text" id="toInput" placeholder="@student_or_team"/>
+      </div>
+
+      <div class="eval-field">
         <label>Private Notes</label>
-        <textarea placeholder="Private notes (only staff can see)"></textarea>
-    </div>
+        <textarea id="privateInput" placeholder="Private notes (only staff can see)"></textarea>
+      </div>
 
-    <!-- Public Notes -->
-    <div class="eval-field">
+      <div class="eval-field">
         <label>Public Notes</label>
-        <textarea placeholder="Notes visible to student"></textarea>
-    </div>
+        <textarea id="publicInput" placeholder="Notes visible to student"></textarea>
+      </div>
 
-    <!-- ===== Sentiment Score ===== -->
-    <div class="sentiment-section">
+      <!-- Sentiment -->
+      <div class="sentiment-section">
         <h4>Sentiment Score</h4>
 
-        <!-- OPTION A: EMOJI SELECT -->
-        <div class="emoji-select">
-            <span class="emoji-option"> =D </span>
-            <span class="emoji-option">- _-</span>
-            <span class="emoji-option"> :[ </span>
+        <div class="emoji-row">
+          <span class="emoji-icon">=D</span>
+          <span class="emoji-icon">-_-</span>
+          <span class="emoji-icon">:[</span>
         </div>
 
-        <!-- OPTION B: TOGGLE RUBRIC -->
-        <details class="rubric-toggle">
-            <summary>Use Rubric Instead</summary>
-
-            <div class="rubric-category">
-                <label>Independence & Leadership</label>
-                <input type="number" min="0" max="5" placeholder="0–5">
-            </div>
-
-            <div class="rubric-category">
-                <label>Technical Contributions</label>
-                <input type="number" min="0" max="5" placeholder="0–5">
-            </div>
-
-            <div class="rubric-category">
-                <label>Teamwork</label>
-                <input type="number" min="0" max="5" placeholder="0–5">
-            </div>
-
-            <div class="rubric-score-box">
-                <p>Total Score: <span>__ / 15</span></p>
-                <p>Mapped Emotion: <span>=D  / - _- /  :[</span></p>
-            </div>
-        </details>
-
-    </div>
-</aside>
-
-
-    </div>
-
-    <!-- BOTTOM SECTION — WORK JOURNALS -->
-    <section class="work-journals">
-        <h2>Recent Work Journals (Group / Individual)</h2>
-        <div class="work-journal-box">
-            <!-- placeholder -->
+        <div class="sentiment-toggle">
+          <button id="modeDefault" class="mode-btn active">Default</button>
+          <button id="modeRubric" class="mode-btn">Rubric</button>
         </div>
-    </section>
+
+        <div class="rubric-panel" id="rubricPanel">
+          <div class="rubric-row">
+            <label>Independence & Leadership</label>
+            <input type="number" min="0" max="5" class="score-input"/>
+          </div>
+
+          <div class="rubric-row">
+            <label>Technical Contributions</label>
+            <input type="number" min="0" max="5" class="score-input"/>
+          </div>
+
+          <div class="rubric-row">
+            <label>Teamwork</label>
+            <input type="number" min="0" max="5" class="score-input"/>
+          </div>
+
+          <div class="sentiment-bar">
+            <div class="sentiment-fill" id="sentimentFill"></div>
+          </div>
+
+          <div class="rubric-summary">
+            Total Score: <span id="scoreTotal">0</span> / 15
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- Work Journals -->
+  <section class="work-journals">
+    <h2>Recent Work Journals (Group / Individual)</h2>
+    <div class="work-journal-box"></div>
+  </section>
 
 </div>
 
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="close-btn" id="closeModal">Close</div>
+
+    <div class="modal-content">
+      <div id="modalTo"></div>
+      <div id="modalTime"></div>
+      <div id="modalPrivate"></div>
+      <div id="modalPublic"></div>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>

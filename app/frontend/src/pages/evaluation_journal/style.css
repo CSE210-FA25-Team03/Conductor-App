@@ -1,177 +1,315 @@
-/* Overall page container */
-.eval-container {
-    width: 95%;
-    margin: 20px auto;
-    font-family: Arial, sans-serif;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+body {
+  background: #f4f6fb;
+  font-family: "Inter", sans-serif;
+  color: #151b35;
 }
 
-/* HEADER */
+/* Layout */
+.eval-container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 0 24px;
+}
+
+/* Page title */
+.eval-page-title {
+  margin-top: 100px;
+  margin-bottom: 30px;
+}
+
+.eval-page-title h1 {
+  font-size: 2.2rem;
+  letter-spacing: 0.4px;
+}
+
+/* Team header */
 .eval-header {
-    background: #fde7c8;
-    padding: 20px;
-    border: 1px solid #d1b48a;
-    border-radius: 8px;
-    margin-bottom: 20px;
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e1e4f2;
+  padding: 13px 16px;
+  margin-bottom: 20px;
 }
 
 .eval-header h1 {
-    margin: 0;
+  font-size: 1.3rem;
+  margin: 0;
 }
 
-/* MAIN GRID: left cards + right new-note column */
+/* Main grid */
 .eval-main {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
-    margin-bottom: 20px;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  margin-bottom: 40px;
 }
 
-/* LEFT COLUMN */
-.eval-cards {
-    background: #fde7c8;
-    padding: 20px;
-    border: 1px solid #d1b48a;
-    border-radius: 8px;
+/* Panels */
+.eval-cards,
+.new-eval,
+.work-journals {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e1e4f2;
+  padding: 24px;
+  box-shadow: 0 25px 45px rgba(21, 27, 53, 0.08);
 }
+
+/* Eval card panel */
+.eval-cards {
+  display: flex;
+  flex-direction: column;
+}
+
 
 .eval-cards-box {
-    background: #f9e5c8;
-    border: 1px solid #cfa97a;
-    height: 300px;      /* placeholder height */
-    border-radius: 8px;
+  flex: 1;
+
+  min-height: 340px;
+  max-height: 600px;   
+  background: #f9fbff;
+  border-radius: 12px;
+  border: 1px dashed #e1e4f2;
+  padding: 14px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+
+  align-content: start;
+  overflow-y: auto;    
 }
 
-/* RIGHT COLUMN (new eval note) */
-.new-eval {
-    background: #fde7c8;
-    padding: 20px;
-    border: 1px solid #d1b48a;
-    border-radius: 8px;
+/* CARD DESIGN  */
+.eval-card {
+  background: #ffffff;
+  border: 1px solid #e1e4f2;
+  border-radius: 14px;
+  padding: 12px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  position: relative;
+
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.new-eval-box {
-    background: #f9e5c8;
-    border: 1px solid #cfa97a;
-    height: 300px;      /* placeholder height */
-    border-radius: 8px;
+/* Top blue line */
+.eval-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 5px;
+  width: 100%;
+  background: #2f3bb5;
+  border-radius: 14px 14px 0 0;
 }
 
-/* BOTTOM: Work Journals */
+/* Card text clamp */
+.eval-card-section {
+  font-size: 0.85rem;
+  color: #151b35;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.more-btn {
+  margin-top: auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #2f3bb5;
+  cursor: pointer;
+}
+
+/* Scrollbar */
+.eval-cards-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.eval-cards-box::-webkit-scrollbar-thumb {
+  background: #c1c7e0;
+  border-radius: 10px;
+}
+
+/* Work journals */
 .work-journals {
-    background: #fde7c8;
-    padding: 20px;
-    border: 1px solid #d1b48a;
-    border-radius: 8px;
+  margin-top: 40px;
 }
 
 .work-journal-box {
-    background: #f9e5c8;
-    border: 1px solid #cfa97a;
-    height: 180px;      /* placeholder */
-    border-radius: 8px;
+  height: 240px;
+  margin-top: 12px;
+  border-radius: 12px;
+  background: #f9fbff;
+  border: 1px dashed #e1e4f2;
 }
 
-/* ============ NEW EVAL SIDEBAR ============ */
-
+/* New Eval */
 .new-eval {
-    width: 280px;
-    background: #fdebd1;
-    border: 1px solid #d1b48a;
-    padding: 20px;
-    border-radius: 10px;
+  min-width: 330px;
 }
 
-.new-eval h3 {
-    margin-bottom: 15px;
+.new-eval-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
+.add-plus-btn {
+  width: 36px;
+  height: 36px;
+  background: #2f3bb5;
+  color: white;
+  border-radius: 50%;
+  font-size: 20px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Inputs */
 .eval-field {
-    margin-bottom: 18px;
-    display: flex;
-    flex-direction: column;
-}
-
-.eval-field label {
-    font-weight: bold;
-    margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
 }
 
 .eval-field input,
 .eval-field textarea {
-    border: 1px solid #c9a373;
-    padding: 8px;
-    border-radius: 6px;
-    background: white;
+  border: 1px solid #d7d9e4;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 0.95rem;
 }
 
 .eval-field textarea {
-    height: 60px;
-    resize: none;
+  resize: none;
+  min-height: 60px;
 }
 
-.placeholder-box {
-    height: 35px;
-    border: 1px dashed #c9a373;
-    background: #fff7ed;
-    border-radius: 6px;
-}
-
-/* ============ SENTIMENT ============ */
-
+/* Sentiment section */
 .sentiment-section {
-    margin-top: 20px;
-    padding-top: 10px;
-    border-top: 2px solid #d1b48a;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e1e4f2;
 }
 
-.sentiment-section h4 {
-    margin-bottom: 10px;
+.emoji-row {
+  display: flex;
+  justify-content: space-around;
+  font-size: 22px;
 }
 
-/* Emoji selection */
-.emoji-select {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
+.emoji-icon {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-radius: 6px;
 }
 
-.emoji-option {
-    font-size: 26px;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 6px;
-    border: 1px solid transparent;
+.emoji-icon.active {
+  background: #eef1ff;
+  box-shadow: 0 0 0 2px #2f3bb5;
 }
 
-.emoji-option:hover {
-    background: #fff2d9;
-    border-color: #d1b48a;
+/* Toggle */
+.sentiment-toggle {
+  display: flex;
+  border: 2px solid #2f3bb5;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 12px 0;
 }
 
-/* Rubric toggle */
-.rubric-toggle summary {
-    cursor: pointer;
-    padding: 6px 0;
-    font-weight: bold;
+.mode-btn {
+  flex: 1;
+  padding: 10px 0;
+  background: transparent;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  color: #2f3bb5;
 }
 
-.rubric-category {
-    margin: 10px 0;
-    display: flex;
-    flex-direction: column;
+.mode-btn.active {
+  background: #2f3bb5;
+  color: white;
 }
 
-.rubric-category input {
-    padding: 6px;
-    border: 1px solid #c9a373;
-    border-radius: 6px;
-    width: 80px;
+/* Rubric */
+.rubric-panel {
+  display: none;
 }
 
-.rubric-score-box {
-    margin-top: 10px;
-    padding: 10px;
-    background: #fff7ed;
-    border: 1px dashed #c9a373;
-    border-radius: 6px;
+.rubric-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.score-input {
+  width: 52px;
+  height: 32px;
+  text-align: center;
+  border-radius: 8px;
+  border: 1px solid #d7d9e4;
+  font-size: 0.9rem;
+  padding: 2px 4px;
+}
+
+/* Progress bar */
+.sentiment-bar {
+  height: 8px;
+  background: #e1e4f2;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+
+.sentiment-fill {
+  height: 100%;
+  width: 0%;
+  background: #2f3bb5;
+}
+
+.rubric-summary {
+  font-size: 0.9rem;
+}
+
+/*  MODAL */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 520px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+  line-height: 1.5;
+}
+
+.close-btn {
+  text-align: right;
+  font-weight: 600;
+  color: #2f3bb5;
+  cursor: pointer;
+  margin-bottom: 10px;
 }
