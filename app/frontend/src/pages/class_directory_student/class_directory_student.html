@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Directory · Student View</title>
+    <link rel="stylesheet" href="../class_directory/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
+</head>
+<body>
+    <header>
+        <button id="backBtn">← Back</button>
+        <h2>CLASS DIRECTORY</h2>
+
+        <div class="course-info">
+            <div id="courseCode" class="course-line">--</div>
+            <div id="courseTerm" class="course-line">--</div>
+        </div>
+    </header>
+
+    <main class="page-layout">
+        <section class="class-summary card">
+            <div class="summary-text">
+                <p class="summary-eyebrow">Class Overview</p>
+                <h3 id="summaryTitle">Course Snapshot</h3>
+                <p id="courseDescription" class="summary-body">
+                    Browse your instructional team, deadlines, and team assignments in one place.
+                </p>
+            </div>
+            <div class="summary-tags">
+                <div class="summary-tag">
+                    <span class="tag-label">Current Term</span>
+                    <strong id="summaryTerm">--</strong>
+                </div>
+                <div class="summary-tag">
+                    <span class="tag-label">Support Staff</span>
+                    <strong id="summaryStaffCount">0</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="calendar-section card">
+            <div class="calendar-header">
+                <div>
+                    <h3>Course Calendar</h3>
+                    <p>View Canvas-style deadlines. Reach out to staff if anything looks off.</p>
+                </div>
+                <button id="addGoogleCalBtn" class="google-btn">Add to Google Calendar</button>
+            </div>
+
+            <div id="calendar"></div>
+
+            <div class="event-management">
+                <div class="event-list">
+                    <div class="card-heading">
+                        <h4>Upcoming Deadlines</h4>
+                        <span class="card-subtitle">Synced from staff postings</span>
+                    </div>
+                    <div id="eventsList" class="event-items"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="directory-section">
+            <div class="card">
+                <div class="card-heading">
+                    <h3>Instructor</h3>
+                    <span class="card-subtitle">Contact details & availability</span>
+                </div>
+                <div id="instructorsList" class="staff-list"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-heading">
+                    <h3>Teaching Assistants</h3>
+                    <span class="card-subtitle">Office hours & communication channels</span>
+                </div>
+                <div id="tasList" class="staff-list"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-heading">
+                    <h3>Tutors</h3>
+                    <span class="card-subtitle">Specialty areas & schedules</span>
+                </div>
+                <div id="tutorsList" class="staff-list"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-heading">
+                    <h3>Project Teams</h3>
+                    <span class="card-subtitle">Reference for discussion sections</span>
+                </div>
+                <div id="teamsList" class="team-list"></div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="student.js"></script>
+</body>
+</html>
