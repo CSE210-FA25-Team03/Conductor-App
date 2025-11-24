@@ -45,11 +45,7 @@ body {
     font-weight: 700;
 }
 
-body {
-  background: #f4f6fb;
-  font-family: "Inter", sans-serif;
-  color: #151b35;
-}
+
 
 /* place holder */
 .eval-field input::placeholder,
