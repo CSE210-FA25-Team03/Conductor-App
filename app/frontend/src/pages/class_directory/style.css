@@ -33,7 +33,7 @@ header {
     font-size: 14px;
 }
 
-#backBtn {
+#back-btn {
     background: white;
     border: none;
     padding: 6px 12px;
@@ -342,11 +342,11 @@ input, textarea {
     font-weight: 600;
 }
 
-#addTaBtn,
-#addInstructorBtn,
-#addTutorBtn,
-#teamForm button,
-#eventForm button {
+#add-ta-btn,
+#add-instructor-btn,
+#add-tutor-btn,
+#team-form button,
+#event-form button {
     margin-top: 15px;
     width: 100%;
     padding: 14px;
@@ -359,7 +359,7 @@ input, textarea {
     box-shadow: 0 10px 20px rgba(59, 111, 245, 0.25);
 }
 
-#eventForm button {
+#event-form button {
     background: linear-gradient(120deg, #1f8efa, #56b8ff);
 }
 

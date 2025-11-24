@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function wireNavigation() {
-  const backBtn = document.getElementById('backBtn');
+  const backBtn = document.getElementById('back-btn');
   if (!backBtn) return;
 
   backBtn.addEventListener('click', () => {
@@ -249,7 +249,7 @@ function fillStaffForm(fields, staff) {
 }
 
 function bindTeamForm() {
-  const teamForm = document.getElementById('teamForm');
+  const teamForm = document.getElementById('team-form');
   if (!teamForm) return;
 
   teamForm.addEventListener('submit', async (event) => {
@@ -276,7 +276,7 @@ function bindTeamForm() {
 }
 
 function bindEventForm() {
-  const eventForm = document.getElementById('eventForm');
+  const eventForm = document.getElementById('event-form');
   if (!eventForm) return;
 
   eventForm.addEventListener('submit', async (event) => {
