@@ -66,7 +66,7 @@
                 <div class="card-content">
                     <h2>Evaluation Journal</h2>
                     <p>Review performance metrics and grading insights for your classes.</p>
-                    <button class="card-btn">Open Journal</button>
+                    <button class="card-btn" id="viewEvalJournalBtn">Open Journal</button>
                 </div>
             </article>
         </section>
@@ -85,6 +85,11 @@
     <script>
         document.getElementById('viewClassBtn').addEventListener('click', function() {
             window.location.href = '/class_directory/class_directory.html';
+        });
+    </script>
+    <script>
+        document.getElementById('viewEvalJournalBtn').addEventListener('click', function() {
+            window.location.href = '/evaluation_journal/evaluation_journal.html';
         });
     </script>
     <script>
