@@ -15,15 +15,17 @@
     </div>
   </header>
 
+  <div id="errorBox" class="error-box hidden"></div>
+  
   <div class="container">
-
+    
     <!-- SKILL/TAGS -->
     <section class="panel">
       <h2>Define Skills / Tags</h2>
 
       <div class="form-grid">
-        <input id="skillName" type="text" placeholder="Skill Name" />
-        <input id="skillWeight" type="number" min="1" max="10" value="5" />
+        <input id="skillName" type="text" placeholder="Skill Name" required/>
+        <input id="skillWeight" type="number" min="1" max="10" value="5" required />
         <button class="primary-btn" id="addSkillBtn">Add Skill</button>
       </div>
 

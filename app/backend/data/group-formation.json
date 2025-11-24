@@ -1,5 +1,11 @@
 {
   "skills": [],
   "studentRatings": [],
-  "teamLeadRatings": []
+  "teamLeadRatings": [
+    {
+      "name": "dsff adc",
+      "email": "temp@gmail.com",
+      "ratings": {}
+    }
+  ]
 }

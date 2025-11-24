@@ -1,18 +1,6 @@
 // --- Group Formation Backend API ---
 const path = require('path');
 const fs = require('fs');
-const groupFormationPath = path.join(__dirname, 'data', 'group-formation.json');
-
-// ...existing code...
-function readGroupFormation() {
-  if (!fs.existsSync(groupFormationPath)) {
-    return { skills: [], studentRatings: [], teamLeadRatings: [] };
-  }
-  return JSON.parse(fs.readFileSync(groupFormationPath, 'utf8'));
-}
-function writeGroupFormation(data) {
-  fs.writeFileSync(groupFormationPath, JSON.stringify(data, null, 2), 'utf8');
-}
 
 /**
  * Backend entry point for our Conductor App.
@@ -389,8 +377,18 @@ function mapGitHubIssueToTask(issue) {
   };
 }
 
-// team formation GET POST
+// team/group formation backend logic+ GET POST
+const groupFormationPath = path.join(__dirname, 'data', 'group-formation.json');
 
+function readGroupFormation() {
+  if (!fs.existsSync(groupFormationPath)) {
+    return { skills: [], studentRatings: [], teamLeadRatings: [] };
+  }
+  return JSON.parse(fs.readFileSync(groupFormationPath, 'utf8'));
+}
+function writeGroupFormation(data) {
+  fs.writeFileSync(groupFormationPath, JSON.stringify(data, null, 2), 'utf8');
+}
 // GET skills
 app.get('/api/group-formation/skills', (req, res) => {
   const data = readGroupFormation();

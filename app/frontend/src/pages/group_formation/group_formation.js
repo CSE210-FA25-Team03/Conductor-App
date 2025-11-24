@@ -44,6 +44,17 @@ const groupsDiv = document.getElementById("groupResults");
 /* =======================================================
    Load Skills (from localStorage or default)
 ======================================================= */
+function showError(msg) {
+  const box = document.getElementById("errorBox");
+  box.textContent = msg;
+  box.classList.add("show");
+
+  // Auto-hide after 3 seconds
+  setTimeout(() => {
+    box.classList.remove("show");
+  }, 3000);
+}
+
 
 function loadSkills() {
   skills = JSON.parse(localStorage.getItem("skills")) || [];
@@ -61,6 +72,15 @@ function loadSkills() {
           </button>
         </td>
       </tr>`;
+  });
+
+  document.querySelectorAll(".delete-skill-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const idx = Number(btn.getAttribute("data-index"));
+      skills.splice(idx, 1);
+      localStorage.setItem("skills", JSON.stringify(skills));
+      loadSkills();
+    });
   });
 // Delete skill handler (moved outside loadSkills to avoid multiple bindings)
 }
@@ -130,13 +150,15 @@ document.getElementById("addSkillBtn").addEventListener("click", () => {
   const weight = Number(weightInput.value);
 
   if (!name) {
-    alert("Enter a skill name!");
+    showError("Please enter a skill name.");
     return;
   }
+
   if (!weight || weight < 1) {
-    alert("Enter a valid weight!");
+    showError("Please enter a valid skill weight (1–10).");
     return;
   }
+
 
   skills.push({ name, weight });
   localStorage.setItem("skills", JSON.stringify(skills));
