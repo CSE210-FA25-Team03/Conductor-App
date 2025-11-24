@@ -11,15 +11,18 @@
         <header class="top-nav">
             <div class="brand">Conductor <span>App</span></div>
             <div class="nav-actions">
+                 <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
                 <div class="profile">
-                    <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-    <!-- Use style.css for consistent dashboard styling -->
-                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
-                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
-                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                    <a href="/profile_page/profile.html" class="profile-link">
+                        <div class="profile-dropdown-container" style="position:relative;">
+                            <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+        <!-- Use style.css for consistent dashboard styling -->
+                            <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                                <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
+                                <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </header>
@@ -27,7 +30,6 @@
         <section class="dashboard-header">
             <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
                 <h1 style="margin:0;">Teams Dashboard</h1>
-                <a href="#" id="backDashboard" class="back-btn">← Back to Dashboard</a>
             </div>
         </section>
 
@@ -273,6 +275,23 @@
             // Load teams when page loads
             window.addEventListener('DOMContentLoaded', loadTeams);
 
+        </script>
+
+        <script>
+        // Dynamic dashboard link based on role
+        document.getElementById('backDashboard').addEventListener('click', function(e) {
+            e.preventDefault();
+            var role = localStorage.getItem('role');
+            if (role === 'professor') {
+                window.location.href = '/dashboards/professor.html';
+            } else if (role === 'Teaching Assistant') {
+                window.location.href = '/dashboards/ta.html';
+            } else if (role === 'team_lead') {
+                window.location.href = '/dashboards/team_lead.html';
+            } else {
+                window.location.href = '/dashboards/student.html';
+            }
+        });
         </script>
     </section> 
 </body>

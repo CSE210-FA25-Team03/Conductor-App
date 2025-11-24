@@ -36,7 +36,7 @@
                 <div class="card-content">
                     <h2>Class Directory</h2>
                     <p>View and manage all staff and student class information.</p>
-                    <button class="card-btn">Open</button>
+                    <button class="card-btn" id="viewClassBtn">Open</button>
                 </div>
             </article>
 
@@ -54,7 +54,7 @@
                 <div class="card-content">
                     <h2>Evaluation Journal</h2>
                     <p>Review performance metrics and grading insights for your classes.</p>
-                    <button class="card-btn">Open Journal</button>
+                    <button class="card-btn" id="viewEvalJournalBtn">Open Journal</button>
                 </div>
             </article>
 
@@ -70,6 +70,16 @@
         <script>
             document.getElementById('viewTeamsBtn').addEventListener('click', function() {
                 window.location.href = '/team_card/team_card.html';
+            });
+        </script>
+        <script>
+            document.getElementById('viewClassBtn').addEventListener('click', function() {
+                window.location.href = '/class_directory/class_directory.html';
+            });
+        </script>
+        <script>
+            document.getElementById('viewEvalJournalBtn').addEventListener('click', function() {
+                window.location.href = '/evaluation_journal/evaluation_journal.html';
             });
         </script>
         <script>

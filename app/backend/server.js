@@ -1,3 +1,7 @@
+// --- Group Formation Backend API ---
+const path = require('path');
+const fs = require('fs');
+
 /**
  * Backend entry point for our Conductor App.
  * Defines health check routes and initializes the Express server.
@@ -5,8 +9,8 @@
  */
 // Basic Express server to serve static frontend and prepare for backend features
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
+// const path = require('path');
+// const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -37,6 +41,8 @@ app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tut
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
 app.use('/work_journal', express.static(path.join(__dirname, '../frontend/src/pages/work_journal')));
+app.use('/group_formation', express.static(path.join(__dirname, '../frontend/src/pages/group_formation')));
+app.use('/evaluation_journal', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_journal')));
 app.use('/class_directory', express.static(path.join(__dirname, '../frontend/src/pages/class_directory')));
 app.use(
   '/class_directory_student',
@@ -371,6 +377,70 @@ function mapGitHubIssueToTask(issue) {
     githubState: issue.state
   };
 }
+
+// team/group formation backend logic+ GET POST
+const groupFormationPath = path.join(__dirname, 'data', 'group-formation.json');
+
+function readGroupFormation() {
+  if (!fs.existsSync(groupFormationPath)) {
+    return { skills: [], studentRatings: [], teamLeadRatings: [] };
+  }
+  return JSON.parse(fs.readFileSync(groupFormationPath, 'utf8'));
+}
+function writeGroupFormation(data) {
+  fs.writeFileSync(groupFormationPath, JSON.stringify(data, null, 2), 'utf8');
+}
+// GET skills
+app.get('/api/group-formation/skills', (req, res) => {
+  const data = readGroupFormation();
+  res.json(data.skills || []);
+});
+// POST skills (replace all)
+app.post('/api/group-formation/skills', (req, res) => {
+  const data = readGroupFormation();
+  data.skills = req.body.skills || [];
+  writeGroupFormation(data);
+  res.json({ message: 'Skills updated', skills: data.skills });
+});
+
+// GET student ratings
+app.get('/api/group-formation/student-ratings', (req, res) => {
+  const data = readGroupFormation();
+  res.json(data.studentRatings || []);
+});
+// POST student rating (add or update)
+app.post('/api/group-formation/student-ratings', (req, res) => {
+  const data = readGroupFormation();
+  const { name, email, ratings } = req.body;
+  if (!email || !ratings) return res.status(400).json({ error: 'Missing email or ratings' });
+  data.studentRatings = (data.studentRatings || []).filter(s => s.email !== email);
+  data.studentRatings.push({ name, email, ratings });
+  writeGroupFormation(data);
+  res.json({ message: 'Student rating saved', student: { name, email, ratings } });
+});
+
+// GET team lead ratings
+app.get('/api/group-formation/team-lead-ratings', (req, res) => {
+  const data = readGroupFormation();
+  res.json(data.teamLeadRatings || []);
+});
+// POST team lead rating (add or update)
+app.post('/api/group-formation/team-lead-ratings', (req, res) => {
+  const data = readGroupFormation();
+  const { name, email, ratings } = req.body;
+  if (!email || !ratings) return res.status(400).json({ error: 'Missing email or ratings' });
+  data.teamLeadRatings = (data.teamLeadRatings || []).filter(s => s.email !== email);
+  data.teamLeadRatings.push({ name, email, ratings });
+  writeGroupFormation(data);
+  res.json({ message: 'Team lead rating saved', teamLead: { name, email, ratings } });
+});
+// Serve student and team lead group formation forms
+app.use('/group_formation/student_group_form.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/src/pages/group_formation/student_group_form.html'));
+});
+app.use('/group_formation/team_lead_group_form.html', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/src/pages/group_formation/team_lead_group_form.html'));
+});
 
 // GET all teams
 app.get('/api/teams', async (req, res) => {
