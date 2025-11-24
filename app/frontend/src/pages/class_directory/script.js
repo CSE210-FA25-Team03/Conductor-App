@@ -68,6 +68,7 @@ const STAFF_FIELD_MAP = {
 
 let calendarInstance = null;
 let cachedEvents = [];
+let editingEventId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   wireNavigation();
@@ -78,16 +79,20 @@ document.addEventListener('DOMContentLoaded', () => {
   loadEvents();
 });
 
+function getDashboardUrl() {
+  const role = (localStorage.getItem('role') || '').toLowerCase();
+  if (role === 'professor') return '/dashboards/professor.html';
+  if (role === 'teaching assistant') return '/dashboards/ta.html';
+  if (role === 'team_lead') return '/dashboards/team_lead.html';
+  return '/dashboards/student.html';
+}
+
 function wireNavigation() {
   const backBtn = document.getElementById('back-btn');
   if (!backBtn) return;
 
   backBtn.addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = '/dashboards';
-    }
+    window.location.href = getDashboardUrl();
   });
 }
 
@@ -285,7 +290,8 @@ function bindEventForm() {
     const payload = {
       title: getInputValue('eventTitle'),
       description: document.getElementById('eventDescription')?.value.trim() || '',
-      dueDate: rawDate ? new Date(rawDate).toISOString() : ''
+      dueDate: rawDate ? new Date(rawDate).toISOString() : '',
+      type: document.getElementById('eventType')?.value || 'Other'
     };
 
     if (!payload.title || !payload.dueDate) {
@@ -294,14 +300,38 @@ function bindEventForm() {
     }
 
     try {
-      await postJson(EVENTS_ENDPOINT, payload);
-      eventForm.reset();
+      if (editingEventId) {
+        await putJson(`${EVENTS_ENDPOINT}/${editingEventId}`, payload);
+      } else {
+        await postJson(EVENTS_ENDPOINT, payload);
+      }
+      resetEventForm(eventForm);
       await loadEvents();
     } catch (error) {
       console.error('Failed to save event', error);
       alert('Failed to save event. Please try again.');
     }
   });
+}
+
+function resetEventForm(form) {
+  editingEventId = null;
+  form.reset();
+  const submitBtn = form.querySelector('button[type=\"submit\"]');
+  if (submitBtn) submitBtn.textContent = 'Save Event';
+}
+
+function startEditEvent(evt) {
+  const form = document.getElementById('event-form');
+  if (!form) return;
+  editingEventId = evt.id;
+  document.getElementById('eventTitle').value = evt.title || '';
+  document.getElementById('eventDescription').value = evt.description || '';
+  document.getElementById('eventDueDate').value = evt.dueDate ? new Date(evt.dueDate).toISOString().slice(0, 16) : '';
+  const typeSelect = document.getElementById('eventType');
+  if (typeSelect) typeSelect.value = evt.type || 'Other';
+  const submitBtn = form.querySelector('button[type=\"submit\"]');
+  if (submitBtn) submitBtn.textContent = 'Update Event';
 }
 
 function getInputValue(id) {
@@ -373,12 +403,20 @@ async function loadEvents() {
   try {
     const response = await fetch(EVENTS_ENDPOINT);
     if (!response.ok) throw new Error('Unable to retrieve events');
-    cachedEvents = await response.json();
+    const data = await response.json();
+    cachedEvents = normalizeEvents(data);
     renderEventsList();
     syncCalendarEvents();
   } catch (error) {
     console.error('Failed to load events', error);
   }
+}
+
+function normalizeEvents(events = []) {
+  return (events || []).map((evt) => ({
+    ...evt,
+    type: evt.type || 'Other'
+  }));
 }
 
 function syncCalendarEvents() {
@@ -392,10 +430,23 @@ function syncCalendarEvents() {
       end: evt.dueDate,
       allDay: false,
       extendedProps: {
-        description: evt.description || ''
-      }
+        description: evt.description || '',
+        type: evt.type || 'Other'
+      },
+      color: eventColor(evt.type),
+      textColor: '#0b132b'
     });
   });
+}
+
+function eventColor(type = '') {
+  const normalized = type.toLowerCase();
+  if (normalized === 'lecture') return '#9fe3ff';
+  if (normalized === 'lab') return '#ffe89f';
+  if (normalized === 'discussion') return '#d8d1ff';
+  if (normalized === 'assignment') return '#c7f4d1';
+  if (normalized === 'exam') return '#ffc9c9';
+  return '#e0e7ff';
 }
 
 function renderEventsList() {
@@ -415,15 +466,32 @@ function renderEventsList() {
     const due = new Date(evt.dueDate).toLocaleString();
 
     card.innerHTML = `
-      <strong>${evt.title}</strong>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <strong>${evt.title}</strong>
+        <span class="event-type">${evt.type || 'Other'}</span>
+      </div>
       <span>Due: ${due}</span>
       ${evt.description ? `<span>${evt.description}</span>` : ''}
     `;
 
-    const button = document.createElement('button');
-    button.textContent = 'Remove';
-    button.addEventListener('click', () => deleteEvent(evt.id));
-    card.appendChild(button);
+    const actions = document.createElement('div');
+    actions.style.display = 'flex';
+    actions.style.gap = '8px';
+    actions.style.marginTop = '8px';
+
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.className = 'ghost-btn';
+    editBtn.addEventListener('click', () => startEditEvent(evt));
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Remove';
+    deleteBtn.className = 'danger-btn';
+    deleteBtn.addEventListener('click', () => deleteEvent(evt.id));
+
+    actions.appendChild(editBtn);
+    actions.appendChild(deleteBtn);
+    card.appendChild(actions);
     container.appendChild(card);
   });
 }

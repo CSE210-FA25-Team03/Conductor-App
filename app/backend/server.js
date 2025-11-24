@@ -583,7 +583,10 @@ app.post('/api/class-directory/teams', (req, res) => {
 // Class calendar events
 app.get('/api/class-directory/events', (req, res) => {
   try {
-    const events = getClassEvents();
+    const events = getClassEvents().map((evt) => ({
+      ...evt,
+      type: evt.type || 'Other'
+    }));
     res.json(events);
   } catch (error) {
     console.error('Error reading class events:', error);
@@ -593,7 +596,7 @@ app.get('/api/class-directory/events', (req, res) => {
 
 app.post('/api/class-directory/events', (req, res) => {
   try {
-    const { title, description, dueDate } = req.body;
+    const { title, description, dueDate, type } = req.body;
     if (!title || !dueDate) {
       return res.status(400).json({ error: 'title and dueDate are required' });
     }
@@ -602,7 +605,8 @@ app.post('/api/class-directory/events', (req, res) => {
       id: Date.now().toString(),
       title,
       description: description || '',
-      dueDate
+      dueDate,
+      type: type || 'Other'
     };
     events.push(newEvent);
     saveClassEvents(events);
@@ -610,6 +614,31 @@ app.post('/api/class-directory/events', (req, res) => {
   } catch (error) {
     console.error('Error saving class event:', error);
     res.status(500).json({ error: 'Failed to save class event' });
+  }
+});
+
+app.put('/api/class-directory/events/:id', (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const events = getClassEvents();
+    const index = events.findIndex((evt) => evt.id === eventId);
+    if (index === -1) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    const existing = events[index];
+    const { title, description, dueDate, type } = req.body;
+    events[index] = {
+      ...existing,
+      title: title || existing.title,
+      description: description !== undefined ? description : existing.description,
+      dueDate: dueDate || existing.dueDate,
+      type: type || existing.type || 'Other'
+    };
+    saveClassEvents(events);
+    res.json(events[index]);
+  } catch (error) {
+    console.error('Error updating class event:', error);
+    res.status(500).json({ error: 'Failed to update class event' });
   }
 });
 

@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Professor Dashboard | Conductor</title>
@@ -41,15 +44,6 @@
 
         <section class="content-grid">
             <article class="dashboard-card">
-                <div class="card-icon">📘</div>
-                <div class="card-content">
-                    <h2>Class Directory</h2>
-                    <p>View and manage all staff and student class information.</p>
-                    <button class="card-btn" id="viewClassBtn">Open</button>
-                </div>
-            </article>
-
-            <article class="dashboard-card">
                 <div class="card-icon">👥</div>
                 <div class="card-content">
                     <h2>Team Card</h2>
@@ -77,11 +71,6 @@
     <script>
         document.getElementById('viewTeamsBtn').addEventListener('click', function() {
             window.location.href = '/team_card/team_card.html';
-        });
-    </script>
-    <script>
-        document.getElementById('viewClassBtn').addEventListener('click', function() {
-            window.location.href = '/class_directory/class_directory.html';
         });
     </script>
     <script>

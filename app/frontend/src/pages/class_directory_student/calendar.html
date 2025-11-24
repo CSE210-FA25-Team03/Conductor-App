@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Calendar</title>
+    <link rel="stylesheet" href="../class_directory/style.css">
+    <link rel="stylesheet" href="student.css">
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+</head>
+<body>
+    <div class="class-shell" data-page="calendar">
+        <aside class="class-sidebar">
+            <div class="side-title">Class Hub</div>
+            <nav class="class-nav">
+                <a class="class-nav-item" data-page="overview" href="class_directory_student.html">Class Overview</a>
+                <a class="class-nav-item" data-page="people" href="people.html">Class Directory</a>
+                <a class="class-nav-item" data-page="calendar" href="calendar.html">Calendar</a>
+            </nav>
+        </aside>
+
+        <div class="class-main">
+            <header>
+                <button id="backBtn">← Back</button>
+                <h2>CLASS CALENDAR</h2>
+                <div class="course-info">
+                    <div id="courseCode" class="course-line">--</div>
+                    <div id="courseTerm" class="course-line">--</div>
+                </div>
+            </header>
+
+            <main class="page-layout">
+                <section class="calendar-card">
+                    <div class="calendar-headline">
+                        <div>
+                            <h3 id="summaryTitle">Course Calendar</h3>
+                            <p class="page-hint">Canvas-style events with type filters for lecture, lab, and more.</p>
+                        </div>
+                        <div class="event-type-filter">
+                            <label for="eventTypeFilter">Show</label>
+                            <select id="eventTypeFilter">
+                                <option value="all">All events</option>
+                                <option value="Lecture">Lecture</option>
+                                <option value="Lab">Lab</option>
+                                <option value="Discussion">Discussion</option>
+                                <option value="Assignment">Assignment</option>
+                                <option value="Exam">Exam</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <button id="addGoogleCalBtn" class="google-btn">Add to Google Calendar</button>
+                        </div>
+                    </div>
+
+                    <div class="calendar-surface">
+                        <div id="calendar"></div>
+                    </div>
+
+                    <div class="event-management" style="margin-top: 16px;">
+                        <form id="eventForm" class="event-form">
+                            <h4 id="eventFormTitle">Add Event</h4>
+                            <label for="eventTitle">Title</label>
+                            <input type="text" id="eventTitle" placeholder="e.g., HW3 Draft" required>
+
+                            <label for="eventDescription">Details</label>
+                            <textarea id="eventDescription" rows="3" placeholder="Optional context"></textarea>
+
+                            <label for="eventTypeSelect">Event Type</label>
+                            <select id="eventTypeSelect">
+                                <option value="Lecture">Lecture</option>
+                                <option value="Lab">Lab</option>
+                                <option value="Discussion">Discussion</option>
+                                <option value="Assignment" selected>Assignment</option>
+                                <option value="Exam">Exam</option>
+                                <option value="Other">Other</option>
+                            </select>
+
+                            <label for="eventDueDate">Due Date</label>
+                            <input type="datetime-local" id="eventDueDate" required>
+
+                            <div class="form-actions">
+                                <button type="button" class="ghost-btn" id="cancelEventEdit" style="display:none;">Cancel</button>
+                                <button type="submit">Save Event</button>
+                            </div>
+                        </form>
+
+                        <div class="event-list">
+                            <div class="card-heading">
+                                <h4>Upcoming Deadlines</h4>
+                                <span class="card-subtitle">Filtered by type selection</span>
+                            </div>
+                            <div id="eventsList" class="event-items"></div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="student.js"></script>
+</body>
+</html>
