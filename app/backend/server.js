@@ -21,6 +21,7 @@ app.use(express.json()); // Parse JSON bodies
 
 // Initialize repository
 const teamsRepository = repositoryFactory.createTeamsRepository();
+const evaluationsRepository = repositoryFactory.createEvaluationsRepository();
 // Serve static files from frontend/public
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
@@ -449,6 +450,32 @@ app.get('/api/teams', async (req, res) => {
   } catch (error) {
     console.error('Error fetching teams:', error);
     res.status(500).json({ error: 'Failed to fetch teams' });
+  }
+});
+
+// GET weekly evaluation data by member ID
+app.get('/api/evaluations/:memberId', async (req, res) => {
+  try {
+    const memberId = parseInt(req.params.memberId, 10);
+    const evaluation = await evaluationsRepository.getEvaluationByMemberId(memberId);
+
+    if (!evaluation) {
+      return res.status(404).json({ error: 'Evaluation not found' });
+    }
+
+    const members = getMembers();
+    const member = members.find((m) => m.id === memberId);
+
+    res.json({
+      memberId,
+      memberName: member?.name || evaluation.memberName || 'Team Member',
+      memberRole: evaluation.teamRole || member?.role || 'student',
+      teamName: evaluation.teamName || '',
+      reports: evaluation.reports || [],
+    });
+  } catch (error) {
+    console.error('Error fetching evaluation:', error);
+    res.status(500).json({ error: 'Failed to fetch evaluation' });
   }
 });
 

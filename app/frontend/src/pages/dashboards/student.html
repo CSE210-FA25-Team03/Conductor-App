@@ -65,17 +65,47 @@
                 <div class="card-icon">📈</div>
                 <div class="card-content">
                     <h2>Weekly Evaluation</h2>
-                    <p>Review performance summaries and submit weekly feedback reports.</p>
-                    <button class="card-btn">View Evaluation</button>
+                    <p>Review your notes and mood score by selecting a timeframe.</p>
+                    <button class="card-btn evaluation-trigger" data-member-id="1" aria-expanded="false">
+                        View Evaluation
+                    </button>
                 </div>
             </article>
-
         </section>
 
     </div>
 
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
     <!-- Profile panel removed, navigation now goes to profile page -->
+    </section>
+
+    <section class="evaluation-panel" aria-hidden="true">
+        <article class="evaluation-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Weekly evaluation</p>
+                    <h2 data-eval-context>Jordan Lee · Team Beacon</h2>
+                    <p>Mood score and notes update as you change the week.</p>
+                </div>
+                <button class="close-evaluation" aria-label="Close weekly evaluation">×</button>
+            </header>
+            <div class="evaluation-filter">
+                <label for="student-week">Filter by week</label>
+                <select id="student-week" data-week-filter></select>
+            </div>
+            <div class="mood-display">
+                <div class="evaluation-face" data-mood-face>😊</div>
+                <div>
+                    <p class="mood-status" data-mood-status>On track</p>
+                    <p class="mood-meta" data-mood-meta>Captured for Week 6</p>
+                </div>
+            </div>
+            <div class="notes-panel">
+                <label>Evaluation notes</label>
+                <p data-eval-notes>Notes for the selected week will appear here.</p>
+            </div>
+        </article>
+    </section>
 
     <script src="script.js"></script>
         <script>
@@ -145,6 +175,5 @@
             });
             */
         </script>
-    </section>
 </body>
 </html>
