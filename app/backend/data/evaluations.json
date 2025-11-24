@@ -1,0 +1,31 @@
+[
+  {
+    "id": 1,
+    "memberId": 1,
+    "teamName": "Team Beacon",
+    "teamRole": "Team Lead",
+    "reports": [
+      {
+        "weekLabel": "Week 6",
+        "status": "Making progress",
+        "mood": "🙂",
+        "notes": "Team rallied for usability testing; still working on slide polish.",
+        "updatedAt": "Nov 15, 2025"
+      },
+      {
+        "weekLabel": "Week 5",
+        "status": "At Risk",
+        "mood": "😟",
+        "notes": "Stand-up slipped; scheduling conflict with two members—reset cadence with shared calendar.",
+        "updatedAt": "Nov 8, 2025"
+      },
+      {
+        "weekLabel": "Week 4",
+        "status": "On Track",
+        "mood": "😊",
+        "notes": "Delivered detailed retro summary to Prof. Lin, highlighting peer praise and action items.",
+        "updatedAt": "Nov 1, 2025"
+      }
+    ]
+  }
+]
