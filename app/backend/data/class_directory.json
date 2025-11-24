@@ -1,0 +1,64 @@
+[
+  {
+    "course": {
+      "course_code": "CSE 210",
+      "term_year": "FA25"
+    },
+    "instructors": [
+      {
+        "staff_picture": "app/frontend/assets/logo/user.png",
+        "audio_pronounciation": "xxx",
+        "staff_name": "xxx",
+        "pronounciation": "xxx",
+        "pronoun": "xxx",
+        "contact": "xxx",
+        "availability": "xxx",
+        "id": "inst-mi6rdsh4-xvojf"
+      },
+      {
+        "staff_picture": "app/frontend/assets/logo/user.png",
+        "audio_pronounciation": "",
+        "staff_name": "test",
+        "pronounciation": "",
+        "pronoun": "he/him",
+        "contact": "test@ucsd.edu | test@ucsd.edu",
+        "availability": "Mon 2-4PM",
+        "id": "inst-mi6rdsh4-4asye"
+      }
+    ],
+    "TAs": [
+      {
+        "staff_picture": "app/frontend/assets/logo/user.png",
+        "audio_pronounciation": "xxx",
+        "staff_name": "xxx",
+        "pronounciation": "xxx",
+        "pronoun": "xxx",
+        "contact": "xxx",
+        "availability": "xxx",
+        "id": "ta-mi6rdsh4-slhs2"
+      }
+    ],
+    "tutors": [
+      {
+        "staff_picture": "app/frontend/assets/logo/user.png",
+        "audio_pronounciation": "xxx",
+        "staff_name": "xxx",
+        "pronounciation": "xxx",
+        "pronoun": "xxx",
+        "contact": "xxx",
+        "availability": "xxx",
+        "id": "tutor-mi6rdsh4-2r9m9"
+      }
+    ],
+    "Teams": [
+      {
+        "team_id": "1",
+        "team_name": "xxx"
+      },
+      {
+        "team_id": "2",
+        "team_name": "xxx"
+      }
+    ]
+  }
+]
