@@ -6,7 +6,7 @@ body {
   color: #151b35;
 }
 
-/*place holder*/
+/* place holder */
 .eval-field input::placeholder,
 .eval-field textarea::placeholder {
   font-family: "Inter", sans-serif;
@@ -34,7 +34,7 @@ body {
 
 /* Team tag */
 .eval-header {
-  margin: 10px 0 20px 0;
+  margin: 10px 0 20px;
 }
 
 .tag-box {
@@ -212,7 +212,7 @@ body {
   overflow-y: auto;
 }
 
-/* urge new card*/
+/* urge new card */
 .new-eval {
   min-width: 330px;
 }
@@ -377,7 +377,7 @@ body {
   margin-bottom: 8px;
 }
 
-/* Journal Cards  */
+/* Journal Cards */
 .journal-card {
   width: 96%;
   min-height: 220px;
