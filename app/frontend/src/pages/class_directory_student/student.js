@@ -1,3 +1,4 @@
+/* global FullCalendar */
 const DIRECTORY_ENDPOINT = '/api/class_directory';
 const EVENTS_ENDPOINT = '/api/class-directory/events';
 const DEFAULT_AVATAR = '/assets/logo/user.png';

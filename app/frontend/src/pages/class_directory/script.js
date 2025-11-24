@@ -1,3 +1,4 @@
+/* global FullCalendar */
 const DIRECTORY_ENDPOINT = '/api/class_directory';
 const INSTRUCTOR_ENDPOINT = '/api/class-directory/instructors';
 const TA_ENDPOINT = '/api/class-directory/tas';
