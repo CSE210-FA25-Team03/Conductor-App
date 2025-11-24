@@ -5,12 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const successMessage = document.getElementById('successMessage');
   const roleSelect = document.getElementById('role');
 
-  const roleRoutes = {
-    professor: '../dashboards/professor.html',
-    'Teaching Assistant': '../dashboards/ta.html',
-    team_lead: '../dashboards/team_lead.html',
-    student: '../dashboards/student.html',
-  };
+  // const roleRoutes = {
+  //   professor: '../dashboards/professor.html',
+  //   'Teaching Assistant': '../dashboards/ta.html',
+  //   team_lead: '../dashboards/team_lead.html',
+  //   student: '../dashboards/student.html',
+  // };
 
   passwordToggle?.addEventListener('click', () => {
     const isPassword = passwordInput.type === 'password';

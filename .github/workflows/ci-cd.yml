@@ -1,0 +1,91 @@
+name: Conductor CI/CD
+
+on:
+  push:
+    branches: [ ci_cd_clean ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  # ========= CI: build & test =========
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: app/backend/package-lock.json
+
+      # ---- Backend: install + test ----
+      - name: Install backend dependencies
+        working-directory: app/backend
+        run: npm install
+
+      - name: Run backend lint
+        working-directory: app/backend
+        run: npm run lint
+
+      - name: Run backend tests (Jest)
+        working-directory: app/backend
+        run: npm test
+
+      - name: Generate backend docs (JSDoc)
+        working-directory: app/backend
+        run: npm run docs
+
+      - name: Upload backend docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jsdoc
+          path: app/backend/docs
+          
+      - name: Run Codacy code quality (backend only)
+        uses: codacy/codacy-analysis-cli-action@v4
+        with:
+          api-token: ${{ secrets.CODACY_API_TOKEN }}
+          directory: ${{ github.workspace }}/app/backend
+          verbose: true
+
+      # ---- Frontend: basic check ----
+      - name: Check frontend files exist
+        run: |
+          test -f app/frontend/public/index.html
+          ls app/frontend/src/pages
+
+      - name: Install frontend dependencies
+        working-directory: app/frontend
+        run: npm install
+
+      - name: Run frontend lint
+        working-directory: app/frontend
+        run: npm run lint
+
+      - name: Run Cypress
+        working-directory: app/frontend
+        run: npm run cy:run
+
+  # ========= CD: create deployment artifact =========
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create deployment archive
+        run: |
+          tar -czf conductor-app.tar.gz app
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: conductor-app-build
+          path: conductor-app.tar.gz

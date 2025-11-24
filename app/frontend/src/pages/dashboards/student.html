@@ -52,9 +52,9 @@
             <article class="dashboard-card">
                 <div class="card-icon">📝</div>
                 <div class="card-content">
-                    <h2>Meeting Notes</h2>
+                    <h2>Work Journal</h2>
                     <p>Create, organize, or review your meeting notes and class discussions.</p>
-                    <button class="card-btn">Open Notes</button>
+                    <button id="viewWorkJournalBtn" class="card-btn">Open Notes</button>
                 </div>
             </article>
 
@@ -83,6 +83,11 @@
         <script>
             document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
                 window.location.href = '/class_directory_student/class_directory_student.html';
+            });
+        </script>
+        <script>
+            document.getElementById('viewWorkJournalBtn').addEventListener('click', function() {
+            window.location.href = '/work_journal/work_journal.html';
             });
         </script>
         <script>
@@ -137,5 +142,6 @@
             });
             */
         </script>
+    </section>
 </body>
 </html>
