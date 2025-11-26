@@ -15,19 +15,38 @@
       <form id="adminForm">
         <h3>Admin · Create Class</h3>
 
+        <div class="input_box">
+          <label for="adminEmail">Admin Email</label>
+          <input
+            type="email"
+            id="adminEmail"
+            name="adminEmail"
+            placeholder="admin@example.edu"
+            required
+          />
+        </div>
+
         <hr style="margin: 16px 0" />
 
         <div class="input_box">
-          <label for="courseCode">Class Number</label>
-          <input type="text" id="courseCode" name="courseCode" placeholder="CSE 210" required />
+          <label for="classId">Class Number</label>
+          <input
+            type="text"
+            id="classId"
+            name="classId"
+            placeholder="CSE 210"
+            required
+          />
         </div>
         <div class="input_box">
-          <label for="profFirst">Professor First Name</label>
-          <input type="text" id="profFirst" name="profFirst" placeholder="Enter first name" required />
-        </div>
-        <div class="input_box">
-          <label for="profLast">Professor Last Name</label>
-          <input type="text" id="profLast" name="profLast" placeholder="Enter last name" required />
+          <label for="profName">Professor Name</label>
+          <input
+            type="text"
+            id="profName"
+            name="profName"
+            placeholder="Prof. Name"
+            required
+          />
         </div>
         <div class="input_box">
           <label for="profEmail">Professor Email</label>
@@ -50,6 +69,7 @@
       </form>
     </main>
 
+    <script src="../shared/storage.js"></script>
     <script src="admin.js"></script>
   </body>
 </html>

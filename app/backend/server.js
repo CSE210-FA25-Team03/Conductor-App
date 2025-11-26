@@ -26,6 +26,32 @@
   const profileDb = require('./db/profile');
   const app = express();
   const PORT = process.env.PORT || 3000;
+// --- Group Formation Backend API ---
+  const fs = require('fs');
+
+/**
+ * Backend entry point for our Conductor App.
+ * Defines health check routes and initializes the Express server.
+ * @module server
+ */
+// Basic Express server to serve static frontend and prepare for backend features
+const cookieSession = require('cookie-session');
+
+// Add cookie sessions for state + PKCE storage
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SESSION_SECRET],   
+  httpOnly: true,
+  secure: false, 
+  sameSite: 'lax'
+}));
+
+
+// --- Mount auth routes ---
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+// Import repository factory
+const repositoryFactory = require('./repositories/repositoryFactory');
 
   // ------------------------------------------------------------
   // Configuration flags
@@ -44,7 +70,88 @@
     (() => {
       throw new Error(
         'Global fetch is not available. Run on Node 18+ or add a fetch polyfill (e.g. node-fetch).',
-      );
+      )});
+// Serve static assets (e.g., logos, images)
+app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
+app.use('/admin', express.static(path.join(__dirname, '../frontend/src/pages/admin')));
+
+// Serve static files for each role page
+app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
+app.use('/login', express.static(path.join(__dirname, '../frontend/src/pages/login_page'), { index: 'login.html' }));
+app.get('/login/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/src/pages/login_page/login.html'));
+});
+app.use('/team_card', express.static(path.join(__dirname, '../frontend/src/pages/team_card')));
+app.use('/new_user', express.static(path.join(__dirname, '../frontend/src/pages/new_user')));
+app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pages/task_tracker'))); 
+app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
+app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
+app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
+app.use('/work_journal', express.static(path.join(__dirname, '../frontend/src/pages/work_journal')));
+app.use('/group_formation', express.static(path.join(__dirname, '../frontend/src/pages/group_formation')));
+app.use('/evaluation_journal', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_journal')));
+app.use('/class_directory', express.static(path.join(__dirname, '../frontend/src/pages/class_directory')));
+app.use(
+  '/class_directory_student',
+  express.static(path.join(__dirname, '../frontend/src/pages/class_directory_student'), {
+    index: 'class_directory_student.html'
+  })
+);
+app.get('/class_directory_student/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/src/pages/class_directory_student/class_directory_student.html'));
+});
+
+// Class Directory helper functions
+const classDirectoryPath = path.join(__dirname, 'data', 'class_directory.json');
+function getClassDirectory() {
+  const raw = fs.readFileSync(classDirectoryPath, 'utf8');
+  return JSON.parse(raw);
+}
+
+function saveClassDirectory(data) {
+  fs.writeFileSync(classDirectoryPath, JSON.stringify(data, null, 2), 'utf8');
+}
+
+const STAFF_FIELDS = [
+  'staff_picture',
+  'audio_pronounciation',
+  'staff_name',
+  'pronounciation',
+  'pronoun',
+  'contact',
+  'email',
+  'availability'
+];
+
+const STAFF_TYPE_META = {
+  instructors: { prefix: 'inst', label: 'instructor' },
+  TAs: { prefix: 'ta', label: 'TA' },
+  tutors: { prefix: 'tutor', label: 'tutor' }
+};
+
+function createStaffId(prefix) {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function ensureDirectoryDataStructure(data) {
+  let updated = false;
+  if (!Array.isArray(data) || data.length === 0) {
+    return { entry: null, data, updated };
+  }
+
+  const entry = data[0];
+  entry.instructors = entry.instructors || [];
+  entry.TAs = entry.TAs || [];
+  entry.tutors = entry.tutors || [];
+  entry.Teams = entry.Teams || [];
+
+  Object.entries(STAFF_TYPE_META).forEach(([key, meta]) => {
+    entry[key] = entry[key].map((person) => {
+      if (!person.id) {
+        person.id = createStaffId(meta.prefix);
+        updated = true;
+      }
+      return person;
     });
 
   // ------------------------------------------------------------
@@ -2233,4 +2340,4 @@
     });
   }
 
-  module.exports = app;
+  module.exports = app})}
