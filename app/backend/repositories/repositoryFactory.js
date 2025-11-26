@@ -1,5 +1,6 @@
 const JsonTeamsRepository = require('./implementations/JsonTeamsRepository');
 const JsonEvaluationsRepository = require('./implementations/JsonEvaluationsRepository');
+const JsonAttendanceRepository = require('./implementations/JsonAttendanceRepository');
 // const PostgresTeamsRepository = require('./implementations/PostgresTeamsRepository');
 
 /**
@@ -31,6 +32,15 @@ class RepositoryFactory {
     switch (this.storageType) {
       case 'json':
         return new JsonEvaluationsRepository();
+      default:
+        throw new Error(`Unknown storage type: ${this.storageType}`);
+    }
+  }
+
+  createAttendanceRepository() {
+    switch (this.storageType) {
+      case 'json':
+        return new JsonAttendanceRepository();
       default:
         throw new Error(`Unknown storage type: ${this.storageType}`);
     }

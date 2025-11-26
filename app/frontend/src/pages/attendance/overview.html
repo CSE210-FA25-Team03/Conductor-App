@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Overview | Conductor</title>
+    <link rel="stylesheet" href="overview.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="attendance-overview">
+        <header class="overview-header">
+            <button id="backBtn" class="back-btn">← Back</button>
+            <h1>Attendance Overview</h1>
+        </header>
+
+        <main class="overview-main">
+            <!-- Summary Cards -->
+            <section class="summary-section">
+                <div class="summary-card">
+                    <span class="summary-label">Class Average</span>
+                    <strong class="summary-value" id="classAverage">--</strong>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">This Week</span>
+                    <strong class="summary-value" id="weekAverage">--</strong>
+                </div>
+                <div class="summary-card">
+                    <span class="summary-label">Total Records</span>
+                    <strong class="summary-value" id="totalRecords">--</strong>
+                </div>
+            </section>
+
+            <!-- Team Selector (Professor/TA only) -->
+            <section class="chart-section" id="teamSelectorSection" style="display: none;">
+                <div class="chart-header">
+                    <h2>Select Team</h2>
+                    <select id="teamSelector" class="time-filter">
+                        <option value="">All Teams</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Team Comparison Chart -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2>Team Performance (Current)</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="teamComparisonChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Team Trend Chart -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2>Team Attendance Over Time</h2>
+                    <select id="teamTimeRange" class="time-filter">
+                        <option value="4weeks">Last 4 Weeks</option>
+                        <option value="month">Last Month</option>
+                        <option value="semester">This Semester</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="teamTrendChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Class Overview Chart (Professor/TA only) -->
+            <section class="chart-section" id="classOverviewSection" style="display: none;">
+                <div class="chart-header">
+                    <h2>Class Attendance Over Time</h2>
+                    <select id="classTimeRange" class="time-filter">
+                        <option value="4weeks">Last 4 Weeks</option>
+                        <option value="month">Last Month</option>
+                        <option value="semester">This Semester</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="classTrendChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Attendance by Type Charts -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2>Attendance by Type</h2>
+                    <select id="typeTimeRange" class="time-filter">
+                        <option value="4weeks">Last 4 Weeks</option>
+                        <option value="month">Last Month</option>
+                        <option value="semester">This Semester</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="attendanceByTypeChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Class Attendance Trend -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2>Class Attendance Trend</h2>
+                    <select id="classAttendanceTimeRange" class="time-filter">
+                        <option value="4weeks">Last 4 Weeks</option>
+                        <option value="month">Last Month</option>
+                        <option value="semester">This Semester</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="classAttendanceChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Lecture Notes Trend -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2>Lecture Notes Trend</h2>
+                    <select id="lectureTimeRange" class="time-filter">
+                        <option value="4weeks">Last 4 Weeks</option>
+                        <option value="month">Last Month</option>
+                        <option value="semester">This Semester</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="lectureChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Meeting Notes Trend -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2>Meeting Notes Trend</h2>
+                    <select id="meetingTimeRange" class="time-filter">
+                        <option value="4weeks">Last 4 Weeks</option>
+                        <option value="month">Last Month</option>
+                        <option value="semester">This Semester</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="meetingChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Office Hours Trend -->
+            <section class="chart-section">
+                <div class="chart-header">
+                    <h2>Office Hours Trend</h2>
+                    <select id="officeHoursTimeRange" class="time-filter">
+                        <option value="4weeks">Last 4 Weeks</option>
+                        <option value="month">Last Month</option>
+                        <option value="semester">This Semester</option>
+                    </select>
+                </div>
+                <div class="chart-container">
+                    <canvas id="officeHoursChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Actions -->
+            <section class="actions-section">
+                <button id="markAttendanceBtn" class="primary-btn">Mark Attendance</button>
+                <button id="viewHistoryBtn" class="secondary-btn">View History</button>
+            </section>
+        </main>
+    </div>
+
+    <script src="overview.js"></script>
+</body>
+</html>
+

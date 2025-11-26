@@ -71,6 +71,15 @@
                     </button>
                 </div>
             </article>
+
+            <article class="dashboard-card">
+                <div class="card-icon">📋</div>
+                <div class="card-content">
+                    <h2>Attendance</h2>
+                    <p>Mark attendance and view your records.</p>
+                    <button id="viewAttendanceBtn" class="card-btn">Mark Attendance</button>
+                </div>
+            </article>
         </section>
 
     </div>
@@ -121,6 +130,11 @@
         <script>
             document.getElementById('viewWorkJournalBtn').addEventListener('click', function() {
             window.location.href = '/work_journal/work_journal.html';
+            });
+        </script>
+        <script>
+            document.getElementById('viewAttendanceBtn').addEventListener('click', function() {
+            window.location.href = '/attendance/quick-entry.html';
             });
         </script>
         <script>

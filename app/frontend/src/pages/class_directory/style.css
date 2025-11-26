@@ -442,6 +442,106 @@ input, textarea {
     font-size: 16px;
 }
 
+/* Attendance Section Styles */
+.attendance-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin: 20px 0;
+}
+
+.attendance-summary-grid .summary-card {
+    background: linear-gradient(135deg, #f0f4ff, #e8edff);
+    border: 1px solid #d0d7ff;
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+}
+
+.attendance-summary-grid .summary-label {
+    font-size: 12px;
+    color: #6b748e;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.attendance-summary-grid .summary-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #3b6ff5;
+    display: block;
+}
+
+.team-comparison,
+.attendance-trend,
+.class-overview {
+    margin: 24px 0;
+    padding: 20px 0;
+    border-top: 1px solid #e2e6ff;
+}
+
+.team-comparison h4,
+.attendance-trend h4,
+.class-overview h4 {
+    margin: 0 0 16px;
+    font-size: 16px;
+    color: #1f2b50;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.time-filter {
+    padding: 8px 12px;
+    border: 1px solid #c8cee8;
+    border-radius: 999px;
+    font-size: 13px;
+    background: #fdfdff;
+    color: #1f2b50;
+    cursor: pointer;
+}
+
+.time-filter:focus {
+    outline: none;
+    border-color: #3b6ff5;
+}
+
+#team-comparison-chart,
+#team-trend-chart,
+#class-trend-chart {
+    max-height: 300px;
+}
+
+.attendance-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e6ff;
+}
+
+.attendance-actions .primary-btn {
+    flex: 1;
+    padding: 12px 20px;
+    background: linear-gradient(120deg, #3b6ff5, #6b8bff);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    box-shadow: 0 10px 20px rgba(59, 111, 245, 0.25);
+}
+
+.attendance-actions .ghost-btn {
+    flex: 1;
+    padding: 12px 20px;
+}
+
 @media (max-width: 768px) {
     .calendar-header {
         flex-direction: column;
@@ -450,5 +550,19 @@ input, textarea {
 
     .event-management {
         grid-template-columns: 1fr;
+    }
+
+    .attendance-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .attendance-actions {
+        flex-direction: column;
     }
 }

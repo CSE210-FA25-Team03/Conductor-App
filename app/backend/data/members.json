@@ -3,55 +3,120 @@
     "id": 1,
     "name": "Grace Ito",
     "initials": "GI",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
   },
   {
     "id": 2,
     "name": "Lucas Nguyen",
     "initials": "LN",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
   },
   {
     "id": 3,
     "name": "Jordan Patel",
     "initials": "JP",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
   },
   {
     "id": 4,
     "name": "Alex Morgan",
     "initials": "AM",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
   },
   {
     "id": 5,
     "name": "Jamie Garcia",
     "initials": "JG",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
   },
   {
     "id": 6,
     "name": "Riley Thompson",
     "initials": "RT",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
   },
   {
     "id": 7,
     "name": "Casey Lee",
     "initials": "CL",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
   },
   {
     "id": 8,
     "name": "Harper Martinez",
     "initials": "HM",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
   },
   {
     "id": 9,
     "name": "Sam Kim",
     "initials": "SK",
-    "role": "student"
+    "role": "student",
+    "email": "",
+    "teamId": 1
+  },
+  {
+    "id": 10,
+    "name": "test1First test1Last",
+    "initials": "TT",
+    "role": "student",
+    "email": "test1@gmail.com",
+    "teamId": 1
+  },
+  {
+    "id": 11,
+    "name": "test2First test2Last",
+    "initials": "TT",
+    "role": "student",
+    "email": "test2@gmail.com",
+    "teamId": 1
+  },
+  {
+    "id": 12,
+    "name": "test3First test3Last",
+    "initials": "TT",
+    "role": "student",
+    "email": "test3@gmail.com",
+    "teamId": 2
+  },
+  {
+    "id": 13,
+    "name": "test4First test4Last",
+    "initials": "TT",
+    "role": "student",
+    "email": "test4@gmail.com",
+    "teamId": 2
+  },
+  {
+    "id": 14,
+    "name": "test5First test5Last",
+    "initials": "TT",
+    "role": "Teaching Assistant",
+    "email": "test5@gmail.com",
+    "teamId": null
+  },
+  {
+    "id": 15,
+    "name": "test6First test6Last",
+    "initials": "TT",
+    "role": "Team Lead",
+    "email": "test6@gmail.com",
+    "teamId": 2
   }
 ]
-

@@ -76,6 +76,11 @@ document.addEventListener('DOMContentLoaded', () => {
   bindForms();
   loadClassDirectory();
   loadEvents();
+  
+  // Initialize attendance section (defined in attendance-charts.js)
+  if (typeof window.initAttendanceSection === 'function') {
+    window.initAttendanceSection();
+  }
 });
 
 function wireNavigation() {
