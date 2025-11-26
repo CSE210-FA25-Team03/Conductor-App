@@ -58,6 +58,15 @@
                 </div>
             </article>
 
+            <article class="dashboard-card">
+                <div class="card-icon">📋</div>
+                <div class="card-content">
+                    <h2>Attendance</h2>
+                    <p>View attendance overview and analytics for the class.</p>
+                    <button id="viewAttendanceBtn" class="card-btn">View Attendance</button>
+                </div>
+            </article>
+
         </section>
 
     </div>
@@ -80,6 +89,11 @@
         <script>
             document.getElementById('viewEvalJournalBtn').addEventListener('click', function() {
                 window.location.href = '/evaluation_journal/evaluation_journal.html';
+            });
+        </script>
+        <script>
+            document.getElementById('viewAttendanceBtn').addEventListener('click', function() {
+                window.location.href = '/attendance/overview.html';
             });
         </script>
         <script>

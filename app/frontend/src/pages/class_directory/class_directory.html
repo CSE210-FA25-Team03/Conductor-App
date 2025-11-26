@@ -207,6 +207,71 @@
                 </form>
             </div>
 
+            <!-- Attendance Section -->
+            <section class="attendance-section card">
+                <div class="card-heading with-actions">
+                    <div>
+                        <h3>Attendance Overview</h3>
+                        <span class="card-subtitle">Class-wide and team statistics</span>
+                    </div>
+                    <button type="button" class="ghost-btn" id="markAttendanceBtn">+ Mark Attendance</button>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="attendance-summary-grid">
+                    <div class="summary-card">
+                        <span class="summary-label">Class Average</span>
+                        <strong class="summary-value" id="classAttendancePercent">--</strong>
+                    </div>
+                    <div class="summary-card">
+                        <span class="summary-label">This Week</span>
+                        <strong class="summary-value" id="weekAttendancePercent">--</strong>
+                    </div>
+                </div>
+
+                <!-- Team Comparison Chart -->
+                <div class="team-comparison">
+                    <h4>Team Performance (Current)</h4>
+                    <canvas id="teamComparisonChart" width="400" height="200"></canvas>
+                </div>
+
+                <!-- Team Attendance Over Time Plot -->
+                <div class="attendance-trend">
+                    <div class="chart-header">
+                        <h4>Team Attendance Over Time</h4>
+                        <select id="timeRangeFilter" class="time-filter">
+                            <option value="4weeks">Last 4 Weeks</option>
+                            <option value="month">Last Month</option>
+                            <option value="semester">This Semester</option>
+                        </select>
+                    </div>
+                    <canvas id="teamTrendChart" width="400" height="250"></canvas>
+                </div>
+
+                <!-- Class Overview Plot (Professor/TA Only) -->
+                <div class="class-overview" id="classOverviewSection" style="display: none;">
+                    <div class="chart-header">
+                        <h4>Class Attendance Over Time</h4>
+                        <select id="classTimeRangeFilter" class="time-filter">
+                            <option value="4weeks">Last 4 Weeks</option>
+                            <option value="month">Last Month</option>
+                            <option value="semester">This Semester</option>
+                        </select>
+                    </div>
+                    <canvas id="classTrendChart" width="400" height="250"></canvas>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="attendance-actions">
+                    <button class="primary-btn" onclick="location.href='/attendance/quick-entry.html'">
+                        Mark Attendance
+                    </button>
+                    <button class="ghost-btn" onclick="location.href='/attendance/overview.html'">
+                        View Full Report
+                    </button>
+                </div>
+            </section>
+
             <!-- Team Section -->
             <div class="card">
                 <div class="card-heading">
@@ -231,6 +296,8 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="script.js"></script>
+    <script src="attendance-charts.js"></script>
 </body>
 </html>

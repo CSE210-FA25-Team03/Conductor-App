@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance History | Conductor</title>
+    <link rel="stylesheet" href="overview.css">
+    <link rel="stylesheet" href="history.css">
+</head>
+<body>
+    <div class="attendance-overview">
+        <header class="overview-header">
+            <button id="backBtn" class="back-btn">← Back</button>
+            <h1>Attendance History</h1>
+        </header>
+
+        <main class="overview-main">
+            <!-- Filters -->
+            <section class="filters-section">
+                <div class="filter-group">
+                    <label for="typeFilter">Filter by Type</label>
+                    <select id="typeFilter" class="filter-select">
+                        <option value="">All Types</option>
+                        <option value="class_attendance">Class Attendance</option>
+                        <option value="lecture">Lecture Notes</option>
+                        <option value="meeting">Meeting Notes</option>
+                        <option value="office_hours">Office Hours</option>
+                    </select>
+                </div>
+                <div class="filter-group" id="teamFilterGroup" style="display: none;">
+                    <label for="teamFilter">Filter by Team</label>
+                    <select id="teamFilter" class="filter-select">
+                        <option value="">All Teams</option>
+                    </select>
+                </div>
+            </section>
+
+            <div id="historyList" class="history-list">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Modal (for students/team leads) -->
+    <div id="editModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Attendance Notes</h2>
+                <button id="closeModal" class="close-btn">×</button>
+            </div>
+            <form id="editForm">
+                <input type="hidden" id="editRecordId">
+                <div class="form-group">
+                    <label for="editTitle">Title</label>
+                    <input type="text" id="editTitle" name="title">
+                </div>
+                <div class="form-group">
+                    <label for="editNotes">Notes</label>
+                    <textarea id="editNotes" name="notes" rows="6"></textarea>
+                </div>
+                <div class="form-group" id="editTimeGroup" style="display: none;">
+                    <label for="editTime">Time (for Office Hours)</label>
+                    <input type="time" id="editTime" name="time">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="cancelEdit" class="secondary-btn">Cancel</button>
+                    <button type="submit" class="primary-btn">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="history.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance | Conductor</title>
+    <link rel="stylesheet" href="quick-entry.css">
+</head>
+<body>
+    <div class="attendance-container">
+        <header class="attendance-header">
+            <button id="backBtn" class="back-btn">← Back</button>
+            <h1>Mark Attendance</h1>
+        </header>
+
+        <main class="attendance-main">
+            <form id="attendanceForm" class="attendance-form">
+                <!-- Type Selection -->
+                <div class="form-group">
+                    <label for="attendanceType">Type *</label>
+                    <select id="attendanceType" name="type" required>
+                        <option value="">Select type...</option>
+                        <option value="class_attendance">Class Attendance</option>
+                        <option value="lecture">Lecture Notes</option>
+                        <option value="meeting">Meeting Notes</option>
+                        <option value="office_hours">Office Hours</option>
+                    </select>
+                </div>
+
+                <!-- Title (for lecture/meeting/office_hours) -->
+                <div class="form-group" id="titleGroup" style="display: none;">
+                    <label for="attendanceTitle">Title</label>
+                    <input type="text" id="attendanceTitle" name="title" placeholder="e.g., Week 5 Lecture, Team Standup">
+                </div>
+
+                <!-- Date -->
+                <div class="form-group">
+                    <label for="attendanceDate">Date *</label>
+                    <input type="date" id="attendanceDate" name="date" required>
+                </div>
+
+                <!-- Time (for office_hours) -->
+                <div class="form-group" id="timeGroup" style="display: none;">
+                    <label for="attendanceTime">Time (optional)</label>
+                    <input type="time" id="attendanceTime" name="time">
+                </div>
+
+                <!-- Notes (for lecture/meeting/office_hours) -->
+                <div class="form-group" id="notesGroup" style="display: none;">
+                    <label for="attendanceNotes">Notes</label>
+                    <textarea id="attendanceNotes" name="notes" rows="4" placeholder="Add any relevant notes..."></textarea>
+                </div>
+
+                <!-- Quick Actions (hidden for students) -->
+                <div class="quick-actions">
+                    <button type="button" id="markAllPresent" class="action-btn">Mark All Present</button>
+                    <button type="button" id="markAllAbsent" class="action-btn">Mark All Absent</button>
+                </div>
+
+                <!-- Students List -->
+                <div class="form-group">
+                    <label id="studentsLabel">Students *</label>
+                    <div id="studentsList" class="students-list">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-actions">
+                    <button type="submit" id="submitBtn" class="submit-btn">Save Attendance</button>
+                    <button type="button" id="updateBtn" class="update-btn" style="display: none;">Update Attendance</button>
+                </div>
+            </form>
+
+            <!-- View Attendance Overview Link -->
+            <div class="view-overview-section">
+                <a href="/attendance/overview.html" class="view-overview-link">View Attendance Overview →</a>
+            </div>
+        </main>
+
+        <div id="message" class="message" style="display: none;"></div>
+    </div>
+
+    <script src="quick-entry.js"></script>
+</body>
+</html>
+

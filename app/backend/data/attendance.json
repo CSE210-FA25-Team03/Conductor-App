@@ -1,0 +1,458 @@
+[
+  {
+    "id": "att-1764118342937-c3y8ovz",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T00:52:22.937Z",
+    "updatedAt": "2025-11-26T00:52:22.937Z"
+  },
+  {
+    "id": "att-1764118356994-42wnkys",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-25",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T00:52:36.994Z",
+    "updatedAt": "2025-11-26T00:52:36.994Z"
+  },
+  {
+    "id": "att-1764118399098-5c3yp6h",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 11,
+        "name": "test2First test2Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test2First test2Last",
+      "email": "test2@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T00:53:19.098Z",
+    "updatedAt": "2025-11-26T00:53:19.098Z"
+  },
+  {
+    "id": "att-1764118407409-quxwb8m",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 11,
+        "name": "test2First test2Last",
+        "status": "absent",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test2First test2Last",
+      "email": "test2@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T00:53:27.409Z",
+    "updatedAt": "2025-11-26T00:53:27.409Z"
+  },
+  {
+    "id": "att-1764118429138-d1scnn1",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-19",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 11,
+        "name": "test2First test2Last",
+        "status": "absent",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test2First test2Last",
+      "email": "test2@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T00:53:49.138Z",
+    "updatedAt": "2025-11-26T00:53:49.138Z"
+  },
+  {
+    "id": "att-1764118442971-uyq92xf",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-12",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 11,
+        "name": "test2First test2Last",
+        "status": "absent",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test2First test2Last",
+      "email": "test2@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T00:54:02.971Z",
+    "updatedAt": "2025-11-26T00:54:02.971Z"
+  },
+  {
+    "id": "att-1764118469315-ca0kvjb",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-19",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T00:54:29.315Z",
+    "updatedAt": "2025-11-26T00:54:29.315Z"
+  },
+  {
+    "id": "att-1764118616520-a5q1xvx",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-12",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "late",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T00:56:56.520Z",
+    "updatedAt": "2025-11-26T00:56:56.520Z"
+  },
+  {
+    "id": "att-1764119926067-b4690cf",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 12,
+        "name": "test3First test3Last",
+        "status": "present",
+        "teamId": 2,
+        "teamName": "Portal Automation"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test3First test3Last",
+      "email": "test3@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T01:18:46.067Z",
+    "updatedAt": "2025-11-26T01:18:46.067Z"
+  },
+  {
+    "id": "att-1764119933292-p7ytd9z",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-19",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 12,
+        "name": "test3First test3Last",
+        "status": "excused",
+        "teamId": 2,
+        "teamName": "Portal Automation"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test3First test3Last",
+      "email": "test3@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T01:18:53.292Z",
+    "updatedAt": "2025-11-26T01:18:53.292Z"
+  },
+  {
+    "id": "att-1764119969193-9vk62t9",
+    "type": "class_attendance",
+    "title": null,
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 13,
+        "name": "test4First test4Last",
+        "status": "absent",
+        "teamId": 2,
+        "teamName": "Portal Automation"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test4First test4Last",
+      "email": "test4@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T01:19:29.193Z",
+    "updatedAt": "2025-11-26T01:19:29.193Z"
+  },
+  {
+    "id": "att-1764120558539-if3wdlh",
+    "type": "lecture",
+    "title": "lecture notes test 1",
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 12,
+        "name": "test3First test3Last",
+        "status": "present",
+        "teamId": 2,
+        "teamName": "Portal Automation"
+      }
+    ],
+    "notes": "lecture notes test 1.\nIn today's lecture, we discuss the concept of software engineering.",
+    "createdBy": {
+      "name": "test3First test3Last",
+      "email": "test3@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T01:29:18.539Z",
+    "updatedAt": "2025-11-26T01:29:18.539Z"
+  },
+  {
+    "id": "att-1764120929168-2ljfk82",
+    "type": "meeting",
+    "title": "meeting note test 1",
+    "date": "2025-11-25",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 12,
+        "name": "test3First test3Last",
+        "status": "present",
+        "teamId": 2,
+        "teamName": "Portal Automation"
+      }
+    ],
+    "notes": "meeting note test 1 body part",
+    "createdBy": {
+      "name": "test3First test3Last",
+      "email": "test3@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T01:35:29.168Z",
+    "updatedAt": "2025-11-26T01:35:29.168Z"
+  },
+  {
+    "id": "att-1764122332532-k3ecds0",
+    "type": "lecture",
+    "title": "lecture notes test",
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": "test",
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T01:58:52.532Z",
+    "updatedAt": "2025-11-26T01:58:52.532Z"
+  },
+  {
+    "id": "att-1764122339309-xhelblf",
+    "type": "meeting",
+    "title": "meeting notes test",
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": "test",
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T01:58:59.309Z",
+    "updatedAt": "2025-11-26T01:58:59.309Z"
+  },
+  {
+    "id": "att-1764122349820-zvm8bhb",
+    "type": "office_hours",
+    "title": "office hour test by test1 student",
+    "date": "2025-11-26",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": "test",
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T01:59:09.820Z",
+    "updatedAt": "2025-11-26T01:59:09.820Z"
+  },
+  {
+    "id": "att-1764122515815-0vi8iud",
+    "type": "lecture",
+    "title": "lecture notes test 1119",
+    "date": "2025-11-19",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T02:01:55.815Z",
+    "updatedAt": "2025-11-26T02:01:55.815Z"
+  },
+  {
+    "id": "att-1764122525784-sz72mx6",
+    "type": "meeting",
+    "title": "meeting notes test 1119",
+    "date": "2025-11-19",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T02:02:05.784Z",
+    "updatedAt": "2025-11-26T02:02:05.784Z"
+  },
+  {
+    "id": "att-1764122533992-gz1siyq",
+    "type": "office_hours",
+    "title": "office hour test 1119",
+    "date": "2025-11-19",
+    "time": null,
+    "attendees": [
+      {
+        "memberId": 10,
+        "name": "test1First test1Last",
+        "status": "present",
+        "teamId": 1,
+        "teamName": "Design Systems"
+      }
+    ],
+    "notes": null,
+    "createdBy": {
+      "name": "test1First test1Last",
+      "email": "test1@gmail.com",
+      "role": "student"
+    },
+    "createdAt": "2025-11-26T02:02:13.992Z",
+    "updatedAt": "2025-11-26T02:02:13.992Z"
+  }
+]

@@ -22,6 +22,7 @@ app.use(express.json()); // Parse JSON bodies
 // Initialize repository
 const teamsRepository = repositoryFactory.createTeamsRepository();
 const evaluationsRepository = repositoryFactory.createEvaluationsRepository();
+const attendanceRepository = repositoryFactory.createAttendanceRepository();
 // Serve static files from frontend/public
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
@@ -268,6 +269,12 @@ function getMembers() {
     console.error('Error reading members.json:', error);
     return [];
   }
+}
+
+// Helper function to save members
+function saveMembers(members) {
+  const filePath = path.join(__dirname, 'data', 'members.json');
+  fs.writeFileSync(filePath, JSON.stringify(members, null, 2), 'utf8');
 }
 
 // Helper function to read GitHub config
@@ -733,6 +740,54 @@ app.get('/api/members', (req, res) => {
   res.json(members);
 });
 
+// POST - Create/Register a new member
+app.post('/api/members', (req, res) => {
+  try {
+    const { firstName, lastName, email, role } = req.body;
+    
+    if (!firstName || !lastName || !email || !role) {
+      return res.status(400).json({ error: 'First name, last name, email, and role are required' });
+    }
+
+    const members = getMembers();
+    const fullName = `${firstName} ${lastName}`;
+    
+    // Check if member already exists (by email or name)
+    const existing = members.find(m => 
+      m.email === email || m.name.toLowerCase() === fullName.toLowerCase()
+    );
+    
+    if (existing) {
+      return res.status(409).json({ error: 'Member already exists', member: existing });
+    }
+
+    // Generate initials from first and last name
+    const initials = `${firstName.charAt(0).toUpperCase()}${lastName.charAt(0).toUpperCase()}`;
+    
+    // Generate new ID
+    const maxId = members.length > 0 ? Math.max(...members.map(m => m.id)) : 0;
+    const newId = maxId + 1;
+
+    // Create new member
+    const newMember = {
+      id: newId,
+      name: fullName,
+      initials: initials,
+      role: role,
+      email: email,
+      teamId: 1 // Default teamId for now
+    };
+
+    members.push(newMember);
+    saveMembers(members);
+    
+    res.status(201).json(newMember);
+  } catch (error) {
+    console.error('Error creating member:', error);
+    res.status(500).json({ error: 'Failed to create member' });
+  }
+});
+
 // GET all tasks
 app.get('/api/tasks', (req, res) => {
   const tasks = getTasks();
@@ -854,6 +909,343 @@ app.post('/api/github/sync', async (req, res) => {
 
 // Serve evaluation_rubric static files
 app.use('/evaluation_rubric', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_rubric')));
+app.use('/attendance', express.static(path.join(__dirname, '../frontend/src/pages/attendance')));
+
+// Attendance API endpoints
+// GET - Get all attendance records (with filters)
+app.get('/api/attendance', async (req, res) => {
+  try {
+    const filters = {
+      type: req.query.type,
+      dateFrom: req.query.dateFrom,
+      dateTo: req.query.dateTo,
+      teamId: req.query.teamId
+    };
+    const records = await attendanceRepository.getAllAttendance(filters);
+    res.json(records);
+  } catch (error) {
+    console.error('Error fetching attendance:', error);
+    res.status(500).json({ error: 'Failed to fetch attendance records' });
+  }
+});
+
+// GET - Get attendance by ID
+app.get('/api/attendance/:id', async (req, res) => {
+  try {
+    const record = await attendanceRepository.getAttendanceById(req.params.id);
+    if (!record) {
+      return res.status(404).json({ error: 'Attendance record not found' });
+    }
+    res.json(record);
+  } catch (error) {
+    console.error('Error fetching attendance:', error);
+    res.status(500).json({ error: 'Failed to fetch attendance record' });
+  }
+});
+
+// POST - Create new attendance record
+app.post('/api/attendance', async (req, res) => {
+  try {
+    const { type, title, date, time, attendees, notes, createdBy } = req.body;
+    
+    if (!type || !date || !attendees || !Array.isArray(attendees) || attendees.length === 0) {
+      return res.status(400).json({ error: 'Type, date, and attendees are required' });
+    }
+
+    const newRecord = await attendanceRepository.createAttendance({
+      type,
+      title: title || null,
+      date,
+      time: time || null,
+      attendees,
+      notes: notes || null,
+      createdBy
+    });
+
+    res.status(201).json(newRecord);
+  } catch (error) {
+    console.error('Error creating attendance:', error);
+    res.status(500).json({ error: 'Failed to create attendance record' });
+  }
+});
+
+// PUT - Update attendance record
+app.put('/api/attendance/:id', async (req, res) => {
+  try {
+    const { attendees, notes, title, time } = req.body;
+    const updates = {};
+    
+    if (attendees) updates.attendees = attendees;
+    if (notes !== undefined) updates.notes = notes;
+    if (title !== undefined) updates.title = title;
+    if (time !== undefined) updates.time = time;
+
+    const updated = await attendanceRepository.updateAttendance(req.params.id, updates);
+    if (!updated) {
+      return res.status(404).json({ error: 'Attendance record not found' });
+    }
+    res.json(updated);
+  } catch (error) {
+    console.error('Error updating attendance:', error);
+    res.status(500).json({ error: 'Failed to update attendance record' });
+  }
+});
+
+// DELETE - Delete attendance record
+app.delete('/api/attendance/:id', async (req, res) => {
+  try {
+    const deleted = await attendanceRepository.deleteAttendance(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Attendance record not found' });
+    }
+    res.status(204).send();
+  } catch (error) {
+    console.error('Error deleting attendance:', error);
+    res.status(500).json({ error: 'Failed to delete attendance record' });
+  }
+});
+
+// GET - Get attendance statistics summary
+app.get('/api/attendance/stats/summary', async (req, res) => {
+  try {
+    const filters = {
+      dateFrom: req.query.dateFrom,
+      dateTo: req.query.dateTo,
+      teamId: req.query.teamId ? parseInt(req.query.teamId, 10) : undefined
+    };
+    const stats = await attendanceRepository.getAttendanceStats(filters);
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching attendance stats:', error);
+    res.status(500).json({ error: 'Failed to fetch attendance statistics' });
+  }
+});
+
+// GET - Get team attendance data for plotting
+app.get('/api/attendance/stats/teams', async (req, res) => {
+  try {
+    const dateFrom = req.query.dateFrom || new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const dateTo = req.query.dateTo || new Date().toISOString().split('T')[0];
+    const groupBy = req.query.groupBy || 'week';
+    const teamId = req.query.teamId ? parseInt(req.query.teamId, 10) : undefined;
+
+    const filters = { dateFrom, dateTo };
+    if (teamId) {
+      filters.teamId = teamId;
+    }
+    const records = await attendanceRepository.getAllAttendance(filters);
+    
+    // Group by team and time period
+    const teamData = {};
+    
+    records.forEach(record => {
+      const recordDate = new Date(record.date);
+      let timeKey;
+      
+      if (groupBy === 'week') {
+        const week = getWeekNumber(recordDate);
+        timeKey = `${recordDate.getFullYear()}-W${week}`;
+      } else if (groupBy === 'month') {
+        timeKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+      } else {
+        timeKey = record.date;
+      }
+
+      record.attendees.forEach(attendee => {
+        const teamId = attendee.teamId;
+        if (!teamData[teamId]) {
+          teamData[teamId] = {
+            teamId,
+            teamName: attendee.teamName,
+            data: {}
+          };
+        }
+        if (!teamData[teamId].data[timeKey]) {
+          teamData[teamId].data[timeKey] = { present: 0, total: 0 };
+        }
+        teamData[teamId].data[timeKey].total++;
+        if (attendee.status === 'present') {
+          teamData[teamId].data[timeKey].present++;
+        }
+      });
+    });
+
+    // Convert to array format with percentages
+    const teams = Object.values(teamData).map(team => ({
+      teamId: team.teamId,
+      teamName: team.teamName,
+      data: Object.entries(team.data)
+        .map(([date, stats]) => ({
+          date,
+          percentage: stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0,
+          present: stats.present,
+          total: stats.total
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date))
+    }));
+
+    res.json({ teams });
+  } catch (error) {
+    console.error('Error fetching team stats:', error);
+    res.status(500).json({ error: 'Failed to fetch team statistics' });
+  }
+});
+
+// GET - Get class-wide attendance data for plotting (Professor/TA only)
+app.get('/api/attendance/stats/class', async (req, res) => {
+  try {
+    const dateFrom = req.query.dateFrom || new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const dateTo = req.query.dateTo || new Date().toISOString().split('T')[0];
+    const groupBy = req.query.groupBy || 'week';
+
+    const records = await attendanceRepository.getAllAttendance({ dateFrom, dateTo });
+    
+    // Group by time period
+    const classData = {};
+    
+    records.forEach(record => {
+      const recordDate = new Date(record.date);
+      let timeKey;
+      
+      if (groupBy === 'week') {
+        const week = getWeekNumber(recordDate);
+        timeKey = `${recordDate.getFullYear()}-W${week}`;
+      } else if (groupBy === 'month') {
+        timeKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+      } else {
+        timeKey = record.date;
+      }
+
+      if (!classData[timeKey]) {
+        classData[timeKey] = { present: 0, total: 0 };
+      }
+
+      record.attendees.forEach(attendee => {
+        classData[timeKey].total++;
+        if (attendee.status === 'present') {
+          classData[timeKey].present++;
+        }
+      });
+    });
+
+    // Convert to array format with percentages
+    const classAverage = Object.entries(classData)
+      .map(([date, stats]) => ({
+        date,
+        percentage: stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0,
+        present: stats.present,
+        total: stats.total
+      }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    res.json({ classAverage });
+  } catch (error) {
+    console.error('Error fetching class stats:', error);
+    res.status(500).json({ error: 'Failed to fetch class statistics' });
+  }
+});
+
+// GET - Get current team comparison data
+app.get('/api/attendance/stats/teams/current', async (req, res) => {
+  try {
+    const filters = {};
+    if (req.query.teamId) {
+      filters.teamId = parseInt(req.query.teamId, 10);
+    }
+    const stats = await attendanceRepository.getAttendanceStats(filters);
+    res.json(stats);
+  } catch (error) {
+    console.error('Error fetching current team stats:', error);
+    res.status(500).json({ error: 'Failed to fetch current team statistics' });
+  }
+});
+
+// GET - Get attendance data grouped by type for plotting
+app.get('/api/attendance/stats/by-type', async (req, res) => {
+  try {
+    const dateFrom = req.query.dateFrom || new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const dateTo = req.query.dateTo || new Date().toISOString().split('T')[0];
+    const groupBy = req.query.groupBy || 'week';
+    const teamId = req.query.teamId ? parseInt(req.query.teamId, 10) : undefined;
+    const type = req.query.type; // Optional: filter by specific type
+
+    const filters = { dateFrom, dateTo };
+    if (teamId) {
+      filters.teamId = teamId;
+    }
+    if (type) {
+      filters.type = type;
+    }
+    
+    const records = await attendanceRepository.getAllAttendance(filters);
+    
+    // Group by type and time period
+    const typeData = {};
+    
+    records.forEach(record => {
+      const recordDate = new Date(record.date);
+      let timeKey;
+      
+      if (groupBy === 'week') {
+        const week = getWeekNumber(recordDate);
+        timeKey = `${recordDate.getFullYear()}-W${week}`;
+      } else if (groupBy === 'month') {
+        timeKey = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}`;
+      } else {
+        timeKey = record.date;
+      }
+
+      const recordType = record.type;
+      if (!typeData[recordType]) {
+        typeData[recordType] = {};
+      }
+      
+      if (!typeData[recordType][timeKey]) {
+        typeData[recordType][timeKey] = { present: 0, total: 0 };
+      }
+
+      record.attendees.forEach(attendee => {
+        typeData[recordType][timeKey].total++;
+        if (attendee.status === 'present') {
+          typeData[recordType][timeKey].present++;
+        }
+      });
+    });
+
+    // Convert to array format with percentages
+    const types = Object.entries(typeData).map(([type, data]) => ({
+      type,
+      typeLabel: {
+        'class_attendance': 'Class Attendance',
+        'lecture': 'Lecture Notes',
+        'meeting': 'Meeting Notes',
+        'office_hours': 'Office Hours'
+      }[type] || type,
+      data: Object.entries(data)
+        .map(([date, stats]) => ({
+          date,
+          percentage: stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0,
+          present: stats.present,
+          total: stats.total
+        }))
+        .sort((a, b) => a.date.localeCompare(b.date))
+    }));
+
+    res.json({ types });
+  } catch (error) {
+    console.error('Error fetching attendance by type:', error);
+    res.status(500).json({ error: 'Failed to fetch attendance by type' });
+  }
+});
+
+// Helper function to get week number
+function getWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
 
 // Fallback: serve index.html for root
 app.get('/', (req, res) => {
