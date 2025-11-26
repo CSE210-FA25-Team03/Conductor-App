@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   wireNavigation();
   wireGoogleButton();
   initCalendar();
-  bindForms();
+  // Remove form bindings for read-only view
   loadClassDirectory();
   loadEvents();
 });
@@ -133,14 +133,7 @@ function initCalendar() {
   calendarInstance.render();
 }
 
-function bindForms() {
-  Object.entries(STAFF_SECTIONS).forEach(([type, config]) => {
-    bindStaffForm(type, config);
-  });
-
-  bindTeamForm();
-  bindEventForm();
-}
+// Form bindings removed for read-only view
 
 function bindStaffForm(type, config) {
   const form = document.getElementById(config.formId);
@@ -521,26 +514,8 @@ function renderStaffList(type, staff = []) {
       textWrapper.appendChild(span);
     }
 
-    const controls = document.createElement('div');
-    controls.className = 'staff-controls';
-
-    const editBtn = document.createElement('button');
-    editBtn.type = 'button';
-    editBtn.className = 'ghost-btn';
-    editBtn.textContent = 'Edit';
-    editBtn.addEventListener('click', () => showStaffForm(type, person));
-    controls.appendChild(editBtn);
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.type = 'button';
-    deleteBtn.className = 'danger-btn';
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.addEventListener('click', () => deleteStaffMember(type, person.id));
-    controls.appendChild(deleteBtn);
-
     row.appendChild(avatar);
     row.appendChild(textWrapper);
-    row.appendChild(controls);
 
     container.appendChild(row);
   });

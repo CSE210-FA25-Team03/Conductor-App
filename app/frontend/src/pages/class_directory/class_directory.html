@@ -82,41 +82,12 @@
                         <h3>Instructor Info</h3>
                         <span class="card-subtitle">Loaded from /api/class_directory</span>
                     </div>
-                    <button type="button" class="ghost-btn" data-open-form="instructor">+ Add</button>
+                    <!-- Add button removed for read-only view -->
                 </div>
 
                 <div id="instructorsList" class="staff-list"></div>
 
-                <form id="instructorForm" class="staff-form hidden">
-                    <div class="form-title">
-                        <h4 id="instructorFormTitle">Add Instructor</h4>
-                        <p>Provide details for the instructional lead.</p>
-                    </div>
-                    <input type="hidden" id="instructorId">
-
-                    <label for="instructorPicture">Photo URL</label>
-                    <input type="text" id="instructorPicture" placeholder="/assets/logo/user.png">
-
-                    <label for="instructorName">Full Name</label>
-                    <input type="text" id="instructorName" placeholder="e.g., Prof. Doe" required>
-
-                    <label for="instructorPronoun">Pronouns</label>
-                    <input type="text" id="instructorPronoun" placeholder="she/her">
-
-                    <label for="instructorEmail">Email</label>
-                    <input type="email" id="instructorEmail" placeholder="name@ucsd.edu">
-
-                    <label for="instructorContact">Contact</label>
-                    <input type="text" id="instructorContact" placeholder="Slack, phone, etc.">
-
-                    <label for="instructorAvailability">Availability</label>
-                    <input type="text" id="instructorAvailability" placeholder="Mon/Wed 2-4pm">
-
-                    <div class="form-actions">
-                        <button type="button" class="ghost-btn" data-cancel-form="instructor">Cancel</button>
-                        <button type="submit">Save Instructor</button>
-                    </div>
-                </form>
+                <!-- Instructor form removed for read-only view -->
             </div>
 
             <!-- Add TA Section -->
@@ -126,41 +97,12 @@
                         <h3>TA Info</h3>
                         <span class="card-subtitle">Updated via /api/class-directory/tas</span>
                     </div>
-                    <button type="button" class="ghost-btn" data-open-form="ta">+ Add</button>
+                    <!-- Add button removed for read-only view -->
                 </div>
 
                 <div id="tasList" class="staff-list"></div>
 
-                <form id="taForm" class="staff-form hidden">
-                    <div class="form-title">
-                        <h4 id="taFormTitle">Add Teaching Assistant</h4>
-                        <p>Log office hours, contact details, and support scope.</p>
-                    </div>
-                    <input type="hidden" id="taId">
-
-                    <label for="taPicture">Photo URL</label>
-                    <input type="text" id="taPicture" placeholder="/assets/logo/user.png">
-
-                    <label for="taName">Full Name</label>
-                    <input type="text" id="taName" placeholder="e.g., Sam TA" required>
-
-                    <label for="taPronoun">Pronouns</label>
-                    <input type="text" id="taPronoun" placeholder="they/them">
-
-                    <label for="taEmail">Email</label>
-                    <input type="email" id="taEmail" placeholder="ta@ucsd.edu">
-
-                    <label for="taContact">Contact</label>
-                    <input type="text" id="taContact" placeholder="Zoom, Discord, etc.">
-
-                    <label for="taAvailability">Availability</label>
-                    <input type="text" id="taAvailability" placeholder="Office hours TBD">
-
-                    <div class="form-actions">
-                        <button type="button" class="ghost-btn" data-cancel-form="ta">Cancel</button>
-                        <button type="submit">Save TA</button>
-                    </div>
-                </form>
+                <!-- TA form removed for read-only view -->
             </div>
 
             <!-- Add Tutor Section -->
@@ -170,41 +112,12 @@
                         <h3>Tutor Info</h3>
                         <span class="card-subtitle">Updated via /api/class-directory/tutors</span>
                     </div>
-                    <button type="button" class="ghost-btn" data-open-form="tutor">+ Add</button>
+                    <!-- Add button removed for read-only view -->
                 </div>
 
                 <div id="tutorsList" class="staff-list"></div>
 
-                <form id="tutorForm" class="staff-form hidden">
-                    <div class="form-title">
-                        <h4 id="tutorFormTitle">Add Tutor</h4>
-                        <p>Capture specialities and meeting details.</p>
-                    </div>
-                    <input type="hidden" id="tutorId">
-
-                    <label for="tutorPicture">Photo URL</label>
-                    <input type="text" id="tutorPicture" placeholder="/assets/logo/user.png">
-
-                    <label for="tutorName">Full Name</label>
-                    <input type="text" id="tutorName" placeholder="e.g., Taylor Tutor" required>
-
-                    <label for="tutorPronoun">Pronouns</label>
-                    <input type="text" id="tutorPronoun" placeholder="they/them">
-
-                    <label for="tutorEmail">Email</label>
-                    <input type="email" id="tutorEmail" placeholder="tutor@ucsd.edu">
-
-                    <label for="tutorContact">Contact</label>
-                    <input type="text" id="tutorContact" placeholder="Communication channel">
-
-                    <label for="tutorAvailability">Availability</label>
-                    <input type="text" id="tutorAvailability" placeholder="Weekly shifts">
-
-                    <div class="form-actions">
-                        <button type="button" class="ghost-btn" data-cancel-form="tutor">Cancel</button>
-                        <button type="submit">Save Tutor</button>
-                    </div>
-                </form>
+                <!-- Tutor form removed for read-only view -->
             </div>
 
             <!-- Team Section -->
@@ -216,16 +129,7 @@
 
                 <div id="teamsList" class="team-list"></div>
 
-                <form id="team-form" class="team-form">
-                    <h4>Add Team</h4>
-                    <label for="teamNumberInput">Team Number</label>
-                    <input type="text" id="teamNumberInput" placeholder="e.g., 12" required>
-
-                    <label for="teamNameInput">Team Name</label>
-                    <input type="text" id="teamNameInput" placeholder="e.g., Quantum Cats" required>
-
-                    <button type="submit">Add Team</button>
-                </form>
+                <!-- Team form removed for read-only view -->
             </div>
         </section>
     </main>
