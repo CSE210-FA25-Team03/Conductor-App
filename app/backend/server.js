@@ -77,6 +77,8 @@ app.use('/admin', express.static(path.join(__dirname, '../frontend/src/pages/adm
 
 // Serve static files for each role page
 app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
+app.use('/shared', express.static(path.join(__dirname, '../frontend/src/shared')));
+
 app.use('/login', express.static(path.join(__dirname, '../frontend/src/pages/login_page'), { index: 'login.html' }));
 app.get('/login/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/src/pages/login_page/login.html'));

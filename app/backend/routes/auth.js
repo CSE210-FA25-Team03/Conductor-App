@@ -2,8 +2,29 @@
 const express = require("express");
 const router = express.Router();
 const { Issuer, generators } = require("openid-client");
-const ADMIN_EMAILS = ["b2zhu@ucsd.edu"]; 
-const PROF_EMAILS = ["prof@example.edu"]; // future
+// admin
+const ADMIN_EMAILS = [
+//   "b2zhu@ucsd.edu",
+];
+
+// professors
+const PROF_EMAILS = [
+  "b2zhu@ucsd.edu",
+  "prof@example.edu",
+  "another-prof@example.edu",
+];
+
+// TAs (you can add actual emails later)
+const TA_EMAILS = [
+  "ta1@example.edu",
+  "ta2@example.edu",
+];
+
+// Team leads
+const TEAM_LEAD_EMAILS = [
+  "lead1@example.edu",
+];
+
 const {
   GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET,
@@ -47,6 +68,7 @@ router.get("/google/start", async (req, res) => {
       state,
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
+      prompt: "select_account"
     });
 
     // Basic safety check to satisfy security tools:
@@ -54,8 +76,9 @@ router.get("/google/start", async (req, res) => {
       console.error("Unexpected Google auth URL:", url);
       return res.status(500).send("Auth start error");
     }
+    const finalUrl = url; // whitelist already enforced
+    res.redirect(finalUrl);
 
-    res.redirect(url);
   } catch (e) {
     console.error("Auth start error:", e);
     res.status(500).send("Auth start error");
@@ -121,6 +144,16 @@ router.get("/google/callback", async (req, res) => {
   }
 });
 
+// --- Logout ---
+router.post("/logout", (req, res) => {
+  console.log("HIT /auth/logout before:", req.session);
+  req.session = null;                // cookie-session clears cookie
+  console.log("HIT /auth/logout after:", req.session);
+  return res.status(204).end();      // no body; frontend will redirect
+});
+
+
+
 // --- Return authenticated user ---
 router.get("/me", (req, res) => {
   const user = req.session?.user;
@@ -140,7 +173,8 @@ router.get("/me", (req, res) => {
 function determineRole(email) {
   if (ADMIN_EMAILS.includes(email)) return "admin";
   if (PROF_EMAILS.includes(email)) return "professor";
-  // later: TA / student logic
+  if (TA_EMAILS.includes(email)) return "ta";
+  if (TEAM_LEAD_EMAILS.includes(email)) return "team_lead";
   return "student";
 }
 

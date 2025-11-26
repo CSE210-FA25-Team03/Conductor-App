@@ -32,7 +32,9 @@
                             <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
                             <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
                                 <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
-                                <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                                <!-- <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a> -->
+                                <a href="javascript:void(0)" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+
                             </div>
                         </div>
 
@@ -92,6 +94,8 @@
     <!-- Profile panel removed, navigation now goes to profile page -->
 
     <script src="script.js"></script>
+    <script src="../../shared/auth.js"></script>
+
     <script>
         document.getElementById('viewTeamsBtn').addEventListener('click', function() {
             window.location.href = '/team_card/team_card.html';
@@ -112,6 +116,18 @@
             window.location.href = '/attendance/professor_attendance.html';
         });
     </script>
+        document.addEventListener("DOMContentLoaded", () => {
+        const logoutBtn = document.getElementById("logoutBtn");
+        if (!logoutBtn) return;
+
+        logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();  // stop outer <a> from hijacking click
+            ConductorAuth.logout();
+        });
+        });
+    </script>
+
     <script>
         // Dropdown logic
         const profileImg = document.getElementById('dashboardProfileImg');
@@ -131,11 +147,6 @@
         });
         dropdown.addEventListener('mouseenter', function () {
             dropdown.style.display = 'block';
-        });
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.clear();
-            window.location.href = '/login';
         });
     </script>
         <script>
