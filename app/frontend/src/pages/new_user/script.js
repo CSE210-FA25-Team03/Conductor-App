@@ -69,6 +69,14 @@ function redirectToDashboard() {
 }
 
 /**
+ * Redirect to login page
+ */
+function redirectToLogin() {
+  const loginUrl = '/login';
+  window.location.href = loginUrl;
+}
+
+/**
  * Create new user account
  * @param {string} firstName - User's first name
  * @param {string} lastName - User's last name
@@ -156,9 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       if (error.message === 'ACCOUNT_EXISTS') {
         showError('Account already exists. Redirecting to login...');
-        setTimeout(() => {
-          window.location.href = '/login';
-        }, 1000);
+        setTimeout(redirectToLogin, 1000);
       } else {
         showError('Failed to create account. Please try again.');
       }
