@@ -24,6 +24,7 @@
             <header>
                 <button id="backBtn">← Back</button>
                 <h2>CLASS OVERVIEW</h2>
+                <button id="manageStaffBtn" class="ghost-btn manage-btn" style="display:none;">Manage Staff</button>
 
                 <div class="course-info">
                     <div id="courseCode" class="course-line">--</div>
@@ -53,29 +54,32 @@
                 </section>
 
                 <section class="directory-section">
-                    <div class="card">
-                        <div class="card-heading">
-                            <h3>Instructor</h3>
-                            <span class="card-subtitle">Contact details & availability</span>
-                        </div>
-                        <div id="instructorsList" class="staff-list"></div>
-                    </div>
+            <div class="card">
+                <div class="card-heading" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <h3>Instructor</h3>
+                    <span class="card-subtitle">Contact details & availability</span>
+                    <button class="ghost-btn manage-only" data-add-staff="instructors" style="display:none;">+ Add</button>
+                </div>
+                <div id="instructorsList" class="staff-list"></div>
+            </div>
 
-                    <div class="card">
-                        <div class="card-heading">
-                            <h3>Teaching Assistants</h3>
-                            <span class="card-subtitle">Office hours & communication channels</span>
-                        </div>
-                        <div id="tasList" class="staff-list"></div>
-                    </div>
+            <div class="card">
+                <div class="card-heading" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <h3>Teaching Assistants</h3>
+                    <span class="card-subtitle">Office hours & communication channels</span>
+                    <button class="ghost-btn manage-only" data-add-staff="tas" style="display:none;">+ Add</button>
+                </div>
+                <div id="tasList" class="staff-list"></div>
+            </div>
 
-                    <div class="card">
-                        <div class="card-heading">
-                            <h3>Tutors</h3>
-                            <span class="card-subtitle">Specialty areas & schedules</span>
-                        </div>
-                        <div id="tutorsList" class="staff-list"></div>
-                    </div>
+            <div class="card">
+                <div class="card-heading" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                    <h3>Tutors</h3>
+                    <span class="card-subtitle">Specialty areas & schedules</span>
+                    <button class="ghost-btn manage-only" data-add-staff="tutors" style="display:none;">+ Add</button>
+                </div>
+                <div id="tutorsList" class="staff-list"></div>
+            </div>
                 </section>
             </main>
         </div>

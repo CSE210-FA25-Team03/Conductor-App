@@ -74,13 +74,43 @@ document.addEventListener('DOMContentLoaded', () => {
   wireNavigation();
   wireGoogleButton();
   initCalendar();
-  bindForms();
+  if (canManageDirectory()) {
+    bindForms();
+  } else {
+    disableManagementUI();
+  }
   loadClassDirectory();
   loadEvents();
 });
 
+function canManageDirectory() {
+  const role = getUserRole();
+  return role === 'professor' || role === 'teaching assistant';
+}
+
+function disableManagementUI() {
+  const adminBlocks = [
+    '#instructorForm',
+    '#taForm',
+    '#tutorForm',
+    '#team-form',
+    '#event-form',
+    '[data-open-form]',
+    '#addGoogleCalBtn'
+  ];
+  adminBlocks.forEach((sel) => {
+    document.querySelectorAll(sel).forEach((el) => {
+      el.style.display = 'none';
+    });
+  });
+}
+
+function getUserRole() {
+  return (localStorage.getItem('role') || '').trim().toLowerCase();
+}
+
 function getDashboardUrl() {
-  const role = (localStorage.getItem('role') || '').toLowerCase();
+  const role = getUserRole();
   if (role === 'professor') return '/dashboards/professor.html';
   if (role === 'teaching assistant') return '/dashboards/ta.html';
   if (role === 'team_lead') return '/dashboards/team_lead.html';
@@ -474,24 +504,26 @@ function renderEventsList() {
       ${evt.description ? `<span>${evt.description}</span>` : ''}
     `;
 
-    const actions = document.createElement('div');
-    actions.style.display = 'flex';
-    actions.style.gap = '8px';
-    actions.style.marginTop = '8px';
+    if (canManageDirectory()) {
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '8px';
+      actions.style.marginTop = '8px';
 
-    const editBtn = document.createElement('button');
-    editBtn.textContent = 'Edit';
-    editBtn.className = 'ghost-btn';
-    editBtn.addEventListener('click', () => startEditEvent(evt));
+      const editBtn = document.createElement('button');
+      editBtn.textContent = 'Edit';
+      editBtn.className = 'ghost-btn';
+      editBtn.addEventListener('click', () => startEditEvent(evt));
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Remove';
-    deleteBtn.className = 'danger-btn';
-    deleteBtn.addEventListener('click', () => deleteEvent(evt.id));
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'Remove';
+      deleteBtn.className = 'danger-btn';
+      deleteBtn.addEventListener('click', () => deleteEvent(evt.id));
 
-    actions.appendChild(editBtn);
-    actions.appendChild(deleteBtn);
-    card.appendChild(actions);
+      actions.appendChild(editBtn);
+      actions.appendChild(deleteBtn);
+      card.appendChild(actions);
+    }
     container.appendChild(card);
   });
 }

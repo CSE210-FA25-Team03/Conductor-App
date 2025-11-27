@@ -11,15 +11,20 @@ let editingEventId = null;
 document.addEventListener('DOMContentLoaded', () => {
   wireNavigation();
   wireGoogleButton();
+  wireManageStaffButton();
   initCalendar();
   loadClassDirectory();
   loadEvents();
   wireEventFilter();
-  bindEventForm();
+  if (canManageEvents()) {
+    bindEventForm();
+  } else {
+    hideEventForm();
+  }
 });
 
 function getDashboardUrl() {
-  const role = (localStorage.getItem('role') || '').toLowerCase();
+  const role = getUserRole();
   if (role === 'professor') return '/dashboards/professor.html';
   if (role === 'teaching assistant') return '/dashboards/ta.html';
   if (role === 'team_lead') return '/dashboards/team_lead.html';
@@ -34,12 +39,37 @@ function wireNavigation() {
   });
 }
 
+function wireManageStaffButton() {
+  const manageBtn = document.getElementById('manageStaffBtn');
+  if (!manageBtn) return;
+  if (canManageEvents()) {
+    manageBtn.style.display = 'inline-flex';
+    manageBtn.addEventListener('click', () => {
+      window.location.href = '/class_directory/class_directory.html';
+    });
+  } else {
+    manageBtn.style.display = 'none';
+  }
+}
+
 function wireGoogleButton() {
   const googleBtn = document.getElementById('addGoogleCalBtn');
   if (!googleBtn) return;
   googleBtn.addEventListener('click', () => {
     alert('Use your Canvas calendar export or contact staff to add this feed.');
   });
+}
+
+function canManageEvents() {
+  const role = getUserRole();
+  return role === 'professor';
+}
+
+function hideEventForm() {
+  const form = document.getElementById('eventForm');
+  const cancelBtn = document.getElementById('cancelEventEdit');
+  if (form) form.style.display = 'none';
+  if (cancelBtn) cancelBtn.style.display = 'none';
 }
 
 function initCalendar() {
@@ -236,7 +266,7 @@ function renderEventsList() {
       ${evt.description ? `<span>${evt.description}</span>` : ''}
     `;
 
-    if (document.getElementById('eventForm')) {
+    if (canManageEvents() && document.getElementById('eventForm')) {
       const actions = document.createElement('div');
       actions.style.display = 'flex';
       actions.style.gap = '8px';
@@ -274,6 +304,10 @@ function eventColor(type = '') {
   if (normalized === 'assignment') return '#c7f4d1';
   if (normalized === 'exam') return '#ffc9c9';
   return '#e0e7ff';
+}
+
+function getUserRole() {
+  return (localStorage.getItem('role') || '').trim().toLowerCase();
 }
 
 async function deleteEvent(id) {
