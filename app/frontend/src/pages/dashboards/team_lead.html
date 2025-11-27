@@ -72,6 +72,15 @@
                     <button class="card-btn evaluation-trigger" data-member-id="1" aria-expanded="false">View Evaluation</button>
                 </div>
             </article>
+
+            <article class="dashboard-card">
+                <div class="card-icon">🗓️</div>
+                <div class="card-content">
+                    <h2>Meeting Manager</h2>
+                    <p>Schedule meetings, track attendance, and take notes.</p>
+                    <button class="card-btn" id="meetingManagerBtn">Open Meeting Manager</button>
+                </div>
+            </article>
         </section>
 
     </div>
@@ -122,6 +131,11 @@
     <script>
         document.getElementById('viewWorkJournalBtn').addEventListener('click', function() {
         window.location.href = '/work_journal/work_journal.html';
+        });
+    </script>
+    <script>
+        document.getElementById('meetingManagerBtn').addEventListener('click', function() {
+            window.location.href = '/meeting_manager/meeting_manager.html';
         });
     </script>
         <script>

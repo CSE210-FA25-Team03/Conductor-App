@@ -41,6 +41,7 @@ app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tut
 app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
 app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
 app.use('/work_journal', express.static(path.join(__dirname, '../frontend/src/pages/work_journal')));
+app.use('/meeting_manager', express.static(path.join(__dirname, '../frontend/src/pages/meeting_manager')));
 app.use('/group_formation', express.static(path.join(__dirname, '../frontend/src/pages/group_formation')));
 app.use('/evaluation_journal', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_journal')));
 app.use('/class_directory', express.static(path.join(__dirname, '../frontend/src/pages/class_directory')));
@@ -252,6 +253,97 @@ function getTasks() {
 function saveTasks(tasks) {
   const filePath = path.join(__dirname, 'data', 'tasks.json');
   fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2), 'utf8');
+}
+
+function getMeetings() {
+  const filePath = path.join(__dirname, 'data', 'meetings.json');
+  if (!fs.existsSync(filePath)) {
+    return [];
+  }
+  try {
+    const data = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('Error reading meetings.json:', error);
+    return [];
+  }
+}
+
+function saveMeetings(meetings) {
+  const filePath = path.join(__dirname, 'data', 'meetings.json');
+  fs.writeFileSync(filePath, JSON.stringify(meetings, null, 2), 'utf8');
+}
+
+function buildMeetingMinutesMarkdown(meeting) {
+  const info = meeting.meetingInfo || {};
+  const agenda = meeting.agenda || [];
+  const attendance = meeting.attendance || [];
+  const discussion = meeting.discussion || [];
+  const actionItems = meeting.actionItems || [];
+  const otherNotes = meeting.notes || '';
+
+  const lines = [
+    '# Meeting Minutes',
+    '## Meeting Information',
+    `- Meeting Date/Time: ${info.date || 'TBD'}, ${info.time || 'TBD'}`,
+    `- Meeting Purpose: ${info.purpose || 'Not specified'}`,
+    `- Meeting Location: ${info.location || 'Not specified'}`,
+    `- Note Taker: ${info.noteTaker || 'Not recorded'}`,
+    '',
+    '## Attendees',
+    'People who attended:'
+  ];
+
+  const presentMembers = attendance.filter((entry) =>
+    (entry.status || '').toLowerCase() !== 'absent'
+  );
+  if (presentMembers.length === 0) {
+    lines.push('- No attendees recorded');
+  } else {
+    presentMembers.forEach((entry) => {
+      const summary = entry.participation ? ` — ${entry.participation}` : '';
+      lines.push(`- ${entry.name || 'Participant'}${summary}`);
+    });
+  }
+
+  if (meeting.communicationSummary) {
+    lines.push('', '### Participation & Communication Notes', meeting.communicationSummary);
+  }
+
+  lines.push('', '## Agenda Items', '| Item | Description |', '| --- | --- |');
+  if (agenda.length === 0) {
+    lines.push('| Agenda Item | Not recorded |');
+  } else {
+    agenda.forEach((item, index) => {
+      const label = item.title || `Agenda Item ${index + 1}`;
+      const description = (item.bullets && item.bullets.length > 0)
+        ? item.bullets.join('<br>')
+        : (item.description || 'N/A');
+      lines.push(`| ${label} | ${description} |`);
+    });
+  }
+
+  lines.push('', '## Discussion Items', '| Item | Who | Notes |', '| --- | --- | --- |');
+  if (discussion.length === 0) {
+    lines.push('| Discussion | — | Not recorded |');
+  } else {
+    discussion.forEach((item) => {
+      lines.push(`| ${item.item || 'Topic'} | ${item.owner || '—'} | ${item.notes || '—'} |`);
+    });
+  }
+
+  lines.push('', '## Action Items', '| Done? | Item | Responsible | Due Date |', '| --- | --- | --- | --- |');
+  if (actionItems.length === 0) {
+    lines.push('| [ ] | Action Item | — | — |');
+  } else {
+    actionItems.forEach((item) => {
+      lines.push(`| ${item.done ? '[x]' : '[ ]'} | ${item.item || 'Task'} | ${item.responsible || '—'} | ${item.dueDate || 'TBD'} |`);
+    });
+  }
+
+  lines.push('', '## Other Notes & Information', otherNotes || 'No additional notes.');
+
+  return lines.join('\n');
 }
 
 // Helper function to read members
@@ -476,6 +568,91 @@ app.get('/api/evaluations/:memberId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching evaluation:', error);
     res.status(500).json({ error: 'Failed to fetch evaluation' });
+  }
+});
+
+// Meeting minutes endpoints
+app.get('/api/meetings', (req, res) => {
+  const meetings = getMeetings();
+  res.json(meetings);
+});
+
+app.get('/api/meetings/:id', (req, res) => {
+  const meetings = getMeetings();
+  const meeting = meetings.find((entry) => entry.id === req.params.id);
+  if (!meeting) {
+    return res.status(404).json({ error: 'Meeting not found' });
+  }
+  res.json(meeting);
+});
+
+app.post('/api/meetings', (req, res) => {
+  try {
+    const meetings = getMeetings();
+    const members = getMembers();
+    const meetingInfo = req.body.meetingInfo || {};
+    const attendancePayload = Array.isArray(req.body.attendance) ? req.body.attendance : [];
+    const agendaPayload = Array.isArray(req.body.agenda) ? req.body.agenda : [];
+    const discussionPayload = Array.isArray(req.body.discussion) ? req.body.discussion : [];
+    const actionPayload = Array.isArray(req.body.actionItems) ? req.body.actionItems : [];
+
+    const attendance = attendancePayload.map((entry) => {
+      const member = members.find((m) => m.id === entry.memberId);
+      return {
+        memberId: entry.memberId,
+        name: member?.name || entry.name || 'Participant',
+        role: member?.role || entry.role || '',
+        status: entry.status || 'Present',
+        participation: entry.participation || ''
+      };
+    });
+
+    const agenda = agendaPayload.map((item, index) => ({
+      title: item.title || `Agenda Item ${index + 1}`,
+      description: item.description || '',
+      bullets: Array.isArray(item.bullets) ? item.bullets : []
+    }));
+
+    const discussion = discussionPayload.map((item) => ({
+      item: item.item || '',
+      owner: item.owner || '',
+      notes: item.notes || ''
+    }));
+
+    const actionItems = actionPayload.map((item) => ({
+      item: item.item || '',
+      responsible: item.responsible || '',
+      dueDate: item.dueDate || '',
+      done: Boolean(item.done)
+    }));
+
+    const meetingRecord = {
+      id: `meeting-${Date.now()}`,
+      meetingInfo: {
+        date: meetingInfo.date || '',
+        time: meetingInfo.time || '',
+        purpose: meetingInfo.purpose || '',
+        location: meetingInfo.location || '',
+        noteTaker: meetingInfo.noteTaker || ''
+      },
+      attendance,
+      agenda,
+      discussion,
+      actionItems,
+      communicationSummary: req.body.communicationSummary || '',
+      notes: req.body.notes || '',
+      createdAt: new Date().toISOString()
+    };
+
+    meetingRecord.markdown = buildMeetingMinutesMarkdown(meetingRecord);
+
+    meetings.unshift(meetingRecord);
+    saveMeetings(meetings);
+
+    res.status(201).json(meetingRecord);
+  } catch (error) {
+    console.error('Error saving meeting:', error);
+    res.status(500).json({ error: 'Failed to save meeting' });
   }
 });
 

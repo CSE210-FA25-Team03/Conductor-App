@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Meeting Manager | Conductor</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="page">
+        <header class="page-header">
+            <div>
+                <h1>Meeting Manager</h1>
+                <p class="subtitle">Schedule meetings, track attendance, and take notes.</p>
+            </div>
+            <div class="header-actions">
+                <a href="/dashboards/student.html" class="ghost-btn">Back to dashboards</a>
+            </div>
+        </header>
+
+        <form id="meetingForm" class="card-grid">
+            <section class="card">
+                <h2>Meeting Information</h2>
+                <div class="form-grid">
+                    <label>
+                        Meeting date
+                        <input type="date" id="meetingDate" required />
+                    </label>
+                    <label>
+                        Meeting time
+                        <input type="time" id="meetingTime" required />
+                    </label>
+                    <label>
+                        Location / Room
+                        <input type="text" id="meetingLocation" placeholder="Design Studio" />
+                    </label>
+                    <label>
+                        Purpose
+                        <input type="text" id="meetingPurpose" placeholder="Sprint planning" />
+                    </label>
+                    <label>
+                        Note taker
+                        <input type="text" id="noteTaker" placeholder="Jordan Lee" />
+                    </label>
+                </div>
+            </section>
+
+            <section class="card">
+                <div class="card-heading">
+                    <div>
+                        <h2>Attendance & Participation</h2>
+                        <p>Encourage every teammate to contribute. Track who attended and capture participation highlights.</p>
+                    </div>
+                    <button type="button" id="toggleAllAttendance" class="ghost-btn">Mark all present</button>
+                </div>
+                <div id="attendanceList" class="attendance-list">
+                    <p class="muted">Loading roster…</p>
+                </div>
+                <label class="stacked">
+                    Participation summary
+                    <textarea id="communicationNotes" rows="3" placeholder="Shout-outs, blockers, reminders to engage quieter members"></textarea>
+                </label>
+            </section>
+
+            <section class="card">
+                <div class="card-heading">
+                    <h2>Agenda Items</h2>
+                    <button type="button" class="ghost-btn" id="addAgenda">Add agenda item</button>
+                </div>
+                <div id="agendaContainer" class="stacked-list"></div>
+            </section>
+
+            <section class="card">
+                <div class="card-heading">
+                    <h2>Discussion Items</h2>
+                    <button type="button" class="ghost-btn" id="addDiscussion">Add discussion item</button>
+                </div>
+                <div id="discussionContainer" class="stacked-list"></div>
+            </section>
+
+            <section class="card">
+                <div class="card-heading">
+                    <h2>Action Items</h2>
+                    <button type="button" class="ghost-btn" id="addAction">Add action item</button>
+                </div>
+                <div id="actionContainer" class="stacked-list"></div>
+            </section>
+
+            <section class="card">
+                <h2>Other Notes</h2>
+                <textarea id="otherNotes" rows="4" placeholder="Reminders, resources, follow-up logistics"></textarea>
+            </section>
+
+            <section class="card form-actions">
+                <p id="formMessage" class="muted"></p>
+                <button type="submit" class="primary-btn">Save meeting minutes</button>
+            </section>
+        </form>
+
+        <section class="card">
+            <div class="card-heading">
+                <h2>Meeting minutes preview</h2>
+                <button type="button" class="ghost-btn" id="copyPreview">Copy markdown</button>
+            </div>
+            <textarea id="minutesPreview" class="markdown-preview" rows="12" readonly placeholder="Submit a meeting to generate markdown minutes."></textarea>
+        </section>
+
+        <section class="card">
+            <h2>Recent meetings</h2>
+            <div id="meetingsList" class="meetings-list">
+                <p class="muted">No meetings recorded yet.</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
