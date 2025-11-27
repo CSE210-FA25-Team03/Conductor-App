@@ -116,18 +116,18 @@
             // Dropdown logic
             const profileImg = document.getElementById('dashboardProfileImg');
             const dropdown = document.getElementById('profileDropdown');
-            profileImg.addEventListener('mouseenter', () => {
+            profileImg.addEventListener('mouseenter', function () {
                 dropdown.style.display = 'block';
             });
-            profileImg.addEventListener('mouseleave', () => {
-                setTimeout(() => {
+            profileImg.addEventListener('mouseleave', function () {
+                setTimeout(function () {
                     if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
                 }, 150);
             });
-            dropdown.addEventListener('mouseleave', () => {
+            dropdown.addEventListener('mouseleave', function () {
                 dropdown.style.display = 'none';
             });
-            dropdown.addEventListener('mouseenter', () => {
+            dropdown.addEventListener('mouseenter', function () {
                 dropdown.style.display = 'block';
             });
             document.getElementById('logoutBtn').addEventListener('click', function(e) {
