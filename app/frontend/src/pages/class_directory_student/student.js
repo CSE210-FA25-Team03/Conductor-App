@@ -157,7 +157,7 @@ function resetEventForm() {
   if (cancelBtn) cancelBtn.style.display = 'none';
   const titleEl = document.getElementById('eventFormTitle');
   if (titleEl) titleEl.textContent = 'Add Event';
-  const submitBtn = document.querySelector('#eventForm button[type=\"submit\"]');
+  const submitBtn = document.querySelector('#eventForm button[type="submit"]');
   if (submitBtn) submitBtn.textContent = 'Save Event';
 }
 
@@ -174,7 +174,7 @@ function startEditEvent(evt) {
   if (cancelBtn) cancelBtn.style.display = 'inline-flex';
   const titleEl = document.getElementById('eventFormTitle');
   if (titleEl) titleEl.textContent = 'Edit Event';
-  const submitBtn = document.querySelector('#eventForm button[type=\"submit\"]');
+  const submitBtn = document.querySelector('#eventForm button[type="submit"]');
   if (submitBtn) submitBtn.textContent = 'Update Event';
 }
 

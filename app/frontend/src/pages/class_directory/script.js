@@ -317,7 +317,7 @@ function bindEventForm() {
 function resetEventForm(form) {
   editingEventId = null;
   form.reset();
-  const submitBtn = form.querySelector('button[type=\"submit\"]');
+  const submitBtn = form.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = 'Save Event';
 }
 
@@ -330,7 +330,7 @@ function startEditEvent(evt) {
   document.getElementById('eventDueDate').value = evt.dueDate ? new Date(evt.dueDate).toISOString().slice(0, 16) : '';
   const typeSelect = document.getElementById('eventType');
   if (typeSelect) typeSelect.value = evt.type || 'Other';
-  const submitBtn = form.querySelector('button[type=\"submit\"]');
+  const submitBtn = form.querySelector('button[type="submit"]');
   if (submitBtn) submitBtn.textContent = 'Update Event';
 }
 
