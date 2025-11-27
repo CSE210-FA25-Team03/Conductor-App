@@ -166,13 +166,30 @@ function renderStudentsList() {
     }
 
     if (!currentUserMember) {
-      container.innerHTML = `
-        <div style="padding: 20px; text-align: center;">
-          <p style="color: #d00; margin-bottom: 8px;">Unable to find your student record.</p>
-          <p style="color: #666; font-size: 13px;">Your name: <strong>${userFullName || 'Not provided'}</strong></p>
-          <p style="color: #666; font-size: 13px;">Please ensure your name matches the class roster or contact support.</p>
-        </div>
-      `;
+      const errorDiv = document.createElement('div');
+      errorDiv.style.padding = '20px';
+      errorDiv.style.textAlign = 'center';
+      
+      const errorMsg = document.createElement('p');
+      errorMsg.style.color = '#d00';
+      errorMsg.style.marginBottom = '8px';
+      errorMsg.textContent = 'Unable to find your student record.';
+      
+      const nameMsg = document.createElement('p');
+      nameMsg.style.color = '#666';
+      nameMsg.style.fontSize = '13px';
+      nameMsg.textContent = `Your name: ${userFullName || 'Not provided'}`;
+      
+      const helpMsg = document.createElement('p');
+      helpMsg.style.color = '#666';
+      helpMsg.style.fontSize = '13px';
+      helpMsg.textContent = 'Please ensure your name matches the class roster or contact support.';
+      
+      errorDiv.appendChild(errorMsg);
+      errorDiv.appendChild(nameMsg);
+      errorDiv.appendChild(helpMsg);
+      container.innerHTML = '';
+      container.appendChild(errorDiv);
       return;
     }
 
@@ -184,20 +201,42 @@ function renderStudentsList() {
     const teamId = currentUserMember.teamId || 1;
     const team = allTeams.find(t => t.id === teamId) || { name: `Team ${teamId}`, id: teamId };
 
-    studentItem.innerHTML = `
-      <input type="checkbox" class="student-checkbox" data-member-id="${currentUserMember.id}" checked disabled>
-      <div class="student-info">
-        <span class="student-name">${currentUserMember.name} (You)</span>
-        <span class="student-team">${team.name || `Team ${teamId}`}</span>
-      </div>
-      <select class="status-select" data-member-id="${currentUserMember.id}">
-        <option value="present">Present</option>
-        <option value="absent">Absent</option>
-        <option value="late">Late</option>
-        <option value="excused">Excused</option>
-      </select>
-    `;
-
+    // Create elements safely without innerHTML
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'student-checkbox';
+    checkbox.dataset.memberId = String(currentUserMember.id);
+    checkbox.checked = true;
+    checkbox.disabled = true;
+    
+    const studentInfo = document.createElement('div');
+    studentInfo.className = 'student-info';
+    
+    const studentName = document.createElement('span');
+    studentName.className = 'student-name';
+    studentName.textContent = `${currentUserMember.name} (You)`;
+    
+    const studentTeam = document.createElement('span');
+    studentTeam.className = 'student-team';
+    studentTeam.textContent = team.name || `Team ${teamId}`;
+    
+    studentInfo.appendChild(studentName);
+    studentInfo.appendChild(studentTeam);
+    
+    const statusSelect = document.createElement('select');
+    statusSelect.className = 'status-select';
+    statusSelect.dataset.memberId = String(currentUserMember.id);
+    
+    ['present', 'absent', 'late', 'excused'].forEach(status => {
+      const option = document.createElement('option');
+      option.value = status;
+      option.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+      statusSelect.appendChild(option);
+    });
+    
+    studentItem.appendChild(checkbox);
+    studentItem.appendChild(studentInfo);
+    studentItem.appendChild(statusSelect);
     container.appendChild(studentItem);
     return;
   }
@@ -223,12 +262,24 @@ function renderStudentsList() {
     }
 
     if (!currentUserMember) {
-      container.innerHTML = `
-        <div style="padding: 20px; text-align: center;">
-          <p style="color: #d00; margin-bottom: 8px;">Unable to find your team lead record.</p>
-          <p style="color: #666; font-size: 13px;">Your name: <strong>${userFullName || 'Not provided'}</strong></p>
-        </div>
-      `;
+      const errorDiv = document.createElement('div');
+      errorDiv.style.padding = '20px';
+      errorDiv.style.textAlign = 'center';
+      
+      const errorMsg = document.createElement('p');
+      errorMsg.style.color = '#d00';
+      errorMsg.style.marginBottom = '8px';
+      errorMsg.textContent = 'Unable to find your team lead record.';
+      
+      const nameMsg = document.createElement('p');
+      nameMsg.style.color = '#666';
+      nameMsg.style.fontSize = '13px';
+      nameMsg.textContent = `Your name: ${userFullName || 'Not provided'}`;
+      
+      errorDiv.appendChild(errorMsg);
+      errorDiv.appendChild(nameMsg);
+      container.innerHTML = '';
+      container.appendChild(errorDiv);
       return;
     }
 
@@ -236,7 +287,13 @@ function renderStudentsList() {
     const teamId = currentUserMember.teamId;
     
     if (!teamId) {
-      container.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">You are not assigned to a team.</p>';
+      const noTeamMsg = document.createElement('p');
+      noTeamMsg.style.padding = '20px';
+      noTeamMsg.style.textAlign = 'center';
+      noTeamMsg.style.color = '#666';
+      noTeamMsg.textContent = 'You are not assigned to a team.';
+      container.innerHTML = '';
+      container.appendChild(noTeamMsg);
       return;
     }
 
@@ -248,7 +305,13 @@ function renderStudentsList() {
     const teamMembers = allMembers.filter(m => m.teamId === teamId);
 
     if (teamMembers.length === 0) {
-      container.innerHTML = '<p style="padding: 20px; text-align: center; color: #666;">No team members found for your team.</p>';
+      const noMembersMsg = document.createElement('p');
+      noMembersMsg.style.padding = '20px';
+      noMembersMsg.style.textAlign = 'center';
+      noMembersMsg.style.color = '#666';
+      noMembersMsg.textContent = 'No team members found for your team.';
+      container.innerHTML = '';
+      container.appendChild(noMembersMsg);
       return;
     }
 
@@ -259,19 +322,41 @@ function renderStudentsList() {
       // Mark team lead with "(You)" label
       const isTeamLead = member.id === currentUserMember.id;
       
-      studentItem.innerHTML = `
-        <input type="checkbox" class="student-checkbox" data-member-id="${member.id}" checked>
-        <div class="student-info">
-          <span class="student-name">${member.name}${isTeamLead ? ' (You)' : ''}</span>
-          <span class="student-team">${teamName}</span>
-        </div>
-        <select class="status-select" data-member-id="${member.id}">
-          <option value="present">Present</option>
-          <option value="absent">Absent</option>
-          <option value="late">Late</option>
-          <option value="excused">Excused</option>
-        </select>
-      `;
+      // Create elements safely without innerHTML
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.className = 'student-checkbox';
+      checkbox.dataset.memberId = String(member.id);
+      checkbox.checked = true;
+      
+      const studentInfo = document.createElement('div');
+      studentInfo.className = 'student-info';
+      
+      const studentName = document.createElement('span');
+      studentName.className = 'student-name';
+      studentName.textContent = `${member.name}${isTeamLead ? ' (You)' : ''}`;
+      
+      const studentTeam = document.createElement('span');
+      studentTeam.className = 'student-team';
+      studentTeam.textContent = teamName;
+      
+      studentInfo.appendChild(studentName);
+      studentInfo.appendChild(studentTeam);
+      
+      const statusSelect = document.createElement('select');
+      statusSelect.className = 'status-select';
+      statusSelect.dataset.memberId = String(member.id);
+      
+      ['present', 'absent', 'late', 'excused'].forEach(status => {
+        const option = document.createElement('option');
+        option.value = status;
+        option.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        statusSelect.appendChild(option);
+      });
+      
+      studentItem.appendChild(checkbox);
+      studentItem.appendChild(studentInfo);
+      studentItem.appendChild(statusSelect);
 
       container.appendChild(studentItem);
     });

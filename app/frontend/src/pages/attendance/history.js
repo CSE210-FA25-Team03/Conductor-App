@@ -293,27 +293,29 @@ function renderHistory(records) {
         day: 'numeric' 
       });
       
-      // Build display info
-      const displayInfo = [];
-      displayInfo.push(`<strong>Type:</strong> ${typeLabels[record.type] || record.type}`);
-      displayInfo.push(`<strong>Date:</strong> ${dateStr}${record.time ? ' at ' + record.time : ''}`);
-      displayInfo.push(`<strong>Created by:</strong> ${record.createdBy?.name || 'Unknown'}`);
-      if (teamNames) {
-        displayInfo.push(`<strong>Team(s):</strong> ${teamNames}`);
-      }
+      // Build display info with proper escaping
+      const typeLabel = escapeHtml(typeLabels[record.type] || record.type);
+      const escapedDateStr = escapeHtml(dateStr);
+      const escapedTime = record.time ? escapeHtml(record.time) : '';
+      const escapedCreator = escapeHtml(record.createdBy?.name || 'Unknown');
+      const escapedTeamNames = teamNames ? escapeHtml(teamNames) : '';
+      const createdAtStr = new Date(record.createdAt).toLocaleString();
       
       return `
         <div class="history-item limited-view">
           <div class="history-item-header">
             <div class="history-item-info">
-              <h3 class="history-item-title">${typeLabels[record.type] || record.type}</h3>
+              <h3 class="history-item-title">${typeLabel}</h3>
               <div style="margin-top: 8px;">
-                ${displayInfo.map(info => `<p class="history-item-meta" style="margin: 4px 0;">${info}</p>`).join('')}
+                <p class="history-item-meta" style="margin: 4px 0;"><strong>Type:</strong> ${typeLabel}</p>
+                <p class="history-item-meta" style="margin: 4px 0;"><strong>Date:</strong> ${escapedDateStr}${escapedTime ? ' at ' + escapedTime : ''}</p>
+                <p class="history-item-meta" style="margin: 4px 0;"><strong>Created by:</strong> ${escapedCreator}</p>
+                ${escapedTeamNames ? `<p class="history-item-meta" style="margin: 4px 0;"><strong>Team(s):</strong> ${escapedTeamNames}</p>` : ''}
               </div>
             </div>
           </div>
           <div class="history-item-footer">
-            <span style="font-size: 11px; color: #9ca3af;">Created: ${new Date(record.createdAt).toLocaleString()}</span>
+            <span style="font-size: 11px; color: #9ca3af;">Created: ${escapeHtml(createdAtStr)}</span>
           </div>
         </div>
       `;
@@ -335,17 +337,28 @@ function renderHistory(records) {
       }
     }
 
+    // Escape record.id to prevent XSS
+    const escapedRecordId = escapeHtml(record.id);
+    const onClickAttr = canEdit ? `onclick="openEditModal('${escapedRecordId}')"` : '';
+    
+    // Escape all user-provided data
+    const escapedType = escapeHtml(typeLabels[record.type] || record.type);
+    const escapedDate = escapeHtml(date);
+    const escapedTime = record.time ? escapeHtml(record.time) : '';
+    const escapedTitle = record.title ? escapeHtml(record.title) : '';
+    const escapedTeamName = escapeHtml(teamName);
+    
     return `
-      <div class="history-item ${canEdit ? 'editable' : ''}" data-record-id="${record.id}" ${canEdit ? 'onclick="openEditModal(\'' + record.id + '\')"' : ''}>
+      <div class="history-item ${canEdit ? 'editable' : ''}" data-record-id="${escapedRecordId}" ${onClickAttr}>
         <div class="history-item-header">
           <div class="history-item-info">
             <h3 class="history-item-title">
-              ${typeLabels[record.type] || record.type}
+              ${escapedType}
               ${canEdit ? '<span class="edit-badge">Click to edit</span>' : ''}
             </h3>
-            <p class="history-item-meta">${date}${record.time ? ' at ' + record.time : ''}</p>
-            ${record.title ? `<p class="history-item-meta" style="margin-top: 4px;">${record.title}</p>` : ''}
-            <p class="history-item-meta" style="margin-top: 4px;">Team: ${teamName}</p>
+            <p class="history-item-meta">${escapedDate}${escapedTime ? ' at ' + escapedTime : ''}</p>
+            ${escapedTitle ? `<p class="history-item-meta" style="margin-top: 4px;">${escapedTitle}</p>` : ''}
+            <p class="history-item-meta" style="margin-top: 4px;">Team: ${escapedTeamName}</p>
           </div>
           <div class="history-item-stats">
             <p class="history-item-percentage">${percentage}%</p>
@@ -355,7 +368,7 @@ function renderHistory(records) {
         ${record.notes ? `<div class="history-item-notes">${escapeHtml(record.notes)}</div>` : ''}
         <div class="history-item-footer">
           <div class="history-item-author">
-            <span>Created by: <strong>${record.createdBy?.name || 'Unknown'}</strong></span>
+            <span>Created by: <strong>${escapeHtml(record.createdBy?.name || 'Unknown')}</strong></span>
             ${isCreator ? '<span class="edit-badge">Your record</span>' : ''}
           </div>
           <span>${new Date(record.createdAt).toLocaleString()}</span>
