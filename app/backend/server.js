@@ -44,7 +44,7 @@ app.use('/work_journal', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/group_formation', express.static(path.join(__dirname, '../frontend/src/pages/group_formation')));
 app.use('/evaluation_journal', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_journal')));
 app.use('/class_config', express.static(path.join(__dirname, '../frontend/src/pages/class_config')));
-
+app.use('/attendance', express.static(path.join(__dirname, '../frontend/src/pages/attendance')));
 app.use('/class_directory', express.static(path.join(__dirname, '../frontend/src/pages/class_directory')));
 app.use(
   '/class_directory_student',

@@ -41,21 +41,37 @@
             <label>Last Name</label>
             <input type="text" id="profileLastName" value="" disabled />
           </div>
+          <div class="info-item">
+            <label>Pronoun</label>
+            <input type="text" id="profilePronoun" value="" disabled />
+          </div>
           <div class="info-item full">
             <label>Role</label>
             <input type="text" id="profileRoleField" value="" disabled />
+          </div>
+          <div class="info-item full">
+            <label>Public Link</label>
+            <input type="text" id="profilePublicLink" value="" disabled />
           </div>
         </div>
         <button class="edit-btn">Edit Information</button>
       </div>
 
       <div class="info-card">
-        <h2>Contact</h2>
+        <h2>Contact/Availability</h2>
         <div class="info-grid">
           <div class="info-item full">
             <label>Email</label>
             <input type="email" id="profileEmail" value="" disabled />
           </div>
+          <div class="info-item">
+            <label>Phone Number</label>
+            <input type="text" id="profilePhone" value="" disabled />
+          </div>
+            <div class="info-item full">
+              <label>Availability Time</label>
+              <textarea id="profileAvailability" placeholder="Enter availability here..."></textarea>
+            </div>
         </div>
         <button class="edit-btn">Edit Contact</button>
       </div>
@@ -97,14 +113,20 @@
     document.querySelectorAll('.edit-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const section = btn.closest('.info-card');
-        const inputs = section.querySelectorAll('input');
+        const inputs = section.querySelectorAll('input, textarea');
         const editing = btn.textContent === 'Save';
         if (editing) {
           inputs.forEach(i => i.disabled = true);
-          btn.textContent = 'Edit Information';
+          btn.textContent = section.querySelector('h2').textContent.includes('Contact') ? 'Edit Contact' : 'Edit Information';
           btn.classList.remove('saving');
         } else {
-          inputs.forEach(i => i.disabled = false);
+          inputs.forEach(i => {
+            if (i.id === 'profileRoleField' || i.id === 'profileEmail') {
+              i.disabled = true;
+            } else {
+              i.disabled = false;
+            }
+          });
           btn.textContent = 'Save';
           btn.classList.add('saving');
         }
@@ -113,11 +135,11 @@
 
     // Populate profile info from localStorage
     window.addEventListener('DOMContentLoaded', function() {
-      var firstName = localStorage.getItem('firstName') || 'Avery';
-      var lastName = localStorage.getItem('lastName') || 'Lin';
+      var firstName = localStorage.getItem('firstName') || '';
+      var lastName = localStorage.getItem('lastName') || '';
       var role = localStorage.getItem('role') || 'Professor';
       var email = localStorage.getItem('email') || 'avery.lin@university.edu';
-      document.getElementById('profileFullName').textContent = firstName + ' ' + lastName;
+      document.getElementById('profileFullName').textContent = (firstName && lastName) ? (firstName + ' ' + lastName) : '';
       document.getElementById('profileFirstName').value = firstName;
       document.getElementById('profileLastName').value = lastName;
       document.getElementById('profileRole').textContent = role + ' · CSE 210';

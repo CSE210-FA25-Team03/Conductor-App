@@ -1,3 +1,110 @@
+// Table-based group rendering logic for group formation page
+function renderGroupsTable(groups) {
+  const groupsTableBody = document.getElementById("groupsTableBody");
+  if (!groupsTableBody) return;
+  groupsTableBody.innerHTML = "";
+
+  if (!groups || !groups.length) {
+    groupsTableBody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;color:#777;font-size:0.9rem;">No groups yet. Form groups using the buttons above.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  groups.forEach((g, i) => {
+    (g.members || g.students || []).forEach((s) => {
+      const tr = document.createElement("tr");
+      const nameTd = document.createElement("td");
+      nameTd.textContent = s.name || s.email || "";
+      const emailTd = document.createElement("td");
+      emailTd.textContent = s.email || "";
+      const pidTd = document.createElement("td");
+      pidTd.textContent = s.pid || "";
+      const groupTd = document.createElement("td");
+      groupTd.textContent = `Team ${g.id || i + 1}`;
+      const roleTd = document.createElement("td");
+      roleTd.textContent = s.role || "member";
+      const taTd = document.createElement("td");
+      taTd.textContent = g.taEmail || "";
+      tr.appendChild(nameTd);
+      tr.appendChild(emailTd);
+      tr.appendChild(pidTd);
+      tr.appendChild(groupTd);
+      tr.appendChild(roleTd);
+      tr.appendChild(taTd);
+      groupsTableBody.appendChild(tr);
+    });
+  });
+}
+
+function assignTAsToGroups(groups, tasList) {
+  if (!tasList || !tasList.length) return groups;
+  return groups.map((g, idx) => {
+    const ta = tasList[idx % tasList.length];
+    return { ...g, taEmail: ta };
+  });
+}
+
+function generateGroups() {
+  const size = Number(document.getElementById("groupSize").value);
+  if (!size || size <= 0) {
+    alert("Enter a valid group size!");
+    return;
+  }
+  // Use dummyStudents for demo; replace with real students if available
+  // Use skills for weighting
+  // For demo, assign all students as 'member', assign TAs
+  // Ensure students have .skills property for algorithm.js
+  const students = dummyStudents.map(s => ({
+    ...s,
+    skills: Object.keys(s.ratings || {})
+  }));
+  const tasList = dummyTAs.map(ta => ta.toLowerCase().replace(/ /g, ".") + "@school.edu");
+  let groups = window.GroupAlgo.formGroups(students, size, skills);
+  groups = assignTAsToGroups(groups, tasList);
+  // Flatten for table rendering
+  const tableGroups = groups.map(g => ({
+    id: g.id,
+    members: g.students.map(s => ({
+      name: s.name,
+      email: s.email,
+      pid: s.pid || "",
+      role: s.role || "member"
+    })),
+    taEmail: g.taEmail
+  }));
+  renderGroupsTable(tableGroups);
+}
+document.getElementById("generateBtn").addEventListener("click", generateGroups);
+
+function generateRandomGroups() {
+  const size = Number(document.getElementById("groupSize").value);
+  if (!size || size <= 0) {
+    alert("Enter a valid group size!");
+    return;
+  }
+  const students = dummyStudents.map(s => ({
+    ...s,
+    skills: Object.keys(s.ratings || {})
+  }));
+  const tasList = dummyTAs.map(ta => ta.toLowerCase().replace(/ /g, ".") + "@school.edu");
+  let groups = window.GroupAlgo.formGroupsRandom ? window.GroupAlgo.formGroupsRandom(students, size) : [];
+  groups = assignTAsToGroups(groups, tasList);
+  const tableGroups = groups.map(g => ({
+    id: g.id,
+    members: g.students.map(s => ({
+      name: s.name,
+      email: s.email,
+      pid: s.pid || "",
+      role: s.role || "member"
+    })),
+    taEmail: g.taEmail
+  }));
+  renderGroupsTable(tableGroups);
+}
+document.getElementById("randomizeBtn").addEventListener("click", generateRandomGroups);
 /* =======================================================
    Dummy Data (fallback only)
 ======================================================= */
