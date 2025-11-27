@@ -1,5 +1,3 @@
-/* global Chart */
-
 let allRecords = [];
 let allTeams = [];
 let allMembers = [];
