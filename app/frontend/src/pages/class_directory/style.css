@@ -274,6 +274,17 @@ header {
     gap: 4px;
 }
 
+.event-card .event-type {
+    display: inline-flex;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #dbe2ff;
+    background: #eef2ff;
+    color: #1f2b50;
+}
+
 .event-card strong {
     font-size: 15px;
 }

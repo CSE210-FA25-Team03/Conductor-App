@@ -1,0 +1,107 @@
+/* Shared class-directory navigation + CTA styles */
+.class-directory-cta {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  background: #f6f8ff;
+  color: #2643a0;
+  border: 2px solid #2643a0;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.25;
+  text-decoration: none;
+  box-shadow: 0 8px 20px rgba(38, 67, 160, 0.15);
+  z-index: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 96px;
+  text-align: center;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+
+.class-directory-cta:hover {
+  transform: translateY(-1px);
+  background: #e7ecff;
+  box-shadow: 0 10px 26px rgba(38, 67, 160, 0.2);
+}
+
+.class-shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+}
+
+.class-sidebar {
+  background: #f8faff;
+  border-right: 1px solid #e3e7fb;
+  padding: 28px 18px;
+  box-sizing: border-box;
+}
+
+.class-sidebar .side-title {
+  font-weight: 800;
+  color: #1f2b50;
+  margin-bottom: 14px;
+  letter-spacing: 0.04em;
+}
+
+.class-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.class-nav-item {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: #27304f;
+  text-decoration: none;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.class-nav-item:hover {
+  background: #eef2ff;
+  border-color: #d7defc;
+}
+
+.class-nav-item.active {
+  background: #2643a0;
+  color: #fff;
+  border-color: #2643a0;
+  box-shadow: 0 10px 24px rgba(38, 67, 160, 0.28);
+}
+
+.class-main {
+  background: radial-gradient(circle at top, #f7f9ff, #eef1fb 60%);
+  min-height: 100vh;
+}
+
+@media (max-width: 960px) {
+  .class-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .class-sidebar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    overflow-x: auto;
+  }
+
+  .class-nav {
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .class-nav-item {
+    white-space: nowrap;
+  }
+}

@@ -1,0 +1,232 @@
+body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+.class-main header {
+  background: #3b6ff5;
+  color: white;
+  padding: 14px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.class-main header h2 {
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.course-info {
+  background: white;
+  color: #3b6ff5;
+  border-radius: 8px;
+  padding: 6px 12px;
+  text-align: right;
+  border: 2px solid #3b6ff5;
+  line-height: 1.2;
+  font-weight: bold;
+  min-width: 104px;
+}
+
+.page-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 26px;
+  max-width: 1100px;
+  margin: 0 auto 60px;
+}
+
+.people-card,
+.calendar-card {
+    background: #fff;
+    padding: 20px;
+    border-radius: 20px;
+  box-shadow: 0 18px 45px rgba(63, 77, 113, 0.18);
+}
+
+.people-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.pill-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  border: 1px solid #d6defc;
+  background: #f4f7ff;
+  color: #1f2b50;
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pill.active {
+  background: #2643a0;
+  color: #fff;
+  border-color: #2643a0;
+}
+
+.people-search {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.people-search input,
+.people-search select {
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #c8cee8;
+  background: #fff;
+  font-size: 14px;
+}
+
+.people-table {
+  border: 1px solid #e2e6ff;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #fdfdff;
+}
+
+.people-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #e8ecff;
+}
+
+.people-row:last-child {
+  border-bottom: none;
+}
+
+.people-row .person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b6ff5, #66b1ff);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    border: 2px solid #e8ecff;
+    object-fit: cover;
+}
+
+.person-name {
+  display: flex;
+  flex-direction: column;
+}
+
+.person-name strong {
+  font-size: 15px;
+  color: #1f2b50;
+}
+
+.person-name span {
+  font-size: 12px;
+  color: #4e5d80;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  background: #eef2ff;
+  color: #1f2b50;
+  border: 1px solid #dbe2ff;
+}
+
+.calendar-headline {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.event-type-filter {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.event-type-filter select {
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #c8cee8;
+}
+
+.calendar-surface {
+  background: #fdfdff;
+  border: 1px solid #e5e8f5;
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.event-card .event-type {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid #dbe2ff;
+  background: #eef2ff;
+  color: #1f2b50;
+  width: fit-content;
+}
+
+.page-hint {
+    margin: 0 0 10px;
+    color: #4e5d80;
+}
+
+.manage-btn {
+    margin-left: auto;
+}
+
+@media (max-width: 960px) {
+  .people-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .people-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .people-search {
+    width: 100%;
+  }
+
+  .people-search input,
+  .people-search select {
+    flex: 1;
+  }
+}
