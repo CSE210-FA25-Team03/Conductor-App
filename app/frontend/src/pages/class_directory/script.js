@@ -77,9 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
   loadClassDirectory();
   loadEvents();
   
-  // Initialize attendance section
-  if (typeof initAttendanceSection === 'function') {
-    initAttendanceSection();
+  // Initialize attendance section (defined in attendance-charts.js)
+  if (typeof window.initAttendanceSection === 'function') {
+    window.initAttendanceSection();
   }
 });
 

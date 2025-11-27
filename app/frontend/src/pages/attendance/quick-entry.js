@@ -1,4 +1,3 @@
-/* global fetch */
 
 let allMembers = [];
 let allTeams = [];

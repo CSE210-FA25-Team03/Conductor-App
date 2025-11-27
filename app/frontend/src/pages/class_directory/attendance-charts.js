@@ -1,13 +1,13 @@
-/* global Chart, fetch */
+/* global Chart */
 
 let teamComparisonChart = null;
 let teamTrendChart = null;
 let classTrendChart = null;
 let currentUserTeamId = null;
-let allTeams = [];
 let allMembers = [];
 
-async function initAttendanceSection() {
+// Make initAttendanceSection globally accessible for class_directory/script.js
+window.initAttendanceSection = async function initAttendanceSection() {
   const role = localStorage.getItem('role');
   
   // Load user's team information
@@ -32,10 +32,7 @@ async function initAttendanceSection() {
       }
     }
 
-    const teamsResponse = await fetch('/api/teams');
-    if (teamsResponse.ok) {
-      allTeams = await teamsResponse.json();
-    }
+    // Teams are loaded as needed in individual functions
   } catch (error) {
     console.error('Error loading user data:', error);
   }
@@ -420,7 +417,7 @@ function getDateRange(timeRange) {
 
 function formatDateLabel(dateStr) {
   if (dateStr.includes('W')) {
-    const [year, week] = dateStr.split('-W');
+    const [, week] = dateStr.split('-W');
     return `Week ${week}`;
   } else if (dateStr.includes('-')) {
     const [year, month] = dateStr.split('-');

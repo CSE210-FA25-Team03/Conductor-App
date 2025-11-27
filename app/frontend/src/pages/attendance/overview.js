@@ -1,4 +1,4 @@
-/* global Chart, fetch */
+/* global Chart */
 
 let teamComparisonChart = null;
 let teamTrendChart = null;
@@ -360,9 +360,9 @@ async function loadTeamComparison(teamIdFilter) {
     if (teamIdFilter && data.teamComparison.length === 0) {
       const canvas = document.getElementById('teamComparisonChart');
       if (canvas) {
-        const ctx = canvas.getContext('2d');
         if (teamComparisonChart) {
           teamComparisonChart.destroy();
+          teamComparisonChart = null;
         }
         // Show empty chart or message
         return;
@@ -456,9 +456,9 @@ async function loadTeamTrendChart(teamIdFilter) {
     if (data.teams.length === 0) {
       const canvas = document.getElementById('teamTrendChart');
       if (canvas) {
-        const ctx = canvas.getContext('2d');
         if (teamTrendChart) {
           teamTrendChart.destroy();
+          teamTrendChart = null;
         }
       }
       return;
@@ -707,7 +707,7 @@ function getDateRange(timeRange) {
 function formatDateLabel(dateStr) {
   // Format "2025-W5" or "2025-01" to readable format
   if (dateStr.includes('W')) {
-    const [year, week] = dateStr.split('-W');
+    const [, week] = dateStr.split('-W');
     return `Week ${week}`;
   } else if (dateStr.includes('-')) {
     const [year, month] = dateStr.split('-');

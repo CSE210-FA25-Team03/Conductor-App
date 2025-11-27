@@ -1,4 +1,3 @@
-/* global fetch */
 
 /**
  * Constant-time string comparison to prevent timing attacks

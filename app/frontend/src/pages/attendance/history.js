@@ -1,4 +1,4 @@
-/* global fetch */
+/* global Chart */
 
 let allRecords = [];
 let allTeams = [];
