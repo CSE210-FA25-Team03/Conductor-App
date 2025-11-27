@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Class Directory · People</title>
+    <link rel="stylesheet" href="../class_directory/style.css">
+    <link rel="stylesheet" href="student.css">
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+</head>
+<body>
+    <div class="class-shell" data-page="people">
+        <aside class="class-sidebar">
+            <div class="side-title">Class Hub</div>
+            <nav class="class-nav">
+                <a class="class-nav-item" data-page="overview" href="class_directory_student.html">Class Overview</a>
+                <a class="class-nav-item" data-page="people" href="people.html">Class Directory</a>
+                <a class="class-nav-item" data-page="calendar" href="calendar.html">Calendar</a>
+            </nav>
+        </aside>
+
+        <div class="class-main">
+            <header>
+                <button id="backBtn">← Back</button>
+                <h2 id="pageTitle">CLASS DIRECTORY</h2>
+                <div class="course-info">
+                    <div id="courseCode" class="course-line">--</div>
+                    <div id="courseTerm" class="course-line">--</div>
+                </div>
+            </header>
+
+            <main class="page-layout">
+                <section class="people-card">
+                    <div class="people-controls">
+                        <div class="pill-group">
+                            <button class="pill active" data-role="all">Everyone</button>
+                            <button class="pill" data-role="instructor">Instructor</button>
+                            <button class="pill" data-role="ta">TA</button>
+                            <button class="pill" data-role="tutor">Tutor</button>
+                            <button class="pill" data-role="student">Students</button>
+                        </div>
+                        <div class="people-search">
+                            <input type="text" id="peopleSearch" placeholder="Search people">
+                            <select id="roleSelect">
+                                <option value="all">All roles</option>
+                                <option value="instructor">Instructor</option>
+                                <option value="ta">TA</option>
+                                <option value="tutor">Tutor</option>
+                                <option value="student">Student</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="people-table">
+                        <div class="people-row" style="font-weight:700;background:#f0f3ff;">
+                            <div>Name</div>
+                            <div>Section</div>
+                            <div>Role</div>
+                        </div>
+                        <div id="peopleTable"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script src="people.js"></script>
+</body>
+</html>

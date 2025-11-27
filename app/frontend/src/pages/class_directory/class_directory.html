@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+
     <meta charset="UTF-8">
     <title>Staff Class Directory</title>
     <link rel="stylesheet" href="style.css">
@@ -57,6 +60,16 @@
 
                     <label for="eventDescription">Details</label>
                     <textarea id="eventDescription" rows="3" placeholder="Optional context"></textarea>
+
+                    <label for="eventType">Event Type</label>
+                    <select id="eventType">
+                        <option value="Lecture">Lecture</option>
+                        <option value="Lab">Lab</option>
+                        <option value="Discussion">Discussion</option>
+                        <option value="Assignment" selected>Assignment</option>
+                        <option value="Exam">Exam</option>
+                        <option value="Other">Other</option>
+                    </select>
 
                     <label for="eventDueDate">Due Date</label>
                     <input type="datetime-local" id="eventDueDate" required>

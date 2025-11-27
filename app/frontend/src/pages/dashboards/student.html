@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Student Dashboard | Conductor</title>
@@ -35,11 +38,11 @@
 
         <section class="content-grid">
             <article class="dashboard-card">
-                <div class="card-icon">📘</div>
+                <div class="card-icon">📚</div>
                 <div class="card-content">
                     <h2>Class Directory</h2>
-                    <p>Browse staff info, deadlines, and team assignments.</p>
-                    <button id="viewClassDirectoryBtn" class="card-btn">Open</button>
+                    <p>Browse your course overview, roster, and calendar in one place.</p>
+                    <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
                 </div>
             </article>
 
@@ -115,7 +118,7 @@
         </script>
         <script>
             document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
-                window.location.href = '/class_directory_student/class_directory_student.html';
+            window.location.href = '/class_directory_student/class_directory_student.html';
             });
         </script>
         <script>
@@ -127,18 +130,18 @@
             // Dropdown logic
             const profileImg = document.getElementById('dashboardProfileImg');
             const dropdown = document.getElementById('profileDropdown');
-            profileImg.addEventListener('mouseenter', () => {
+            profileImg.addEventListener('mouseenter', function () {
                 dropdown.style.display = 'block';
             });
-            profileImg.addEventListener('mouseleave', () => {
-                setTimeout(() => {
+            profileImg.addEventListener('mouseleave', function () {
+                setTimeout(function () {
                     if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
                 }, 150);
             });
-            dropdown.addEventListener('mouseleave', () => {
+            dropdown.addEventListener('mouseleave', function () {
                 dropdown.style.display = 'none';
             });
-            dropdown.addEventListener('mouseenter', () => {
+            dropdown.addEventListener('mouseenter', function () {
                 dropdown.style.display = 'block';
             });
             document.getElementById('logoutBtn').addEventListener('click', function(e) {
