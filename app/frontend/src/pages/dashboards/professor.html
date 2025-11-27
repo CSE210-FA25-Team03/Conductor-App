@@ -17,6 +17,9 @@
                 <!-- <a href="/evaluation_rubric/evaluation_rubric.html" class="nav-btn eval-btn">
                     Create a Course
                 </a> -->
+                <a href="/class_config/class_config.html" class="nav-btn eval-btn">
+                    Class Configuration
+                </a>
                 <a href="/evaluation_rubric/evaluation_rubric.html" class="nav-btn eval-btn">
                     Evaluation Rubric
                 </a>
@@ -45,7 +48,7 @@
             </div>
         </section>
 
-        <section class="content-grid">
+        <section class="content-grid">  
             <article class="dashboard-card">
                 <div class="card-icon">📚</div>
                 <div class="card-content">
@@ -72,6 +75,15 @@
                     <button class="card-btn" id="viewEvalJournalBtn">Open Journal</button>
                 </div>
             </article>
+
+            <article class="dashboard-card">
+                <div class="card-icon">✅</div>
+                <div class="card-content">
+                    <h2>Attendance</h2>
+                    <p>Generate codes and review attendance across class meetings.</p>
+                    <button class="card-btn" id="viewAttendanceBtn">Open Attendance</button>
+                </div>
+            </article>
         </section>
 
     </div>
@@ -93,6 +105,11 @@
     <script>
         document.getElementById('viewEvalJournalBtn').addEventListener('click', function() {
             window.location.href = '/evaluation_journal/evaluation_journal.html';
+        });
+    </script>
+    <script>
+        document.getElementById('viewAttendanceBtn').addEventListener('click', function() {
+            window.location.href = '/attendance/professor_attendance.html';
         });
     </script>
     <script>

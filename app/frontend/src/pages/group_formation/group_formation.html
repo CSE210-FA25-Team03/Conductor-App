@@ -80,18 +80,36 @@
 
     <!-- GENERATE GROUPS -->
     <section class="panel">
-      <h2>Generate Groups</h2>
+      <h2>Generate Group</h2>
 
       <div class="form-grid">
         <input type="number" id="groupSize" placeholder="Group Size (ex: 2)" />
-        <button class="primary-btn" id="generateBtn">Generate Groups</button>
+        <button class="primary-btn" id="generateBtn">Smart Generate</button>
+        <button class="primary-btn" id="randomizeBtn">Randomize Generate</button>
       </div>
 
-      <div id="groupResults"></div>
+      <div style="margin-top:8px;overflow-x:auto;">
+        <table class="config-table">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Email</th>
+              <th>PID</th>
+              <th>Team</th>
+              <th>Role</th>
+              <th>TA assigned</th>
+            </tr>
+          </thead>
+          <tbody id="groupsTableBody">
+            <!-- JS will render group rows -->
+          </tbody>
+        </table>
+      </div>
     </section>
   </div>
 
   <!-- MAIN GROUP-FORMATION LOGIC -->
+  <script src="algorithm.js"></script>
   <script src="group_formation.js"></script>
 
   <!-- PROFILE + DASHBOARD SCRIPTS (unchanged) -->

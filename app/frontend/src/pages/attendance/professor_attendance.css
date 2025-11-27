@@ -1,0 +1,218 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* ============================================================
+   ORIGINAL BASE STYLES — UNTOUCHED
+   ============================================================ */
+:root {
+    --bg: #f5f5f7;
+    --panel-bg: rgba(255,255,255,0.96);
+    --border: #e2e2e7;
+    --radius: 14px;
+    --shadow: 0 6px 20px rgba(0,0,0,0.08);
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --table-header: #eaf1fb;
+    --table-row: #f9fafb;
+}
+
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    color: #111;
+}
+
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    padding: 0.8rem 1.5rem 1.5rem;
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    margin-bottom: 2.2rem;
+}
+
+.brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #2a3a5e;
+}
+.brand span {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+.profile {
+    position: relative;
+}
+
+.profile-dropdown-container {
+    position: relative;
+}
+
+/* 🔧 FIX: renamed to kebab-case */
+#dashboard-profile-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid #e2e2e7;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    transition: box-shadow 0.2s;
+}
+#dashboard-profile-img:hover {
+    box-shadow: 0 4px 16px rgba(37,99,235,0.12);
+}
+
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    top: 54px;
+    right: 0;
+    background: #fff;
+    border: 1px solid #e2e2e7;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    min-width: 140px;
+    z-index: 100;
+    flex-direction: column;
+    padding: 8px 0;
+}
+.profile-dropdown a {
+    display: block;
+    padding: 10px 18px;
+    color: #2a3a5e;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background 0.2s, color 0.2s;
+}
+.profile-dropdown a:hover {
+    background: #eaf1fb;
+    color: var(--accent);
+}
+.logout {
+    color: #e53e3e !important;
+}
+
+/* 🔧 this is original, keep it */
+.eval-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: rgba(100, 100, 100, 0.15);
+    color: black;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s;
+}
+.eval-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* ============================================================
+   ATTENDANCE PAGE — CLEAN NON-DUPLICATED STYLES
+   ============================================================ */
+
+.attendance-container {
+    max-width: 950px;
+    margin: 0 auto;
+    padding: 0 1.2rem 3rem;
+}
+
+.page-title {
+    margin: 0 0 0.2rem;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.subtitle {
+    color: #6b7280;
+    margin-bottom: 2rem;
+}
+
+.card {
+    background: var(--panel-bg);
+    padding: 1.5rem 1.8rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+}
+
+.card h2 {
+    margin: 0 0 1rem;
+    font-size: 1.3rem;
+}
+
+.generate-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.duration-field label {
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+
+.duration-field input {
+    width: 120px;
+    padding: 6px 8px;
+    margin-top: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.primary-btn {
+    padding: 10px 16px;
+    background: var(--accent);
+    border: none;
+    color: white;
+    cursor: pointer;
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+.primary-btn:hover {
+    background: var(--accent-hover);
+}
+
+.code-display {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    font-family: monospace;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+th {
+    background: var(--table-header);
+    text-align: left;
+}
+
+tbody tr:nth-child(even) {
+    background: var(--table-row);
+}

@@ -62,15 +62,7 @@
                     <p id="modalStatusDesc">What the team is currently working on...</p>
                 </div>
                 
-                <div class="modal-section">
-                    <h3>Progress</h3>
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div id="modalProgressBar" class="progress-fill" style="width: 0%;"></div>
-                        </div>
-                        <span id="modalProgressText" class="progress-text">0%</span>
-                    </div>
-                </div>
+                <!-- Progress section removed from modal -->
                 
                 <div class="modal-section">
                     <h3>Teaching Assistant</h3>
@@ -101,29 +93,23 @@
                 const teamData = {
                     name: team.name || "Unnamed Team",
                     description: team.description || "No description available.",
-                    status: team.status || "Needs Review",
                     statusDescription: team.description || "Currently working on team projects and assignments.",
-                    progress: team.status === 'On Track' ? 75 : team.status === 'At Risk' ? 45 : 60, // Default progress based on status
                     ta: "Sarah Chen", // Default TA (can be enhanced later)
                     members: (team.members || [])
                         .filter(member => {
-                            // Filter out entries that start with "+" (like "+2", "+3") as they're just indicators
                             if (typeof member === 'string' && member.startsWith('+')) {
                                 return false;
                             }
                             return true;
                         })
                         .map((member, index) => {
-                            // If member is a string (like "AM"), create a simple entry
-                            // Otherwise assume it's an object
                             if (typeof member === 'string') {
                                 return {
-                                    name: member, // Will show initials like "AM"
-                                    isLeader: index === 0, // First member is leader
-                                    score: 85 + Math.floor(Math.random() * 15) // Random score between 85-100
+                                    name: member,
+                                    isLeader: index === 0,
+                                    score: 85 + Math.floor(Math.random() * 15)
                                 };
                             } else {
-                                // If member is already an object with name, isLeader, score
                                 return member;
                             }
                         })
@@ -146,20 +132,7 @@
                     modalStatusDesc.textContent = teamData.statusDescription;
                     modalTA.textContent = teamData.ta;
                     
-                    // Set status badge
-                    const statusBadge = document.getElementById('modalTeamStatus');
-                    if (statusBadge) {
-                        statusBadge.textContent = teamData.status;
-                        statusBadge.className = `badge ${teamData.status === 'On Track' ? 'success' : teamData.status === 'At Risk' ? 'risk' : ''}`;
-                    }
-                    
-                    // Set progress bar
-                    const progressBar = document.getElementById('modalProgressBar');
-                    const progressText = document.getElementById('modalProgressText');
-                    if (progressBar && progressText) {
-                        progressBar.style.width = `${teamData.progress}%`;
-                        progressText.textContent = `${teamData.progress}%`;
-                    }
+                    // Status badge and progress bar removed
                     
                     // Populate members list
                     const membersList = document.getElementById('modalMembers');
@@ -211,25 +184,18 @@
             
             function createTeamCard(team) {
             const card = document.createElement('div');
-            card.className = `team-card ${team.status === 'At Risk' ? 'risk' : ''}`;
-            
-            const statusClass = team.status === 'On Track' ? 'success' : 
-                                team.status === 'At Risk' ? 'risk' : '';
-            
+            card.className = `team-card`;
+
             card.innerHTML = `
                 <header>
                 <div>
                     <small>${team.teamNumber}</small>
                     <h3>${team.name}</h3>
                 </div>
-                <span class="badge ${statusClass}">${team.status}</span>
                 </header>
                 <p>${team.description}</p>
-                <div class="avatar-stack">
-                ${team.members.map(m => `<span>${m}</span>`).join('')}
-                </div>
+                <!-- Member abbreviations removed from card -->
                 <div class="card-actions">
-                <span>${team.nextSync || team.lastUpdate || team.actionRequired || ''}</span>
                 <button class="card-info-btn" data-team-id="${team.id}">Card info</button>
                 </div>
             `;

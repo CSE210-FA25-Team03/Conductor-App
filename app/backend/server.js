@@ -43,7 +43,10 @@ app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pa
 app.use('/work_journal', express.static(path.join(__dirname, '../frontend/src/pages/work_journal')));
 app.use('/group_formation', express.static(path.join(__dirname, '../frontend/src/pages/group_formation')));
 app.use('/evaluation_journal', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_journal')));
+app.use('/class_config', express.static(path.join(__dirname, '../frontend/src/pages/class_config')));
+app.use('/attendance', express.static(path.join(__dirname, '../frontend/src/pages/attendance')));
 app.use('/class_directory', express.static(path.join(__dirname, '../frontend/src/pages/class_directory')));
+app.use('/team_meeting_task', express.static(path.join(__dirname, '../frontend/src/pages/team_meeting_task')));
 app.use(
   '/class_directory_student',
   express.static(path.join(__dirname, '../frontend/src/pages/class_directory_student'), {
