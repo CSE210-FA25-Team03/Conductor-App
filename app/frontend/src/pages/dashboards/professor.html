@@ -47,6 +47,15 @@
 
         <section class="content-grid">
             <article class="dashboard-card">
+                <div class="card-icon">📚</div>
+                <div class="card-content">
+                    <h2>Class Directory</h2>
+                    <p>Browse your course overview, roster, and calendar in one place.</p>
+                    <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
                 <div class="card-icon">👥</div>
                 <div class="card-content">
                     <h2>Team Card</h2>
@@ -74,6 +83,11 @@
     <script>
         document.getElementById('viewTeamsBtn').addEventListener('click', function() {
             window.location.href = '/team_card/team_card.html';
+        });
+    </script>
+    <script>
+        document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
+            window.location.href = '/class_directory/class_directory.html';
         });
     </script>
     <script>

@@ -38,6 +38,15 @@
 
         <section class="content-grid">
             <article class="dashboard-card">
+                <div class="card-icon">📚</div>
+                <div class="card-content">
+                    <h2>Class Directory</h2>
+                    <p>Browse your course overview, roster, and calendar in one place.</p>
+                    <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
                 <div class="card-icon">🗂️</div>
                 <div class="card-content">
                     <h2>Team Task Tracker</h2>
@@ -100,16 +109,21 @@
     </section>
 
     <script src="script.js"></script>
-        <script>
-            document.getElementById('viewTasksBtn').addEventListener('click', function() {
-                window.location.href = '/task_tracker/task_tracker.html';
-            });
-        </script>
-        <script>
-            document.getElementById('viewWorkJournalBtn').addEventListener('click', function() {
-            window.location.href = '/work_journal/work_journal.html';
-            });
-        </script>
+    <script>
+        document.getElementById('viewTasksBtn').addEventListener('click', function() {
+            window.location.href = '/task_tracker/task_tracker.html';
+        });
+    </script>
+    <script>
+        document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
+            window.location.href = '/class_directory_student/class_directory_student.html';
+        });
+    </script>
+    <script>
+        document.getElementById('viewWorkJournalBtn').addEventListener('click', function() {
+        window.location.href = '/work_journal/work_journal.html';
+        });
+    </script>
         <script>
             // Dropdown logic
             const profileImg = document.getElementById('dashboardProfileImg');
