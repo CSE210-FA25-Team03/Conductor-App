@@ -74,6 +74,16 @@
                     </button>
                 </div>
             </article>
+
+            <article class="dashboard-card">
+                <div class="card-icon">✅</div>
+                <div class="card-content">
+                    <h2>Submit Attendance</h2>
+                    <p>Enter your weekly attendance code.</p>
+                    <button id="openAttendanceDrawer" class="card-btn">Submit Attendance</button>
+                </div>
+            </article>
+
         </section>
 
     </div>
@@ -81,6 +91,48 @@
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
     <!-- Profile panel removed, navigation now goes to profile page -->
     </section>
+
+        <!-- ============================================================
+         NEW ATTENDANCE DRAWER (REPLACED CONTENT)
+         ============================================================ -->
+    <section class="attendance-panel" id="attendancePanel" aria-hidden="true">
+        <article class="attendance-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Attendance</p>
+                    <h2>Enter Attendance Code</h2>
+                    <p>Enter the code announced during class.</p>
+                </div>
+                <button class="close-attendance" aria-label="Close attendance drawer">×</button>
+            </header>
+
+            <!-- Attendance Input -->
+            <div class="attendance-input-box">
+                <input id="attendanceInput" type="text" placeholder="Enter code…" />
+                <button id="attendanceSubmitBtn" class="submit-btn">Submit</button>
+            </div>
+
+            <!-- Success/Error Message -->
+            <p id="attendanceMessage" class="attendance-message"></p>
+
+            <!-- Attendance Record -->
+            <div class="attendance-record-box">
+                <h3>Your Attendance Record</h3>
+                <p id="attendanceOverall" class="attendance-overall"></p>
+
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceRecordBody"></tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
 
     <section class="evaluation-panel" aria-hidden="true">
         <article class="evaluation-drawer">
@@ -163,6 +215,69 @@
                 }
             });
         </script>
+
+        <script>
+            // ============================================================
+            // ATTENDANCE DRAWER OPEN/CLOSE
+            // ============================================================
+            const drawer = document.getElementById("attendancePanel");
+            const openBtn = document.getElementById("openAttendanceDrawer");
+            const closeBtn = document.querySelector(".close-attendance");
+
+            openBtn.onclick = () => drawer.setAttribute("aria-hidden", "false");
+            closeBtn.onclick = () => drawer.setAttribute("aria-hidden", "true");
+
+
+            // ============================================================
+            // ATTENDANCE CODE SYSTEM
+            // ============================================================
+            const input = document.getElementById("attendanceInput");
+            const submitBtn = document.getElementById("attendanceSubmitBtn");
+            const message = document.getElementById("attendanceMessage");
+            const recordBody = document.getElementById("attendanceRecordBody");
+            const overall = document.getElementById("attendanceOverall");
+
+            const VALID_CODE = "ABC123"; // <--- Replace with real code if needed
+
+            submitBtn.onclick = () => {
+                const code = input.value.trim();
+                const history = JSON.parse(localStorage.getItem("attendanceCodeHistory") || "[]");
+
+                const sessionNumber = history.length + 1;
+                const success = code === VALID_CODE;
+
+                history.unshift({
+                    session: sessionNumber,
+                    status: success ? "Present" : "Invalid Code"
+                });
+
+                localStorage.setItem("attendanceCodeHistory", JSON.stringify(history));
+
+                message.textContent = success ? "✔ Attendance recorded!" : "✖ Invalid code.";
+                message.style.color = success ? "green" : "red";
+
+                loadAttendanceTable();
+            };
+
+            function loadAttendanceTable() {
+                const history = JSON.parse(localStorage.getItem("attendanceCodeHistory") || "[]");
+
+                recordBody.innerHTML = history.map(item => `
+                    <tr>
+                        <td>Session ${item.session}</td>
+                        <td>${item.status}</td>
+                    </tr>
+                `).join("");
+
+                const presentCount = history.filter(h => h.status === "Present").length;
+                overall.textContent = `Present ${presentCount} out of ${history.length} sessions`;
+            }
+
+            loadAttendanceTable();
+        </script>
+
+
+
         <script>
             /*
             window.addEventListener('DOMContentLoaded', function() {
