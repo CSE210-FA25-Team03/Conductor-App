@@ -1,5 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
+/* ============================================================
+   ORIGINAL BASE STYLES — UNTOUCHED
+   ============================================================ */
 :root {
     --bg: #f5f5f7;
     --panel-bg: rgba(255,255,255,0.96);
@@ -55,7 +58,8 @@ body {
     position: relative;
 }
 
-#dashboardProfileImg {
+/* 🔧 FIX: renamed to kebab-case */
+#dashboard-profile-img {
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -65,7 +69,7 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.07);
     transition: box-shadow 0.2s;
 }
-#dashboardProfileImg:hover {
+#dashboard-profile-img:hover {
     box-shadow: 0 4px 16px rgba(37,99,235,0.12);
 }
 
@@ -100,6 +104,7 @@ body {
     color: #e53e3e !important;
 }
 
+/* 🔧 this is original, keep it */
 .eval-btn {
     display: inline-block;
     padding: 8px 20px;
@@ -115,57 +120,11 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-/* ============================================================
-   WORK JOURNAL — CLEAN UPDATED STYLES
-   ============================================================ */
-
-:root {
-    --bg: #f5f5f7;
-    --panel-bg: rgba(255,255,255,0.96);
-    --border: #e2e2e7;
-    --radius: 14px;
-    --shadow: 0 6px 20px rgba(0,0,0,0.08);
-    --text-muted: #6b7280;
-    --accent: #2563eb;
-    --accent-hover: #1d4ed8;
-    --table-header: #eaf1fb;
-    --table-row: #f9fafb;
-}
-
-body {
-    font-family: "Inter", "Segoe UI", Arial, sans-serif;
-    background: var(--bg);
-    margin: 0;
-    color: #111;
-}
 
 /* ============================================================
-   TOP NAV
+   ATTENDANCE PAGE — CLEAN NON-DUPLICATED STYLES
    ============================================================ */
 
-.top-nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--panel-bg);
-    padding: 0.8rem 1.5rem 1.5rem;
-    box-shadow: var(--shadow);
-    border-bottom: 1px solid var(--border);
-    backdrop-filter: blur(8px);
-    margin-bottom: 2.2rem;
-}
-
-.brand {
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #2a3a5e;
-}
-.brand span {
-    color: var(--accent);
-    font-weight: 700;
-}
-
-/* MAIN LAYOUT */
 .attendance-container {
     max-width: 950px;
     margin: 0 auto;
@@ -173,17 +132,16 @@ body {
 }
 
 .page-title {
-    margin-top: 0;
+    margin: 0 0 0.2rem;
     font-size: 2rem;
     font-weight: 700;
 }
 
 .subtitle {
-    color: var(--text-muted);
+    color: #6b7280;
     margin-bottom: 2rem;
 }
 
-/* CARD */
 .card {
     background: var(--panel-bg);
     padding: 1.5rem 1.8rem;
@@ -194,12 +152,10 @@ body {
 }
 
 .card h2 {
-    margin-top: 0;
+    margin: 0 0 1rem;
     font-size: 1.3rem;
-    margin-bottom: 1rem;
 }
 
-/* Generate Code Row */
 .generate-row {
     display: flex;
     align-items: flex-end;
@@ -209,7 +165,7 @@ body {
 
 .duration-field label {
     font-size: 0.85rem;
-    color: var(--text-muted);
+    color: #6b7280;
 }
 
 .duration-field input {
@@ -220,7 +176,6 @@ body {
     border: 1px solid var(--border);
 }
 
-/* Button */
 .primary-btn {
     padding: 10px 16px;
     background: var(--accent);
@@ -235,13 +190,12 @@ body {
     background: var(--accent-hover);
 }
 
-/* Code Display */
 .code-display {
     margin-top: 1rem;
     font-size: 1.1rem;
+    font-family: monospace;
 }
 
-/* Table */
 table {
     width: 100%;
     border-collapse: collapse;
@@ -261,21 +215,4 @@ th {
 
 tbody tr:nth-child(even) {
     background: var(--table-row);
-}
-
-.eval-btn {
-    display: inline-block;
-    padding: 8px 20px;
-    background-color: rgba(100, 100, 100, 0.15); /* transparent grey button */
-    color: black;
-    font-weight: 600;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.eval-btn:hover {
-    background-color: #45a049;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }

@@ -1,104 +1,69 @@
 /* global FullCalendar */
 const DIRECTORY_ENDPOINT = '/api/class_directory';
-const INSTRUCTOR_ENDPOINT = '/api/class-directory/instructors';
-const TA_ENDPOINT = '/api/class-directory/tas';
-const TUTOR_ENDPOINT = '/api/class-directory/tutors';
+// const INSTRUCTOR_ENDPOINT = '/api/class-directory/instructors';
+// const TA_ENDPOINT = '/api/class-directory/tas';
+// const TUTOR_ENDPOINT = '/api/class-directory/tutors';
 const TEAMS_ENDPOINT = '/api/class-directory/teams';
 const EVENTS_ENDPOINT = '/api/class-directory/events';
+
 const DEFAULT_AVATAR = '/assets/logo/user.png';
+
 const STAFF_SECTIONS = {
   instructor: {
-    endpoint: INSTRUCTOR_ENDPOINT,
-    listId: 'instructorsList',
-    formId: 'instructorForm',
-    idInput: 'instructorId',
-    titleId: 'instructorFormTitle',
-    label: 'Instructor',
-    fields: {
-      picture: 'instructorPicture',
-      name: 'instructorName',
-      pronoun: 'instructorPronoun',
-      email: 'instructorEmail',
-      contact: 'instructorContact',
-      availability: 'instructorAvailability'
-    }
+    listId: 'instructorsList'
   },
   ta: {
-    endpoint: TA_ENDPOINT,
-    listId: 'tasList',
-    formId: 'taForm',
-    idInput: 'taId',
-    titleId: 'taFormTitle',
-    label: 'Teaching Assistant',
-    fields: {
-      picture: 'taPicture',
-      name: 'taName',
-      pronoun: 'taPronoun',
-      email: 'taEmail',
-      contact: 'taContact',
-      availability: 'taAvailability'
-    }
+    listId: 'tasList'
   },
   tutor: {
-    endpoint: TUTOR_ENDPOINT,
-    listId: 'tutorsList',
-    formId: 'tutorForm',
-    idInput: 'tutorId',
-    titleId: 'tutorFormTitle',
-    label: 'Tutor',
-    fields: {
-      picture: 'tutorPicture',
-      name: 'tutorName',
-      pronoun: 'tutorPronoun',
-      email: 'tutorEmail',
-      contact: 'tutorContact',
-      availability: 'tutorAvailability'
-    }
+    listId: 'tutorsList'
   }
-};
-
-const STAFF_FIELD_MAP = {
-  picture: 'staff_picture',
-  name: 'staff_name',
-  pronoun: 'pronoun',
-  email: 'email',
-  contact: 'contact',
-  availability: 'availability'
 };
 
 let calendarInstance = null;
 let cachedEvents = [];
 
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
   wireNavigation();
   wireGoogleButton();
   initCalendar();
-  // Remove form bindings for read-only view
+
+  // Read-only page → load data only
   loadClassDirectory();
   loadEvents();
+
+  bindTeamForm();    // ← your missing wrapper
+  bindEventForm();   // ← now re-enabled & functional
 });
 
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
 function wireNavigation() {
   const backBtn = document.getElementById('back-btn');
   if (!backBtn) return;
 
   backBtn.addEventListener('click', () => {
-    if (window.history.length > 1) {
-      window.history.back();
-    } else {
-      window.location.href = '/dashboards';
-    }
+    if (window.history.length > 1) window.history.back();
+    else window.location.href = '/dashboards';
   });
 }
 
 function wireGoogleButton() {
-  const googleBtn = document.getElementById('addGoogleCalBtn');
-  if (!googleBtn) return;
-  googleBtn.addEventListener('click', () => {
-    alert('Google Calendar integration will be added.');
+  const btn = document.getElementById('addGoogleCalBtn');
+  if (!btn) return;
+
+  btn.addEventListener('click', () => {
+    alert('Google Calendar integration coming soon.');
   });
 }
 
+/* ============================================================
+   CALENDAR
+   ============================================================ */
 function initCalendar() {
   const calendarEl = document.getElementById('calendar');
   if (!calendarEl || typeof FullCalendar === 'undefined') return;
@@ -115,138 +80,30 @@ function initCalendar() {
     events: [],
     dateClick(info) {
       const dueInput = document.getElementById('eventDueDate');
-      if (dueInput) {
-        dueInput.value = toLocalInputValue(info.dateStr);
-        dueInput.focus();
-      }
+      if (dueInput) dueInput.value = toLocalInputValue(info.dateStr);
     },
     eventClick(info) {
       const due = new Date(info.event.start).toLocaleString();
       const details = info.event.extendedProps?.description;
       const message = `Deadline: ${info.event.title}\nDue: ${due}${details ? `\n\nDetails: ${details}` : ''}\n\nDelete this event?`;
-      if (confirm(message)) {
-        deleteEvent(info.event.id);
-      }
+
+      if (confirm(message)) deleteEvent(info.event.id);
     }
   });
 
   calendarInstance.render();
 }
 
-// Form bindings removed for read-only view
-
-function bindStaffForm(type, config) {
-  const form = document.getElementById(config.formId);
+/* ============================================================
+   TEAM FORM (ADD TEAM)
+   ============================================================ */
+function bindTeamForm() {
+  const form = document.getElementById('team-form');
   if (!form) return;
-
-  const openButton = document.querySelector(`[data-open-form="${type}"]`);
-  if (openButton) {
-    openButton.addEventListener('click', () => showStaffForm(type));
-  }
-
-  const cancelButton = form.querySelector(`[data-cancel-form="${type}"]`);
-  if (cancelButton) {
-    cancelButton.addEventListener('click', () => hideStaffForm(type));
-  }
 
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const payload = buildStaffPayload(config.fields);
-    if (!payload.staff_name) {
-      alert('Please provide a full name before submitting.');
-      return;
-    }
 
-    const hiddenId = document.getElementById(config.idInput);
-    const staffId = hiddenId ? hiddenId.value.trim() : '';
-
-    try {
-      if (staffId) {
-        await putJson(`${config.endpoint}/${staffId}`, payload);
-      } else {
-        await postJson(config.endpoint, payload);
-      }
-      hideStaffForm(type);
-      await loadClassDirectory();
-    } catch (error) {
-      console.error('Failed to save entry', error);
-      alert('Failed to save entry. Please try again.');
-    }
-  });
-}
-
-function buildStaffPayload(fields) {
-  return {
-    staff_picture: getInputValue(fields.picture) || DEFAULT_AVATAR,
-    audio_pronounciation: '',
-    staff_name: getInputValue(fields.name),
-    pronounciation: '',
-    pronoun: getInputValue(fields.pronoun),
-    contact: getInputValue(fields.contact),
-    email: getInputValue(fields.email),
-    availability: getInputValue(fields.availability)
-  };
-}
-
-function showStaffForm(type, staff = null) {
-  const config = STAFF_SECTIONS[type];
-  if (!config) return;
-  const form = document.getElementById(config.formId);
-  if (!form) return;
-
-  const hiddenId = document.getElementById(config.idInput);
-  if (hiddenId) {
-    hiddenId.value = staff?.id || '';
-  }
-
-  fillStaffForm(config.fields, staff);
-
-  const title = document.getElementById(config.titleId);
-  if (title) {
-    title.textContent = staff ? `Edit ${config.label}` : `Add ${config.label}`;
-  }
-
-  form.classList.remove('hidden');
-}
-
-function hideStaffForm(type) {
-  const config = STAFF_SECTIONS[type];
-  if (!config) return;
-  const form = document.getElementById(config.formId);
-  if (!form) return;
-
-  form.reset();
-  form.classList.add('hidden');
-
-  const hiddenId = document.getElementById(config.idInput);
-  if (hiddenId) {
-    hiddenId.value = '';
-  }
-
-  const title = document.getElementById(config.titleId);
-  if (title) {
-    title.textContent = `Add ${config.label}`;
-  }
-}
-
-function fillStaffForm(fields, staff) {
-  Object.entries(fields).forEach(([key, inputId]) => {
-    const element = document.getElementById(inputId);
-    if (!element) return;
-    if (staff) {
-      element.value = staff[STAFF_FIELD_MAP[key]] || '';
-    } else {
-      element.value = '';
-    }
-  });
-}
-
-function bindTeamForm() {
-  const teamForm = document.getElementById('team-form');
-  if (!teamForm) return;
-
-  teamForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
     const payload = {
       team_id: getInputValue('teamNumberInput'),
       team_name: getInputValue('teamNameInput')
@@ -259,21 +116,25 @@ function bindTeamForm() {
 
     try {
       await postJson(TEAMS_ENDPOINT, payload);
-      teamForm.reset();
+      form.reset();
       await loadClassDirectory();
     } catch (error) {
       console.error('Failed to save team', error);
-      alert('Failed to add team. Please try again.');
+      alert('Failed to add team.');
     }
   });
 }
 
+/* ============================================================
+   EVENT FORM (ADD EVENT)
+   ============================================================ */
 function bindEventForm() {
-  const eventForm = document.getElementById('event-form');
-  if (!eventForm) return;
+  const form = document.getElementById('event-form');
+  if (!form) return;
 
-  eventForm.addEventListener('submit', async (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
+
     const rawDate = getInputValue('eventDueDate');
     const payload = {
       title: getInputValue('eventTitle'),
@@ -288,68 +149,49 @@ function bindEventForm() {
 
     try {
       await postJson(EVENTS_ENDPOINT, payload);
-      eventForm.reset();
+      form.reset();
       await loadEvents();
     } catch (error) {
       console.error('Failed to save event', error);
-      alert('Failed to save event. Please try again.');
+      alert('Failed to save event.');
     }
   });
 }
 
+/* ============================================================
+   FETCH HELPERS
+   ============================================================ */
 function getInputValue(id) {
   const el = document.getElementById(id);
   return el ? el.value.trim() : '';
 }
 
 async function postJson(url, body) {
-  const response = await fetch(url, {
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Request failed');
-  }
-
-  return response.json();
-}
-
-async function putJson(url, body) {
-  const response = await fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Request failed');
-  }
-
-  return response.json();
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
 async function deleteRequest(url) {
-  const response = await fetch(url, { method: 'DELETE' });
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Request failed');
-  }
-  return response.json();
+  const res = await fetch(url, { method: 'DELETE' });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
 }
 
+/* ============================================================
+   LOADERS
+   ============================================================ */
 async function loadClassDirectory() {
   try {
-    const response = await fetch(DIRECTORY_ENDPOINT);
-    if (!response.ok) throw new Error('Unable to retrieve class directory');
+    const res = await fetch(DIRECTORY_ENDPOINT);
+    if (!res.ok) throw new Error('Failed to load directory');
 
-    const data = await response.json();
+    const data = await res.json();
     const entry = Array.isArray(data) ? data[0] : data;
-
-    if (!entry) return;
 
     updateCourseInfo(entry.course);
     renderStaffList('instructor', entry.instructors);
@@ -357,54 +199,60 @@ async function loadClassDirectory() {
     renderStaffList('tutor', entry.tutors);
     renderTeams(entry.Teams);
     updateSummaryStats(entry);
-  } catch (error) {
-    console.error('Failed to load class directory', error);
+  } catch (e) {
+    console.error('loadClassDirectory error', e);
   }
 }
 
 async function loadEvents() {
   try {
-    const response = await fetch(EVENTS_ENDPOINT);
-    if (!response.ok) throw new Error('Unable to retrieve events');
-    cachedEvents = await response.json();
+    const res = await fetch(EVENTS_ENDPOINT);
+    cachedEvents = await res.json();
+
     renderEventsList();
     syncCalendarEvents();
-  } catch (error) {
-    console.error('Failed to load events', error);
+  } catch (e) {
+    console.error('loadEvents error', e);
   }
 }
 
+/* ============================================================
+   EVENTS RENDERING
+   ============================================================ */
 function syncCalendarEvents() {
   if (!calendarInstance) return;
+
   calendarInstance.removeAllEvents();
-  cachedEvents.forEach((evt) => {
+
+  cachedEvents.forEach(evt =>
     calendarInstance.addEvent({
       id: evt.id,
       title: evt.title,
       start: evt.dueDate,
       end: evt.dueDate,
       allDay: false,
-      extendedProps: {
-        description: evt.description || ''
-      }
-    });
-  });
+      extendedProps: { description: evt.description || '' }
+    })
+  );
 }
 
 function renderEventsList() {
   const container = document.getElementById('eventsList');
   if (!container) return;
+
   container.innerHTML = '';
 
   if (!cachedEvents.length) {
-    container.innerHTML = '<p class="empty-copy">No deadlines yet.</p>';
+    container.innerHTML = `<p class="empty-copy">No deadlines yet.</p>`;
     return;
   }
 
   const sorted = [...cachedEvents].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+
   sorted.forEach((evt) => {
     const card = document.createElement('div');
     card.className = 'event-card';
+
     const due = new Date(evt.dueDate).toLocaleString();
 
     card.innerHTML = `
@@ -413,64 +261,37 @@ function renderEventsList() {
       ${evt.description ? `<span>${evt.description}</span>` : ''}
     `;
 
-    const button = document.createElement('button');
-    button.textContent = 'Remove';
-    button.addEventListener('click', () => deleteEvent(evt.id));
-    card.appendChild(button);
+    const btn = document.createElement('button');
+    btn.textContent = 'Remove';
+    btn.addEventListener('click', () => deleteEvent(evt.id));
+    card.appendChild(btn);
+
     container.appendChild(card);
   });
 }
 
 async function deleteEvent(id) {
-  if (!id) return;
   try {
     await deleteRequest(`${EVENTS_ENDPOINT}/${id}`);
     await loadEvents();
-  } catch (error) {
-    console.error('Failed to delete event', error);
-    alert('Failed to delete event. Please try again.');
+  } catch (err) {
+    console.error('Delete failed', err);
+    alert('Failed to delete event.');
   }
 }
 
-function updateCourseInfo(course) {
-  const codeEl = document.getElementById('courseCode');
-  const termEl = document.getElementById('courseTerm');
-  const summaryTitle = document.getElementById('summaryTitle');
-  const descriptionEl = document.getElementById('courseDescription');
-  const summaryTerm = document.getElementById('summaryTerm');
-
-  const courseCode = course?.course_code || 'N/A';
-  const courseTerm = course?.term_year || 'N/A';
-
-  if (codeEl) codeEl.textContent = courseCode;
-  if (termEl) termEl.textContent = courseTerm;
-  if (summaryTerm) summaryTerm.textContent = courseTerm;
-  if (summaryTitle) summaryTitle.textContent = `${courseCode} · Directory`;
-  if (descriptionEl) {
-    const fallback = 'Use this space to summarize key goals, grading logistics, or collaboration guidelines for the class.';
-    descriptionEl.textContent = course?.description || fallback;
-  }
-}
-
-function updateSummaryStats(entry) {
-  const summaryStaffCount = document.getElementById('summaryStaffCount');
-  if (!summaryStaffCount) return;
-  const instructors = entry.instructors?.length || 0;
-  const tas = entry.TAs?.length || 0;
-  const tutors = entry.tutors?.length || 0;
-  summaryStaffCount.textContent = instructors + tas + tutors;
-}
-
+/* ============================================================
+   STAFF + TEAMS RENDERING
+   ============================================================ */
 function renderStaffList(type, staff = []) {
   const config = STAFF_SECTIONS[type];
-  if (!config) return;
   const container = document.getElementById(config.listId);
   if (!container) return;
 
   container.innerHTML = '';
 
-  if (!staff || staff.length === 0) {
-    container.innerHTML = '<p class="empty-copy">Nothing to show yet.</p>';
+  if (!staff.length) {
+    container.innerHTML = `<p class="empty-copy">Nothing to show yet.</p>`;
     return;
   }
 
@@ -478,44 +299,16 @@ function renderStaffList(type, staff = []) {
     const row = document.createElement('div');
     row.className = 'staff-row';
 
-    const avatar = document.createElement('img');
-    avatar.className = 'staff-avatar';
-    avatar.src = resolveStaffPicture(person.staff_picture);
-    avatar.alt = person.staff_name || 'Staff';
-
-    const textWrapper = document.createElement('div');
-    textWrapper.className = 'staff-row-text';
-
-    const nameEl = document.createElement('strong');
-    nameEl.textContent = person.staff_name || 'Unnamed';
-    textWrapper.appendChild(nameEl);
-
-    if (person.pronoun) {
-      const span = document.createElement('span');
-      span.textContent = `Pronouns: ${person.pronoun}`;
-      textWrapper.appendChild(span);
-    }
-
-    if (person.email) {
-      const span = document.createElement('span');
-      span.textContent = `Email: ${person.email}`;
-      textWrapper.appendChild(span);
-    }
-
-    if (person.contact) {
-      const span = document.createElement('span');
-      span.textContent = `Contact: ${person.contact}`;
-      textWrapper.appendChild(span);
-    }
-
-    if (person.availability) {
-      const span = document.createElement('span');
-      span.textContent = `Availability: ${person.availability}`;
-      textWrapper.appendChild(span);
-    }
-
-    row.appendChild(avatar);
-    row.appendChild(textWrapper);
+    row.innerHTML = `
+      <img class="staff-avatar" src="${resolveStaffPicture(person.staff_picture)}" />
+      <div class="staff-row-text">
+        <strong>${person.staff_name || 'Unnamed'}</strong>
+        ${person.pronoun ? `<span>Pronouns: ${person.pronoun}</span>` : ''}
+        ${person.email ? `<span>Email: ${person.email}</span>` : ''}
+        ${person.contact ? `<span>Contact: ${person.contact}</span>` : ''}
+        ${person.availability ? `<span>Availability: ${person.availability}</span>` : ''}
+      </div>
+    `;
 
     container.appendChild(row);
   });
@@ -527,27 +320,51 @@ function renderTeams(teams = []) {
 
   container.innerHTML = '';
 
-  if (!teams || teams.length === 0) {
-    container.innerHTML = '<p class="empty-copy">No teams registered.</p>';
+  if (!teams.length) {
+    container.innerHTML = `<p class="empty-copy">No teams registered.</p>`;
     return;
   }
 
-  teams.forEach((team) => {
+  teams.forEach(team => {
     const row = document.createElement('div');
     row.className = 'team-row';
+
     row.innerHTML = `
       <strong>Team ${team.team_id || '--'}</strong>
       <span>${team.team_name || ''}</span>
     `;
+
     container.appendChild(row);
   });
 }
 
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+function updateCourseInfo(course) {
+  const code = course?.course_code || 'N/A';
+  const term = course?.term_year || 'N/A';
+  const desc = course?.description || 'Use this space to summarize key goals or guidelines.';
+
+  document.getElementById('courseCode').textContent = code;
+  document.getElementById('courseTerm').textContent = term;
+  document.getElementById('summaryTerm').textContent = term;
+  document.getElementById('summaryTitle').textContent = `${code} · Directory`;
+  document.getElementById('courseDescription').textContent = desc;
+}
+
+function updateSummaryStats(entry) {
+  const count = (entry.instructors?.length || 0) +
+                (entry.TAs?.length || 0) +
+                (entry.tutors?.length || 0);
+
+  document.getElementById('summaryStaffCount').textContent = count;
+}
+
 function toLocalInputValue(dateString) {
-  const date = new Date(dateString);
-  const offset = date.getTimezoneOffset();
-  const localDate = new Date(date.getTime() - offset * 60000);
-  return localDate.toISOString().slice(0, 16);
+  const d = new Date(dateString);
+  const offset = d.getTimezoneOffset();
+  return new Date(d.getTime() - offset * 60000).toISOString().slice(0, 16);
 }
 
 function resolveStaffPicture(path = '') {
@@ -555,19 +372,7 @@ function resolveStaffPicture(path = '') {
   if (path.startsWith('http')) return path;
   if (path.startsWith('/assets')) return path;
   if (path.startsWith('assets')) return `/${path}`;
-  return path.replace(/^app\/frontend\/assets/, '/assets').replace(/^frontend\/assets/, '/assets');
-}
-
-async function deleteStaffMember(type, staffId) {
-  if (!staffId) return;
-  if (!confirm('Delete this entry? This action cannot be undone.')) return;
-  const config = STAFF_SECTIONS[type];
-  if (!config) return;
-  try {
-    await deleteRequest(`${config.endpoint}/${staffId}`);
-    await loadClassDirectory();
-  } catch (error) {
-    console.error('Failed to delete entry', error);
-    alert('Failed to delete entry. Please try again.');
-  }
+  return path
+    .replace(/^app\/frontend\/assets/, '/assets')
+    .replace(/^frontend\/assets/, '/assets');
 }

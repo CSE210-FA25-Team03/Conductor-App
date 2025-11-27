@@ -1,119 +1,137 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Dummy data for demo/testing (no shared storage.js required)
+  /* --------------------------------------------------------------------------
+     DEMO USER + LOCAL STORAGE FALLBACK
+  -------------------------------------------------------------------------- */
+
+  // Inline demo user for testing (no backend)
   const demoUser = {
     email: "professor@school.edu",
     role: "professor",
     classId: "CSE210"
   };
+
+  // In-page memory for attendance
   let attendanceSessions = [];
   let attendanceRecords = {};
 
+  // Returns the current user (demo fallback)
   function getCurrentUser() {
-    return demoUser;
+    try {
+      const stored = JSON.parse(localStorage.getItem("currentUser"));
+      return stored || demoUser;
+    } catch {
+      return demoUser;
+    }
   }
-  function getAttendanceSessions(classId) {
+
+  // Save new user to localStorage
+  function saveCurrentUser(user) {
+    localStorage.setItem("currentUser", JSON.stringify(user));
+  }
+
+  // Sessions helpers
+  function getAttendanceSessions() {
     return attendanceSessions;
   }
-  function saveAttendanceSessions(classId, sessions) {
+
+  function saveAttendanceSessions(sessions) {
     attendanceSessions = sessions;
   }
-  function getAttendanceRecords(classId) {
+
+  function getAttendanceRecords() {
     return attendanceRecords;
   }
-  // ...existing code...
-  // DEMO: Set a default professor user if not present
-  if (!getCurrentUser() || getCurrentUser().role !== "professor" || !getCurrentUser().classId) {
-    setCurrentUser({
-      email: "professor@school.edu",
-      role: "professor",
-      classId: "CSE210",
-    });
+
+  /* --------------------------------------------------------------------------
+     ENSURE A VALID PROFESSOR USER
+  -------------------------------------------------------------------------- */
+  const user = getCurrentUser();
+
+  if (!user || user.role !== "professor" || !user.classId) {
+    saveCurrentUser(demoUser);
   }
 
   const currentUser = getCurrentUser();
-  if (!currentUser || currentUser.role !== "professor") {
-    alert("You must be logged in as a professor.");
-    return;
-  }
-
   const classId = currentUser.classId;
+
   if (!classId) {
-    alert("No classId found.");
+    alert("Missing class ID.");
     return;
   }
 
+  /* --------------------------------------------------------------------------
+     DOM ELEMENTS
+  -------------------------------------------------------------------------- */
   const durationInput = document.getElementById("attendanceDuration");
   const generateBtn = document.getElementById("generateAttendanceCodeBtn");
   const codeDisplay = document.getElementById("currentCodeDisplay");
   const sessionsContainer = document.getElementById("attendanceSessionsContainer");
 
-  /* --------------------------------------------------------------------------
-     PROFILE DROPDOWN LOGIC (Fully Fixed)
-  -------------------------------------------------------------------------- */
   const profileImg = document.getElementById("dashboardProfileImg");
   const dropdown = document.getElementById("profileDropdown");
-
-  if (profileImg && dropdown) {
-    profileImg.addEventListener("mouseenter", () => {
-      dropdown.style.display = "block";
-    });
-
-    profileImg.addEventListener("mouseleave", () => {
-      setTimeout(() => {
-        if (!dropdown.matches(":hover")) dropdown.style.display = "none";
-      }, 150);
-    });
-
-    dropdown.addEventListener("mouseenter", () => {
-      dropdown.style.display = "block";
-    });
-
-    dropdown.addEventListener("mouseleave", () => {
-      dropdown.style.display = "none";
-    });
-
-    document.getElementById("logoutBtn").addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.clear();
-      window.location.href = "/login";
-    });
-  }
-
-  /* --------------------------------------------------------------------------
-     PROFILE IMAGE LOADING
-  -------------------------------------------------------------------------- */
-  const savedImg = localStorage.getItem("profileImg");
-  if (savedImg) {
-    profileImg.src = savedImg;
-  }
-
-  /* --------------------------------------------------------------------------
-     BACK TO DASHBOARD
-  -------------------------------------------------------------------------- */
   const backDashboardBtn = document.getElementById("backDashboard");
+
+  /* --------------------------------------------------------------------------
+     PROFILE DROPDOWN
+  -------------------------------------------------------------------------- */
+  if (profileImg && dropdown) {
+      profileImg.addEventListener("mouseenter", () => {
+        dropdown.style.display = "block";
+      });
+
+      profileImg.addEventListener("mouseleave", () => {
+        setTimeout(() => {
+          if (!dropdown.matches(":hover")) dropdown.style.display = "none";
+        }, 150);
+      });
+
+      dropdown.addEventListener("mouseleave", () => {
+        dropdown.style.display = "none";
+      });
+
+      const logoutBtn = document.getElementById("logoutBtn");
+      if (logoutBtn) {
+        logoutBtn.addEventListener("click", (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = "/login";
+        });
+      }
+
+      const savedImg = localStorage.getItem("profileImg");
+      if (savedImg) profileImg.src = savedImg;
+  }
+
+  /* --------------------------------------------------------------------------
+     BACK BUTTON
+  -------------------------------------------------------------------------- */
   if (backDashboardBtn) {
-    backDashboardBtn.addEventListener("click", function (e) {
+    backDashboardBtn.addEventListener("click", (e) => {
       e.preventDefault();
       const role = localStorage.getItem("role");
 
-      if (role === "professor") {
-        window.location.href = "/dashboards/professor.html";
-      } else if (role === "Teaching Assistant") {
-        window.location.href = "/dashboards/ta.html";
-      } else if (role === "team_lead") {
-        window.location.href = "/dashboards/team_lead.html";
-      } else {
-        window.location.href = "/dashboards/student.html";
+      switch (role) {
+        case "professor":
+          window.location.href = "/dashboards/professor.html";
+          break;
+        case "Teaching Assistant":
+          window.location.href = "/dashboards/ta.html";
+          break;
+        case "team_lead":
+          window.location.href = "/dashboards/team_lead.html";
+          break;
+        default:
+          window.location.href = "/dashboards/student.html";
       }
     });
   }
 
   /* --------------------------------------------------------------------------
-     LOAD ATTENDANCE SESSION TABLE
+     LOAD ATTENDANCE SESSIONS UI
   -------------------------------------------------------------------------- */
   function loadSessionsUI() {
-    const sessions = getAttendanceSessions(classId);
-    const records = getAttendanceRecords(classId);
+    const sessions = getAttendanceSessions();
+    const records = getAttendanceRecords();
 
     if (!sessions.length) {
       sessionsContainer.innerHTML =
@@ -133,10 +151,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         rows += `
           <tr>
-              <td>${new Date(s.createdAt).toLocaleString()}</td>
-              <td>${s.code}</td>
-              <td>${presentCount}</td>
-              <td>${expired ? "Closed" : "Open"}</td>
+            <td>${new Date(s.createdAt).toLocaleString()}</td>
+            <td>${s.code}</td>
+            <td>${presentCount}</td>
+            <td>${expired ? "Closed" : "Open"}</td>
           </tr>`;
       });
 
@@ -156,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* --------------------------------------------------------------------------
-     GENERATE ATTENDANCE CODE
+     GENERATE RANDOM CODE
   -------------------------------------------------------------------------- */
   function generateRandomCode() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -167,14 +185,18 @@ document.addEventListener("DOMContentLoaded", () => {
     return code;
   }
 
+  /* --------------------------------------------------------------------------
+     GENERATE ATTENDANCE SESSION
+  -------------------------------------------------------------------------- */
   generateBtn.addEventListener("click", () => {
     const minutes = Math.max(
       1,
       Math.min(60, parseInt(durationInput.value.trim(), 10) || 10)
     );
 
-    const sessions = getAttendanceSessions(classId);
+    const sessions = getAttendanceSessions();
     const now = new Date();
+
     const sessionId = `${classId}-${now.getTime()}`;
     const code = generateRandomCode();
     const expiresAt = new Date(now.getTime() + minutes * 60 * 1000);
@@ -186,7 +208,7 @@ document.addEventListener("DOMContentLoaded", () => {
       expiresAt: expiresAt.toISOString(),
     });
 
-    saveAttendanceSessions(classId, sessions);
+    saveAttendanceSessions(sessions);
 
     codeDisplay.innerHTML = `
       <div style="font-weight:600;margin-bottom:4px;">Current Code:</div>
@@ -199,6 +221,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loadSessionsUI();
   });
 
-  // Initial load
+  /* --------------------------------------------------------------------------
+     INITIAL LOAD
+  -------------------------------------------------------------------------- */
   loadSessionsUI();
 });
