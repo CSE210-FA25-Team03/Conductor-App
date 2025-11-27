@@ -119,7 +119,7 @@ async function loadTeamComparison(teamIdFilter) {
     if (!response.ok) return;
     
     const data = await response.json();
-    const canvas = document.getElementById('teamComparisonChart');
+    const canvas = document.getElementById('team-comparison-chart');
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
@@ -193,7 +193,7 @@ async function loadTeamTrendChart(teamIdFilter) {
     if (!response.ok) return;
     
     const data = await response.json();
-    const canvas = document.getElementById('teamTrendChart');
+    const canvas = document.getElementById('team-trend-chart');
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');
@@ -272,7 +272,7 @@ async function loadClassTrendChart(teamIdFilter) {
       // Use team data for class chart when filtered
       if (data.teams && data.teams.length > 0) {
         const team = data.teams[0];
-        const canvas = document.getElementById('classTrendChart');
+        const canvas = document.getElementById('class-trend-chart');
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
         
@@ -333,7 +333,7 @@ async function loadClassTrendChart(teamIdFilter) {
     if (!response.ok) return;
     
     const data = await response.json();
-    const canvas = document.getElementById('classTrendChart');
+    const canvas = document.getElementById('class-trend-chart');
     if (!canvas) return;
     
     const ctx = canvas.getContext('2d');

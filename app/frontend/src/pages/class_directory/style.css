@@ -511,9 +511,9 @@ input, textarea {
     border-color: #3b6ff5;
 }
 
-#teamComparisonChart,
-#teamTrendChart,
-#classTrendChart {
+#team-comparison-chart,
+#team-trend-chart,
+#class-trend-chart {
     max-height: 300px;
 }
 
