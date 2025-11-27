@@ -1,19 +1,7 @@
 (() => {
-  const DIRECTORY_LINK = '/class_directory_student/';
-
-  function ensureCta() {
-    // Hide CTA when already inside class directory shell to avoid overlap
-    if (document.querySelector('.class-shell')) return null;
-
-    let cta = document.querySelector('.class-directory-cta');
-    if (cta) return cta;
-
-    cta = document.createElement('a');
-    cta.className = 'class-directory-cta';
-    cta.href = DIRECTORY_LINK;
-    cta.textContent = 'Class Directory';
-    document.body.appendChild(cta);
-    return cta;
+  // CTA removal: dashboard now has a dedicated card, so suppress the floating shortcut.
+  function removeCta() {
+    document.querySelectorAll('.class-directory-cta').forEach((cta) => cta.remove());
   }
 
   function applyActiveNav() {
@@ -52,9 +40,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    const cta = ensureCta();
+    removeCta();
     applyActiveNav();
-    const course = await fetchCourseMeta();
-    updateCtaContent(cta, course);
   });
 })();
