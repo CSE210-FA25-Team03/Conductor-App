@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profile | Conductor</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <header class="top-nav">
+        <div class="brand">Conductor <span>App</span></div>
+        <div class="nav-actions">
+            <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+            <div class="profile">
+                <div class="profile-dropdown-container">
+                    <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" />
+                    <div class="profile-dropdown" id="profileDropdown">
+                        <a href="/profile_page/profile.html">Profile</a>
+                        <a href="#" id="logoutBtn">Log Out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- TEAM LEADER VIEW SECTION -->
+        <section class="team-leader-section" id="teamLeadLeaderSection">
+            <article class="dashboard-card full-width-card">
+                <div class="card-icon">🧭</div>
+                <div class="card-content">
+                    <h2>Team Meetings & Tasks</h2>
+                    <p class="card-description">
+                        Schedule recurring meetings and group-specific tasks. Your teammates
+                        will see these on their Calendar view.
+                    </p>
+
+                    <!-- Event Form (will hide for students) -->
+                    <form class="leader-event-form" id="leaderEventForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="leaderEventTitle">Title</label>
+                                <input type="text" id="leaderEventTitle" placeholder="Weekly standup, Sprint review..." required />
+                            </div>
+                            <div class="form-group">
+                                <label for="leaderEventType">Type</label>
+                                <select id="leaderEventType">
+                                    <option value="meeting">Meeting</option>
+                                    <option value="task">Task / Deadline</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="leaderEventDateTime">First Occurrence</label>
+                                <input type="datetime-local" id="leaderEventDateTime" required />
+                            </div>
+                            <div class="form-group checkbox-group">
+                                <label>
+                                    <input type="checkbox" id="leaderEventRepeatWeekly" />
+                                    Repeat weekly
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="leaderEventAudience">Audience tag</label>
+                            <select id="leaderEventAudience">
+                                <option value="team">Whole team</option>
+                                <option value="individual">Specific member (describe in notes)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="leaderEventDescription">Notes / who is it for</label>
+                            <textarea id="leaderEventDescription" placeholder="Add notes or describe audience..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" id="leaderEventSaveBtn" class="card-btn">Add Event</button>
+                        </div>
+                    </form>
+
+                    <!-- Group Events (visible for all roles) -->
+                    <div class="group-events">
+                        <h3>Group Events</h3>
+                        <div id="leaderEventsList" class="events-list"></div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // --- Profile Dropdown ---
+        const profileImg = document.getElementById('dashboardProfileImg');
+        const dropdown = document.getElementById('profileDropdown');
+        profileImg.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+        profileImg.addEventListener('mouseleave', () => setTimeout(() => {
+            if (!dropdown.matches(':hover')) dropdown.classList.remove('show');
+        }, 150));
+        dropdown.addEventListener('mouseleave', () => dropdown.classList.remove('show'));
+        dropdown.addEventListener('mouseenter', () => dropdown.classList.add('show'));
+
+        document.getElementById('logoutBtn').addEventListener('click', e => {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '/login';
+        });
+
+        // --- Profile Info ---
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedImg = localStorage.getItem('profileImg');
+            if (savedImg) profileImg.src = savedImg;
+
+            // Determine role
+            const role = localStorage.getItem('role') || 'student';
+
+            // Hide form if role is student
+            if (role.toLowerCase() === 'student') {
+                document.getElementById('leaderEventForm').style.display = 'none';
+            }
+
+            // You can also display role-specific info here if needed
+        });
+
+        // --- Dashboard link ---
+        document.getElementById('backDashboard').addEventListener('click', e => {
+            e.preventDefault();
+            const role = localStorage.getItem('role');
+            if (role === 'professor') window.location.href = '/dashboards/professor.html';
+            else if (role === 'Teaching Assistant') window.location.href = '/dashboards/ta.html';
+            else if (role === 'team_lead') window.location.href = '/dashboards/team_lead.html';
+            else window.location.href = '/dashboards/student.html';
+        });
+
+        // --- Event Form JS ---
+        const leaderEventForm = document.getElementById('leaderEventForm');
+        const eventsList = document.getElementById('leaderEventsList');
+
+        if (leaderEventForm) {
+            leaderEventForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const title = document.getElementById('leaderEventTitle').value;
+                const type = document.getElementById('leaderEventType').value;
+                const datetime = document.getElementById('leaderEventDateTime').value;
+                const repeat = document.getElementById('leaderEventRepeatWeekly').checked ? ' (Repeats Weekly)' : '';
+                const audience = document.getElementById('leaderEventAudience').value;
+                const description = document.getElementById('leaderEventDescription').value;
+
+                const eventItem = document.createElement('div');
+                eventItem.className = 'event-item';
+                eventItem.innerHTML = `
+                    <strong>${title}</strong> - ${type}<br>
+                    <small>${new Date(datetime).toLocaleString()}${repeat}</small><br>
+                    <small>Audience: ${audience}</small><br>
+                    <p>${description}</p>
+                `;
+
+                eventsList.appendChild(eventItem);
+
+                // Reset form
+                leaderEventForm.reset();
+            });
+        }
+    </script>
+</body>
+</html>
