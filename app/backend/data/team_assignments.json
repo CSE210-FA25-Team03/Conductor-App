@@ -1,0 +1,67 @@
+{
+    "tas": [
+      {
+        "id": 1,
+        "name": "Sarah Chen",
+        "initials": "SC",
+        "email": "sarah.chen@conductor.edu",
+        "role": "Teaching Assistant",
+        "teams": [1, 2, 3]
+      },
+      {
+        "id": 2,
+        "name": "Daniel Rivera",
+        "initials": "DR",
+        "email": "daniel.rivera@conductor.edu",
+        "role": "Teaching Assistant",
+        "teams": [1]
+      },
+      {
+        "id": 3,
+        "name": "Priya Natarajan",
+        "initials": "PN",
+        "email": "priya.natarajan@conductor.edu",
+        "role": "Teaching Assistant",
+        "teams": [2]
+      },
+      {
+        "id": 4,
+        "name": "Omar Hassan",
+        "initials": "OH",
+        "email": "omar.hassan@conductor.edu",
+        "role": "Teaching Assistant",
+        "teams": [3]
+      }
+    ],
+    "teamLeads": [
+      {
+        "id": 101,
+        "name": "Alex Morgan",
+        "initials": "AM",
+        "email": "alex.morgan@conductor.edu",
+        "role": "team_lead",
+        "teams": [1]
+      },
+      {
+        "id": 102,
+        "name": "Casey Lee",
+        "initials": "CL",
+        "email": "casey.lee@conductor.edu",
+        "role": "team_lead",
+        "teams": [2]
+      },
+      {
+        "id": 103,
+        "name": "Harper Martinez",
+        "initials": "HM",
+        "email": "harper.martinez@conductor.edu",
+        "role": "team_lead",
+        "teams": [3]
+      }
+    ],
+    "metadata": {
+      "description": "Role-to-team assignments for TAs and team leads used by Team Card and related features.",
+      "teamsSource": "app/backend/data/teams.json",
+      "membersSource": "app/backend/data/members.json"
+    }
+  }

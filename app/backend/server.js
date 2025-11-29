@@ -892,6 +892,46 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
 });
 
+// --- Team assignments helper & endpoint (for Team Card access control) ---
+
+const teamAssignmentsPath = path.join(__dirname, 'data', 'team_assignments.json');
+
+/**
+ * Safely read team assignments from JSON file.
+ * If the file doesn't exist or is invalid, returns a default structure.
+ */
+function getTeamAssignments() {
+  try {
+    if (!fs.existsSync(teamAssignmentsPath)) {
+      // Default empty structure
+      return { tas: [], teamLeads: [], metadata: {} };
+    }
+    const raw = fs.readFileSync(teamAssignmentsPath, 'utf8');
+    const data = JSON.parse(raw);
+
+    // Ensure expected structure
+    return {
+      tas: Array.isArray(data.tas) ? data.tas : [],
+      teamLeads: Array.isArray(data.teamLeads) ? data.teamLeads : [],
+      metadata: data.metadata || {}
+    };
+  } catch (error) {
+    console.error('Error reading team_assignments.json:', error);
+    return { tas: [], teamLeads: [], metadata: {} };
+  }
+}
+
+/**
+ * Expose assignments to the frontend.
+ * NOTE: This is read-only and does NOT enforce security; it's for UI filtering.
+ */
+app.get('/api/team-assignments', (req, res) => {
+  const assignments = getTeamAssignments();
+  res.json(assignments);
+});
+
+// --- end team assignments helpers ---
+
 if (require.main === module) {
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
