@@ -19,6 +19,10 @@ class TeamsRepository {
     async getTeamById(_id) {
       throw new Error('getTeamById() must be implemented');
     }
+
+    async getTeamByUserId(_uid) {
+      throw new Error('getTeamByUserId() must be implemented');
+    }
   
     /**
      * Create a new team
