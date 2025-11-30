@@ -510,6 +510,19 @@ app.post('/api/teams', async (req, res) => {
   }
 });
 
+// GET - Get team(s) by user ID
+app.get('/api/teams/:uid', async (req, res) => {
+  try 
+    const userid = parseInt(req.params.uid);
+    const team = await teamsRepository.createTeam(req.body);
+    res.status(201).json(newTeam);
+  } catch (error) {
+    console.error('Error creating team:', error);
+    res.status(500).json({ error: 'Failed to create team' });
+  }
+});
+
+
 // PUT - Update an existing team
 app.put('/api/teams/:id', async (req, res) => {
   try {
