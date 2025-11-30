@@ -119,15 +119,15 @@ class TeamsRepositoryPostgres extends TeamsRepository {
         return result.rows[0].role;
     }
 
-    async getTeamsByUserId(userId) {
-        role = await this.getUserRole(userId);
+    async getTeamsByUserId(_uId) {
+        role = await this.getUserRole(_uid);
 
         if (role === 'team_leader') {
-            return this.getTeamsByLeaderId(userId);
+            return this.getTeamsByLeaderId(_uid);
         } else if (role === 'ta') {
-            return this.getTeamsByTaId(userId);
+            return this.getTeamsByTaId(_uid);
         } else if (role === 'team_member') {
-            return this.getTeamsForMembers(userId);
+            return this.getTeamsForMembers(_uid);
         } else if (role === 'professor') {
             return this.getAllTeams();
         }
@@ -137,3 +137,4 @@ class TeamsRepositoryPostgres extends TeamsRepository {
 }
 
 module.exports = TeamsRepositoryPostgres;
+
