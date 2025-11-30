@@ -514,11 +514,11 @@ app.post('/api/teams', async (req, res) => {
 app.get('/api/teams/:uid', async (req, res) => {
   try 
     const userid = parseInt(req.params.uid);
-    const team = await teamsRepository.createTeam(req.body);
-    res.status(201).json(newTeam);
+    const team = await teamsRepository.getTeamsByUserId(req.body);
+    res.status(201).json(team);
   } catch (error) {
-    console.error('Error creating team:', error);
-    res.status(500).json({ error: 'Failed to create team' });
+    console.error('Error get team:', error);
+    res.status(500).json({ error: 'Failed to get team' });
   }
 });
 
