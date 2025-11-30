@@ -107,6 +107,32 @@ class TeamsRepositoryPostgres extends TeamsRepository {
         return result.rowCount > 0;
     }
 
+    async getUserRole(userId) {
+        const query = `SELECT role FROM users WHERE id = $1;`;
+        const params = [userId];
+        const result = await this.pool.query(query, params);
+
+        if (result.rows.length === 0) {
+            return null;
+        }
+
+        return result.rows[0].role;
+    }
+
+    async getTeamsByUserId(userId) {
+        role = await this.getUserRole(userId);
+
+        if (role === 'team_leader') {
+            return this.getTeamsByLeaderId(userId);
+        } else if (role === 'ta') {
+            return this.getTeamsByTaId(userId);
+        } else if (role === 'team_member') {
+            return this.getTeamsForMembers(userId);
+        } else if (role === 'professor') {
+            return this.getAllTeams();
+        }
+
+    }
 
 }
 
