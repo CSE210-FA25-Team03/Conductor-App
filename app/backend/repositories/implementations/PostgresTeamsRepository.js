@@ -58,25 +58,25 @@ class TeamsRepositoryPostgres extends TeamsRepository {
     }
 
 
-    async createTeam(teamData) {
+    async createTeam(_teamData) {
         const query = `
             INSERT INTO teams(leader_id, ta_id, title, description, status)
             VALUES ($1, $2, $3, $4, $5)
             RETURNING *;
         `;
         const values = [
-            teamData.leader_id,
-            teamData.ta_id,
-            teamData.title,
-            teamData.description,
-            teamData.status
+            _teamData.leader_id,
+            _teamData.ta_id,
+            _teamData.title,
+            _teamData.description,
+            _teamData.status
         ];
 
         const result = await this.pool.query(query, values);
         return result.rows[0];
     }
 
-    async updateTeam(id, teamData) {
+    async updateTeam(_id, _teamData) {
         const query = `
             UPDATE teams
             SET leader_id = $1,
@@ -88,21 +88,21 @@ class TeamsRepositoryPostgres extends TeamsRepository {
             RETURNING *;
         `;
         const values = [
-            teamData.leader_id,
-            teamData.ta_id,
-            teamData.title,
-            teamData.description,
-            teamData.status,
-            id
+            _teamData.leader_id,
+            _teamData.ta_id,
+            _teamData.title,
+            _teamData.description,
+            _teamData.status,
+            _id
         ];
 
         const result = await this.pool.query(query, values);
         return result.rows[0] || null;
     }
 
-    async deleteTeam(id) {
+    async deleteTeam(_id) {
         const query = `DELETE FROM teams WHERE id = $1;`;
-        const result = await this.pool.query(query, [id]);
+        const result = await this.pool.query(query, [_id]);
 
         return result.rowCount > 0;
     }
@@ -137,4 +137,5 @@ class TeamsRepositoryPostgres extends TeamsRepository {
 }
 
 module.exports = TeamsRepositoryPostgres;
+
 
