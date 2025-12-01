@@ -1,6 +1,12 @@
 {
   "skills": [],
-  "studentRatings": [],
+  "studentRatings": [
+    {
+      "name": "Sriraksha tr",
+      "email": "srirao1611@gmail.com",
+      "ratings": {}
+    }
+  ],
   "teamLeadRatings": [
     {
       "name": "dsff adc",
