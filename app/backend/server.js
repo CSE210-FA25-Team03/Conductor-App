@@ -652,7 +652,14 @@
   app.get('/api/teams', async (req, res) => {
     try {
       // Read-only: if course missing, return empty list
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      const ok = ensureDb(res, { requireCourse: true, errorOnMissingCourse: false });
+      if (!ok) {
+        // If DB itself is missing, ensureDb already sent a 500; do not send again
+        if (!hasDbConfig) return;
+        // Course is missing: return empty list for read-only endpoints
+        return res.json([]);
+      }
+      if (!DEFAULT_COURSE_ID) {
         return res.json([]);
       }
       const teams = await teamsDb.getAllTeams(DEFAULT_COURSE_ID);
