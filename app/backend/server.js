@@ -649,28 +649,49 @@
   // ------------------------------------------------------------
 
   // GET all teams
+
   app.get('/api/teams', async (req, res) => {
     try {
-      // Read-only: if course missing, return empty list
-      const ok = ensureDb(res, { requireCourse: true, errorOnMissingCourse: false });
-      if (!ok) {
-        // If DB itself is missing, ensureDb already sent a 500; do not send again
-        if (!hasDbConfig) return;
-        // Course is missing: return empty list for read-only endpoints
+      // Always return an array for this read-only route
+      if (!hasDbConfig) {
         return res.json([]);
       }
-      if (!DEFAULT_COURSE_ID) {
+      if (!hasCourseConfig || !DEFAULT_COURSE_ID) {
         return res.json([]);
       }
+
       const teams = await teamsDb.getAllTeams(DEFAULT_COURSE_ID);
-      res.json(teams);
+      res.json(Array.isArray(teams) ? teams : []);
     } catch (error) {
       console.error('Error fetching teams:', error);
-      // Read-only tolerance: return an empty list on unexpected errors
-      res.status(200).json([]);
-
+      return res.json([]); // 200 by default; guarantee array
     }
   });
+
+
+  // app.get('/api/teams', async (req, res) => {
+  //   try {
+  //     // Read-only: if course missing, return empty list
+  //     const ok = ensureDb(res, { requireCourse: true, errorOnMissingCourse: false });
+  //     if (!ok) {
+  //       // If DB itself is missing, ensureDb already sent a 500; do not send again
+  //       if (!hasDbConfig) return;
+  //       // Course is missing: return empty list for read-only endpoints
+  //       return res.json([]);
+  //     }
+  //     if (!DEFAULT_COURSE_ID) {
+  //       return res.json([]);
+  //     }
+  //     const teams = await teamsDb.getAllTeams(DEFAULT_COURSE_ID);
+  //     res.json(teams);
+  //   } catch (error) {
+  //     console.error('Error fetching teams:', error);
+  //     // Read-only tolerance: return an empty list on unexpected errors
+  //     res.status(200).json([]);
+
+  //   }
+  // });
+
 
   // GET single team by ID
   app.get('/api/teams/:id', async (req, res) => {
