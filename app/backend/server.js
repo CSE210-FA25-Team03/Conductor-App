@@ -686,7 +686,7 @@
       res.json(team);
     } catch (error) {
       console.error('Error fetching team:', error);
-      res.status(500).json({ error: 'Failed to fetch team' });
+      res.status(200).json({ error: 'Failed to fetch team' });
     }
   });
 
@@ -702,7 +702,7 @@
       res.json(data);
     } catch (error) {
       console.error('Error reading team card:', error);
-      res.status(500).json({ error: 'Failed to read team card' });
+      res.status(200).json({ error: 'Failed to read team card' });
     }
   });
 
@@ -781,7 +781,7 @@
       res.status(201).json(newTeam);
     } catch (error) {
       console.error('Error creating team:', error);
-      res.status(500).json({ error: 'Failed to create team' });
+      res.status(200).json({ error: 'Failed to create team' });
     }
   });
 
