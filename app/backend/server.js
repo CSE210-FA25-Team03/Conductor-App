@@ -54,9 +54,8 @@
   app.use(express.json({ limit: '10mb' }));
   app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
-  // Serve base public assets
-  app.use(express.static(path.join(__dirname, '../frontend/public')));
-  app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
+  // Note: Static asset serving is registered AFTER API routes to avoid
+  // potential header conflicts when static middleware encounters errors.
 
   // Serve static files for each role/page
   app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
@@ -660,7 +659,9 @@
       res.json(teams);
     } catch (error) {
       console.error('Error fetching teams:', error);
-      res.status(500).json({ error: 'Failed to fetch teams' });
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Failed to fetch teams' });
+      }
     }
   });
 
@@ -2187,6 +2188,12 @@
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
   });
+
+  // ------------------------------------------------------------
+  // Static assets (registered last)
+  // ------------------------------------------------------------
+  app.use(express.static(path.join(__dirname, '../frontend/public')));
+  app.use('/assets', express.static(path.join(__dirname, '../frontend/assets')));
 
   // ------------------------------------------------------------
   // Server bootstrap
