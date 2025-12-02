@@ -1,6 +1,6 @@
 // backend/db/teamEvents.js
 const db = require('./index');
-const { getCurrentCourseId } = require('./classDirectory');
+// const { getCurrentCourseId } = require('./classDirectory');
 
 // Create table if it does not exist (lightweight migration)
 async function ensureTeamEventsTable() {

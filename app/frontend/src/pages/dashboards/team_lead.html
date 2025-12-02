@@ -18,7 +18,7 @@
                 <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
                     Teams Meetings and Tasks
                 </a>
-                <a href="/group_formation/group_member_form.html?role=team_lead" class="nav-btn eval-btn">
+                <a href="/group_formation/student_group_form.html?role=team_lead" class="nav-btn eval-btn">
                     Group Formation Form
                 </a>
 
@@ -39,7 +39,6 @@
         <section class="dashboard-header">
             <div>
                 <h1>Team Lead Dashboard</h1>
-                <small>Team Beacon · Weekly rituals</small>
             </div>
         </section>
 
@@ -54,6 +53,15 @@
             </article>
 
             <article class="dashboard-card">
+                <div class="card-icon">👥</div>
+                <div class="card-content">
+                    <h2>My Teams</h2>
+                    <p>Access to your teams.</p>
+                    <button class="card-btn" id="viewTeamsBtn">View Teams</button>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
                 <div class="card-icon">🗂️</div>
                 <div class="card-content">
                     <h2>Team Task Tracker</h2>
@@ -63,11 +71,20 @@
             </article>
 
             <article class="dashboard-card">
-                <div class="card-icon">👥</div>
+                <div class="card-icon">📝</div>
                 <div class="card-content">
                     <h2>Work Journal</h2>
                     <p>Create, organize, or review your meeting notes and class discussions.</p>
                     <button id="viewWorkJournalBtn" class="card-btn">Open Notes</button>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
+                <div class="card-icon">📊</div>
+                <div class="card-content">
+                    <h2>Evaluation Journal</h2>
+                    <p>Review performance metrics and grading insights.</p>
+                    <button id="viewEvalJournalBtn" class="card-btn">Open Journal</button>
                 </div>
             </article>
 
@@ -151,13 +168,13 @@
                 <select id="lead-week" data-week-filter></select>
             </div>
 
-            <div class="mood-display">
+            <!-- <div class="mood-display">
                 <div class="evaluation-face" data-mood-face>🙂</div>
                 <div>
                     <p class="mood-status" data-mood-status>Making progress</p>
                     <p class="mood-meta" data-mood-meta>Captured for Week 6</p>
                 </div>
-            </div>
+            </div> -->
 
             <div class="notes-panel">
                 <label>Evaluation notes</label>
@@ -172,16 +189,22 @@
          ============================================================ -->
 
     <script src="script.js"></script>
+    <script src="student_weekly_eval.js"></script>
 
     <script>
-        document.getElementById('viewTasksBtn').onclick = () =>
-            window.location.href = '/task_tracker/task_tracker.html';
+        // Navigation buttons (consistent with TA/professor)
+        const nav = {
+            viewTasksBtn: '/task_tracker/task_tracker.html',
+            viewClassDirectoryBtn: '/class_directory_student/class_directory_student.html',
+            viewWorkJournalBtn: '/work_journal/work_journal.html',
+            viewTeamsBtn: '/student_team_card/student_team_card.html',
+            viewEvalJournalBtn: '/evaluation_journal/evaluation_journal.html'
+        };
 
-        document.getElementById('viewClassDirectoryBtn').onclick = () =>
-            window.location.href = '/class_directory_student/class_directory_student.html';
-
-        document.getElementById('viewWorkJournalBtn').onclick = () =>
-            window.location.href = '/work_journal/work_journal.html';
+        Object.entries(nav).forEach(([id, link]) => {
+            const btn = document.getElementById(id);
+            if (btn) btn.onclick = () => (window.location.href = link);
+        });
     </script>
 
     <script>
@@ -211,65 +234,122 @@
         });
     </script>
 
-    <script>
-        // ============================================================
-        // ATTENDANCE DRAWER OPEN/CLOSE
-        // ============================================================
-        const drawer = document.getElementById("attendancePanel");
-        const openBtn = document.getElementById("openAttendanceDrawer");
-        const closeBtn = document.querySelector(".close-attendance");
+        <script>
+            // Backend-integrated attendance (mirrors student dashboard logic)
+            document.addEventListener('DOMContentLoaded', () => {
+                const API_BASE = '/api';
 
-        openBtn.onclick = () => drawer.setAttribute("aria-hidden", "false");
-        closeBtn.onclick = () => drawer.setAttribute("aria-hidden", "true");
+                const drawer = document.getElementById('attendancePanel');
+                const openBtn = document.getElementById('openAttendanceDrawer');
+                const closeBtn = document.querySelector('.close-attendance');
+                const input = document.getElementById('attendanceInput');
+                const submitBtn = document.getElementById('attendanceSubmitBtn');
+                const messageEl = document.getElementById('attendanceMessage');
+                const recordBody = document.getElementById('attendanceRecordBody');
+                const overallEl = document.getElementById('attendanceOverall');
 
+                function fetchJSON(url, options = {}) {
+                    return fetch(url, {
+                        headers: { 'Content-Type': 'application/json' },
+                        ...options,
+                    }).then(async (res) => {
+                        if (!res.ok) {
+                            const text = await res.text().catch(() => '');
+                            throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+                        }
+                        return res.json();
+                    });
+                }
 
-        // ============================================================
-        // ATTENDANCE CODE SYSTEM
-        // ============================================================
-        const input = document.getElementById("attendanceInput");
-        const submitBtn = document.getElementById("attendanceSubmitBtn");
-        const message = document.getElementById("attendanceMessage");
-        const recordBody = document.getElementById("attendanceRecordBody");
-        const overall = document.getElementById("attendanceOverall");
+                function getCurrentUserEmail() {
+                    try {
+                        const stored = JSON.parse(localStorage.getItem('currentUser'));
+                        if (stored && stored.email) return String(stored.email).toLowerCase();
+                    } catch {}
+                    return (localStorage.getItem('email') || 'teamlead@school.edu').toLowerCase();
+                }
 
-        const VALID_CODE = "ABC123"; // <--- Replace with real code if needed
+                const email = getCurrentUserEmail();
 
-        submitBtn.onclick = () => {
-            const code = input.value.trim();
-            const history = JSON.parse(localStorage.getItem("attendanceCodeHistory") || "[]");
+                function loadAttendanceHistory() {
+                    fetchJSON(`${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`)
+                        .then((data) => {
+                            const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+                            const presentCount = data.presentCount || 0;
+                            const total = data.totalSessions || sessions.length;
+                            const pct = total ? Math.round((presentCount / total) * 100) : 0;
 
-            const sessionNumber = history.length + 1;
-            const success = code === VALID_CODE;
+                            if (!sessions.length) {
+                                recordBody.innerHTML = '<tr><td colspan="2">No attendance sessions created yet.</td></tr>';
+                                overallEl.textContent = '';
+                                return;
+                            }
 
-            history.unshift({
-                session: sessionNumber,
-                status: success ? "Present" : "Invalid Code"
+                            const rowsHtml = sessions
+                                .slice()
+                                .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+                                .map((s) => {
+                                    const when = new Date(s.createdAt).toLocaleString();
+                                    const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
+                                    return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
+                                })
+                                .join('');
+
+                            recordBody.innerHTML = rowsHtml;
+                            overallEl.textContent = `Present ${presentCount} out of ${total} sessions (${pct}%)`;
+                        })
+                        .catch((err) => {
+                            console.error('[team_lead] Attendance history error:', err);
+                            recordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
+                            overallEl.textContent = '';
+                        });
+                }
+
+                function openDrawer() {
+                    drawer.setAttribute('aria-hidden', 'false');
+                    input.value = '';
+                    messageEl.textContent = '';
+                    messageEl.style.color = '#333';
+                    loadAttendanceHistory();
+                }
+                function closeDrawer() {
+                    drawer.setAttribute('aria-hidden', 'true');
+                }
+                openBtn.addEventListener('click', openDrawer);
+                closeBtn.addEventListener('click', closeDrawer);
+                drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
+
+                async function handleSubmit() {
+                    const code = (input.value || '').trim().toUpperCase();
+                    if (!code) {
+                        messageEl.textContent = 'Please enter a code.';
+                        messageEl.style.color = '#b00020';
+                        return;
+                    }
+                    try {
+                        const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
+                            method: 'POST',
+                            body: JSON.stringify({ code, email }),
+                        });
+                        if (result && result.success) {
+                            messageEl.textContent = '✔ You are marked present for this session.';
+                            messageEl.style.color = '#0a7a30';
+                            loadAttendanceHistory();
+                        } else {
+                            messageEl.textContent = (result && result.message) || 'Invalid or expired code.';
+                            messageEl.style.color = '#b00020';
+                        }
+                    } catch (err) {
+                        console.error('[team_lead] Failed to mark attendance:', err);
+                        messageEl.textContent = 'Could not submit attendance. Please retry.';
+                        messageEl.style.color = '#b00020';
+                    }
+                }
+
+                submitBtn.addEventListener('click', handleSubmit);
+                input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } });
             });
-
-            localStorage.setItem("attendanceCodeHistory", JSON.stringify(history));
-
-            message.textContent = success ? "✔ Attendance recorded!" : "✖ Invalid code.";
-            message.style.color = success ? "green" : "red";
-
-            loadAttendanceTable();
-        };
-
-        function loadAttendanceTable() {
-            const history = JSON.parse(localStorage.getItem("attendanceCodeHistory") || "[]");
-
-            recordBody.innerHTML = history.map(item => `
-                <tr>
-                    <td>Session ${item.session}</td>
-                    <td>${item.status}</td>
-                </tr>
-            `).join("");
-
-            const presentCount = history.filter(h => h.status === "Present").length;
-            overall.textContent = `Present ${presentCount} out of ${history.length} sessions`;
-        }
-
-        loadAttendanceTable();
-    </script>
+        </script>
 
 </body>
 </html>

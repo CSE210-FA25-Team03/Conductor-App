@@ -1,0 +1,19 @@
+.teams-grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); padding:16px; }
+.team-card { background:#fff; border:1px solid #ddd; border-radius:10px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
+.team-card header small { font-size:0.75rem; color:#555; }
+.team-card h3 { margin:4px 0 8px; font-size:1.15rem; }
+.team-card p { font-size:0.85rem; color:#444; min-height:44px; }
+.team-card button { margin-top:auto; background:#1d4ed8; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; font-size:0.85rem; }
+.team-card button:hover { background:#1742b0; }
+
+.team-modal { position:fixed; inset: 0; background:rgba(0,0,0,0.4); display:flex; align-items:flex-start; justify-content:center; padding:60px 20px; z-index:50; }
+.team-modal-content { background:#fff; width:100%; max-width:640px; border-radius:12px; padding:24px 28px; position:relative; box-shadow:0 6px 32px rgba(0,0,0,0.25); }
+.team-modal-close { position:absolute; top:12px; right:16px; cursor:pointer; font-size:1.3rem; }
+.team-modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.badge { background:#1e3a8a; color:#fff; padding:4px 10px; border-radius:16px; font-size:0.7rem; letter-spacing:0.5px; }
+.modal-section { margin-bottom:20px; }
+.modal-section h3 { margin:0 0 6px; font-size:0.9rem; letter-spacing:0.5px; color:#333; }
+.modal-section p { margin:0; font-size:0.85rem; line-height:1.3rem; color:#222; }
+.members-list { list-style:none; padding:0; margin:0; display:grid; gap:8px; }
+.member-item { background:#f7f9fc; border:1px solid #e2e8f0; padding:8px 10px; border-radius:8px; display:flex; align-items:center; justify-content:space-between; font-size:0.8rem; }
+.leader-badge { background:#facc15; color:#222; font-size:0.65rem; padding:3px 6px; border-radius:6px; margin-left:6px; }

@@ -75,42 +75,45 @@ function buildPeopleData(entry, members = []) {
   const courseCode = entry?.course?.course_code || '';
   const term = entry?.course?.term_year || '';
   const sectionLabel = [courseCode, term].filter(Boolean).join(' • ');
-
   const normalizeName = (name) => name?.trim() || 'Unnamed';
 
-  const staffLists = [
-    ...(entry?.instructors || []).map((person) => ({
-      name: normalizeName(person.staff_name),
-      role: 'instructor',
-      section: sectionLabel,
-      avatar: resolvePicture(person.staff_picture),
-      pronoun: person.pronoun || ''
-    })),
-    ...(entry?.TAs || []).map((person) => ({
-      name: normalizeName(person.staff_name),
-      role: 'ta',
-      section: sectionLabel,
-      avatar: resolvePicture(person.staff_picture),
-      pronoun: person.pronoun || ''
-    })),
-    ...(entry?.tutors || []).map((person) => ({
-      name: normalizeName(person.staff_name),
-      role: 'tutor',
-      section: sectionLabel,
-      avatar: resolvePicture(person.staff_picture),
-      pronoun: person.pronoun || ''
-    }))
-  ];
+  // Build a quick lookup for staff extra data (avatar/pronouns) by id
+  const staffArrays = [entry?.instructors || [], entry?.TAs || [], entry?.tutors || []];
+  const staffMap = {};
+  staffArrays.forEach((arr) => {
+    arr.forEach((person) => {
+      const id = person.id || person.user_id || null;
+      if (!id) return;
+      staffMap[id] = {
+        avatar: resolvePicture(person.photo_url || person.staff_picture || ''),
+        pronouns: person.pronouns || person.pronoun || ''
+      };
+    });
+  });
 
-  const students = (members || []).map((member) => ({
-    name: normalizeName(member.name),
-    role: 'student',
-    section: sectionLabel || 'Main',
-    initials: member.initials || '',
-    avatar: DEFAULT_AVATAR
-  }));
+  // Use role from members; map professor->instructor label for UI consistency
+  const people = (members || []).map((member) => {
+    const rawRole = (member.role || 'student').toLowerCase();
+    let mappedRole = rawRole; // preserve raw role first
+    if (rawRole === 'professor') mappedRole = 'instructor';
+    // keep team_lead as-is so it can be labeled distinctly
+    if (!['instructor','ta','tutor','team_lead','student'].includes(mappedRole)) {
+      mappedRole = 'student';
+    }
 
-  return [...staffLists, ...students].sort((a, b) => a.name.localeCompare(b.name));
+    const staffInfo = staffMap[member.id] || {};
+    return {
+      name: normalizeName(member.name),
+      role: mappedRole,
+      section: sectionLabel || 'Main',
+      initials: member.initials || '',
+      avatar: staffInfo.avatar || DEFAULT_AVATAR,
+      pronoun: staffInfo.pronouns || ''
+    };
+  });
+
+  // Sort by name
+  return people.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function renderPeople() {
@@ -168,6 +171,8 @@ function roleToLabel(role) {
       return 'TA';
     case 'tutor':
       return 'Tutor';
+    case 'team_lead':
+      return 'Team Lead';
     case 'student':
     default:
       return 'Student';

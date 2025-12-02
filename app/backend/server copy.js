@@ -21,8 +21,7 @@ const journalRepliesDb = require('./db/journalReplies');
 
 
 // NEW: work journals + attendance DB modules (we'll implement these next)
-const workJournalsDb = require('./db/workJournals');
-const attendanceDb = require('./db/attendance');
+// const attendanceDb = require('./db/attendance');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

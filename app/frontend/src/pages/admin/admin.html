@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Conductor · Admin</title>
+    <link rel="stylesheet" href="../login_page/style.css" />
+    <!-- reuse login styles just to look decent -->
+  </head>
+  <body>
+    <main class="login_form">
+      <form id="adminForm">
+        <h3>Admin · Create Class</h3>
+
+        <hr style="margin: 16px 0" />
+
+        <div class="input_box">
+          <label for="courseCode">Class Number</label>
+          <input type="text" id="courseCode" name="courseCode" placeholder="CSE 210" required />
+        </div>
+        <div class="input_box">
+          <label for="profFirst">Professor First Name</label>
+          <input type="text" id="profFirst" name="profFirst" placeholder="Enter first name" required />
+        </div>
+        <div class="input_box">
+          <label for="profLast">Professor Last Name</label>
+          <input type="text" id="profLast" name="profLast" placeholder="Enter last name" required />
+        </div>
+        <div class="input_box">
+          <label for="profEmail">Professor Email</label>
+          <input
+            type="email"
+            id="profEmail"
+            name="profEmail"
+            placeholder="prof@example.edu"
+            required
+          />
+        </div>
+
+        <button type="submit" class="login_button">Create / Update Class</button>
+
+        <p id="adminStatus" style="margin-top: 12px; font-size: 0.9rem"></p>
+
+        <div class="links" style="margin-top: 12px">
+          <a href="../login_page/login.html">Go to Login</a>
+        </div>
+      </form>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>

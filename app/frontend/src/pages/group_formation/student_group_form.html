@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Formation · Student Skills</title>
+
+  <!-- Optional shared nav / styles (keep if you already use these elsewhere) -->
+  <link rel="stylesheet" href="/assets/css/class-directory-nav.css" />
+  <script defer src="/assets/js/class-directory-nav.js"></script>
+
+  <link rel="stylesheet" href="/dashboards/style.css" />
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        sans-serif;
+      background: #f7f7fb;
+      color: #111827;
+    }
+
+    .gf-page {
+      max-width: 960px;
+      margin: 24px auto 48px;
+      padding: 0 16px 32px;
+    }
+
+    .gf-header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .gf-title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .gf-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .gf-subtitle {
+      font-size: 0.9rem;
+      color: #6b7280;
+    }
+
+    .gf-back-link {
+      font-size: 0.85rem;
+      text-decoration: none;
+      color: #2563eb;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #eff6ff;
+    }
+
+    .gf-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 20px 20px 16px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e5e7eb;
+    }
+
+    .gf-meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .gf-student-label strong {
+      color: #111827;
+    }
+
+    .gf-status {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+
+    .gf-status.error {
+      color: #b91c1c;
+    }
+
+    .gf-status.success {
+      color: #065f46;
+    }
+
+    .skills-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .skill-row {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+    }
+
+    .skill-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+
+    .skill-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #111827;
+    }
+
+    .skill-weight {
+      font-size: 0.8rem;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+
+    .skill-description {
+      margin-top: 0.3rem;
+      font-size: 0.85rem;
+      color: #4b5563;
+    }
+
+    .skill-rating-row {
+      margin-top: 0.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .skill-rating-row label {
+      font-size: 0.85rem;
+      color: #374151;
+    }
+
+    .skill-rating-row input[type="range"] {
+      flex: 1;
+      max-width: 280px;
+    }
+
+    .skill-rating-value {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #111827;
+      min-width: 32px;
+      text-align: right;
+    }
+
+    .gf-empty-state {
+      padding: 16px 14px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px dashed #d1d5db;
+      font-size: 0.9rem;
+      color: #4b5563;
+      text-align: center;
+    }
+
+    .gf-actions {
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .gf-btn-primary {
+      background: #2563eb;
+      border: none;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 8px 18px;
+      border-radius: 999px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .gf-btn-primary:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <div class="page" data-role="student">
+    <div class="gf-page">
+      <header class="gf-header">
+        <div class="gf-title-row">
+          <div>
+            <div class="gf-title">Group Formation – My Skills</div>
+            <div class="gf-subtitle">
+              Rate your skills so we can form balanced project teams.
+            </div>
+          </div>
+          <a href="/dashboards/student.html" class="gf-back-link">
+            ← Back to Dashboard
+          </a>
+        </div>
+      </header>
+
+      <section class="gf-card">
+        <div class="gf-meta-row">
+          <div class="gf-student-label">
+            <strong id="gfStudentName">Student</strong>
+            <span id="gfStudentEmail" style="margin-left: 4px;"></span>
+          </div>
+          <div class="gf-status" id="gfStatus"></div>
+        </div>
+
+        <form id="studentSkillsForm">
+          <div id="skillsContainer" class="skills-list">
+            <!-- Filled by student_group_form.js -->
+          </div>
+
+          <div class="gf-actions">
+            <span class="gf-status" id="gfStatusFooter"></span>
+            <button type="submit" id="gfSubmitBtn" class="gf-btn-primary">
+              Save My Skill Ratings
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script src="student_group_form.js"></script>
+</body>
+</html>
