@@ -667,7 +667,7 @@
     } catch (error) {
       console.error('Error fetching teams:', error);
       // Read-only tolerance: return an empty list on unexpected errors
-      if (!res.headersSent) return res.json([]);
+      res.status(200).json({ error: 'Failed to fetch teams' });
     }
   });
 
