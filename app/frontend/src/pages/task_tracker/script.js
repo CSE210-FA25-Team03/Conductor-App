@@ -61,7 +61,16 @@ document.addEventListener("DOMContentLoaded", async () => {
             if (column.classList.contains("progress-col")) group = "progress";
             if (column.classList.contains("done-col")) group = "done";
 
-            const taskObj = { title: "New Task", badge: "medium", due: "TBD", assignee: "None" };
+            const taskObj = { 
+                title: "New Task",
+                badge: "medium",
+                due: "TBD",
+                assignee: "None",
+                githubIssueNumber: null,
+                githubUrl: null,
+                githubState: null,
+            };
+
             storyData[activeStory][group].push(taskObj);
             saveTasks();
 
@@ -126,6 +135,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const saveBtn = document.getElementById('saveGitHubConfig');
     const testBtn = document.getElementById('testGitHubConnection');
     const statusDiv = document.getElementById('githubConfigStatus');
+    const pushBtn = document.getElementById('githubPushBtn'); // define pushBtn
 
     // Debug: Check if elements are found
     console.log('GitHub modal elements:', {
@@ -286,6 +296,51 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     }
+
+    if (pushBtn) {
+        pushBtn.addEventListener('click', async () => {
+            if (!confirm('Create GitHub issues for any tasks in the GitHub story that are not yet linked?')) {
+                return;
+            }
+
+            pushBtn.disabled = true;
+            const originalText = pushBtn.textContent;
+            pushBtn.textContent = 'Pushing...';
+
+            try {
+                const response = await fetch('/api/github/push', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.error || result.message || 'Failed to push tasks');
+                }
+
+                alert(`Created ${result.created} new GitHub issues for story "${result.story}".`);
+
+                // Reload tasks so issue numbers/links are visible in storyData
+                await loadTasks();
+                initializeStoryItems();
+                attachStoryItemEvents();
+
+                // If the GitHub story exists, switch to it
+                const stories = document.querySelectorAll('.story-item');
+                stories.forEach(story => {
+                    if (story.textContent.includes('GitHub:')) {
+                        story.click();
+                    }
+                });
+            } catch (err) {
+                console.error('Error pushing tasks to GitHub:', err);
+                alert(`Error pushing tasks to GitHub: ${err.message}`);
+            } finally {
+                pushBtn.disabled = false;
+                pushBtn.textContent = originalText;
+            }
+        });
+    }
 });
 
 // Load members from API
@@ -436,8 +491,16 @@ function createTaskCard(task, storyName, group) {
     card.setAttribute("draggable", "true");
     card.dataset.originalTitle = task.title;
 
+    // NEW: persist GitHub metadata on the card
+    if (task.githubIssueNumber != null) {
+        card.dataset.issueNumber = String(task.githubIssueNumber);
+    } else {
+        card.dataset.issueNumber = "";
+    }
+    card.dataset.githubUrl = task.githubUrl || "";
+    card.dataset.githubState = task.githubState || "";
+
     // Build options HTML for members dropdown
-    // Debug: Log if membersList is empty
     if (!membersList || membersList.length === 0) {
         console.warn('createTaskCard: membersList is empty or not loaded yet');
     }
@@ -463,7 +526,7 @@ function createTaskCard(task, storyName, group) {
         </div>
     `;
 
-    // Add event listener for assignee dropdown
+    // Assignee change handler
     const assigneeSelectElement = card.querySelector('.task-assignee-select');
     assigneeSelectElement.addEventListener('change', () => {
         const updated = getTaskDataFromCard(card);
@@ -478,9 +541,7 @@ function createTaskCard(task, storyName, group) {
         }
     });
 
-    // Apply bold style if assigned
     updateTaskBoldStyle(card, task.assignee);
-
     enableTaskAutoSave(card, storyName, group);
     return card;
 }
@@ -589,12 +650,19 @@ function addTaskToData(storyName, group, task) {
 function getTaskDataFromCard(card) {
     const assigneeSelect = card.querySelector('.task-assignee-select');
     const assignee = assigneeSelect ? assigneeSelect.value : "None";
-    
+
+    const issueNumberRaw = card.dataset.issueNumber;
+    const issueNumber = issueNumberRaw ? Number(issueNumberRaw) : null;
+
     return {
         title: card.querySelector(".task-title").textContent.trim(),
         badge: card.querySelector(".task-badge").textContent.trim(),
         due: card.querySelector(".task-due").textContent.replace("Due:", "").trim(),
-        assignee: assignee
+        assignee,
+        // NEW: keep GitHub link fields
+        githubIssueNumber: issueNumber,
+        githubUrl: card.dataset.githubUrl || null,
+        githubState: card.dataset.githubState || null,
     };
 }
 

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Teams | Conductor</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/dashboards/style.css" />
+</head>
+<body>
+  <div class="page" data-role="student">
+    <header class="top-nav">
+      <div class="brand">Conductor <span>App</span></div>
+      <div class="nav-actions">
+        <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+        <div class="profile">
+          <img id="profileImg" src="/assets/logo/user.png" alt="Profile" style="width:40px;height:40px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+        </div>
+      </div>
+    </header>
+
+    <section class="dashboard-header">
+      <h1>My Teams</h1>
+      <small>Your enrolled teams in the current course.</small>
+    </section>
+
+    <section id="teamsGrid" class="teams-grid"></section>
+  </div>
+
+  <!-- Modal -->
+  <div id="teamModal" class="team-modal" style="display:none;">
+    <div class="team-modal-content">
+      <span class="team-modal-close">&times;</span>
+      <div class="team-modal-header">
+        <h2 id="modalTeamName">Team Name</h2>
+        <span id="modalTeamStatus" class="badge">Status</span>
+      </div>
+      <div class="team-modal-body">
+        <div class="modal-section">
+          <h3>Description</h3>
+          <p id="modalDescription">No description available.</p>
+        </div>
+        <div class="modal-section">
+          <h3>Status Description</h3>
+          <p id="modalStatusDesc">No status details.</p>
+        </div>
+        <div class="modal-section">
+          <h3>Repo Link</h3>
+          <p id="modalRepoLink">Repo not set.</p>
+        </div>
+        <div class="modal-section">
+          <h3>Teaching Assistant</h3>
+          <p id="modalTA">None assigned</p>
+        </div>
+        <div class="modal-section">
+          <h3>Team Members</h3>
+          <ul id="modalMembers" class="members-list"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

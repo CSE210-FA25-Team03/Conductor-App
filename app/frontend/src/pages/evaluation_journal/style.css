@@ -1,4 +1,153 @@
+/* Evaluation Journal Styles */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+/* Sections container */
+#wj-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Dropdown header */
+.wj-sec-header {
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+.wj-dd-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 4px 0;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #111827;
+}
+.wj-dd-arrow {
+  font-weight: 700;
+  width: 18px;
+  text-align: center;
+}
+.wj-sec-body {
+  display: block;
+}
+
+
+
+/* Compact single-column grid: Name, Email, Time, View Details */
+.wj-grid {
+  display: grid;
+  grid-template-columns: 1fr;   /* single column */
+  gap: 4px;                      /* tight spacing */
+  align-items: start;
+  font-size: 0.92rem;            /* larger text for readability */
+  line-height: 1.3;              /* comfortable line height */
+}
+
+/* First line (Name) emphasized; fourth line aligns button right */
+.wj-cell:nth-child(1) {
+  font-weight: 700;              /* emphasize Name line */
+}
+.wj-cell:nth-child(4) {
+  text-align: right;
+}
+/* View details button */
+.wj-view-btn {
+  padding: 3px 8px; /* slightly larger to match text */
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+  cursor: pointer;
+  font-size: 0.9rem;  /* larger text for clarity */
+}
+.wj-view-btn:hover {
+  background: #f3f4f6;
+}
+
+/* Archive button styled to match View Details */
+.wj-archive-btn {
+  padding: 3px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff7ed;             /* soft amber background for distinction */
+  color: #92400e;                   /* amber text */
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-left: 6px;
+}
+.wj-archive-btn:hover {
+  background: #fde68a;              /* slightly stronger hover */
+}
+
+/* Tag pill */
+.tag-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  line-height: 1;
+  margin-left: 6px;
+}
+.tag-mention {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+/* Replies wrapper */
+.journal-replies {
+  margin-top: 8px;
+}
+.journal-reply-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.journal-reply-input {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 0.9rem;
+}
+.journal-reply-submit {
+  align-self: flex-start;
+  padding: 6px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #f9fafb;
+  cursor: pointer;
+}
+.journal-reply-submit:hover {
+  background: #f3f4f6;
+}
+
+/* Detail panel */
+.wj-detail-modal {
+  position: relative;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px;
+  background: #fff;
+  max-height: 320px;         /* limit height for long content */
+  overflow-y: auto;          /* enable scrolling for full details */
+}
+.wj-detail-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  border: none;
+  background: #f3f4f6;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+.wj-detail-close:hover {
+  background: #e5e7eb;
+}
 
 
 
@@ -418,12 +567,12 @@ body {
   margin-bottom: 8px;
 }
 
-/* Journal Cards */
+/* Journal Cards (compact for Recent Work Journals) */
 .journal-card {
   width: 96%;
-  min-height: 220px;
+  min-height: 140px;      /* reduce minimum height */
   height: auto;
-  padding: 18px 20px;
+  padding: 10px 12px;     /* tighter padding */
 }
 
 .work-journal-box .journal-card::before {
@@ -431,8 +580,8 @@ body {
 }
 
 .work-journal-box .eval-card-section {
-  font-size: 0.9rem;
-  line-height: 1.6;
+  font-size: 0.85rem;     /* slightly smaller text in details */
+  line-height: 1.4;       /* shorter lines */
 }
 
 

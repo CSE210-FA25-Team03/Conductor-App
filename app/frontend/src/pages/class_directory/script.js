@@ -417,15 +417,23 @@ function renderStaffList(type, staff = []) {
   staff.forEach(person => {
     const row = document.createElement('div');
     row.className = 'staff-row';
+    const avatar = resolveStaffPicture(person.photo_url || person.staff_picture);
+    const name = person.name || person.staff_name || 'Unnamed';
+    const pronouns = person.pronouns || '';
+    const email = person.email || '';
+    const phone = person.phone || person.contact || '';
+    const availability = person.office_hours || person.availability || '';
+    const publicLink = person.public_link || '';
 
     row.innerHTML = `
-      <img class="staff-avatar" src="${resolveStaffPicture(person.staff_picture)}" />
+      <img class="staff-avatar" src="${avatar}" />
       <div class="staff-row-text">
-        <strong>${person.staff_name || 'Unnamed'}</strong>
-        ${person.pronoun ? `<span>Pronouns: ${person.pronoun}</span>` : ''}
-        ${person.email ? `<span>Email: ${person.email}</span>` : ''}
-        ${person.contact ? `<span>Contact: ${person.contact}</span>` : ''}
-        ${person.availability ? `<span>Availability: ${person.availability}</span>` : ''}
+        <strong>${name}</strong>
+        ${pronouns ? `<span>Pronouns: ${pronouns}</span>` : ''}
+        ${email ? `<span>Email: ${email}</span>` : ''}
+        ${phone ? `<span>Phone: ${phone}</span>` : ''}
+        ${availability ? `<span>Availability: ${availability}</span>` : ''}
+        ${publicLink ? `<span>Link: <a href="${publicLink}" target="_blank" rel="noopener">${publicLink}</a></span>` : ''}
       </div>
     `;
 
@@ -448,9 +456,13 @@ function renderTeams(teams = []) {
     const row = document.createElement('div');
     row.className = 'team-row';
 
+    const code = team.teamNumber || team.displayNumber || team.code || team.team_id || '--';
+    const name = team.name || team.team_name || '';
+    const status = team.status ? ` · ${team.status}` : '';
+
     row.innerHTML = `
-      <strong>Team ${team.team_id || '--'}</strong>
-      <span>${team.team_name || ''}</span>
+      <strong>Team ${code}</strong>
+      <span>${name}${status}</span>
     `;
 
     box.appendChild(row);

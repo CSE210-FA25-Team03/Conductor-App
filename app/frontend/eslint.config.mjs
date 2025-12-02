@@ -2,6 +2,16 @@ import js from "@eslint/js";
 import globals from "globals";
 import { defineConfig } from "eslint/config";
 
+function sanitizeGlobals(obj) {
+  const cleaned = {};
+  for (const [key, val] of Object.entries(obj || {})) {
+    const k = (key || "").trim();
+    if (!k) continue;
+    cleaned[k] = val;
+  }
+  return cleaned;
+}
+
 export default defineConfig([
   // Ignore build output if you ever have it
   {
@@ -13,7 +23,7 @@ export default defineConfig([
     files: ["cypress.config.{js,mjs,cjs}"],
     languageOptions: {
       sourceType: "commonjs",
-      globals: globals.node,
+      globals: sanitizeGlobals(globals.node),
     },
     rules: {
       // ignore unused on/config
@@ -28,9 +38,9 @@ export default defineConfig([
       // no imports/exports here, just plain test files
       sourceType: "script",
       globals: {
-        ...globals.browser,   // window, document
-        ...globals.mocha,     // describe, it, beforeEach, etc.
-        ...globals.cypress,   // cy, Cypress
+        ...sanitizeGlobals(globals.browser),   // window, document
+        ...sanitizeGlobals(globals.mocha),     // describe, it, beforeEach, etc.
+        ...sanitizeGlobals(globals.cypress),   // cy, Cypress
       },
     },
   },
@@ -41,9 +51,9 @@ export default defineConfig([
     languageOptions: {
       sourceType: "module",   // Cypress generates these as ES modules
       globals: {
-        ...globals.browser,
-        ...globals.mocha,
-        ...globals.cypress,
+        ...sanitizeGlobals(globals.browser),
+        ...sanitizeGlobals(globals.mocha),
+        ...sanitizeGlobals(globals.cypress),
       },
     },
   },
@@ -55,7 +65,7 @@ export default defineConfig([
     extends: ["js/recommended"],
     languageOptions: {
       sourceType: "script",   // loaded via <script src="...">
-      globals: globals.browser,
+      globals: sanitizeGlobals(globals.browser),
     },
   },
 ]);

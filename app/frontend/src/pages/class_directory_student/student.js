@@ -401,20 +401,23 @@ function renderStaffList(containerId, staff = []) {
     const row = document.createElement('div');
     row.className = 'staff-row';
 
-    const name = person.staff_name || 'Unnamed';
-    const pronoun = person.pronoun ? `Pronouns: ${person.pronoun}` : '';
-    const contactInfo = person.email || person.contact;
-    const contact = contactInfo ? `Contact: ${contactInfo}` : '';
-    const availability = person.availability ? `Availability: ${person.availability}` : '';
-    const pictureSrc = resolveStaffPicture(person.staff_picture);
+    const name = person.name || person.staff_name || 'Unnamed';
+    const pronouns = person.pronouns || person.pronoun || '';
+    const email = person.email || '';
+    const phone = person.phone || person.contact || '';
+    const availability = person.office_hours || person.availability || '';
+    const publicLink = person.public_link || person.link || '';
+    const pictureSrc = resolveStaffPicture(person.photo_url || person.staff_picture || '');
 
     row.innerHTML = `
       <img class="staff-avatar" src="${pictureSrc}" alt="${name}">
       <div class="staff-row-text">
         <strong>${name}</strong>
-        ${pronoun ? `<span>${pronoun}</span>` : ''}
-        ${contact ? `<span>${contact}</span>` : ''}
-        ${availability ? `<span>${availability}</span>` : ''}
+        ${pronouns ? `<span>Pronouns: ${pronouns}</span>` : ''}
+        ${email ? `<span>Email: ${email}</span>` : ''}
+        ${phone ? `<span>Phone: ${phone}</span>` : ''}
+        ${availability ? `<span>Availability: ${availability}</span>` : ''}
+        ${publicLink ? `<span>Link: <a href="${publicLink}" target="_blank" rel="noopener">${publicLink}</a></span>` : ''}
       </div>
     `;
 

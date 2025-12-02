@@ -161,21 +161,25 @@ label {
   margin-bottom: 0.3rem;
 }
 
-input {
+input,
+textarea {
   padding: 0.6rem;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: #fafafa;
   font-size: 0.95rem;
   transition: border 0.2s;
+  font-family: inherit;
 }
 
-input:focus {
+input:focus,
+textarea:focus {
   border-color: var(--accent);
   outline: none;
 }
 
-input:disabled {
+input:disabled,
+textarea:disabled {
   background: #f4f4f4;
   color: #555;
 }
@@ -204,18 +208,25 @@ input:disabled {
 }
 
 .eval-btn {
-    display: inline-block;
-    padding: 8px 20px;
-    background-color: rgba(100, 100, 100, 0.15); /* transparent grey button */
-    color: black;
-    font-weight: 600;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: background-color 0.3s, transform 0.2s;
+  display: inline-block;
+  padding: 8px 20px;
+  background-color: rgba(100, 100, 100, 0.15);
+  color: black;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 .eval-btn:hover {
-    background-color: #45a049;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  background-color: #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Status text helper */
+.status-text {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: left;
 }
