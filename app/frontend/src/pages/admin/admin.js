@@ -6,60 +6,53 @@ document.addEventListener("DOMContentLoaded", async () => {
     window.location.href = "/login/";
     return;
   }
-  const { upsertClass, upsertUser, getRosterForClass, saveRosterForClass } =
-    window.ConductorStorage;
   const form = document.getElementById('adminForm');
   const status = document.getElementById('adminStatus');
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    status.textContent = '';
+    status.style.color = '';
 
-    const adminEmail = document.getElementById('adminEmail').value.trim();
-    const classId = document.getElementById('classId').value.trim();
-    const profName = document.getElementById('profName').value.trim();
+    const courseCode = document.getElementById('courseCode').value.trim();
+    const profFirst = document.getElementById('profFirst').value.trim();
+    const profLast = document.getElementById('profLast').value.trim();
     const profEmail = document.getElementById('profEmail').value.trim();
 
-    if (!adminEmail || !classId || !profName || !profEmail) {
+    if (!courseCode || !profFirst || !profLast || !profEmail) {
       status.textContent = 'Please fill in all fields.';
       status.style.color = 'red';
       return;
     }
 
-    // 1) Create / update class
-    const classRecord = upsertClass({
-      id: classId,
-      name: classId,
-      professorEmail: profEmail,
-      professorName: profName,
-      createdBy: adminEmail,
-      createdAt: new Date().toISOString(),
-    });
-
-    // 2) Create / update professor user
-    upsertUser({
-      email: profEmail,
-      name: profName,
-      role: 'professor',
-      classId: classRecord.id,
-    });
-
-    // 3) Ensure roster has at least the professor in staff list
-    const roster = getRosterForClass(classRecord.id);
-    const professorAlreadyInStaff = roster.staff.some(
-      (s) => s.email.toLowerCase() === profEmail.toLowerCase()
-    );
-
-    if (!professorAlreadyInStaff) {
-      roster.staff.push({
-        email: profEmail,
-        pid: '',
-        name: profName,
-        role: 'professor',
+    try {
+      const resp = await fetch('/api/admin/course-professor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ courseCode, profFirst, profLast, profEmail }),
       });
-      saveRosterForClass(classRecord.id, roster);
-    }
 
-    status.textContent = `Class ${classRecord.id} saved and professor user created.`;
-    status.style.color = 'green';
+      const text = await resp.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch {
+        data = { success: false, message: text };
+      }
+
+      if (!resp.ok || !data.success) {
+        const msg = data.message || data.error || `Request failed (${resp.status})`;
+        status.textContent = msg;
+        status.style.color = 'red';
+        return;
+      }
+
+      status.textContent = data.message || 'Success';
+      status.style.color = (data.message && data.message.includes('already')) ? '#a15c00' : 'green';
+    } catch (err) {
+      console.error('Admin submit error:', err);
+      status.textContent = err?.message || 'Unexpected error. Please try again.';
+      status.style.color = 'red';
+    }
   });
 });

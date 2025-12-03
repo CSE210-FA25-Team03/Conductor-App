@@ -190,7 +190,7 @@
 
     <script src="script.js"></script>
     <script src="student_weekly_eval.js"></script>
-
+    <script src="../../shared/auth.js"></script>
     <script>
         // Navigation buttons (consistent with TA/professor)
         const nav = {
@@ -211,7 +211,7 @@
         // PROFILE DROPDOWN
         const profileImg = document.getElementById('dashboardProfileImg');
         const dropdown = document.getElementById('profileDropdown');
-
+        const logoutBtn = document.getElementById('logoutBtn');
         profileImg.addEventListener('mouseenter', () => dropdown.style.display = 'block');
         profileImg.addEventListener('mouseleave', () =>
             setTimeout(() => { if (!dropdown.matches(':hover')) dropdown.style.display = 'none'; }, 150)
@@ -219,11 +219,14 @@
         dropdown.addEventListener('mouseenter', () => dropdown.style.display = 'block');
         dropdown.addEventListener('mouseleave', () => dropdown.style.display = 'none');
 
-        document.getElementById('logoutBtn').onclick = (e) => {
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            localStorage.clear();
-            window.location.href = '/login';
-        };
+            e.stopPropagation(); // stop outer <a> from hijacking click
+            ConductorAuth.logout();
+          });
+        }
+        
 
         window.addEventListener('DOMContentLoaded', () => {
             const savedImg = localStorage.getItem('profileImg');

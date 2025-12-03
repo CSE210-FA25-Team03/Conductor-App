@@ -93,40 +93,53 @@
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
     <!-- Profile panel removed, navigation now goes to profile page -->
 
-    <script src="script.js"></script>
-    <script src="../../shared/auth.js"></script>
+<script src="script.js"></script>
+<script src="../../shared/auth.js"></script>
 
-    <script>
-        document.getElementById('viewTeamsBtn').addEventListener('click', function() {
-            window.location.href = '/team_card/team_card.html';
-        });
-    </script>
-    <script>
-        document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
-            window.location.href = '/class_directory/class_directory.html';
-        });
-    </script>
-    <script>
-        document.getElementById('viewEvalJournalBtn').addEventListener('click', function() {
-            window.location.href = '/evaluation_journal/evaluation_journal.html';
-        });
-    </script>
-    <script>
-        document.getElementById('viewAttendanceBtn').addEventListener('click', function() {
-            window.location.href = '/attendance/professor_attendance.html';
-        });
-    </script>
-        document.addEventListener("DOMContentLoaded", () => {
-        const logoutBtn = document.getElementById("logoutBtn");
-        if (!logoutBtn) return;
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // --- NAV BUTTONS ---
+    const viewTeamsBtn = document.getElementById('viewTeamsBtn');
+    const viewClassDirectoryBtn = document.getElementById('viewClassDirectoryBtn');
+    const viewEvalJournalBtn = document.getElementById('viewEvalJournalBtn');
+    const viewAttendanceBtn = document.getElementById('viewAttendanceBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
 
-        logoutBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();  // stop outer <a> from hijacking click
-            ConductorAuth.logout();
-        });
-        });
-    </script>
+    if (viewTeamsBtn) {
+      viewTeamsBtn.addEventListener('click', () => {
+        window.location.href = '/team_card/team_card.html';
+      });
+    }
+
+    if (viewClassDirectoryBtn) {
+      viewClassDirectoryBtn.addEventListener('click', () => {
+        window.location.href = '/class_directory/class_directory.html';
+      });
+    }
+
+    if (viewEvalJournalBtn) {
+      viewEvalJournalBtn.addEventListener('click', () => {
+        window.location.href = '/evaluation_journal/evaluation_journal.html';
+      });
+    }
+
+    if (viewAttendanceBtn) {
+      viewAttendanceBtn.addEventListener('click', () => {
+        window.location.href = '/attendance/professor_attendance.html';
+      });
+    }
+
+    // --- LOGOUT BUTTON ---
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();  // stop outer <a> from hijacking click
+        ConductorAuth.logout();
+      });
+    }
+  });
+</script>
+
 
     <script>
         // Dropdown logic

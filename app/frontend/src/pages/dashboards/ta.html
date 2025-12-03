@@ -120,6 +120,7 @@
 
 
 <!-- <script src="script.js"></script> -->
+<script src="../../shared/auth.js"></script>
 
 <script>
 // ---------------------------
@@ -127,7 +128,7 @@
 // ---------------------------
 const profileImg = document.getElementById('dashboardProfileImg');
 const dropdown = document.getElementById('profileDropdown');
-
+const logoutBtn = document.getElementById('logoutBtn');
 if (profileImg && dropdown) {
     profileImg.addEventListener('mouseenter', () => {
         dropdown.style.display = 'block';
@@ -148,12 +149,13 @@ if (profileImg && dropdown) {
     });
 }
 
-document.getElementById('logoutBtn').addEventListener('click', (e) => {
+if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
     e.preventDefault();
-    localStorage.clear();
-    window.location.href = '/login';
-});
-
+    e.stopPropagation(); // stop outer <a> from hijacking click
+    ConductorAuth.logout();
+    });
+}
 
 // ---------------------------
 // LOAD PROFILE IMAGE

@@ -4,5 +4,3 @@ npm-debug.log*
 .env
 app/backend/docs/
 .DS_Store
-test-db.js
-db.js

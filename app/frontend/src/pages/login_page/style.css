@@ -197,3 +197,27 @@ form button:hover {
 .success-message.show {
     display: block;
 }
+.error-message {
+  position: fixed;
+  top: 40px;                /* move down a bit */
+  left: 50%;                /* center horizontally */
+  transform: translateX(-50%);
+
+  background: #f56565;
+  color: #fff;
+  padding: 14px 20px;
+  border-radius: 6px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  font-size: 0.95rem;
+
+  display: none;            /* teammate's JS still controls display */
+  z-index: 2000;
+}
+
+
+
+.error-message.visible {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
