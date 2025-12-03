@@ -6,22 +6,19 @@
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Team Lead Dashboard | Conductor</title>
+    <title>Tutor Dashboard | Conductor</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="teamlead.css" />
+    <link rel="stylesheet" href="tutor.css" />
 </head>
-
 <body>
-    <div class="page" data-role="team-lead">
+    <div class="page" data-role="tutor">
         <header class="top-nav">
             <div class="brand">Conductor <span>App</span></div>
             <div class="nav-actions">
                 <div class="profile">
                     <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" 
-                             alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-                        <div class="profile-dropdown" id="profileDropdown"
-                             style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
                             <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
                             <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
                         </div>
@@ -32,22 +29,22 @@
 
         <section class="dashboard-header">
             <div>
-                <h1>Team Lead Dashboard</h1>
-                <small>Team Beacon · Weekly rituals</small>
+                <h1>Tutor Support Hub</h1>
+                <small>Tutor view · CSE 210</small>
             </div>
         </section>
 
         <!-- Two-Column Layout: Left (Cards) + Right (FAQ) -->
-        <section class="teamlead-content-wrapper">
+        <section class="tutor-content-wrapper">
             <!-- LEFT COLUMN: Stacked Cards -->
-            <div class="teamlead-left-column">
+            <div class="tutor-left-column">
                 <!-- Class Directory Card -->
                 <article class="dashboard-card">
                     <div class="card-icon">📚</div>
                     <div class="card-content">
                         <h2>Class Directory</h2>
-                        <p>Browse your course overview, roster, and calendar in one place.</p>
-                        <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
+                        <p>Access course roster, instructor info, and class schedule in one place.</p>
+                        <button id="viewClassDirectoryBtn" class="card-btn">Open Directory</button>
                     </div>
                 </article>
 
@@ -63,95 +60,73 @@
             </div>
 
             <!-- RIGHT COLUMN: FAQ Section -->
-            <aside class="teamlead-right-column">
+            <aside class="tutor-right-column">
                 <section class="faq-section">
                     <h3>Frequently Asked Questions</h3>
                     <div class="faq-container">
                         <!-- FAQ Item 1 -->
                         <div class="faq-item">
                             <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">What are my responsibilities as a Team Lead?</span>
+                                <span class="faq-question">How do I access my assigned classes?</span>
                                 <span class="faq-icon">+</span>
                             </button>
                             <div class="faq-answer" style="display:none;">
-                                <p>As a Team Lead, you're responsible for coordinating team meetings, tracking team tasks, managing group formation, and submitting weekly evaluations. You also facilitate communication between your team and the course instructor.</p>
+                                <p>You can access all your assigned classes through the Class Directory. Click on any class to view the roster, schedule, and instructor contact information. Your tutoring assignments are listed under each class.</p>
                             </div>
                         </div>
 
                         <!-- FAQ Item 2 -->
                         <div class="faq-item">
                             <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I access the Class Directory?</span>
+                                <span class="faq-question">How do I submit a support ticket?</span>
                                 <span class="faq-icon">+</span>
                             </button>
                             <div class="faq-answer" style="display:none;">
-                                <p>Click the "Go to Class Directory" button on this dashboard. You can view the course roster, instructor information, meeting schedule, and all relevant class resources in one place.</p>
+                                <p>Click the "Create Ticket" button on this dashboard. Fill out the ticket form with details about your issue, question, or feedback. The course instructor and teaching assistants will review and respond to your ticket within 24-48 hours.</p>
                             </div>
                         </div>
 
                         <!-- FAQ Item 3 -->
                         <div class="faq-item">
                             <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I submit a support ticket?</span>
+                                <span class="faq-question">Where can I find student schedules and availability?</span>
                                 <span class="faq-icon">+</span>
                             </button>
                             <div class="faq-answer" style="display:none;">
-                                <p>Click the "Create Ticket" button on this dashboard. Fill out the ticket form with details about your issue, question, or feedback. The course instructor and teaching assistants will review and respond within 24-48 hours.</p>
+                                <p>Student schedules are available in the Class Directory under each class. You can view when students are available for tutoring sessions and coordinate meeting times directly with them. Use the class calendar to schedule sessions.</p>
                             </div>
                         </div>
 
                         <!-- FAQ Item 4 -->
                         <div class="faq-item">
                             <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I schedule team meetings and track tasks?</span>
+                                <span class="faq-question">How do I report hours worked or submit attendance?</span>
                                 <span class="faq-icon">+</span>
                             </button>
                             <div class="faq-answer" style="display:none;">
-                                <p>Use the Teams Meetings and Tasks button in the navigation bar. You can schedule meetings, assign tasks to team members, set deadlines, and track completion status. Share the meeting link with your team.</p>
+                                <p>You can log your tutoring hours in your profile. Go to Profile → Work Log and enter your tutoring sessions with dates, times, and students worked with. Submit your weekly hours by Friday of each week for payroll processing.</p>
                             </div>
                         </div>
 
                         <!-- FAQ Item 5 -->
                         <div class="faq-item">
                             <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I submit weekly evaluations for my team?</span>
+                                <span class="faq-question">What should I do if a student doesn't show up for their session?</span>
                                 <span class="faq-icon">+</span>
                             </button>
                             <div class="faq-answer" style="display:none;">
-                                <p>Access the Weekly Evaluation section to set mood scores and add direct quotes from team members. Evaluations are submitted per week and help track team morale and progress. Submit by Friday for the current week.</p>
+                                <p>If a student misses a scheduled session, document it in your work log. Send a follow-up message through the class directory and notify the instructor if this is a recurring issue. Submit a support ticket if additional follow-up is needed.</p>
                             </div>
                         </div>
 
                         <!-- FAQ Item 6 -->
                         <div class="faq-item">
                             <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">When and how do I submit attendance?</span>
+                                <span class="faq-question">How do I contact the course instructor or TA?</span>
                                 <span class="faq-icon">+</span>
                             </button>
                             <div class="faq-answer" style="display:none;">
-                                <p>Attendance codes are announced during class. Open the attendance drawer and enter the code provided. Your attendance record is automatically tracked. Submit attendance within the same class session.</p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ Item 7 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I use the Work Journal?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>The Work Journal lets you document team meetings, discussion notes, and progress updates. Use it to keep records of decisions made and action items assigned during meetings.</p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ Item 8 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I manage group formation for my team?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>Use the Group Formation Form accessible from the navigation bar. You can add team members, assign roles, and organize sub-groups if needed. This information helps structure team collaboration.</p>
+                                <p>Instructor and TA contact information is available in the Class Directory. You can find their email addresses, office hours, and availability. For urgent matters, use the Support Ticket system to escalate your request.</p>
                             </div>
                         </div>
                     </div>
@@ -160,15 +135,36 @@
         </section>
     </div>
 
-
+    <!-- Scripts -->
     <script src="script.js"></script>
-
     <script>
-        document.getElementById('viewClassDirectoryBtn').onclick = () =>
-            window.location.href = '/class_directory_student/class_directory_student.html';
+        // Profile Dropdown Logic
+        const profileImg = document.getElementById('dashboardProfileImg');
+        const dropdown = document.getElementById('profileDropdown');
 
-        document.getElementById('viewTicketBtn').onclick = () =>
-            window.location.href = '/app/frontend/src/pages/support_tickets/submit_ticket.html';
+        profileImg.addEventListener('mouseenter', () => {
+            dropdown.style.display = 'block';
+        });
+
+        profileImg.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+            }, 150);
+        });
+
+        dropdown.addEventListener('mouseleave', () => {
+            dropdown.style.display = 'none';
+        });
+
+        dropdown.addEventListener('mouseenter', () => {
+            dropdown.style.display = 'block';
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '/login';
+        });
     </script>
 
     <!-- FAQ Toggle Logic -->
@@ -211,32 +207,26 @@
         });
     </script>
 
+    <!-- Navigation Button Handlers -->
     <script>
-        // PROFILE DROPDOWN
-        const profileImg = document.getElementById('dashboardProfileImg');
-        const dropdown = document.getElementById('profileDropdown');
+        document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
+            window.location.href = '/class_directory/class_directory.html';
+        });
 
-        profileImg.addEventListener('mouseenter', () => dropdown.style.display = 'block');
-        profileImg.addEventListener('mouseleave', () =>
-            setTimeout(() => { if (!dropdown.matches(':hover')) dropdown.style.display = 'none'; }, 150)
-        );
-        dropdown.addEventListener('mouseenter', () => dropdown.style.display = 'block');
-        dropdown.addEventListener('mouseleave', () => dropdown.style.display = 'none');
-
-        document.getElementById('logoutBtn').onclick = (e) => {
-            e.preventDefault();
-            localStorage.clear();
-            window.location.href = '/login';
-        };
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedImg = localStorage.getItem('profileImg');
-            if (savedImg) {
-                const img1 = document.getElementById('dashboardProfileImg');
-                if (img1) img1.src = savedImg;
-            }
+        document.getElementById('viewTicketBtn').addEventListener('click', function() {
+            window.location.href = '/support_tickets/submit_ticket.html';
         });
     </script>
 
+    <!-- Load Profile Image -->
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedImg = localStorage.getItem('profileImg');
+            if (savedImg) {
+                const img = document.getElementById('dashboardProfileImg');
+                if (img) img.src = savedImg;
+            }
+        });
+    </script>
 </body>
 </html>

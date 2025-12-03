@@ -1,0 +1,239 @@
+/* ============================================
+   TEAM LEAD DASHBOARD - CUSTOM LAYOUT STYLES
+   ============================================ */
+
+:root {
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --text: #151b35;
+  --subtle: #6b7087;
+  --border: #e1e4f2;
+  --accent: #f4c93f;
+  --primary: #2f3bb5;
+  --success: #57b894;
+  --risk: #f16c6c;
+}
+
+/* Main Content Wrapper - Two Column Layout */
+.teamlead-content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 32px;
+  margin-top: 32px;
+  padding: 0 clamp(24px, 4vw, 64px);
+}
+
+/* Left Column - Stacked Cards */
+.teamlead-left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.teamlead-left-column .dashboard-card {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 25px 45px rgba(21, 27, 53, 0.08);
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.teamlead-left-column .dashboard-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 35px 55px rgba(21, 27, 53, 0.12);
+}
+
+.teamlead-left-column .card-icon {
+  font-size: 2.5rem;
+  min-width: 60px;
+  text-align: center;
+}
+
+.teamlead-left-column .card-content {
+  flex: 1;
+}
+
+.teamlead-left-column .card-content h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 8px 0;
+}
+
+.teamlead-left-column .card-content p {
+  font-size: 0.95rem;
+  color: var(--subtle);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.teamlead-left-column .card-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.teamlead-left-column .card-btn:hover {
+  background-color: #1f2b8b;
+}
+
+.teamlead-left-column .card-btn:active {
+  transform: scale(0.98);
+}
+
+/* Right Column - FAQ Section */
+.teamlead-right-column {
+  background: var(--card);
+  border-radius: 18px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  box-shadow: 0 25px 45px rgba(21, 27, 53, 0.08);
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.faq-section h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 20px 0;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border);
+}
+
+.faq-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* FAQ Items */
+.faq-item {
+  background: #f8f9ff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.faq-toggle {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 14px 16px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  transition: background-color 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.faq-toggle:hover {
+  background-color: rgba(47, 59, 181, 0.05);
+}
+
+.faq-toggle:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.faq-question {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+.faq-icon {
+  font-size: 1.2rem;
+  color: var(--primary);
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.faq-toggle[aria-expanded="true"] .faq-icon {
+  transform: rotate(45deg);
+}
+
+.faq-answer {
+  background: white;
+  padding: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--subtle);
+  line-height: 1.6;
+}
+
+.faq-answer p {
+  margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .teamlead-content-wrapper {
+    grid-template-columns: 1fr 320px;
+    gap: 24px;
+  }
+
+  .teamlead-right-column {
+    top: 80px;
+  }
+}
+
+@media (max-width: 900px) {
+  .teamlead-content-wrapper {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .teamlead-right-column {
+    position: relative;
+    top: 0;
+  }
+
+  .teamlead-left-column .dashboard-card {
+    flex-direction: row;
+  }
+}
+
+@media (max-width: 640px) {
+  .teamlead-content-wrapper {
+    padding: 0 16px;
+  }
+
+  .teamlead-left-column .dashboard-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .teamlead-left-column .card-icon {
+    text-align: center;
+  }
+
+  .faq-toggle {
+    padding: 12px 14px;
+  }
+
+  .faq-question {
+    font-size: 0.85rem;
+  }
+
+  .faq-answer {
+    font-size: 0.8rem;
+  }
+}

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Submit Support Ticket | Conductor</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="page" data-role="support-tickets">
+        <header class="top-nav">
+            <div class="brand">Conductor <span>App</span></div>
+            <div class="nav-actions">
+                <div class="profile">
+                    <div class="profile-dropdown-container" style="position:relative;">
+                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
+                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="ticket-header">
+            <div>
+                <h1>Submit Support Ticket</h1>
+                <small>Report issues, request assistance, or provide feedback</small>
+            </div>
+            <a href="javascript:history.back()" class="back-btn">← Back</a>
+        </section>
+
+        <!-- Ticket Submission Form -->
+        <section class="ticket-form-wrapper">
+            <article class="ticket-form-card">
+                <form id="ticketForm">
+                    <!-- Name Field -->
+                    <div class="form-group">
+                        <label for="name">Full Name <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            name="name" 
+                            placeholder="Enter your full name" 
+                            required 
+                            value="" 
+                        />
+                        <small class="form-hint">Your full name as registered in the system</small>
+                    </div>
+
+                    <!-- Team Number Field -->
+                    <div class="form-group">
+                        <label for="teamNumber">Team Number <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="teamNumber" 
+                            name="teamNumber" 
+                            placeholder="e.g., Team 1, Team A" 
+                            required 
+                        />
+                        <small class="form-hint">Your team identifier</small>
+                    </div>
+
+                    <!-- Subject Field -->
+                    <div class="form-group">
+                        <label for="subject">Subject <span class="required">*</span></label>
+                        <input 
+                            type="text" 
+                            id="subject" 
+                            name="subject" 
+                            placeholder="Brief summary of your issue" 
+                            required 
+                        />
+                        <small class="form-hint">Keep it concise (max 100 characters)</small>
+                    </div>
+
+                    <!-- Description Field -->
+                    <div class="form-group">
+                        <label for="description">Description <span class="required">*</span></label>
+                        <textarea 
+                            id="description" 
+                            name="description" 
+                            placeholder="Provide detailed information about your issue, question, or feedback..." 
+                            required 
+                            rows="8"
+                        ></textarea>
+                        <small class="form-hint">Include any relevant details that will help us assist you</small>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Submit Ticket</button>
+                        <button type="reset" class="btn-secondary">Clear Form</button>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="successMessage" class="success-message" style="display:none;">
+                        <div class="success-content">
+                            <div class="success-icon">✓</div>
+                            <h3>Ticket Submitted Successfully!</h3>
+                            <p>Your support ticket has been received. The course instructor and teaching assistants will review and respond within 24-48 hours.</p>
+                            <p><strong>Ticket ID:</strong> <span id="ticketId"></span></p>
+                            <button type="button" class="btn-primary" onclick="window.location.href='/login'">Return to Dashboard</button>
+                        </div>
+                    </div>
+                </form>
+            </article>
+
+            <!-- Helpful Information Sidebar -->
+            <aside class="ticket-info-sidebar">
+                <section class="info-panel">
+                    <h3>📋 Ticket Guidelines</h3>
+                    <ul>
+                        <li><strong>Response Time:</strong> 24-48 hours</li>
+                        <li><strong>Urgent Issues:</strong> Mark in subject with [URGENT]</li>
+                        <li><strong>Attachments:</strong> Include details in description</li>
+                        <li><strong>Follow-up:</strong> Check your email for updates</li>
+                    </ul>
+                </section>
+
+                <section class="info-panel">
+                    <h3>🔍 Common Issues</h3>
+                    <ul>
+                        <li>Technical problems with the app</li>
+                        <li>Questions about assignments</li>
+                        <li>Team collaboration issues</li>
+                        <li>Feature requests</li>
+                        <li>General feedback</li>
+                    </ul>
+                </section>
+
+                <section class="info-panel">
+                    <h3>💡 Tips</h3>
+                    <ul>
+                        <li>Be specific and detailed</li>
+                        <li>Include error messages if applicable</li>
+                        <li>Mention when the issue occurred</li>
+                        <li>Describe steps to reproduce the problem</li>
+                    </ul>
+                </section>
+            </aside>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    
+    <!-- Profile Dropdown Logic -->
+    <script>
+        const profileImg = document.getElementById('dashboardProfileImg');
+        const dropdown = document.getElementById('profileDropdown');
+
+        profileImg.addEventListener('mouseenter', () => {
+            dropdown.style.display = 'block';
+        });
+
+        profileImg.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+                if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+            }, 150);
+        });
+
+        dropdown.addEventListener('mouseleave', () => {
+            dropdown.style.display = 'none';
+        });
+
+        dropdown.addEventListener('mouseenter', () => {
+            dropdown.style.display = 'block';
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.clear();
+            window.location.href = '/login';
+        });
+    </script>
+
+    <!-- Load Profile Image and Name -->
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            // Load profile image
+            const savedImg = localStorage.getItem('profileImg');
+            if (savedImg) {
+                const img = document.getElementById('dashboardProfileImg');
+                if (img) img.src = savedImg;
+            }
+
+            // Auto-fill name from localStorage
+            const firstName = localStorage.getItem('firstName');
+            const lastName = localStorage.getItem('lastName');
+            if (firstName && lastName) {
+                document.getElementById('name').value = `${firstName} ${lastName}`;
+            }
+        });
+    </script>
+
+    <!-- Ticket Form Submission Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ticketForm = document.getElementById('ticketForm');
+            const successMessage = document.getElementById('successMessage');
+
+            ticketForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Get form values
+                const name = document.getElementById('name').value.trim();
+                const teamNumber = document.getElementById('teamNumber').value.trim();
+                const subject = document.getElementById('subject').value.trim();
+                const description = document.getElementById('description').value.trim();
+
+                // Validate form
+                if (!name || !teamNumber || !subject || !description) {
+                    alert('Please fill out all required fields.');
+                    return;
+                }
+
+                // Generate unique ticket ID
+                const ticketId = 'TKT-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+
+                // Create ticket object
+                const ticket = {
+                    id: ticketId,
+                    name: name,
+                    teamNumber: teamNumber,
+                    subject: subject,
+                    description: description,
+                    status: 'Open',
+                    createdAt: new Date().toISOString(),
+                    userRole: localStorage.getItem('role')
+                };
+
+                // Save to localStorage
+                let tickets = JSON.parse(localStorage.getItem('supportTickets') || '[]');
+                tickets.push(ticket);
+                localStorage.setItem('supportTickets', JSON.stringify(tickets));
+
+                // TODO: Send to backend API when ready
+                // fetch('/api/support-tickets', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(ticket)
+                // }).then(response => response.json())
+                //   .then(data => handleTicketSubmission(data.id));
+
+                // Show success message
+                document.getElementById('ticketId').textContent = ticketId;
+                ticketForm.style.display = 'none';
+                successMessage.style.display = 'block';
+
+                // Log to console for debugging
+                console.log('Ticket submitted:', ticket);
+            });
+
+            // Clear form on reset
+            ticketForm.addEventListener('reset', function() {
+                // Preserve name field if it was auto-filled
+                const firstName = localStorage.getItem('firstName');
+                const lastName = localStorage.getItem('lastName');
+                if (firstName && lastName) {
+                    setTimeout(() => {
+                        document.getElementById('name').value = `${firstName} ${lastName}`;
+                    }, 0);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

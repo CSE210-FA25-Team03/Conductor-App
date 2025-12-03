@@ -36,6 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
       target = '../dashboards/professor.html';
     } else if (roleSelect.value === 'Teaching Assistant') {
       target = '../dashboards/ta.html';
+    } else if (roleSelect.value === 'tutor') {
+      target = '../dashboards/tutor.html';
     } else if (roleSelect.value === 'team_lead') {
       target = '../dashboards/team_lead.html';
     }
