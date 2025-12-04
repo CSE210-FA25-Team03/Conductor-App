@@ -894,6 +894,108 @@ app.post('/api/github/sync', async (req, res) => {
   }
 });
 
+// TUTOR INTERFACES
+function readTutorFAQ() {
+  const faqPath = path.join(__dirname, 'data', 'tutor_faq.json');
+  if (!fs.existsSync(faqPath)) {
+    fs.writeFileSync(faqPath, JSON.stringify([], null, 2));
+  }
+  return JSON.parse(fs.readFileSync(faqPath, 'utf-8'));
+}
+
+function createTutorFAQ(faq) {
+  const faqs = readTutorFAQ();
+  const maxId = faqs.length > 0 ? Math.max(...faqs.map(f => f.id)) : 0;
+  const newId = maxId + 1;
+  const newFAQ = { id: newId, ...faq };
+  faqs.push(newFAQ);
+  const faqPath = path.join(__dirname, 'data', 'tutor_faq.json');
+  fs.writeFileSync(faqPath, JSON.stringify(faqs, null, 2), 'utf-8');
+  return newFAQ;
+}
+
+function updateTutorFAQ(id, updates) {
+  const faqs = readTutorFAQ();
+  const index = faqs.findIndex(f => f.id === id);
+  if (index === -1) {
+    return null;
+  }
+  faqs[index] = { ...faqs[index], ...updates };
+  const faqPath = path.join(__dirname, 'data', 'tutor_faq.json');
+  fs.writeFileSync(faqPath, JSON.stringify(faqs, null, 2), 'utf-8');
+  return faqs[index];
+}
+
+function deleteTutorFAQ(id) {
+  const faqs = readTutorFAQ();
+  const index = faqs.findIndex(f => f.id === id);
+  if (index === -1) {
+    return false;
+  }
+  faqs.splice(index, 1);
+  const faqPath = path.join(__dirname, 'data', 'tutor_faq.json');
+  fs.writeFileSync(faqPath, JSON.stringify(faqs, null, 2), 'utf-8');
+  return true;
+}
+
+// CRUD for tutor FAQ
+app.get('/api/tutor/get_faq', (req, res) => {
+  try {
+    const faqs = readTutorFAQ();
+    if (!faqs) {
+      return res.status(404).json({ error: 'No FAQs found' });
+    }
+    res.json(faqs);
+  } catch (error) {
+    console.error('Error reading tutor FAQ:', error);
+    res.status(500).json({ error: 'Failed to read tutor FAQ' });
+  }
+});
+
+app.post('/api/tutor/create_faq', (req, res) => {
+  try {
+    const { question, answer } = req.body;
+    if (!question || !answer) {
+      return res.status(400).json({ error: 'Question and answer are required' });
+    }
+    const newFAQ = createTutorFAQ({ question, answer });
+    res.status(201).json(newFAQ);
+  } catch (error) {
+    console.error('Error creating tutor FAQ:', error);
+    res.status(500).json({ error: 'Failed to create tutor FAQ' });
+  }
+});
+
+app.post('/api/tutor/update_faq/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const updates = req.body;
+    const updatedFAQ = updateTutorFAQ(id, updates);
+    if (!updatedFAQ) {
+      return res.status(404).json({ error: 'FAQ not found' });
+    }
+    res.json(updatedFAQ);
+  } catch (error) {
+    console.error('Error updating tutor FAQ:', error);
+    res.status(500).json({ error: 'Failed to update tutor FAQ' });
+  }
+});
+
+
+app.delete('/api/tutor/delete_faq/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const deleted = deleteTutorFAQ(id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'FAQ not found' });
+    }
+    res.json({ message: 'FAQ deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting tutor FAQ:', error);
+    res.status(500).json({ error: 'Failed to delete tutor FAQ' });
+  }
+});
+
 // Serve evaluation_rubric static files
 app.use('/evaluation_rubric', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_rubric')));
 

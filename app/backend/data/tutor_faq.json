@@ -1,0 +1,17 @@
+[
+    {
+        "id": 1,
+        "question": "How do I access my assigned courses?",
+        "answer": "You can access all your assigned classes through the Class Directory. Click on any class to view the roster, schedule, and instructor contact information. Your tutoring assignments are listed under each class."
+    },
+    {
+        "id": 2,
+        "question": "How do I submit a support ticket?",
+        "answer": "Click the \"Create Ticket\" button on this dashboard. Fill out the ticket form with details about your issue, question, or feedback. The course instructor and teaching assistants will review and respond to your ticket within 24-48 hours."
+    },
+    {
+        "id": 3,
+        "question": "Where can I find student schedules and availability?",
+        "answer": "Student schedules are available in the Class Directory under each class. You can view when students are available for tutoring sessions and coordinate meeting times directly with them. Use the class calendar to schedule sessions."
+    }
+]
