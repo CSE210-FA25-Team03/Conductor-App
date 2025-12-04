@@ -17,6 +17,7 @@
   const githubDb = require('./db/github');
   const workJournalsDb = require('./db/workJournals');
   const attendanceDb = require('./db/attendance');
+  const weeklyAttendanceDb = require('./db/weeklyAttendance');
   const rubricDb = require('./db/rubric');
   const evalNotesDb = require('./db/evalNotes');
   const journalRepliesDb = require('./db/journalReplies');
@@ -1865,6 +1866,245 @@ const fetch =
         totalSessions: 0,
         error: 'Failed to fetch attendance history',
       });
+    }
+  });
+
+  // ------------------------------------------------------------
+  // Weekly Attendance API
+  // ------------------------------------------------------------
+
+  // Helper to get user ID from email
+  async function getUserIdFromEmail(email) {
+    if (!email) return null;
+    const { rows } = await dbCore.query(
+      `SELECT id FROM users WHERE LOWER(email) = $1 LIMIT 1`,
+      [email.toLowerCase().trim()],
+    );
+    return rows.length > 0 ? rows[0].id : null;
+  }
+
+  // Submit or update weekly attendance
+  app.post('/api/attendance/weekly/submit', async (req, res) => {
+    try {
+      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+        return res.status(200).json({ error: 'Database not configured' });
+      }
+
+      const { email, periodStartDate, periodEndDate, periodLabel, attendanceTypes } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const userId = await getUserIdFromEmail(email);
+      if (!userId) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const result = await weeklyAttendanceDb.submitWeeklyAttendance(
+        DEFAULT_COURSE_ID,
+        userId,
+        {
+          periodStartDate,
+          periodEndDate,
+          periodLabel,
+          attendanceTypes,
+        },
+      );
+
+      res.json({ success: true, ...result });
+    } catch (error) {
+      console.error('Error submitting weekly attendance:', error);
+      res.status(200).json({
+        success: false,
+        error: error.message || 'Failed to submit weekly attendance',
+      });
+    }
+  });
+
+  // Update weekly attendance (same as POST, but explicit)
+  app.put('/api/attendance/weekly/submit', async (req, res) => {
+    try {
+      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+        return res.status(200).json({ error: 'Database not configured' });
+      }
+
+      const { email, periodStartDate, periodEndDate, periodLabel, attendanceTypes } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const userId = await getUserIdFromEmail(email);
+      if (!userId) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const result = await weeklyAttendanceDb.submitWeeklyAttendance(
+        DEFAULT_COURSE_ID,
+        userId,
+        {
+          periodStartDate,
+          periodEndDate,
+          periodLabel,
+          attendanceTypes,
+        },
+      );
+
+      res.json({ success: true, ...result });
+    } catch (error) {
+      console.error('Error updating weekly attendance:', error);
+      res.status(200).json({
+        success: false,
+        error: error.message || 'Failed to update weekly attendance',
+      });
+    }
+  });
+
+  // Get user's weekly attendance submissions
+  app.get('/api/attendance/weekly/user', async (req, res) => {
+    try {
+      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+        return res.json({ submissions: [] });
+      }
+
+      const { email, periodStartDate } = req.query;
+
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const userId = await getUserIdFromEmail(email);
+      if (!userId) {
+        return res.json({ submissions: [] });
+      }
+
+      const result = await weeklyAttendanceDb.getUserWeeklyAttendance(
+        DEFAULT_COURSE_ID,
+        userId,
+        periodStartDate || null,
+      );
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching user weekly attendance:', error);
+      res.status(200).json({ submissions: [], error: 'Failed to fetch attendance' });
+    }
+  });
+
+  // Get team attendance overview
+  app.get('/api/attendance/weekly/team/:teamId', async (req, res) => {
+    try {
+      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+        return res.status(200).json({ error: 'Database not configured' });
+      }
+
+      const { teamId } = req.params;
+      const { startDate, endDate } = req.query;
+
+      const result = await weeklyAttendanceDb.getTeamAttendanceOverview(
+        DEFAULT_COURSE_ID,
+        teamId,
+        startDate || null,
+        endDate || null,
+      );
+
+      if (!result) {
+        return res.status(404).json({ error: 'Team not found' });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching team attendance overview:', error);
+      res.status(200).json({ error: 'Failed to fetch team attendance overview' });
+    }
+  });
+
+  // Get class attendance overview
+  app.get('/api/attendance/weekly/class', async (req, res) => {
+    try {
+      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+        return res.status(200).json({ error: 'Database not configured' });
+      }
+
+      const { startDate, endDate } = req.query;
+
+      const result = await weeklyAttendanceDb.getClassAttendanceOverview(
+        DEFAULT_COURSE_ID,
+        startDate || null,
+        endDate || null,
+      );
+
+      if (!result) {
+        return res.json({
+          overview: { totalStudents: 0, totalPeriods: 0, averageAttendanceRate: 0, currentPeriodRate: 0 },
+          timeSeries: [],
+          teamBreakdown: [],
+        });
+      }
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching class attendance overview:', error);
+      res.status(200).json({ error: 'Failed to fetch class attendance overview' });
+    }
+  });
+
+  // Get team lead notifications
+  app.get('/api/attendance/weekly/notifications', async (req, res) => {
+    try {
+      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+        return res.json({ notifications: [], unreadCount: 0 });
+      }
+
+      const { email } = req.query;
+
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const userId = await getUserIdFromEmail(email);
+      if (!userId) {
+        return res.json({ notifications: [], unreadCount: 0 });
+      }
+
+      const result = await weeklyAttendanceDb.getTeamLeadNotifications(
+        DEFAULT_COURSE_ID,
+        userId,
+      );
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      res.status(200).json({ notifications: [], unreadCount: 0 });
+    }
+  });
+
+  // Mark notification as read
+  app.post('/api/attendance/weekly/notifications/:id/read', async (req, res) => {
+    try {
+      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+        return res.status(200).json({ error: 'Database not configured' });
+      }
+
+      const { id } = req.params;
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required' });
+      }
+
+      const userId = await getUserIdFromEmail(email);
+      if (!userId) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      await weeklyAttendanceDb.markNotificationAsRead(id, userId);
+
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      res.status(200).json({ error: 'Failed to mark notification as read' });
     }
   });
 

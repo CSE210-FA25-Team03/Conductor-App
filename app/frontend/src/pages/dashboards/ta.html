@@ -72,55 +72,23 @@
         <article class="dashboard-card">
             <div class="card-icon">✅</div>
             <div class="card-content">
-                <h2>Submit Attendance</h2>
-                <p>Submit attendance/activity for this week.</p>
-                <button id="openAttendanceDrawer" class="card-btn">Submit Attendance</button>
+                <h2>Attendance</h2>
+                <p>View attendance analytics and reports.</p>
+                <button id="viewAttendanceBtn" class="card-btn">View Attendance</button>
             </div>
         </article>
 
     </section>
+
+    <!-- Attendance Analytics -->
+    <section id="classAttendanceOverview"></section>
 </div>
 
-<!-- TA ATTENDANCE SLIDE-IN DRAWER -->
-<section class="attendance-panel" id="attendancePanel" aria-hidden="true">
-    <article class="attendance-drawer">
-        <header>
-            <div>
-                <p class="meta-label">Attendance Submission</p>
-                <h2>Weekly Attendance</h2>
-                <p>Select attendance types for this week and save.</p>
-            </div>
-            <button class="close-attendance" aria-label="Close attendance drawer">×</button>
-        </header>
-
-        <!-- Attendance form -->
-        <div class="attendance-form">
-            <label class="att-row">
-                <input type="checkbox" id="attClass"> Class
-            </label>
-            <label class="att-row">
-                <input type="checkbox" id="attGroup"> Group Meeting
-            </label>
-            <label class="att-row">
-                <input type="checkbox" id="attOffice"> Office Hours
-            </label>
-            <label class="att-row">
-                <input type="checkbox" id="attClassMeeting"> Class Meeting
-            </label>
-
-            <button id="saveAttendanceBtn" class="save-btn">Save Attendance</button>
-        </div>
-
-        <!-- Past Submissions -->
-        <div class="past-attendance">
-            <h3>Past Submissions</h3>
-            <ul id="pastAttendanceList"></ul>
-        </div>
-    </article>
-</section>
+<!-- TA does NOT have weekly attendance submission form per requirements -->
 
 
 <!-- <script src="script.js"></script> -->
+<script src="attendance_analytics.js"></script>
 <script src="../../shared/auth.js"></script>
 
 <script>

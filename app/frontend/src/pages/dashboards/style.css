@@ -994,6 +994,184 @@ body {
     font-size: 0.9rem;
 }
 
+/* Attendance Analytics Styles */
+.attendance-overview-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 24px;
+}
+
+.attendance-overview-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.attendance-metrics {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: var(--subtle);
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.chart-container {
+  position: relative;
+  height: 300px;
+  margin-bottom: 24px;
+}
+
+.team-breakdown {
+  margin-top: 24px;
+}
+
+.team-breakdown h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.breakdown-table th,
+.breakdown-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.breakdown-table th {
+  font-weight: 600;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.breakdown-table td {
+  color: var(--subtle);
+}
+
+/* Notification Styles */
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  transition: background 0.2s;
+}
+
+.notification-item.unread {
+  background: #f0f7ff;
+  border-left: 4px solid var(--primary);
+}
+
+.notification-item.read {
+  opacity: 0.7;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.notification-header strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.team-name {
+  font-size: 0.875rem;
+  color: var(--subtle);
+  background: var(--bg);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.notification-body {
+  font-size: 0.9rem;
+  color: var(--subtle);
+  margin-bottom: 4px;
+}
+
+.notification-meta {
+  font-size: 0.75rem;
+  color: var(--subtle);
+}
+
+.mark-read-btn {
+  padding: 6px 12px;
+  font-size: 0.875rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mark-read-btn:hover {
+  background: #1e2a8a;
+}
+
+#attendanceNotificationBadge {
+  display: inline-block;
+  background: var(--risk);
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 0.75rem;
+  text-align: center;
+  line-height: 20px;
+  margin-left: 4px;
+}
+
+.notifications-section {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-top: 24px;
+}
+
+.notifications-section h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text);
+}
+
 .attendance-overall {
     color: #444;
     font-size: 0.85rem;

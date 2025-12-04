@@ -146,6 +146,10 @@
                 </div>
             </article>
         </section>
+
+        <!-- Attendance Analytics -->
+        <section id="teamAttendanceOverview"></section>
+        <section id="classAttendanceOverview"></section>
     </div>
 
     <!-- ============================================================
@@ -156,42 +160,41 @@
     </section>
 
     <!-- ============================================================
-         ATTENDANCE DRAWER (CURRENTLY LOCAL / DEV IMPLEMENTATION)
+         WEEKLY ATTENDANCE DRAWER
     ============================================================ -->
     <section class="attendance-panel" id="attendancePanel" aria-hidden="true">
         <article class="attendance-drawer">
             <header>
                 <div>
-                    <p class="meta-label">Attendance</p>
-                    <h2>Enter Attendance Code</h2>
-                    <p>Enter the code announced during class.</p>
+                    <p class="meta-label">Attendance Submission</p>
+                    <h2>Weekly Attendance</h2>
+                    <p>Select attendance types for this week and save.</p>
                 </div>
                 <button class="close-attendance" aria-label="Close attendance drawer">×</button>
             </header>
 
-            <!-- Attendance Input -->
-            <div class="attendance-input-box">
-                <input id="attendanceInput" type="text" placeholder="Enter code…" />
-                <button id="attendanceSubmitBtn" class="submit-btn">Submit</button>
+            <!-- Attendance form -->
+            <div class="attendance-form">
+                <label class="att-row">
+                    <input type="checkbox" id="attClass"> Class
+                </label>
+                <label class="att-row">
+                    <input type="checkbox" id="attGroup"> Group Meeting
+                </label>
+                <label class="att-row">
+                    <input type="checkbox" id="attOffice"> Office Hours
+                </label>
+                <label class="att-row">
+                    <input type="checkbox" id="attClassMeeting"> Class Meeting
+                </label>
+
+                <button id="saveAttendanceBtn" class="save-btn">Save Attendance</button>
             </div>
 
-            <!-- Success/Error Message -->
-            <p id="attendanceMessage" class="attendance-message"></p>
-
-            <!-- Attendance Record -->
-            <div class="attendance-record-box">
-                <h3>Your Attendance Record</h3>
-                <p id="attendanceOverall" class="attendance-overall"></p>
-
-                <table class="attendance-table">
-                    <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceRecordBody"></tbody>
-                </table>
+            <!-- Past Submissions -->
+            <div class="past-attendance">
+                <h3>Past Submissions</h3>
+                <ul id="pastAttendanceList"></ul>
             </div>
         </article>
     </section>
@@ -255,6 +258,8 @@
            - #weeklyEvalJournalReplies
     ============================================================ -->
     <script src="student_weekly_eval.js"></script>
+    <script src="weekly_attendance.js"></script>
+    <script src="attendance_analytics.js"></script>
 
     <!-- ============================================================
          NAVIGATION BUTTONS
