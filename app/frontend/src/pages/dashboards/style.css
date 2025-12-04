@@ -19,10 +19,18 @@
   font-family: 'Inter', sans-serif;
 }
 
+html {
+  overflow-x: hidden; 
+  width: 100%;
+}
+
 body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  overflow-x: hidden; 
+  width: 100%;
+  max-width: 100vw;
 }
 
 .page {
@@ -31,6 +39,9 @@ body {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  max-width: 100vw; 
+  box-sizing: border-box; 
+  width: 100%;
 }
 
 .top-nav {
@@ -40,32 +51,27 @@ body {
   gap: 16px;
 }
 
-
 .nav-actions {
   display: flex;
   align-items: center;
   gap: 16px;
+  justify-content: flex-end; 
 }
 
-.class-directory-btn {
-  border: 1px solid var(--border);
-  background: var(--card);
-  padding: 10px 18px;
-  border-radius: 999px;
-  color: var(--text);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+.nav-actions:has(.profile:only-child) {
+  justify-content: flex-end;
+  margin-left: auto;
 }
 
-.class-directory-btn:hover {
-  border-color: var(--primary);
-  transform: translateY(-2px);
+
+.nav-actions .profile:only-child {
+  margin-left: auto;
 }
 
 .profile {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .profile-trigger {
@@ -528,6 +534,17 @@ body {
   color: var(--text);
 }
 
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding: 0 2rem;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+
 @media (max-width: 1100px) {
   .content-grid {
     grid-template-columns: 1fr;
@@ -535,29 +552,120 @@ body {
 }
 
 @media (max-width: 640px) {
+  .page {
+    padding: 0.75rem;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .content-grid {
+    padding: 0 0.75rem;
+    margin-top: 1rem;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
   .top-nav {
     flex-direction: column;
     align-items: flex-start;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .nav-actions {
     width: 100%;
     justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    box-sizing: border-box;
+  }
+
+  .eval-btn {
+    font-size: 0.85rem;
+    padding: 0.375rem 0.75rem;
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  .brand {
+    font-size: clamp(1.1rem, 5vw, 1.4rem);
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .profile {
+    position: relative;
+    align-self: flex-end; 
+    display: flex;
+    align-items: center; 
+  }
+
+  .profile-dropdown-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  .profile-link {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  }
+
+  #dashboardProfileImg {
+    display: block;
+    margin-left: auto;
+    max-width: 100%;
   }
 
   .class-directory-card {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .dashboard-card {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+    box-sizing: border-box;
+    margin: 0; 
+  }
+
+  .dashboard-header {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 0.75rem;
+    box-sizing: border-box;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .profile-dropdown {
+    min-width: 7.5rem !important;
+    right: 0 !important;
+    max-width: calc(100vw - 1.5rem); 
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .dashboard-card * {
+    max-width: 100%;
+    box-sizing: border-box;
+  }
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-  padding: 0 2rem;
-}
 
 .dashboard-card {
   background: var(--panel-bg, rgba(255, 255, 255, 0.85));
@@ -609,10 +717,11 @@ body {
   background-color: #1d4ed8;
 }
 .brand {
-  font-size: 1.6rem;
+  font-size: clamp(1.2rem, 4vw, 1.6rem); 
   font-weight: 700;
   color: #232946;
   letter-spacing: 0.5px;
+  line-height: 1.2; 
 }
 
 .brand span {
@@ -626,7 +735,7 @@ body {
 .eval-btn {
     display: inline-block;
     padding: 8px 20px;
-    background-color: rgba(100, 100, 100, 0.15); /* transparent grey button */
+    background-color: rgba(100, 100, 100, 0.15);
     color: black;
     font-weight: 600;
     border-radius: 6px;
@@ -849,7 +958,7 @@ body {
 
 .attendance-drawer {
     background: white;
-    width: 420px;
+    width: min(420px, 100%);
     height: 100%;
     padding: 24px;
     overflow-y: auto;
@@ -928,6 +1037,7 @@ body {
     margin-bottom: 10px;
     background: #fafafa;
 }
+
 
 
 
