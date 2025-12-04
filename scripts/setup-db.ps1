@@ -86,28 +86,41 @@ try {
     # Initialize database schema
     Write-Host "Initializing database schema..." -ForegroundColor Yellow
     $schemaPath = Join-Path $projectRoot "app\db\schema.sql"
+    $schema2Path = Join-Path $projectRoot "app\db\schema2.sql"
     
-    if (-not (Test-Path $schemaPath)) {
-        Write-Host "Error: Schema file not found at $schemaPath" -ForegroundColor Red
-        exit 1
-    }
-    
-    Get-Content $schemaPath | docker exec -i conductor-postgres psql -U postgres
-    
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "Database setup complete!" -ForegroundColor Green
-        Write-Host ""
-        Write-Host "Connection string: postgres://postgres:postgres@localhost:5432/conductor" -ForegroundColor Cyan
-        Write-Host ""
-        $stopCmd = if ($useDockerComposeV2) { "docker compose down" } else { "docker-compose down" }
-        $logsCmd = if ($useDockerComposeV2) { "docker compose logs -f postgres" } else { "docker-compose logs -f postgres" }
-        Write-Host "To stop the database: $stopCmd" -ForegroundColor Yellow
-        Write-Host "To view logs: $logsCmd" -ForegroundColor Yellow
+    # Prefer schema2.sql if it exists (includes seed data), otherwise fall back to schema.sql
+    if (Test-Path $schema2Path) {
+        Write-Host "Loading schema with seed data (schema2.sql)..." -ForegroundColor Yellow
+        Get-Content $schema2Path | docker exec -i conductor-postgres psql -U postgres
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Error: Failed to load schema with seed data (schema2.sql)." -ForegroundColor Red
+            Write-Host "Check the output above for SQL errors." -ForegroundColor Yellow
+            exit 1
+        }
+    } elseif (Test-Path $schemaPath) {
+        Write-Host "Loading base schema (schema.sql)..." -ForegroundColor Yellow
+        Write-Host "Note: schema2.sql not found, using schema.sql (no seed data)" -ForegroundColor Yellow
+        Get-Content $schemaPath | docker exec -i conductor-postgres psql -U postgres
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "Error: Failed to load base schema (schema.sql)." -ForegroundColor Red
+            Write-Host "Check the output above for SQL errors." -ForegroundColor Yellow
+            exit 1
+        }
     } else {
-        Write-Host "Error: Failed to initialize database schema." -ForegroundColor Red
-        Write-Host "Check the output above for SQL errors." -ForegroundColor Yellow
+        Write-Host "Error: Neither schema.sql nor schema2.sql found in app\db\" -ForegroundColor Red
         exit 1
     }
+    
+    Write-Host "Database setup complete!" -ForegroundColor Green
+    Write-Host ""
+    Write-Host "Connection string: postgres://postgres:postgres@localhost:5432/conductor" -ForegroundColor Cyan
+    Write-Host ""
+    $stopCmd = if ($useDockerComposeV2) { "docker compose down" } else { "docker-compose down" }
+    $logsCmd = if ($useDockerComposeV2) { "docker compose logs -f postgres" } else { "docker-compose logs -f postgres" }
+    Write-Host "To stop the database: $stopCmd" -ForegroundColor Yellow
+    Write-Host "To view logs: $logsCmd" -ForegroundColor Yellow
 } finally {
     Pop-Location
 }
