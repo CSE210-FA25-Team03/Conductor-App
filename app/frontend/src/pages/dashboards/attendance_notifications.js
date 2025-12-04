@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const email = currentUser.email.toLowerCase();
   const notificationsContainer = document.getElementById('attendanceNotifications');
-  const notificationBadge = document.getElementById('attendanceNotificationBadge');
+  const notificationBadge = document.getElementById('attendance-notification-badge');
 
   if (!notificationsContainer) {
     return; // Notifications container not present on this page

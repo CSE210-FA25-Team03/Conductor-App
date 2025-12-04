@@ -887,15 +887,9 @@ body {
 
 .attendance-form-help {
     font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 1rem;
-    line-height: 1.5;
-}
-
-.attendance-form-help {
-    font-size: 0.9rem;
     color: #5f6c85;
     margin-bottom: 1rem;
+    line-height: 1.5;
 }
 
 .attendance-type {
@@ -1272,7 +1266,7 @@ body {
   background: #1e2a8a;
 }
 
-#attendanceNotificationBadge {
+#attendance-notification-badge {
   display: inline-block;
   background: var(--risk);
   color: white;

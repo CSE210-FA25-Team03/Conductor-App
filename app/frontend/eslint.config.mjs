@@ -65,7 +65,10 @@ export default defineConfig([
     extends: ["js/recommended"],
     languageOptions: {
       sourceType: "script",   // loaded via <script src="...">
-      globals: sanitizeGlobals(globals.browser),
+      globals: {
+        ...sanitizeGlobals(globals.browser),
+        Chart: "readonly",  // Chart.js library loaded from CDN
+      },
     },
   },
 ]);
