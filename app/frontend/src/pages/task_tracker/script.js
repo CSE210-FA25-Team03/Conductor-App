@@ -345,42 +345,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     if (pushBtn) {
         pushBtn.addEventListener('click', async () => {
-            if (!confirm('Create GitHub issues for any tasks in the GitHub story that are not yet linked?')) {
+            if (!confirm('Update GitHub project issues to match current task positions?')) {
                 return;
             }
 
             pushBtn.disabled = true;
             const originalText = pushBtn.textContent;
-            pushBtn.textContent = 'Pushing...';
+            pushBtn.textContent = 'Updating...';
 
             try {
-                const response = await fetch('/api/github/push', {
+                const response = await fetch('/api/github/update', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
 
                 const result = await response.json();
                 if (!response.ok) {
-                    throw new Error(result.error || result.message || 'Failed to push tasks');
+                    throw new Error(result.error || result.message || 'Failed to update GitHub issues');
                 }
 
-                alert(`Created ${result.created} new GitHub issues for story "${result.story}".`);
-
-                // Reload tasks so issue numbers/links are visible in storyData
-                await loadTasks();
-                initializeStoryItems();
-                attachStoryItemEvents();
-
-                // If the GitHub story exists, switch to it
-                const stories = document.querySelectorAll('.story-item');
-                stories.forEach(story => {
-                    if (story.textContent.includes('GitHub:')) {
-                        story.click();
-                    }
-                });
+                alert(`Successfully updated ${result.updated} GitHub issue(s) in project.`);
             } catch (err) {
-                console.error('Error pushing tasks to GitHub:', err);
-                alert(`Error pushing tasks to GitHub: ${err.message}`);
+                console.error('Error updating GitHub issues:', err);
+                alert(`Error updating GitHub issues: ${err.message}`);
             } finally {
                 pushBtn.disabled = false;
                 pushBtn.textContent = originalText;

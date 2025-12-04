@@ -15,6 +15,7 @@
   const membersDb = require('./db/members');
   const tasksDb = require('./db/tasks');
   const githubDb = require('./db/github');
+  const githubApi = require('./services/githubApi');
   const workJournalsDb = require('./db/workJournals');
   const attendanceDb = require('./db/attendance');
   const rubricDb = require('./db/rubric');
@@ -1901,6 +1902,9 @@
   // ------------------------------------------------------------
   // GitHub API integration
   // ------------------------------------------------------------
+  // Note: GitHub API functions are now in ./services/githubApi.js
+  // Keeping old function definitions for backward compatibility during migration
+  // TODO: Remove these and use githubApi module directly
 
   // Fetch GitHub issues for configured repo (REST API)
   async function fetchGitHubIssues(owner, repo, token = '') {
@@ -2425,6 +2429,427 @@
     }
   });
 
+
+  // Fetch project items with their IDs and issue numbers for updating
+  async function fetchProjectItemsWithIds(projectId, token, orgName = null, projectNumber = null) {
+    if (!token) {
+      throw new Error('GitHub token is required for Project API access');
+    }
+
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'Conductor-App',
+    };
+
+    let query, variables;
+
+    if (orgName && projectNumber !== null) {
+      query = `
+        query($orgLogin: String!, $projectNumber: Int!, $first: Int!) {
+          organization(login: $orgLogin) {
+            projectV2(number: $projectNumber) {
+              id
+              fields(first: 20) {
+                nodes {
+                  ... on ProjectV2FieldCommon {
+                    id
+                    name
+                  }
+                  ... on ProjectV2SingleSelectField {
+                    id
+                    name
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+              items(first: $first) {
+                nodes {
+                  id
+                  fieldValues(first: 20) {
+                    nodes {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        field {
+                          ... on ProjectV2FieldCommon {
+                            id
+                            name
+                          }
+                        }
+                        name
+                      }
+                    }
+                  }
+                  content {
+                    ... on Issue {
+                      id
+                      number
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+      variables = {
+        orgLogin: orgName,
+        projectNumber: parseInt(projectNumber, 10),
+        first: 100,
+      };
+    } else if (projectId) {
+      query = `
+        query($projectId: ID!, $first: Int!) {
+          node(id: $projectId) {
+            ... on ProjectV2 {
+              id
+              fields(first: 20) {
+                nodes {
+                  ... on ProjectV2FieldCommon {
+                    id
+                    name
+                  }
+                  ... on ProjectV2SingleSelectField {
+                    id
+                    name
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+              items(first: $first) {
+                nodes {
+                  id
+                  fieldValues(first: 20) {
+                    nodes {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        field {
+                          ... on ProjectV2FieldCommon {
+                            id
+                            name
+                          }
+                        }
+                        name
+                      }
+                    }
+                  }
+                  content {
+                    ... on Issue {
+                      id
+                      number
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+      variables = {
+        projectId: projectId,
+        first: 100,
+      };
+    } else {
+      throw new Error('Either project_id or org_name + project_number must be provided');
+    }
+
+    const response = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query, variables }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`GitHub GraphQL API error: ${response.status} ${response.statusText} - ${text}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      throw new Error(`GitHub GraphQL errors: ${JSON.stringify(result.errors)}`);
+    }
+
+    let project;
+    if (orgName && projectNumber !== null) {
+      project = result.data?.organization?.projectV2;
+    } else {
+      project = result.data?.node;
+    }
+
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    return project;
+  }
+
+  // Update a project item's status field value
+  async function updateProjectItemStatus(projectId, itemId, statusFieldId, statusValue, token) {
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'Conductor-App',
+    };
+
+    const mutation = `
+      mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: String!) {
+        updateProjectV2ItemFieldValue(
+          input: {
+            projectId: $projectId
+            itemId: $itemId
+            fieldId: $fieldId
+            value: { singleSelectOptionId: $value }
+          }
+        ) {
+          projectV2Item {
+            id
+          }
+        }
+      }
+    `;
+
+    const variables = {
+      projectId: projectId,
+      itemId: itemId,
+      fieldId: statusFieldId,
+      value: statusValue,
+    };
+
+    const response = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query: mutation, variables }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`GitHub GraphQL mutation error: ${response.status} ${response.statusText} - ${text}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      throw new Error(`GitHub GraphQL mutation errors: ${JSON.stringify(result.errors)}`);
+    }
+
+    return result.data;
+  }
+
+  // Update GitHub project issues to match task board positions
+  app.post('/api/github/update', async (req, res) => {
+    // Ensure we always return JSON, even on errors
+    const sendError = (status, message) => {
+      if (!res.headersSent) {
+        return res.status(status).json({ error: message });
+      }
+    };
+
+    try {
+      if (!ensureDb(res)) {
+        return sendError(500, 'Database not configured');
+      }
+
+      const config = await githubDb.getGithubConfig();
+      
+      // Check if using GitHub Projects (required for status updates)
+      if (!config.org_name && !config.project_id) {
+        return res.status(400).json({
+          error: 'GitHub Projects not configured. Please configure org_name/project_number or project_id.',
+        });
+      }
+
+      if (!config.token) {
+        return res.status(400).json({
+          error: 'GitHub token is required for Project API access.',
+        });
+      }
+
+      // Load current tasks board from DB
+      const board = await tasksDb.getTasksBoard();
+      
+      // Find GitHub story (could be different formats)
+      let githubStoryName = null;
+      let story = null;
+      
+      if (config.org_name && config.project_number !== null) {
+        githubStoryName = `GitHub Project: ${config.org_name}/project-${config.project_number}`;
+        story = board[githubStoryName];
+      }
+      
+      if (!story && config.project_id) {
+        githubStoryName = `GitHub Project: ${config.project_id.substring(0, 12)}...`;
+        story = board[githubStoryName];
+      }
+      
+      if (!story && config.owner && config.repo) {
+        githubStoryName = `GitHub: ${config.owner}/${config.repo}`;
+        story = board[githubStoryName];
+      }
+
+      if (!story) {
+        return res.status(400).json({
+          error: `No GitHub story found in task board. Please sync GitHub issues first.`,
+        });
+      }
+
+      // Fetch project items with their IDs using the service module
+      const project = await githubApi.fetchProjectItemsWithIds(
+        config.project_id,
+        config.token,
+        config.org_name,
+        config.project_number
+      );
+
+      // Find status field ID and options
+      const statusField = project.fields?.nodes?.find(
+        (field) => field && field.name && 
+        (field.name.toLowerCase().includes('status') || field.name.toLowerCase().includes('state'))
+      );
+
+      if (!statusField || !statusField.id) {
+        return res.status(400).json({
+          error: 'Status field not found in GitHub project. Please ensure your project has a status field.',
+        });
+      }
+
+      // Get status field options (if available from the query)
+      let statusOptions = statusField.options || [];
+
+      // Get all possible status field values (we'll need to query for options)
+      // For now, we'll map our columns to common status values
+      const statusMapping = {
+        'todo': ['Todo', 'To Do', 'Not Started', 'Backlog'],
+        'progress': ['In Progress', 'InProgress', 'Doing', 'Active'],
+        'done': ['Done', 'Completed', 'Complete', 'Closed'],
+      };
+
+      // Create a map of issue number -> project item ID
+      const issueToItemMap = new Map();
+      for (const item of project.items?.nodes || []) {
+        if (item.content && item.content.number !== undefined) {
+          issueToItemMap.set(item.content.number, item.id);
+        }
+      }
+
+      // If options weren't included in the initial query, fetch them separately
+      if (!statusOptions || statusOptions.length === 0) {
+        const fieldOptionsQuery = `
+          query($projectId: ID!, $fieldId: ID!) {
+            node(id: $projectId) {
+              ... on ProjectV2 {
+                field(id: $fieldId) {
+                  ... on ProjectV2SingleSelectField {
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `;
+
+        const fieldOptionsResponse = await fetch('https://api.github.com/graphql', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${config.token}`,
+            'Content-Type': 'application/json',
+            'User-Agent': 'Conductor-App',
+          },
+          body: JSON.stringify({
+            query: fieldOptionsQuery,
+            variables: { projectId: project.id, fieldId: statusField.id },
+          }),
+        });
+
+        if (fieldOptionsResponse.ok) {
+          const fieldOptionsResult = await fieldOptionsResponse.json();
+          if (!fieldOptionsResult.errors && fieldOptionsResult.data?.node?.field?.options) {
+            statusOptions = fieldOptionsResult.data.node.field.options;
+          }
+        }
+      }
+
+      // Helper function to find status option ID by name
+      const findStatusOptionId = (columnName) => {
+        const possibleNames = statusMapping[columnName] || [columnName];
+        for (const name of possibleNames) {
+          const option = statusOptions.find(
+            opt => opt.name && opt.name.toLowerCase() === name.toLowerCase()
+          );
+          if (option) return option.id;
+        }
+        // If exact match not found, try partial match
+        for (const name of possibleNames) {
+          const option = statusOptions.find(
+            opt => opt.name && opt.name.toLowerCase().includes(name.toLowerCase())
+          );
+          if (option) return option.id;
+        }
+        return null;
+      };
+
+      let updated = 0;
+      const groups = ['todo', 'progress', 'done'];
+
+      // Update each task's status in GitHub
+      for (const group of groups) {
+        const tasks = story[group] || [];
+        for (const task of tasks) {
+          if (!task.githubIssueNumber) continue;
+
+          const itemId = issueToItemMap.get(task.githubIssueNumber);
+          if (!itemId) {
+            console.warn(`Project item not found for issue #${task.githubIssueNumber}`);
+            continue;
+          }
+
+          const statusOptionId = findStatusOptionId(group);
+          if (!statusOptionId) {
+            console.warn(`Status option not found for column "${group}"`);
+            continue;
+          }
+
+          try {
+            await githubApi.updateProjectItemStatus(
+              project.id,
+              itemId,
+              statusField.id,
+              statusOptionId,
+              config.token
+            );
+            updated += 1;
+          } catch (error) {
+            console.error(`Error updating issue #${task.githubIssueNumber}:`, error);
+            // Continue with other updates
+          }
+        }
+      }
+
+      if (!res.headersSent) {
+        res.json({
+          message: 'Updated GitHub project issues',
+          updated,
+          total: updated,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating GitHub issues:', error);
+      console.error('Error stack:', error.stack);
+      if (!res.headersSent) {
+        res.status(500).json({
+          error: 'Failed to update GitHub issues',
+          message: error.message || 'Unknown error occurred',
+        });
+      }
+    }
+  });
 
   // Push local tasks in the GitHub story that don't have an issue number yet
   app.post('/api/github/push', async (req, res) => {
