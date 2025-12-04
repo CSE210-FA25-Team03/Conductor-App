@@ -885,16 +885,144 @@ body {
     margin-bottom: 30px;
 }
 
-.att-row {
+.attendance-form-help {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.attendance-form-help {
+    font-size: 0.9rem;
+    color: #5f6c85;
+    margin-bottom: 1rem;
+}
+
+.attendance-type {
+    border: 1px solid #e1e7f5;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    background: #fdfdff;
+    box-shadow: 0 1px 4px rgba(15, 27, 71, 0.08);
+}
+
+.attendance-type + .attendance-type {
+    margin-top: 1rem;
+}
+
+.attendance-type label {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-weight: 600;
+    color: #1f2a44;
+}
+
+.attendance-date-picker {
     display: flex;
+    gap: 0.75rem;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-    font-size: 16px;
+    flex-wrap: wrap;
+}
+
+.attendance-date-input {
+    flex: 1;
+    min-width: 180px;
+    border-radius: 8px;
+    border: 1px solid #cad6f6;
+    padding: 0.6rem 0.75rem;
+    font-size: 0.95rem;
+    color: #1f2a44;
+    background: #fff;
+}
+
+.attendance-date-input:focus {
+    outline: none;
+    border-color: #5b7cfa;
+    box-shadow: 0 0 0 2px rgba(91, 124, 250, 0.15);
+}
+
+.add-date-btn {
+    padding: 0.55rem 1.25rem;
+    border-radius: 8px;
+    border: none;
+    background: #1c64f2;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.add-date-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(28, 100, 242, 0.3);
+}
+
+.selected-dates-list {
+    margin-top: 0.85rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 1px dashed #d5def0;
+    background: #f6f8ff;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.selected-dates-empty {
+    color: #8892b0;
+    font-size: 0.85rem;
+}
+
+.date-chip {
+    position: relative;
+    min-width: 140px;
+    padding: 0.75rem 1rem 0.7rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid #c7d8ff;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(15, 27, 71, 0.12);
+}
+
+.date-chip-date {
+    font-weight: 600;
+    color: #1f2a44;
+    font-size: 0.95rem;
+}
+
+.date-chip-period {
+    font-size: 0.8rem;
+    color: #647099;
+    margin-top: 0.15rem;
+}
+
+.date-chip-remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(99, 110, 174, 0.08);
+    color: #4b5d8a;
+    cursor: pointer;
+    font-size: 0.9rem;
+    line-height: 1;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.date-chip-remove:hover {
+    background: rgba(220, 38, 38, 0.15);
+    color: #b42318;
+}
+
+.attendance-form .save-btn {
+    margin-top: 1.5rem;
 }
 
 .save-btn {
-    margin-top: 10px;
     padding: 10px 16px;
     background: #4B7BE5;
     color: #fff;

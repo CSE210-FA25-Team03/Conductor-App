@@ -170,6 +170,26 @@ document.addEventListener('DOMContentLoaded', () => {
       return null;
     }
   }
+
+  /**
+   * Check if a date is within the last 3 days (including today)
+   * @param {string} dateStr - Date in YYYY-MM-DD format
+   * @returns {boolean} - True if date is within last 3 days
+   */
+  function isWithinLast3Days(dateStr) {
+    if (!dateStr) return false;
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const threeDaysAgo = new Date(today);
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 2); // 3 days: today, yesterday, day before
+    
+    const checkDate = new Date(dateStr);
+    checkDate.setHours(0, 0, 0, 0);
+    
+    return checkDate >= threeDaysAgo && checkDate <= today;
+  }
   
   /**
    * Add a date to the selected dates for a type
@@ -182,6 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!normalizedDate) {
       alert('Invalid date format. Please use YYYY-MM-DD');
+      return;
+    }
+    
+    // Check if date is within last 3 days
+    if (!isWithinLast3Days(normalizedDate)) {
+      alert('You can only add attendance for dates within the last 3 days.');
       return;
     }
     
@@ -203,66 +229,57 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Render the list of selected dates for a type
+   * Render the list of selected dates for a type (only shows dates within last 3 days)
    */
   function renderDateList(type) {
     const container = datePickerContainers[type];
     if (!container) return;
     
-    const dates = Array.from(selectedDates[type]).sort();
+    // Filter to only show dates within last 3 days
+    const allDates = Array.from(selectedDates[type]);
+    const recentDates = allDates.filter(dateStr => isWithinLast3Days(dateStr)).sort();
     
-    // Find the date list container (should be a sibling or child)
     let dateList = container.querySelector('.selected-dates-list');
     if (!dateList) {
       dateList = document.createElement('div');
       dateList.className = 'selected-dates-list';
-      dateList.style.cssText = 'margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;';
       container.appendChild(dateList);
     }
     
-    if (dates.length === 0) {
-      dateList.innerHTML = '<span style="color: #999; font-size: 0.9rem;">No dates selected</span>';
+    if (recentDates.length === 0) {
+      dateList.innerHTML = '<span class="selected-dates-empty">No dates selected (only last 3 days shown)</span>';
       return;
     }
     
-    dateList.innerHTML = dates.map(dateStr => {
+    dateList.innerHTML = recentDates.map(dateStr => {
       const period = calculatePeriod(dateStr);
+      const periodLabel = period ? generatePeriodLabel(period.startDate, period.endDate) : '';
+      const displayDate = formatDateDisplay(dateStr);
       return `
-        <span class="date-chip" style="
-          display: inline-flex;
-          align-items: center;
-          gap: 0.25rem;
-          padding: 0.25rem 0.5rem;
-          background: #e3f2fd;
-          border: 1px solid #90caf9;
-          border-radius: 4px;
-          font-size: 0.875rem;
-        ">
-          ${formatDateDisplay(dateStr)}
+        <div class="date-chip">
           <button 
-            type="button"
-            onclick="window.removeAttendanceDate('${type}', '${dateStr}')"
-            style="
-              background: none;
-              border: none;
-              color: #1976d2;
-              cursor: pointer;
-              padding: 0;
-              margin: 0;
-              font-size: 1rem;
-              line-height: 1;
-            "
-            title="Remove date"
+            type="button" 
+            class="date-chip-remove" 
+            data-type="${type}" 
+            data-date="${dateStr}"
+            aria-label="Remove ${displayDate}"
+            title="Remove ${displayDate}"
           >×</button>
-        </span>
+          <div class="date-chip-date">${displayDate}</div>
+          <div class="date-chip-period">${periodLabel}</div>
+        </div>
       `;
     }).join('');
+    
+    dateList.querySelectorAll('.date-chip-remove').forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+        event.preventDefault();
+        const selectedType = btn.getAttribute('data-type');
+        const dateValue = btn.getAttribute('data-date');
+        removeDate(selectedType, dateValue);
+      });
+    });
   }
-
-  // Make removeDate available globally for onclick handlers
-  window.removeAttendanceDate = (type, dateStr) => {
-    removeDate(type, dateStr);
-  };
 
   // ---------------------------------------------------------------------------
   // Load existing attendance records
@@ -288,13 +305,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedDates[type] && record.attendanceDate) {
           // Normalize date from API (might be ISO string) to YYYY-MM-DD
           const normalizedDate = normalizeDate(record.attendanceDate);
-          if (normalizedDate) {
+          if (normalizedDate && isWithinLast3Days(normalizedDate)) {
+            // Only load dates within last 3 days
             selectedDates[type].add(normalizedDate);
           }
         }
       });
       
-      // Render all date lists
+      // Render all date lists (only shows dates within last 3 days)
       Object.keys(selectedDates).forEach(type => {
         renderDateList(type);
       });
@@ -375,12 +393,20 @@ document.addEventListener('DOMContentLoaded', () => {
   async function saveAttendance() {
     if (!saveAttendanceBtn) return;
 
-    // Build attendanceDates object, ensuring all dates are normalized
+    // Build attendanceDates object, ensuring all dates are normalized and within last 3 days
     const attendanceDates = {
-      class: Array.from(selectedDates.class).map(d => normalizeDate(d)).filter(d => d),
-      group_meeting: Array.from(selectedDates.group_meeting).map(d => normalizeDate(d)).filter(d => d),
-      office_hours: Array.from(selectedDates.office_hours).map(d => normalizeDate(d)).filter(d => d),
-      class_meeting: Array.from(selectedDates.class_meeting).map(d => normalizeDate(d)).filter(d => d),
+      class: Array.from(selectedDates.class)
+        .map(d => normalizeDate(d))
+        .filter(d => d && isWithinLast3Days(d)),
+      group_meeting: Array.from(selectedDates.group_meeting)
+        .map(d => normalizeDate(d))
+        .filter(d => d && isWithinLast3Days(d)),
+      office_hours: Array.from(selectedDates.office_hours)
+        .map(d => normalizeDate(d))
+        .filter(d => d && isWithinLast3Days(d)),
+      class_meeting: Array.from(selectedDates.class_meeting)
+        .map(d => normalizeDate(d))
+        .filter(d => d && isWithinLast3Days(d)),
     };
 
     // Check if any dates are selected
@@ -433,9 +459,31 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize date picker handlers
   // ---------------------------------------------------------------------------
   function initializeDatePickers() {
+    // Calculate date range (last 3 days: today, yesterday, day before)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const threeDaysAgo = new Date(today);
+    threeDaysAgo.setDate(threeDaysAgo.getDate() - 2); // 3 days: today, yesterday, day before
+    
+    // Format dates for input min/max attributes
+    function formatDateForInput(dateObj) {
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    
+    const minDate = formatDateForInput(threeDaysAgo);
+    const maxDate = formatDateForInput(today);
+    
     Object.keys(datePickers).forEach(type => {
       const picker = datePickers[type];
       if (!picker) return;
+      
+      // Set min and max dates to restrict selection to last 3 days
+      picker.setAttribute('min', minDate);
+      picker.setAttribute('max', maxDate);
       
       // Add button click handler
       const addBtn = picker.parentElement?.querySelector('.add-date-btn');

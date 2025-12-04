@@ -136,43 +136,43 @@
 
             <!-- Attendance form -->
             <div class="attendance-form">
-                <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
-                    Select the dates you attended for each type:
+                <p class="attendance-form-help">
+                    Select the dates you attended for each type (last 3 days only):
                 </p>
                 
-                <div class="att-row" id="attClassDates">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Class</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="date" id="attClassDatePicker" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <button type="button" class="add-date-btn" style="padding: 0.5rem 1rem; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                <div class="attendance-type" id="attClassDates">
+                    <label for="attClassDatePicker">Class</label>
+                    <div class="attendance-date-picker">
+                        <input type="date" id="attClassDatePicker" class="attendance-date-input">
+                        <button type="button" class="add-date-btn">Add</button>
                     </div>
                 </div>
                 
-                <div class="att-row" id="attGroupDates" style="margin-top: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Group Meeting</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="date" id="attGroupDatePicker" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <button type="button" class="add-date-btn" style="padding: 0.5rem 1rem; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                <div class="attendance-type" id="attGroupDates">
+                    <label for="attGroupDatePicker">Group Meeting</label>
+                    <div class="attendance-date-picker">
+                        <input type="date" id="attGroupDatePicker" class="attendance-date-input">
+                        <button type="button" class="add-date-btn">Add</button>
                     </div>
                 </div>
                 
-                <div class="att-row" id="attOfficeDates" style="margin-top: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Office Hours</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="date" id="attOfficeDatePicker" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <button type="button" class="add-date-btn" style="padding: 0.5rem 1rem; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                <div class="attendance-type" id="attOfficeDates">
+                    <label for="attOfficeDatePicker">Office Hours</label>
+                    <div class="attendance-date-picker">
+                        <input type="date" id="attOfficeDatePicker" class="attendance-date-input">
+                        <button type="button" class="add-date-btn">Add</button>
                     </div>
                 </div>
                 
-                <div class="att-row" id="attClassMeetingDates" style="margin-top: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Class Meeting</label>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <input type="date" id="attClassMeetingDatePicker" style="flex: 1; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
-                        <button type="button" class="add-date-btn" style="padding: 0.5rem 1rem; background: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                <div class="attendance-type" id="attClassMeetingDates">
+                    <label for="attClassMeetingDatePicker">Class Meeting</label>
+                    <div class="attendance-date-picker">
+                        <input type="date" id="attClassMeetingDatePicker" class="attendance-date-input">
+                        <button type="button" class="add-date-btn">Add</button>
                     </div>
                 </div>
 
-                <button id="saveAttendanceBtn" class="save-btn" style="margin-top: 1.5rem;">Save Attendance</button>
+                <button id="saveAttendanceBtn" class="save-btn">Save Attendance</button>
             </div>
 
             <!-- Past Submissions -->
