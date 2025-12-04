@@ -246,7 +246,7 @@
          MAIN DASHBOARD SCRIPT (existing behavior: open/close panels, etc.)
     ============================================================ -->
     <script src="script.js"></script>
-
+    <script src="../../shared/auth.js"></script>
     <!-- ============================================================
          STUDENT WEEKLY EVAL SCRIPT (calls /student/weekly-evaluation)
          Populates:
@@ -311,6 +311,8 @@
         if (viewWorkJournalBtn) viewWorkJournalBtn.addEventListener('click', () => { window.location.href = '/work_journal/work_journal.html'; });
         if (viewTeamsBtn) viewTeamsBtn.addEventListener('click', () => { window.location.href = '/student_team_card/student_team_card.html'; });
 
+                
+ 
         // ------------------------------------------------------------
         // PROFILE DROPDOWN + LOGOUT
         // ------------------------------------------------------------
@@ -337,14 +339,14 @@
             dropdown.style.display = 'none';
           });
         }
-
         if (logoutBtn) {
-          logoutBtn.addEventListener('click', (e) => {
+          logoutBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            localStorage.clear();
-            window.location.href = '/login';
+            e.stopPropagation(); // stop outer <a> from hijacking click
+            ConductorAuth.logout();
           });
         }
+        
 
         // ------------------------------------------------------------
         // PROFILE IMAGE SYNC
