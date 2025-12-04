@@ -577,11 +577,29 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-.card-icon {
+/* .card-icon {
   font-size: 2.2rem;
   margin-bottom: 0.75rem;
+} */
+
+.card-icon img {
+  width: 5.2rem;   /* same visual size as your emoji */
+  height: auto;    /* keeps aspect ratio */
+  display: block;
+  object-fit: contain;
+}
+.card-icon {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+}
+@media (max-width: 500px) {
+  .card-icon img {
+    width: 1.9rem; /* slightly smaller on tiny phones */
+  }
 }
 
+/* end of icon image replacement */ 
 .card-content h2 {
   font-size: 1.25rem;
   margin: 0;
