@@ -196,6 +196,7 @@
       const ctx = await classDirectoryDb.getUserCourseContextByEmail(
         normalizedEmail,
       );
+      console.log('ctx', ctx);
 
       if (!ctx.user) {
         return res.status(404).json({

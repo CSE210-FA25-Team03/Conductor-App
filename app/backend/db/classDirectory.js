@@ -135,6 +135,7 @@ async function getClassDirectory() {
 async function getUserCourseContextByEmail(emailRaw) {
   const courseId = getCurrentCourseId();
   const email = (emailRaw || '').trim().toLowerCase();
+  console.log('email', email);
 
   if (!courseId || !email) {
     return {
@@ -148,6 +149,7 @@ async function getUserCourseContextByEmail(emailRaw) {
     };
   }
 
+  console.log('email', email);
   // 1) Lookup user by email
   const { rows: userRows } = await db.query(
     `
@@ -158,6 +160,7 @@ async function getUserCourseContextByEmail(emailRaw) {
     `,
     [email],
   );
+  console.log('userRows', userRows);
 
   if (!userRows.length) {
     return {
