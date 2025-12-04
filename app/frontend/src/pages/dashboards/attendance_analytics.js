@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const result = await fetchJSON(`${API_BASE}/attendance/weekly/team/${teamId}`);
 
-      if (!result || !result.timeSeries || result.timeSeries.length === 0) {
+      if (!result || !result.periods || result.periods.length === 0) {
         container.innerHTML = '<p style="color: #777; padding: 1rem;">No attendance data available</p>';
         return;
       }
@@ -103,23 +103,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderTeamOverview(container, data) {
-    const { overview, timeSeries, teamName } = data;
+    const { periods, summary, totalMembers } = data;
 
     container.innerHTML = `
       <div class="attendance-overview-card">
-        <h3>Team Attendance Overview${teamName ? `: ${teamName}` : ''}</h3>
+        <h3>Team Attendance Overview</h3>
         <div class="attendance-metrics">
           <div class="metric">
-            <span class="metric-label">Current Period</span>
-            <span class="metric-value">${Math.round(overview.currentPeriodRate * 100)}%</span>
+            <span class="metric-label">Average Rate</span>
+            <span class="metric-value">${Math.round((summary.averageRate || 0) * 100)}%</span>
           </div>
           <div class="metric">
-            <span class="metric-label">Average</span>
-            <span class="metric-value">${Math.round(overview.averageAttendanceRate * 100)}%</span>
+            <span class="metric-label">Total Members</span>
+            <span class="metric-value">${totalMembers || 0}</span>
           </div>
           <div class="metric">
             <span class="metric-label">Total Periods</span>
-            <span class="metric-value">${overview.totalPeriods}</span>
+            <span class="metric-value">${periods.length}</span>
           </div>
         </div>
         <div class="chart-container">
@@ -134,11 +134,11 @@ document.addEventListener('DOMContentLoaded', () => {
       new Chart(ctx, {
         type: 'line',
         data: {
-          labels: timeSeries.map((p) => p.periodLabel || p.periodStartDate),
+          labels: periods.map((p) => p.label || p.periodStart),
           datasets: [
             {
               label: 'Attendance Rate (%)',
-              data: timeSeries.map((p) => Math.round(p.attendanceRate * 100)),
+              data: periods.map((p) => Math.round((p.attendanceRate || 0) * 100)),
               borderColor: 'rgb(59, 130, 246)',
               backgroundColor: 'rgba(59, 130, 246, 0.1)',
               tension: 0.4,
@@ -158,11 +158,11 @@ document.addEventListener('DOMContentLoaded', () => {
               callbacks: {
                 label: function (context) {
                   const index = context.dataIndex;
-                  const period = timeSeries[index];
+                  const period = periods[index];
                   return [
-                    `Attendance: ${Math.round(period.attendanceRate * 100)}%`,
-                    `Period: ${period.periodStartDate} - ${period.periodEndDate}`,
-                    `Attended: ${period.attendedCount}/${period.totalMembers}`,
+                    `Attendance: ${Math.round((period.attendanceRate || 0) * 100)}%`,
+                    `Period: ${period.periodStart} - ${period.periodEnd}`,
+                    `Users with records: ${period.usersWithRecords || 0}/${period.totalTeamMembers || 0}`,
                   ];
                 },
               },
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const result = await fetchJSON(`${API_BASE}/attendance/weekly/class`);
       
-      if (!result || !result.timeSeries || result.timeSeries.length === 0) {
+      if (!result || !result.periods || result.periods.length === 0) {
         container.innerHTML = '<p style="color: #777; padding: 1rem;">No attendance data available</p>';
         return;
       }
@@ -207,51 +207,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderClassOverview(container, data) {
-    const { overview, timeSeries, teamBreakdown } = data;
+    const { periods, summary, totalStudents } = data;
 
     container.innerHTML = `
       <div class="attendance-overview-card">
         <h3>Class Attendance Overview</h3>
         <div class="attendance-metrics">
           <div class="metric">
-            <span class="metric-label">Current Period</span>
-            <span class="metric-value">${Math.round(overview.currentPeriodRate * 100)}%</span>
-          </div>
-          <div class="metric">
-            <span class="metric-label">Average</span>
-            <span class="metric-value">${Math.round(overview.averageAttendanceRate * 100)}%</span>
+            <span class="metric-label">Average Rate</span>
+            <span class="metric-value">${Math.round((summary.averageRate || 0) * 100)}%</span>
           </div>
           <div class="metric">
             <span class="metric-label">Total Students</span>
-            <span class="metric-value">${overview.totalStudents}</span>
+            <span class="metric-value">${totalStudents || 0}</span>
+          </div>
+          <div class="metric">
+            <span class="metric-label">Total Periods</span>
+            <span class="metric-value">${periods.length}</span>
           </div>
         </div>
         <div class="chart-container">
           <canvas id="classAttendanceChart"></canvas>
         </div>
-        ${teamBreakdown && teamBreakdown.length > 0 ? `
-          <div class="team-breakdown">
-            <h4>Team Breakdown</h4>
-            <table class="breakdown-table">
-              <thead>
-                <tr>
-                  <th>Team</th>
-                  <th>Attendance Rate</th>
-                  <th>Members</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${teamBreakdown.map((team) => `
-                  <tr>
-                    <td>${team.teamName}</td>
-                    <td>${Math.round(team.attendanceRate * 100)}%</td>
-                    <td>${team.memberCount}</td>
-                  </tr>
-                `).join('')}
-              </tbody>
-            </table>
-          </div>
-        ` : ''}
       </div>
     `;
 
@@ -261,11 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
       new Chart(ctx, {
         type: 'line',
         data: {
-          labels: timeSeries.map((p) => p.periodLabel || p.periodStartDate),
+          labels: periods.map((p) => p.label || p.periodStart),
           datasets: [
             {
               label: 'Attendance Rate (%)',
-              data: timeSeries.map((p) => Math.round(p.attendanceRate * 100)),
+              data: periods.map((p) => Math.round((p.attendanceRate || 0) * 100)),
               borderColor: 'rgb(34, 197, 94)',
               backgroundColor: 'rgba(34, 197, 94, 0.1)',
               tension: 0.4,
@@ -285,11 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
               callbacks: {
                 label: function (context) {
                   const index = context.dataIndex;
-                  const period = timeSeries[index];
+                  const period = periods[index];
                   return [
-                    `Attendance: ${Math.round(period.attendanceRate * 100)}%`,
-                    `Period: ${period.periodStartDate} - ${period.periodEndDate}`,
-                    `Attended: ${period.attendedCount}/${period.totalStudents}`,
+                    `Attendance: ${Math.round((period.attendanceRate || 0) * 100)}%`,
+                    `Period: ${period.periodStart} - ${period.periodEnd}`,
+                    `Users with records: ${period.usersWithRecords || 0}/${period.totalStudents || 0}`,
                   ];
                 },
               },

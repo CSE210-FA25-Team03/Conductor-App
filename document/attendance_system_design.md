@@ -65,6 +65,50 @@ This document outlines the design for an enhanced attendance system that support
 
 ## Database Design
 
+### IMPORTANT: Design Correction
+
+**Original Design (INCORRECT):**
+- Users selected attendance types for a period (checkboxes)
+- Stored: period_start_date, period_end_date, attendance_types (boolean flags)
+
+**Corrected Design:**
+- Users record **actual dates** they attended
+- Store: individual records with `attendance_date + attendance_type`
+- **Calculate** which 7-day period each date falls into for visualization
+- **Aggregate** by calculated period for plotting
+
+See `attendance_system_design_corrected.md` for the revised design.
+
+### New Table: `attendance_records` (CORRECTED)
+
+```sql
+CREATE TABLE attendance_records (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  attendance_date date NOT NULL,  -- Actual date of attendance (e.g., 2025-11-02)
+  attendance_type text NOT NULL CHECK (attendance_type IN ('class', 'group_meeting', 'office_hours', 'class_meeting')),
+  
+  -- Metadata
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  
+  -- Constraints
+  CONSTRAINT attendance_records_unique 
+    UNIQUE (course_id, user_id, attendance_date, attendance_type)
+);
+```
+
+**Period Calculation:**
+- Periods are calculated from dates: Nov 2 → Period Nov 1-7, Nov 9 → Period Nov 8-14
+- Done in queries/backend, not stored in database
+- See `get_period_start()` function in migration
+
+### Legacy Table: `weekly_attendance_submissions` (DEPRECATED)
+
+The existing `weekly_attendance_submissions` table uses the old design. 
+For new implementation, use `attendance_records` instead.
+
 ### New Table: `attendance_update_notifications`
 
 ```sql

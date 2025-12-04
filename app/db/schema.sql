@@ -329,10 +329,69 @@ CREATE INDEX idx_weekly_attendance_user
 CREATE INDEX idx_weekly_attendance_period_range 
   ON weekly_attendance_submissions (period_start_date, period_end_date);
 
+------------------------------------------------------------
+-- 7c. Attendance Records (CORRECTED DESIGN - stores actual dates)
+------------------------------------------------------------
+
+CREATE TABLE attendance_records (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  attendance_date date NOT NULL,  -- Actual date of attendance (e.g., 2025-11-02)
+  attendance_type text NOT NULL CHECK (attendance_type IN ('class', 'group_meeting', 'office_hours', 'class_meeting')),
+  
+  -- Metadata
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  
+  -- Constraints
+  CONSTRAINT attendance_records_unique 
+    UNIQUE (course_id, user_id, attendance_date, attendance_type)
+);
+
+CREATE INDEX idx_attendance_records_course_date 
+  ON attendance_records (course_id, attendance_date);
+
+CREATE INDEX idx_attendance_records_user 
+  ON attendance_records (user_id);
+
+CREATE INDEX idx_attendance_records_date_type 
+  ON attendance_records (attendance_date, attendance_type);
+
+CREATE INDEX idx_attendance_records_user_date 
+  ON attendance_records (user_id, attendance_date);
+
+-- Helper function to calculate 7-day period from a date
+-- Periods are consecutive 7-day blocks: 1-7, 8-14, 15-21, 22-28, etc.
+CREATE OR REPLACE FUNCTION get_period_start(date_input date) 
+RETURNS date AS $$
+DECLARE
+  period_start_day int;
+  period_start date;
+BEGIN
+  -- Calculate which 7-day period this date falls into
+  -- Periods: 1-7, 8-14, 15-21, 22-28, 29-35 (wraps to next month)
+  period_start_day := ((EXTRACT(DAY FROM date_input) - 1) / 7)::int * 7 + 1;
+  period_start := date_trunc('month', date_input) + (period_start_day - 1) * interval '1 day';
+  RETURN period_start;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE OR REPLACE FUNCTION get_period_end(date_input date) 
+RETURNS date AS $$
+BEGIN
+  RETURN get_period_start(date_input) + interval '6 days';
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+------------------------------------------------------------
+-- 7d. Attendance Update Notifications
+------------------------------------------------------------
+
 CREATE TABLE attendance_update_notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   course_id uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  submission_id uuid NOT NULL REFERENCES weekly_attendance_submissions(id) ON DELETE CASCADE,
+  submission_id uuid REFERENCES weekly_attendance_submissions(id) ON DELETE CASCADE,  -- Nullable for new attendance_records system
   student_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   team_lead_user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   team_id uuid REFERENCES teams(id) ON DELETE CASCADE,
@@ -342,7 +401,7 @@ CREATE TABLE attendance_update_notifications (
   read_at timestamptz,
   
   CONSTRAINT attendance_update_notifications_unique
-    UNIQUE (submission_id, team_lead_user_id)
+    UNIQUE (student_user_id, team_lead_user_id, period_start_date)
 );
 
 CREATE INDEX idx_attendance_notifications_team_lead 

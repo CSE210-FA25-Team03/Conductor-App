@@ -17,7 +17,8 @@
   const githubDb = require('./db/github');
   const workJournalsDb = require('./db/workJournals');
   const attendanceDb = require('./db/attendance');
-  const weeklyAttendanceDb = require('./db/weeklyAttendance');
+  const weeklyAttendanceDb = require('./db/weeklyAttendance'); // Legacy - kept for backward compatibility
+  const attendanceRecordsDb = require('./db/attendanceRecords'); // New - stores actual dates
   const rubricDb = require('./db/rubric');
   const evalNotesDb = require('./db/evalNotes');
   const journalRepliesDb = require('./db/journalReplies');
@@ -1883,17 +1884,21 @@ const fetch =
     return rows.length > 0 ? rows[0].id : null;
   }
 
-  // Submit or update weekly attendance
+  // Submit or update weekly attendance (CORRECTED: accepts dates, not periods)
   app.post('/api/attendance/weekly/submit', async (req, res) => {
     try {
       if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
         return res.status(200).json({ error: 'Database not configured' });
       }
 
-      const { email, periodStartDate, periodEndDate, periodLabel, attendanceTypes } = req.body;
+      const { email, attendanceDates } = req.body;
 
       if (!email) {
         return res.status(400).json({ error: 'Email is required' });
+      }
+
+      if (!attendanceDates || typeof attendanceDates !== 'object') {
+        return res.status(400).json({ error: 'attendanceDates object is required' });
       }
 
       const userId = await getUserIdFromEmail(email);
@@ -1901,18 +1906,13 @@ const fetch =
         return res.status(404).json({ error: 'User not found' });
       }
 
-      const result = await weeklyAttendanceDb.submitWeeklyAttendance(
+      const result = await attendanceRecordsDb.submitAttendanceRecords(
         DEFAULT_COURSE_ID,
         userId,
-        {
-          periodStartDate,
-          periodEndDate,
-          periodLabel,
-          attendanceTypes,
-        },
+        { attendanceDates },
       );
 
-      res.json({ success: true, ...result });
+      res.json(result);
     } catch (error) {
       console.error('Error submitting weekly attendance:', error);
       res.status(200).json({
@@ -1929,10 +1929,14 @@ const fetch =
         return res.status(200).json({ error: 'Database not configured' });
       }
 
-      const { email, periodStartDate, periodEndDate, periodLabel, attendanceTypes } = req.body;
+      const { email, attendanceDates } = req.body;
 
       if (!email) {
         return res.status(400).json({ error: 'Email is required' });
+      }
+
+      if (!attendanceDates || typeof attendanceDates !== 'object') {
+        return res.status(400).json({ error: 'attendanceDates object is required' });
       }
 
       const userId = await getUserIdFromEmail(email);
@@ -1940,18 +1944,13 @@ const fetch =
         return res.status(404).json({ error: 'User not found' });
       }
 
-      const result = await weeklyAttendanceDb.submitWeeklyAttendance(
+      const result = await attendanceRecordsDb.submitAttendanceRecords(
         DEFAULT_COURSE_ID,
         userId,
-        {
-          periodStartDate,
-          periodEndDate,
-          periodLabel,
-          attendanceTypes,
-        },
+        { attendanceDates },
       );
 
-      res.json({ success: true, ...result });
+      res.json(result);
     } catch (error) {
       console.error('Error updating weekly attendance:', error);
       res.status(200).json({
@@ -1961,14 +1960,14 @@ const fetch =
     }
   });
 
-  // Get user's weekly attendance submissions
+  // Get user's weekly attendance records
   app.get('/api/attendance/weekly/user', async (req, res) => {
     try {
       if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
-        return res.json({ submissions: [] });
+        return res.json({ records: [] });
       }
 
-      const { email, periodStartDate } = req.query;
+      const { email, startDate, endDate } = req.query;
 
       if (!email) {
         return res.status(400).json({ error: 'Email is required' });
@@ -1976,23 +1975,24 @@ const fetch =
 
       const userId = await getUserIdFromEmail(email);
       if (!userId) {
-        return res.json({ submissions: [] });
+        return res.json({ records: [] });
       }
 
-      const result = await weeklyAttendanceDb.getUserWeeklyAttendance(
+      const records = await attendanceRecordsDb.getUserAttendanceRecords(
         DEFAULT_COURSE_ID,
         userId,
-        periodStartDate || null,
+        startDate || null,
+        endDate || null,
       );
 
-      res.json(result);
+      res.json({ records });
     } catch (error) {
       console.error('Error fetching user weekly attendance:', error);
-      res.status(200).json({ submissions: [], error: 'Failed to fetch attendance' });
+      res.status(200).json({ records: [], error: 'Failed to fetch attendance' });
     }
   });
 
-  // Get team attendance overview
+  // Get team attendance overview (aggregated by calculated periods)
   app.get('/api/attendance/weekly/team/:teamId', async (req, res) => {
     try {
       if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
@@ -2002,7 +2002,7 @@ const fetch =
       const { teamId } = req.params;
       const { startDate, endDate } = req.query;
 
-      const result = await weeklyAttendanceDb.getTeamAttendanceOverview(
+      const result = await attendanceRecordsDb.getTeamAttendanceOverview(
         DEFAULT_COURSE_ID,
         teamId,
         startDate || null,
@@ -2020,7 +2020,7 @@ const fetch =
     }
   });
 
-  // Get class attendance overview
+  // Get class attendance overview (aggregated by calculated periods)
   app.get('/api/attendance/weekly/class', async (req, res) => {
     try {
       if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
@@ -2029,7 +2029,7 @@ const fetch =
 
       const { startDate, endDate } = req.query;
 
-      const result = await weeklyAttendanceDb.getClassAttendanceOverview(
+      const result = await attendanceRecordsDb.getClassAttendanceOverview(
         DEFAULT_COURSE_ID,
         startDate || null,
         endDate || null,
@@ -2037,9 +2037,9 @@ const fetch =
 
       if (!result) {
         return res.json({
-          overview: { totalStudents: 0, totalPeriods: 0, averageAttendanceRate: 0, currentPeriodRate: 0 },
-          timeSeries: [],
-          teamBreakdown: [],
+          totalStudents: 0,
+          periods: [],
+          summary: { averageRate: 0, totalRecords: 0 },
         });
       }
 
@@ -2068,7 +2068,7 @@ const fetch =
         return res.json({ notifications: [], unreadCount: 0 });
       }
 
-      const result = await weeklyAttendanceDb.getTeamLeadNotifications(
+      const result = await attendanceRecordsDb.getTeamLeadNotifications(
         DEFAULT_COURSE_ID,
         userId,
       );
@@ -2099,7 +2099,7 @@ const fetch =
         return res.status(404).json({ error: 'User not found' });
       }
 
-      await weeklyAttendanceDb.markNotificationAsRead(id, userId);
+      await attendanceRecordsDb.markNotificationAsRead(id, userId);
 
       res.json({ success: true });
     } catch (error) {

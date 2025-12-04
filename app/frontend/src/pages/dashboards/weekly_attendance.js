@@ -1,5 +1,5 @@
 // weekly_attendance.js
-// Weekly attendance submission form for Students and Team Leads
+// Weekly attendance submission form - CORRECTED: stores actual dates
 
 document.addEventListener('DOMContentLoaded', () => {
   const API_BASE = '/api';
@@ -41,40 +41,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /**
    * Calculate 7-day period from a date
-   * Returns dates in YYYY-MM-DD format in local timezone
+   * Periods are consecutive 7-day blocks: 1-7, 8-14, 15-21, 22-28, etc.
    */
-  function calculatePeriod(date = new Date()) {
+  function calculatePeriod(date) {
     const d = new Date(date);
-    const startDate = new Date(d);
-    startDate.setHours(0, 0, 0, 0);
-
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 6);
-    endDate.setHours(23, 59, 59, 999);
-
-    // Format dates in local timezone (not UTC) to avoid timezone conversion issues
+    const dayOfMonth = d.getDate();
+    
+    // Calculate period start day: 1, 8, 15, 22, 29, etc.
+    const periodStartDay = Math.floor((dayOfMonth - 1) / 7) * 7 + 1;
+    
+    const periodStart = new Date(d.getFullYear(), d.getMonth(), periodStartDay);
+    const periodEnd = new Date(periodStart);
+    periodEnd.setDate(periodEnd.getDate() + 6);
+    
+    // Format dates in local timezone
     function formatLocalDate(dateObj) {
       const year = dateObj.getFullYear();
       const month = String(dateObj.getMonth() + 1).padStart(2, '0');
       const day = String(dateObj.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     }
-
+    
     return {
-      startDate: formatLocalDate(startDate),
-      endDate: formatLocalDate(endDate),
+      startDate: formatLocalDate(periodStart),
+      endDate: formatLocalDate(periodEnd),
     };
   }
 
   /**
-   * Generate period label
+   * Generate period label from dates
    */
   function generatePeriodLabel(startDate, endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     const startMonth = start.toLocaleString('en-US', { month: 'short' });
     const endMonth = end.toLocaleString('en-US', { month: 'short' });
-
+    
     if (startMonth === endMonth) {
       return `${startMonth} ${start.getDate()}-${end.getDate()}`;
     }
@@ -82,15 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /**
-   * Check if update is within 2-day window
+   * Format date for display (e.g., "Nov 2, 2025")
    */
-  function canUpdate(periodEndDate) {
-    const endDate = new Date(periodEndDate);
-    const deadline = new Date(endDate);
-    deadline.setDate(deadline.getDate() + 2);
-    deadline.setHours(23, 59, 59, 999);
-
-    return new Date() <= deadline;
+  function formatDateDisplay(dateStr) {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
 
   // ---------------------------------------------------------------------------
@@ -104,60 +102,209 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const email = currentUser.email.toLowerCase();
 
-  // Find attendance panel elements (may be in different dashboards)
+  // Find attendance panel elements
   const attendancePanel = document.getElementById('attendancePanel');
   const openAttendanceBtn = document.getElementById('openAttendanceDrawer');
   const closeAttendanceBtn = document.querySelector('.close-attendance');
   const saveAttendanceBtn = document.getElementById('saveAttendanceBtn');
   const pastAttendanceList = document.getElementById('pastAttendanceList');
 
-  // Checkboxes
-  const attClass = document.getElementById('attClass');
-  const attGroup = document.getElementById('attGroup');
-  const attOffice = document.getElementById('attOffice');
-  const attClassMeeting = document.getElementById('attClassMeeting');
+  // Date picker containers for each attendance type
+  const datePickerContainers = {
+    class: document.getElementById('attClassDates'),
+    group_meeting: document.getElementById('attGroupDates'),
+    office_hours: document.getElementById('attOfficeDates'),
+    class_meeting: document.getElementById('attClassMeetingDates'),
+  };
+
+  // Date picker inputs
+  const datePickers = {
+    class: document.getElementById('attClassDatePicker'),
+    group_meeting: document.getElementById('attGroupDatePicker'),
+    office_hours: document.getElementById('attOfficeDatePicker'),
+    class_meeting: document.getElementById('attClassMeetingDatePicker'),
+  };
 
   if (!attendancePanel || !saveAttendanceBtn) {
     // Attendance form not present on this page
     return;
   }
 
-  // ---------------------------------------------------------------------------
-  // Load current period submission
-  // ---------------------------------------------------------------------------
-  let currentSubmission = null;
+  // Store selected dates for each type
+  const selectedDates = {
+    class: new Set(),
+    group_meeting: new Set(),
+    office_hours: new Set(),
+    class_meeting: new Set(),
+  };
 
-  async function loadCurrentPeriod() {
+  // ---------------------------------------------------------------------------
+  // Date Management
+  // ---------------------------------------------------------------------------
+  
+  /**
+   * Normalize date string to YYYY-MM-DD format
+   * Handles ISO strings, Date objects, and already-normalized strings
+   */
+  function normalizeDate(dateInput) {
+    if (!dateInput) return null;
+    
+    // If already in YYYY-MM-DD format, return as-is
+    if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+      return dateInput;
+    }
+    
+    // Try to parse as Date and format
     try {
-      const period = calculatePeriod();
+      const date = new Date(dateInput);
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      
+      // Format as YYYY-MM-DD in local timezone
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    } catch (e) {
+      return null;
+    }
+  }
+  
+  /**
+   * Add a date to the selected dates for a type
+   */
+  function addDate(type, dateInput) {
+    if (!dateInput) return;
+    
+    // Normalize the date to YYYY-MM-DD format
+    const normalizedDate = normalizeDate(dateInput);
+    
+    if (!normalizedDate) {
+      alert('Invalid date format. Please use YYYY-MM-DD');
+      return;
+    }
+    
+    selectedDates[type].add(normalizedDate);
+    renderDateList(type);
+    
+    // Clear the date picker
+    if (datePickers[type]) {
+      datePickers[type].value = '';
+    }
+  }
+
+  /**
+   * Remove a date from selected dates
+   */
+  function removeDate(type, dateStr) {
+    selectedDates[type].delete(dateStr);
+    renderDateList(type);
+  }
+
+  /**
+   * Render the list of selected dates for a type
+   */
+  function renderDateList(type) {
+    const container = datePickerContainers[type];
+    if (!container) return;
+    
+    const dates = Array.from(selectedDates[type]).sort();
+    
+    // Find the date list container (should be a sibling or child)
+    let dateList = container.querySelector('.selected-dates-list');
+    if (!dateList) {
+      dateList = document.createElement('div');
+      dateList.className = 'selected-dates-list';
+      dateList.style.cssText = 'margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.5rem;';
+      container.appendChild(dateList);
+    }
+    
+    if (dates.length === 0) {
+      dateList.innerHTML = '<span style="color: #999; font-size: 0.9rem;">No dates selected</span>';
+      return;
+    }
+    
+    dateList.innerHTML = dates.map(dateStr => {
+      const period = calculatePeriod(dateStr);
+      return `
+        <span class="date-chip" style="
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          padding: 0.25rem 0.5rem;
+          background: #e3f2fd;
+          border: 1px solid #90caf9;
+          border-radius: 4px;
+          font-size: 0.875rem;
+        ">
+          ${formatDateDisplay(dateStr)}
+          <button 
+            type="button"
+            onclick="window.removeAttendanceDate('${type}', '${dateStr}')"
+            style="
+              background: none;
+              border: none;
+              color: #1976d2;
+              cursor: pointer;
+              padding: 0;
+              margin: 0;
+              font-size: 1rem;
+              line-height: 1;
+            "
+            title="Remove date"
+          >×</button>
+        </span>
+      `;
+    }).join('');
+  }
+
+  // Make removeDate available globally for onclick handlers
+  window.removeAttendanceDate = (type, dateStr) => {
+    removeDate(type, dateStr);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Load existing attendance records
+  // ---------------------------------------------------------------------------
+  let existingRecords = [];
+
+  async function loadExistingRecords() {
+    try {
       const result = await fetchJSON(
-        `${API_BASE}/attendance/weekly/user?email=${encodeURIComponent(email)}&periodStartDate=${period.startDate}`,
+        `${API_BASE}/attendance/weekly/user?email=${encodeURIComponent(email)}`,
       );
 
-      if (result.submissions && result.submissions.length > 0) {
-        currentSubmission = result.submissions[0];
-        // Pre-fill checkboxes
-        if (currentSubmission.attendanceTypes) {
-          attClass.checked = currentSubmission.attendanceTypes.class === true;
-          attGroup.checked = currentSubmission.attendanceTypes.group_meeting === true;
-          attOffice.checked = currentSubmission.attendanceTypes.office_hours === true;
-          attClassMeeting.checked = currentSubmission.attendanceTypes.class_meeting === true;
+      existingRecords = result.records || [];
+      
+      // Group records by type and populate selectedDates
+      selectedDates.class.clear();
+      selectedDates.group_meeting.clear();
+      selectedDates.office_hours.clear();
+      selectedDates.class_meeting.clear();
+      
+      existingRecords.forEach(record => {
+        const type = record.attendanceType;
+        if (selectedDates[type] && record.attendanceDate) {
+          // Normalize date from API (might be ISO string) to YYYY-MM-DD
+          const normalizedDate = normalizeDate(record.attendanceDate);
+          if (normalizedDate) {
+            selectedDates[type].add(normalizedDate);
+          }
         }
-      } else {
-        // Clear checkboxes for new submission
-        attClass.checked = false;
-        attGroup.checked = false;
-        attOffice.checked = false;
-        attClassMeeting.checked = false;
-        currentSubmission = null;
-      }
+      });
+      
+      // Render all date lists
+      Object.keys(selectedDates).forEach(type => {
+        renderDateList(type);
+      });
     } catch (err) {
-      console.error('Failed to load current period:', err);
+      console.error('Failed to load existing records:', err);
     }
   }
 
   // ---------------------------------------------------------------------------
-  // Load past submissions
+  // Load past submissions (for display)
   // ---------------------------------------------------------------------------
   async function loadPastSubmissions() {
     if (!pastAttendanceList) return;
@@ -167,40 +314,55 @@ document.addEventListener('DOMContentLoaded', () => {
         `${API_BASE}/attendance/weekly/user?email=${encodeURIComponent(email)}`,
       );
 
-      const submissions = result.submissions || [];
-      const pastSubmissions = submissions.filter(
-        (s) => s.periodStartDate !== currentSubmission?.periodStartDate,
+      const records = result.records || [];
+      
+      // Group records by period
+      const recordsByPeriod = {};
+      records.forEach(record => {
+        const periodKey = record.period.startDate;
+        if (!recordsByPeriod[periodKey]) {
+          recordsByPeriod[periodKey] = {
+            period: record.period,
+            types: {},
+          };
+        }
+        if (!recordsByPeriod[periodKey].types[record.attendanceType]) {
+          recordsByPeriod[periodKey].types[record.attendanceType] = [];
+        }
+        recordsByPeriod[periodKey].types[record.attendanceType].push(record.attendanceDate);
+      });
+      
+      const periods = Object.values(recordsByPeriod).sort((a, b) => 
+        new Date(b.period.startDate) - new Date(a.period.startDate)
       );
 
-      if (pastSubmissions.length === 0) {
+      if (periods.length === 0) {
         pastAttendanceList.innerHTML = '<li style="color: #777; padding: 0.5rem;">No past submissions</li>';
         return;
       }
 
-      pastAttendanceList.innerHTML = pastSubmissions
-        .map((submission) => {
-          const types = submission.attendanceTypes || {};
-          const typesList = [];
-          if (types.class) typesList.push('Class');
-          if (types.group_meeting) typesList.push('Group Meeting');
-          if (types.office_hours) typesList.push('Office Hours');
-          if (types.class_meeting) typesList.push('Class Meeting');
-
-          const updated = new Date(submission.updatedAt).toLocaleDateString();
-          const canUpdate = submission.canUpdate ? '' : ' (Update window expired)';
-
-          return `
-            <li style="padding: 0.5rem; border-bottom: 1px solid #eee;">
-              <strong>${submission.periodLabel || submission.periodStartDate}</strong>
-              <div style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">
-                ${typesList.length > 0 ? typesList.join(', ') : 'No attendance marked'}
-                <span style="margin-left: 0.5rem; color: #999;">Updated: ${updated}</span>
-                ${canUpdate}
-              </div>
-            </li>
-          `;
-        })
-        .join('');
+      pastAttendanceList.innerHTML = periods.map(({ period, types }) => {
+        const typeLabels = {
+          class: 'Class',
+          group_meeting: 'Group Meeting',
+          office_hours: 'Office Hours',
+          class_meeting: 'Class Meeting',
+        };
+        
+        const typeList = Object.entries(types).map(([type, dates]) => {
+          const dateStrs = dates.map(d => formatDateDisplay(d)).join(', ');
+          return `${typeLabels[type] || type}: ${dateStrs}`;
+        }).join('; ');
+        
+        return `
+          <li style="padding: 0.5rem; border-bottom: 1px solid #eee;">
+            <strong>${period.label || period.startDate}</strong>
+            <div style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">
+              ${typeList || 'No attendance marked'}
+            </div>
+          </li>
+        `;
+      }).join('');
     } catch (err) {
       console.error('Failed to load past submissions:', err);
       pastAttendanceList.innerHTML = '<li style="color: #b00020;">Failed to load past submissions</li>';
@@ -213,19 +375,18 @@ document.addEventListener('DOMContentLoaded', () => {
   async function saveAttendance() {
     if (!saveAttendanceBtn) return;
 
-    const period = calculatePeriod();
-    const attendanceTypes = {
-      class: attClass.checked,
-      group_meeting: attGroup.checked,
-      office_hours: attOffice.checked,
-      class_meeting: attClassMeeting.checked,
+    // Build attendanceDates object, ensuring all dates are normalized
+    const attendanceDates = {
+      class: Array.from(selectedDates.class).map(d => normalizeDate(d)).filter(d => d),
+      group_meeting: Array.from(selectedDates.group_meeting).map(d => normalizeDate(d)).filter(d => d),
+      office_hours: Array.from(selectedDates.office_hours).map(d => normalizeDate(d)).filter(d => d),
+      class_meeting: Array.from(selectedDates.class_meeting).map(d => normalizeDate(d)).filter(d => d),
     };
 
-    const periodLabel = generatePeriodLabel(period.startDate, period.endDate);
-
-    // Check if this is an update and if update window is still open
-    if (currentSubmission && !currentSubmission.canUpdate) {
-      alert('Update window has expired. You can only update attendance within 2 days after the period ends.');
+    // Check if any dates are selected
+    const hasAnyDates = Object.values(attendanceDates).some(dates => dates.length > 0);
+    if (!hasAnyDates) {
+      alert('Please select at least one attendance date.');
       return;
     }
 
@@ -233,28 +394,25 @@ document.addEventListener('DOMContentLoaded', () => {
     saveAttendanceBtn.textContent = 'Saving...';
 
     try {
-      const method = currentSubmission ? 'PUT' : 'POST';
+      const method = existingRecords.length > 0 ? 'PUT' : 'POST';
       const result = await fetchJSON(`${API_BASE}/attendance/weekly/submit`, {
         method,
         body: JSON.stringify({
           email,
-          periodStartDate: period.startDate,
-          periodEndDate: period.endDate,
-          periodLabel,
-          attendanceTypes,
+          attendanceDates,
         }),
       });
 
       if (result.success) {
-        // Reload current period and past submissions
-        await loadCurrentPeriod();
+        // Reload records
+        await loadExistingRecords();
         await loadPastSubmissions();
 
         // Show success message
-        const message = currentSubmission
+        const message = existingRecords.length > 0
           ? 'Attendance updated successfully!'
           : 'Attendance saved successfully!';
-        if (result.notificationSent) {
+        if (result.isUpdate) {
           alert(`${message} Your team lead has been notified.`);
         } else {
           alert(message);
@@ -272,13 +430,45 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ---------------------------------------------------------------------------
+  // Initialize date picker handlers
+  // ---------------------------------------------------------------------------
+  function initializeDatePickers() {
+    Object.keys(datePickers).forEach(type => {
+      const picker = datePickers[type];
+      if (!picker) return;
+      
+      // Add button click handler
+      const addBtn = picker.parentElement?.querySelector('.add-date-btn');
+      if (addBtn) {
+        addBtn.addEventListener('click', () => {
+          const dateStr = picker.value;
+          if (dateStr) {
+            addDate(type, dateStr);
+          }
+        });
+      }
+      
+      // Enter key handler
+      picker.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const dateStr = picker.value;
+          if (dateStr) {
+            addDate(type, dateStr);
+          }
+        }
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // Panel open/close
   // ---------------------------------------------------------------------------
   function openPanel() {
     if (attendancePanel) {
       attendancePanel.setAttribute('aria-hidden', 'false');
       attendancePanel.style.display = 'block';
-      loadCurrentPeriod();
+      loadExistingRecords();
       loadPastSubmissions();
     }
   }
@@ -313,5 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Initialize date pickers
+  initializeDatePickers();
 });
 
