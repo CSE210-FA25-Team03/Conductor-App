@@ -145,6 +145,25 @@ body {
   gap: 1rem;
 }
 
+@media (max-width: 600px) {
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr !important; 
+    gap: 16px;
+  }
+
+  .info-item.full {
+    grid-column: span 1 !important;   
+  }
+
+  .info-item input, 
+  .info-item select, 
+  .info-item textarea {
+    width: 100%;
+    box-sizing: border-box;    
+  }
+}
+
 .info-item {
   display: flex;
   flex-direction: column;
