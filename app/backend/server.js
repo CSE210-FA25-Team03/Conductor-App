@@ -17,7 +17,7 @@
   const githubDb = require('./db/github');
   const workJournalsDb = require('./db/workJournals');
   const attendanceDb = require('./db/attendance');
-  const weeklyAttendanceDb = require('./db/weeklyAttendance'); // Legacy - kept for backward compatibility
+  const _weeklyAttendanceDb = require('./db/weeklyAttendance'); // Legacy - kept for backward compatibility
   const attendanceRecordsDb = require('./db/attendanceRecords'); // New - stores actual dates
   const rubricDb = require('./db/rubric');
   const evalNotesDb = require('./db/evalNotes');

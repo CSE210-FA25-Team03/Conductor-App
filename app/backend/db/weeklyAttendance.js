@@ -2,7 +2,6 @@
 // Weekly attendance submission system with flexible 7-day periods
 
 const db = require('./index');
-const { getCurrentCourseId } = require('./classDirectory');
 
 /**
  * Calculate 7-day period from any date

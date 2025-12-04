@@ -2,7 +2,6 @@
 // Attendance records system - stores actual dates, calculates periods for visualization
 
 const db = require('./index');
-const { getCurrentCourseId } = require('./classDirectory');
 
 /**
  * Calculate 7-day period from any date
