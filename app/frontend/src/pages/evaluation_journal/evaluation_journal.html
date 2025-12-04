@@ -70,8 +70,15 @@
 
     <!-- Main Layout -->
     <div class="eval-main">
+      <!-- Mobile Tab Bar -->
+      <div class="mobile-tab-bar" id="mobileTabBar">
+        <button class="mobile-tab active" data-tab="eval-cards">All Eval Cards</button>
+        <button class="mobile-tab" data-tab="new-eval">New Eval Note</button>
+        <button class="mobile-tab" data-tab="work-journals">Recent Work Journals</button>
+      </div>
+
       <!-- LEFT: Eval Cards -->
-      <section class="eval-cards">
+      <section class="eval-cards mobile-tab-content" data-tab="eval-cards">
         <h2 id="cardsHeader">All Eval Cards (Group & Individual)</h2>
 
         <div class="eval-cards-box" id="evalCardsBox">
@@ -84,7 +91,7 @@
       </section>
 
       <!-- RIGHT: New Eval -->
-      <aside class="new-eval">
+      <aside class="new-eval mobile-tab-content" data-tab="new-eval">
         <div class="new-eval-header">
           <h3>New Eval Note</h3>
           <button id="addEvalBtn" class="add-plus-btn">+</button>
@@ -140,7 +147,7 @@
     </div>
 
     <!-- Work Journals -->
-    <section class="work-journals">
+    <section class="work-journals mobile-tab-content" data-tab="work-journals">
       <h2 style="display:flex;align-items:center;gap:10px;">
         Recent Work Journals
       </h2>
@@ -220,6 +227,47 @@
         window.location.href = '/dashboards/team_lead.html';
       } else {
         window.location.href = '/dashboards/student.html';
+      }
+    });
+  </script>
+
+  <!-- Mobile Tab Switching -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabBar = document.getElementById('mobileTabBar');
+      const tabs = document.querySelectorAll('.mobile-tab');
+      const tabContents = document.querySelectorAll('.mobile-tab-content');
+
+      // Only enable tab switching on mobile
+      if (window.innerWidth <= 768 && tabBar) {
+        tabs.forEach(tab => {
+          tab.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+
+            // Remove active class from all tabs and contents
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            const targetContent = document.querySelector(`.mobile-tab-content[data-tab="${targetTab}"]`);
+            if (targetContent) {
+              targetContent.classList.add('active');
+            }
+          });
+        });
+
+        // Show first tab by default
+        if (tabs.length > 0 && tabContents.length > 0) {
+          tabs[0].classList.add('active');
+          tabContents[0].classList.add('active');
+        }
+      } else {
+        // Desktop: show all content
+        tabContents.forEach(content => {
+          content.style.display = '';
+          content.classList.add('active');
+        });
       }
     });
   </script>
