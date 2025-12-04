@@ -119,9 +119,15 @@
             </div>
             
             <div style="margin-bottom:16px;">
-                <label style="display:block; margin-bottom:6px; font-weight:600;">Personal Access Token (optional):</label>
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Personal Access Token:</label>
                 <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-                <small style="color:#666; font-size:12px;">Required for private repos. Create one at: github.com/settings/tokens</small>
+                <small style="color:#666; font-size:12px;">Required for Projects API. Create one at: github.com/settings/tokens (needs 'repo' and 'read:project' scopes)</small>
+            </div>
+            
+            <div style="margin-bottom:16px;">
+                <label style="display:block; margin-bottom:6px; font-weight:600;">GitHub Project ID (optional):</label>
+                <input type="text" id="githubProjectId" placeholder="PVT_kwHOA..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                <small style="color:#666; font-size:12px;">If provided, will fetch issues from GitHub Projects. Otherwise, fetches from repository. Find Project ID in project URL or use GraphQL query.</small>
             </div>
             
             <div id="githubConfigStatus" class="status-message" style="display:none; padding:12px; border-radius:6px; margin-bottom:16px;"></div>

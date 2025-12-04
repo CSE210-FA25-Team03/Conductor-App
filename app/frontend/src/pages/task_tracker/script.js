@@ -153,6 +153,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const config = await loadGitHubConfig();
             document.getElementById('githubOwner').value = config.owner || '';
             document.getElementById('githubRepo').value = config.repo || '';
+            document.getElementById('githubProjectId').value = config.project_id || '';
             document.getElementById('githubToken').value = '';
             statusDiv.className = 'status-message';
             statusDiv.style.display = 'none';
@@ -177,16 +178,27 @@ document.addEventListener("DOMContentLoaded", async () => {
             const owner = document.getElementById('githubOwner').value.trim();
             const repo = document.getElementById('githubRepo').value.trim();
             const token = document.getElementById('githubToken').value.trim();
+            const projectId = document.getElementById('githubProjectId').value.trim();
 
-            if (!owner || !repo) {
-                statusDiv.className = 'status-message error';
-                statusDiv.textContent = 'Please enter both owner and repository name';
-                statusDiv.style.display = 'block';
-                return;
+            // If project_id is provided, token is required. Otherwise, owner/repo are required.
+            if (projectId) {
+                if (!token) {
+                    statusDiv.className = 'status-message error';
+                    statusDiv.textContent = 'Personal Access Token is required when using GitHub Projects';
+                    statusDiv.style.display = 'block';
+                    return;
+                }
+            } else {
+                if (!owner || !repo) {
+                    statusDiv.className = 'status-message error';
+                    statusDiv.textContent = 'Please enter both owner and repository name, or provide a Project ID';
+                    statusDiv.style.display = 'block';
+                    return;
+                }
             }
 
             try {
-                await saveGitHubConfig(owner, repo, token);
+                await saveGitHubConfig(owner, repo, token, projectId);
                 statusDiv.className = 'status-message success';
                 statusDiv.textContent = 'Configuration saved successfully!';
                 statusDiv.style.display = 'block';
@@ -217,8 +229,9 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const ownerInput = document.getElementById('githubOwner');
                 const repoInput = document.getElementById('githubRepo');
                 const tokenInput = document.getElementById('githubToken');
+                const projectIdInput = document.getElementById('githubProjectId');
                 
-                if (!ownerInput || !repoInput) {
+                if (!ownerInput || !repoInput || !projectIdInput) {
                     console.error('Form inputs not found!');
                     alert('Error: Form inputs not found. Please refresh the page.');
                     return;
@@ -227,20 +240,31 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const owner = ownerInput.value.trim();
                 const repo = repoInput.value.trim();
                 const token = tokenInput ? tokenInput.value.trim() : '';
+                const projectId = projectIdInput.value.trim();
 
-                console.log('Form values:', { owner, repo, token: token ? '***' : '' });
+                console.log('Form values:', { owner, repo, projectId, token: token ? '***' : '' });
 
-                if (!owner || !repo) {
-                    statusDiv.className = 'status-message error';
-                    statusDiv.textContent = 'Please enter both owner and repository name';
-                    statusDiv.style.display = 'block';
-                    return;
+                // If project_id is provided, token is required. Otherwise, owner/repo are required.
+                if (projectId) {
+                    if (!token) {
+                        statusDiv.className = 'status-message error';
+                        statusDiv.textContent = 'Personal Access Token is required when using GitHub Projects';
+                        statusDiv.style.display = 'block';
+                        return;
+                    }
+                } else {
+                    if (!owner || !repo) {
+                        statusDiv.className = 'status-message error';
+                        statusDiv.textContent = 'Please enter both owner and repository name, or provide a Project ID';
+                        statusDiv.style.display = 'block';
+                        return;
+                    }
                 }
 
                 // Save config first
                 console.log('Saving GitHub config...');
                 try {
-                    await saveGitHubConfig(owner, repo, token);
+                    await saveGitHubConfig(owner, repo, token, projectId);
                     console.log('Config saved');
                 } catch (saveError) {
                     console.error('Error saving config:', saveError);
@@ -674,19 +698,19 @@ async function loadGitHubConfig() {
         return config;
     } catch (error) {
         console.error('Error loading GitHub config:', error);
-        return { owner: '', repo: '' };
+        return { owner: '', repo: '', project_id: null };
     }
 }
 
-async function saveGitHubConfig(owner, repo, token) {
+async function saveGitHubConfig(owner, repo, token, projectId) {
     try {
-        console.log('Sending POST to /api/github/config with:', { owner, repo, token: token ? '***' : '' });
+        console.log('Sending POST to /api/github/config with:', { owner, repo, projectId, token: token ? '***' : '' });
         const response = await fetch('/api/github/config', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ owner, repo, token })
+            body: JSON.stringify({ owner, repo, token, project_id: projectId || null })
         });
         
         console.log('Response status:', response.status, response.statusText);
@@ -735,7 +759,7 @@ async function syncGitHubIssues() {
         const stories = document.querySelectorAll('.story-item');
         let githubStoryFound = false;
         stories.forEach(story => {
-            if (story.textContent.includes('GitHub:')) {
+            if (story.textContent.includes('GitHub:') || story.textContent.includes('GitHub Project:')) {
                 story.click();
                 githubStoryFound = true;
             }

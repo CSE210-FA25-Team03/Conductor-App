@@ -328,6 +328,7 @@ CREATE TABLE github_configs (
   owner      text NOT NULL,
   repo       text NOT NULL,
   token      text NOT NULL,
+  project_id text,  -- GitHub Project v2 ID (optional, for Projects integration)
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT github_configs_course_unique UNIQUE (course_id)
