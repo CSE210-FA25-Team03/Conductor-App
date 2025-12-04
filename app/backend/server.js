@@ -996,6 +996,121 @@ app.delete('/api/tutor/delete_faq/:id', (req, res) => {
   }
 });
 
+
+// SUPPORT TICKETS INTERFACES
+function readSupportTickets() {
+  const ticketsPath = path.join(__dirname, 'data', 'support_tickets.json');
+  if (!fs.existsSync(ticketsPath)) {
+    fs.writeFileSync(ticketsPath, JSON.stringify([], null, 2));
+  }
+  return JSON.parse(fs.readFileSync(ticketsPath, 'utf-8'));
+}
+
+function getTicketsById(id) {
+  const tickets = readSupportTickets();
+  return tickets.find(t => t.id === id);
+}
+
+function createSupportTicket(ticket) {
+  const tickets = readSupportTickets();
+  const maxId = tickets.length > 0 ? Math.max(...tickets.map(t => t.id)) : 0;
+  const newId = maxId + 1;
+  const newTicket = { id: newId, status: 'open', createdAt: new Date().toISOString(), ...ticket };
+  tickets.push(newTicket);
+  const ticketsPath = path.join(__dirname, 'data', 'support_tickets.json');
+  fs.writeFileSync(ticketsPath, JSON.stringify(tickets, null, 2), 'utf-8');
+  return newTicket;
+}
+
+function updateSupportTicket(id, updates) {
+  const tickets = readSupportTickets();
+  const index = tickets.findIndex(t => t.id === id);
+  if (index === -1) {
+    return null;
+  }
+  tickets[index] = { ...tickets[index], ...updates };
+  const ticketsPath = path.join(__dirname, 'data', 'support_tickets.json');
+  fs.writeFileSync(ticketsPath, JSON.stringify(tickets, null, 2), 'utf-8');
+  return tickets[index];
+}
+
+function deleteSupportTicket(id) {
+  const tickets = readSupportTickets();
+  const index = tickets.findIndex(t => t.id === id);
+  if (index === -1) {
+    return null;
+  }
+  tickets.splice(index, 1);
+  const ticketsPath = path.join(__dirname, 'data', 'support_tickets.json');
+  fs.writeFileSync(ticketsPath, JSON.stringify(tickets, null, 2), 'utf-8');
+  return true;
+}
+
+// CRUD for support tickets
+app.get('/api/tutor/get_all_tickets', (req, res) => {
+  try {
+    const tickets = readSupportTickets();
+    res.json(tickets);
+  } catch (error) {
+    console.error('Error reading support tickets:', error);
+    res.status(500).json({ error: 'Failed to read support tickets' });
+  }
+});
+
+app.get('/api/tutor/get_ticket/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const ticket = getTicketsById(id);
+    if (!ticket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+    res.json(ticket);
+  } catch (error) {
+    console.error('Error reading support ticket:', error);
+    res.status(500).json({ error: 'Failed to read support ticket' });
+  }
+});
+
+app.post('/api/tutor/create_ticket', (req, res) => {
+  try {
+    const { studentName, studentEmail, subject, description } = req.body;
+    const newTicket = createSupportTicket({ studentName, studentEmail, subject, description });
+    res.status(201).json(newTicket);
+  } catch (error) {
+    console.error('Error creating support ticket:', error);
+    res.status(500).json({ error: 'Failed to create support ticket' });
+  }
+});
+
+app.post('/api/tutor/update_ticket/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const updates = req.body;
+    const updatedTicket = updateSupportTicket(id, updates);
+    if (!updatedTicket) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+    res.json(updatedTicket);
+  } catch (error) {
+    console.error('Error updating support ticket:', error);
+    res.status(500).json({ error: 'Failed to update support ticket' });
+  }
+});
+
+app.delete('/api/tutor/delete_ticket/:id', (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const deleted = deleteSupportTicket(id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Ticket not found' });
+    }
+    res.json({ message: 'Ticket deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting support ticket:', error);
+    res.status(500).json({ error: 'Failed to delete support ticket' });
+  }
+});
+
 // Serve evaluation_rubric static files
 app.use('/evaluation_rubric', express.static(path.join(__dirname, '../frontend/src/pages/evaluation_rubric')));
 
