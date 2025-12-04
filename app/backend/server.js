@@ -1925,7 +1925,8 @@
   }
 
   // Fetch GitHub issues from a Project v2 (GraphQL API)
-  async function fetchGitHubProjectIssues(projectId, token) {
+  // Supports both direct project ID and organization + project number
+  async function fetchGitHubProjectIssues(projectId, token, orgName = null, projectNumber = null) {
     if (!token) {
       throw new Error('GitHub token is required for Project API access');
     }
@@ -1936,47 +1937,52 @@
       'User-Agent': 'Conductor-App',
     };
 
-    // GraphQL query to fetch project items (issues) with their status field
-    const query = `
-      query($projectId: ID!, $first: Int!) {
-        node(id: $projectId) {
-          ... on ProjectV2 {
-            title
-            items(first: $first) {
-              nodes {
-                id
-                fieldValues(first: 20) {
-                  nodes {
-                    ... on ProjectV2ItemFieldSingleSelectValue {
-                      field {
-                        ... on ProjectV2FieldCommon {
-                          name
+    let query, variables;
+
+    // If org_name and project_number are provided, use organization-based query
+    if (orgName && projectNumber !== null) {
+      query = `
+        query($orgLogin: String!, $projectNumber: Int!, $first: Int!) {
+          organization(login: $orgLogin) {
+            projectV2(number: $projectNumber) {
+              id
+              title
+              items(first: $first) {
+                nodes {
+                  id
+                  fieldValues(first: 20) {
+                    nodes {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        field {
+                          ... on ProjectV2FieldCommon {
+                            name
+                          }
                         }
-                      }
-                      name
-                    }
-                  }
-                }
-                content {
-                  ... on Issue {
-                    id
-                    number
-                    title
-                    url
-                    state
-                    body
-                    assignees(first: 10) {
-                      nodes {
-                        login
-                      }
-                    }
-                    labels(first: 10) {
-                      nodes {
                         name
                       }
                     }
-                    milestone {
-                      dueOn
+                  }
+                  content {
+                    ... on Issue {
+                      id
+                      number
+                      title
+                      url
+                      state
+                      body
+                      assignees(first: 10) {
+                        nodes {
+                          login
+                        }
+                      }
+                      labels(first: 10) {
+                        nodes {
+                          name
+                        }
+                      }
+                      milestone {
+                        dueOn
+                      }
                     }
                   }
                 }
@@ -1984,13 +1990,73 @@
             }
           }
         }
-      }
-    `;
+      `;
 
-    const variables = {
-      projectId: projectId,
-      first: 100,
-    };
+      variables = {
+        orgLogin: orgName,
+        projectNumber: parseInt(projectNumber, 10),
+        first: 100,
+      };
+    } else if (projectId) {
+      // Use direct project ID query (existing method)
+      query = `
+        query($projectId: ID!, $first: Int!) {
+          node(id: $projectId) {
+            ... on ProjectV2 {
+              id
+              title
+              items(first: $first) {
+                nodes {
+                  id
+                  fieldValues(first: 20) {
+                    nodes {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        field {
+                          ... on ProjectV2FieldCommon {
+                            name
+                          }
+                        }
+                        name
+                      }
+                    }
+                  }
+                  content {
+                    ... on Issue {
+                      id
+                      number
+                      title
+                      url
+                      state
+                      body
+                      assignees(first: 10) {
+                        nodes {
+                          login
+                        }
+                      }
+                      labels(first: 10) {
+                        nodes {
+                          name
+                        }
+                      }
+                      milestone {
+                        dueOn
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      variables = {
+        projectId: projectId,
+        first: 100,
+      };
+    } else {
+      throw new Error('Either project_id or org_name + project_number must be provided');
+    }
 
     const response = await fetch('https://api.github.com/graphql', {
       method: 'POST',
@@ -2009,9 +2075,16 @@
       throw new Error(`GitHub GraphQL errors: ${JSON.stringify(result.errors)}`);
     }
 
-    const project = result.data?.node;
+    // Handle both organization-based and direct ID queries
+    let project;
+    if (orgName && projectNumber !== null) {
+      project = result.data?.organization?.projectV2;
+    } else {
+      project = result.data?.node;
+    }
+
     if (!project || !project.items) {
-      throw new Error('Invalid project or project not found');
+      throw new Error('Invalid project or project not found. Check organization name, project number, or project ID.');
     }
 
     // Extract issues from project items
@@ -2211,8 +2284,15 @@
       if (!ensureDb(res)) {
         return;
       }
-      const { owner, repo, token, project_id } = req.body;
-      const saved = await githubDb.upsertGithubConfig({ owner, repo, token, project_id });
+      const { owner, repo, token, project_id, org_name, project_number } = req.body;
+      const saved = await githubDb.upsertGithubConfig({ 
+        owner, 
+        repo, 
+        token, 
+        project_id, 
+        org_name, 
+        project_number: project_number ? parseInt(project_number, 10) : null 
+      });
       res.json(saved);
     } catch (error) {
       console.error('Error saving GitHub config:', error);
@@ -2231,8 +2311,16 @@
       
       let issues = [];
       
-      // If project_id is configured, fetch from GitHub Projects
-      if (config.project_id) {
+      // If org_name and project_number are configured, fetch from GitHub Projects
+      if (config.org_name && config.project_number !== null) {
+        if (!config.token) {
+          return res.status(400).json({
+            error: 'GitHub token is required for Project API access.',
+          });
+        }
+        issues = await fetchGitHubProjectIssues(null, config.token, config.org_name, config.project_number);
+      } else if (config.project_id) {
+        // Use direct project ID
         if (!config.token) {
           return res.status(400).json({
             error: 'GitHub token is required for Project API access.',
@@ -2244,7 +2332,7 @@
         issues = await fetchGitHubIssues(config.owner, config.repo, config.token);
       } else {
         return res.status(400).json({
-          error: 'GitHub not configured. Please set either project_id or owner/repo.',
+          error: 'GitHub not configured. Please set org_name/project_number, project_id, or owner/repo.',
         });
       }
 
@@ -2273,15 +2361,23 @@
       let issues = [];
       let githubStoryName = '';
       
-      // If project_id is configured, fetch from GitHub Projects
-      if (config.project_id) {
+      // If org_name and project_number are configured, fetch from GitHub Projects
+      if (config.org_name && config.project_number !== null) {
+        if (!config.token) {
+          return res.status(400).json({
+            error: 'GitHub token is required for Project API access.',
+          });
+        }
+        issues = await fetchGitHubProjectIssues(null, config.token, config.org_name, config.project_number);
+        githubStoryName = `GitHub Project: ${config.org_name}/project-${config.project_number}`;
+      } else if (config.project_id) {
+        // Use direct project ID
         if (!config.token) {
           return res.status(400).json({
             error: 'GitHub token is required for Project API access.',
           });
         }
         issues = await fetchGitHubProjectIssues(config.project_id, config.token);
-        // Try to get project title from the first issue's metadata, or use a shortened ID
         githubStoryName = `GitHub Project: ${config.project_id.substring(0, 12)}...`;
       } else if (config.owner && config.repo) {
         // Fall back to repository issues
@@ -2289,7 +2385,7 @@
         githubStoryName = `GitHub: ${config.owner}/${config.repo}`;
       } else {
         return res.status(400).json({
-          error: 'GitHub not configured. Please set either project_id or owner/repo.',
+          error: 'GitHub not configured. Please set org_name/project_number, project_id, or owner/repo.',
         });
       }
 

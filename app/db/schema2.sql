@@ -325,14 +325,16 @@ CREATE TABLE project_tasks (
 );
 
 CREATE TABLE github_configs (
-  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  course_id  uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  owner      text NOT NULL,
-  repo       text NOT NULL,
-  token      text NOT NULL,
-  project_id text,  -- GitHub Project v2 ID (optional, for Projects integration)
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id     uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  owner         text,  -- Repository owner (optional if using org projects)
+  repo          text,  -- Repository name (optional if using org projects)
+  token         text NOT NULL,
+  project_id    text,  -- GitHub Project v2 ID (optional, direct ID usage)
+  org_name      text,  -- Organization name (optional, for org projects)
+  project_number int,  -- Project number (optional, for org projects)
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT github_configs_course_unique UNIQUE (course_id)
 );
 
