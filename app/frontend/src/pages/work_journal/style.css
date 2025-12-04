@@ -96,10 +96,36 @@ body {
 }
 
 .sentiment-options {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: .8rem;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.sentiment-options label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.sentiment-options input[type="radio"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.sentiment-options span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.visibility-options { 
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: .8rem;
 }
 
 .wj-btn {
@@ -138,7 +164,7 @@ body {
     color: #fff;
     padding: 12px 18px;
     font-size: 1.1rem;
-    border-radius: 50px;
+    border-radius: 8px;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(0,0,0,0.18);
     border: none;
