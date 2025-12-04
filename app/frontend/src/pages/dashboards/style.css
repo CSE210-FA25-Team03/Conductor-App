@@ -47,6 +47,19 @@ body {
   gap: 16px;
 }
 
+@media (max-width: 600px) {
+    .nav-actions {
+        flex-direction: column;
+        align-items: flex-start; 
+        gap: 8px;
+    }
+
+    .nav-actions .nav-btn {
+        width: 100%;
+        text-align: left; 
+    }
+}
+
 .class-directory-btn {
   border: 1px solid var(--border);
   background: var(--card);
