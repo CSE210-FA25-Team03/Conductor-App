@@ -223,7 +223,7 @@ body {
 }
 
 .team-card {
-  border-left: 6px solid var(--primary);
+  border: 1.6px solid #000;
 }
 
 .team-card.risk {
