@@ -1,0 +1,55 @@
+/* Base i18n helpers: keeps pages fluid, translation-friendly, and RTL aware */
+:root {
+  --page-gutter: clamp(12px, 2vw, 28px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  line-height: 1.5;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.responsive-shell {
+  width: min(1200px, 100% - 2 * var(--page-gutter));
+  margin-inline: auto;
+}
+
+[dir='rtl'] body {
+  direction: rtl;
+}
+
+[dir='rtl'] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+[dir='rtl'] input,
+[dir='rtl'] textarea,
+[dir='rtl'] select {
+  text-align: start;
+}
+
+[dir='rtl'] button,
+[dir='rtl'] a {
+  text-align: start;
+}
