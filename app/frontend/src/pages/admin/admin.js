@@ -1,4 +1,11 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  const me = await fetch("/auth/me").then(res => res.json());
+
+  if (!me.authenticated || me.user.role !== "admin") {
+    // not admin → redirect to login
+    window.location.href = "/login/";
+    return;
+  }
   const form = document.getElementById('adminForm');
   const status = document.getElementById('adminStatus');
 

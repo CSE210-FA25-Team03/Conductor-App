@@ -26,26 +26,47 @@
   const profileDb = require('./db/profile');
   const app = express();
   const PORT = process.env.PORT || 3000;
+/**
+ * Backend entry point for our Conductor App.
+ * Defines health check routes and initializes the Express server.
+ * @module server
+ */
+// Basic Express server to serve static frontend and prepare for backend features
+const cookieSession = require('cookie-session');
 
-  // ------------------------------------------------------------
-  // Configuration flags
-  // ------------------------------------------------------------
+// Add cookie sessions for state + PKCE storage
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SESSION_SECRET],   
+  httpOnly: true,
+  secure: false, 
+  sameSite: 'lax'
+}));
 
-  // DB is considered "configured" if we at least have a DATABASE_URL.
-  // Some routes ALSO need DEFAULT_COURSE_ID (course-scoped data).
-  const hasDbConfig = !!process.env.DATABASE_URL;
-  const hasCourseConfig = !!process.env.DEFAULT_COURSE_ID;
-  const DEFAULT_COURSE_ID = process.env.DEFAULT_COURSE_ID || null;
 
-  // Safe fetch wrapper for GitHub integration.
-  // Requires Node 18+ (global fetch). If not available, we throw a clear error.
-  const fetch =
-    global.fetch ||
-    (() => {
-      throw new Error(
-        'Global fetch is not available. Run on Node 18+ or add a fetch polyfill (e.g. node-fetch).',
-      );
-    });
+// --- Mount auth routes ---
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+
+
+// ------------------------------------------------------------
+// Configuration flags
+// ------------------------------------------------------------
+
+// DB is considered "configured" if we at least have a DATABASE_URL.
+// Some routes ALSO need DEFAULT_COURSE_ID (course-scoped data).
+const hasDbConfig = !!process.env.DATABASE_URL;
+const hasCourseConfig = !!process.env.DEFAULT_COURSE_ID;
+const DEFAULT_COURSE_ID = process.env.DEFAULT_COURSE_ID || null;
+
+// Safe fetch wrapper for GitHub integration.
+// Requires Node 18+ (global fetch). If not available, we throw a clear error.
+const fetch =
+  global.fetch ||
+  (() => {
+    throw new Error(
+      'Global fetch is not available. Run on Node 18+ or add a fetch polyfill (e.g. node-fetch).',
+    )});
 
   // ------------------------------------------------------------
   // Middleware
@@ -58,6 +79,7 @@
   // potential header conflicts when static middleware encounters errors.
 
   // Serve static files for each role/page
+  app.use('/shared', express.static(path.join(__dirname, '../frontend/src/shared')));
   app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
   app.use(
     '/login',

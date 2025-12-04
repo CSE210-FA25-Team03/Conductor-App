@@ -22,6 +22,23 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const params = new URLSearchParams(window.location.search);
+  const err = params.get('error');
+
+  if (err) {
+    if (err === 'not_enrolled') {
+      showError('You are not enrolled in this course.');
+    } else if (err === 'no_role') {
+      showError('Your account does not have a valid course role.');
+    } else if (err === 'unknown_role') {
+      showError('Your role is not recognized. Please contact the instructor.');
+    }
+    setTimeout(() => {
+      clearError();
+    }, 4000);
+    // Clean up the URL so refresh doesn’t re-show the error
+    window.history.replaceState({}, '', window.location.pathname);
+  }
   // Password show/hide
   passwordToggle?.addEventListener('click', () => {
     const isPassword = passwordInput.type === 'password';
@@ -140,4 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showError(err.message || 'Login failed. Please try again.');
     }
   });
+
+
 });
