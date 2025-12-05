@@ -29,15 +29,30 @@ body {
   backdrop-filter: blur(8px);
 }
 
-.brand {
-  font-weight: 600;
-  font-size: 1.2rem;
+.brand img{
+     
+}
+.logo-full {
+    display: block;
+    height: 6rem;
 }
 
-.brand span {
-  color: var(--accent);
-  font-weight: 700;
+.logo-mini {
+    display: none;
 }
+
+
+@media (max-width: 500px) {
+    .logo-full {
+        display: none ;
+    }
+
+    .logo-mini {
+        display: block ;
+        height: 2rem;
+    }
+}
+
 
 .back-btn {
   color: var(--accent);
