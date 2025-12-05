@@ -178,12 +178,12 @@ const fetch =
    */
   function ensureDb(res, { requireCourse = false, errorOnMissingCourse = true } = {}) {
     if (!hasDbConfig) {
-      res.status(200).json({ error: 'Database not configured' });
+      res.status(500).json({ error: 'Database not configured' });
       return false;
     }
     if (requireCourse && !hasCourseConfig) {
       if (errorOnMissingCourse) {
-        res.status(200).json({ error: 'Course not configured' });
+        res.status(500).json({ error: 'Course not configured' });
       }
       return false;
     }
@@ -200,7 +200,7 @@ const fetch =
         !ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) ||
         !DEFAULT_COURSE_ID
       ) {
-        return res.status(200).json({
+        return res.status(500).json({
           success: false,
           message: 'Course/database not configured for login',
         });
@@ -289,7 +289,7 @@ const fetch =
       });
     } catch (error) {
       console.error('Error resolving login:', error);
-      return res.status(200).json({
+      return res.status(500).json({
         success: false,
         message: 'Failed to resolve login. Please try again.',
       });
@@ -464,7 +464,7 @@ const fetch =
       });
     } catch (error) {
       console.error('Error upserting course/professor:', error);
-      return res.status(200).json({ success: false, message: 'Failed to upsert course/professor' });
+      return res.status(500).json({ success: false, message: 'Failed to upsert course/professor' });
     }
   });
 
@@ -496,7 +496,7 @@ const fetch =
       res.json(result);
     } catch (error) {
       console.error('Error importing rosters:', error);
-      res.status(200).json({ error: 'Failed to import rosters' });
+      res.status(500).json({ error: 'Failed to import rosters' });
     }
   });
 
@@ -516,7 +516,7 @@ const fetch =
       res.json(skills);
     } catch (error) {
       console.error('Error loading skills:', error);
-      res.status(200).json({ error: 'Failed to load skills' });
+      res.status(500).json({ error: 'Failed to load skills' });
     }
   });
 
@@ -530,7 +530,7 @@ const fetch =
       res.status(201).json(skill);
     } catch (error) {
       console.error('Error saving skill:', error);
-      res.status(200).json({ error: 'Failed to save skill' });
+      res.status(500).json({ error: 'Failed to save skill' });
     }
   });
 
@@ -544,7 +544,7 @@ const fetch =
       res.json(ratings);
     } catch (error) {
       console.error('Error loading student ratings:', error);
-      res.status(200).json({ error: 'Failed to load student ratings' });
+      res.status(500).json({ error: 'Failed to load student ratings' });
     }
   });
 
@@ -563,7 +563,7 @@ const fetch =
       res.json(groups);
     } catch (error) {
       console.error('Error loading groups:', error);
-      res.status(200).json({ error: 'Failed to load groups' });
+      res.status(500).json({ error: 'Failed to load groups' });
     }
   });
 
@@ -585,7 +585,7 @@ const fetch =
       });
     } catch (error) {
       console.error('Error saving groups:', error);
-      res.status(200).json({ error: error.message || 'Failed to save groups' });
+      res.status(500).json({ error: error.message || 'Failed to save groups' });
     }
   });
 
@@ -607,7 +607,7 @@ const fetch =
       res.json(ratingsBySkillId); // { [skillId]: rating }
     } catch (error) {
       console.error('Error loading current student ratings:', error);
-      res.status(200).json({ error: 'Failed to load current student ratings' });
+      res.status(500).json({ error: 'Failed to load current student ratings' });
     }
   });
 
@@ -632,7 +632,7 @@ const fetch =
       res.json({ message: 'Student rating saved' });
     } catch (error) {
       console.error('Error saving student rating:', error);
-      res.status(200).json({ error: 'Failed to save student rating' });
+      res.status(500).json({ error: 'Failed to save student rating' });
     }
   });
 
@@ -648,7 +648,7 @@ const fetch =
       res.json(ratings);
     } catch (error) {
       console.error('Error loading team lead ratings:', error);
-      res.status(200).json({ error: 'Failed to load team lead ratings' });
+      res.status(500).json({ error: 'Failed to load team lead ratings' });
     }
   });
 
@@ -663,7 +663,7 @@ const fetch =
       res.json({ message: 'Team lead rating saved' });
     } catch (error) {
       console.error('Error saving team lead rating:', error);
-      res.status(200).json({ error: 'Failed to save team lead rating' });
+      res.status(500).json({ error: 'Failed to save team lead rating' });
     }
   });
 
@@ -730,7 +730,7 @@ const fetch =
       res.json(team);
     } catch (error) {
       console.error('Error fetching team:', error);
-      res.status(200).json({ error: 'Failed to fetch team' });
+      res.status(500).json({ error: 'Failed to fetch team' });
     }
   });
 
@@ -738,7 +738,7 @@ const fetch =
   app.get('/api/team-card/:id', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Course/database not configured' });
+        return res.status(500).json({ error: 'Course/database not configured' });
       }
       const teamId = req.params.id;
       const data = await teamCardDb.getTeamCard(teamId);
@@ -746,7 +746,7 @@ const fetch =
       res.json(data);
     } catch (error) {
       console.error('Error reading team card:', error);
-      res.status(200).json({ error: 'Failed to read team card' });
+      res.status(500).json({ error: 'Failed to read team card' });
     }
   });
 
@@ -754,7 +754,7 @@ const fetch =
   app.put('/api/team-card/:id', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Course/database not configured' });
+        return res.status(500).json({ error: 'Course/database not configured' });
       }
       const teamId = req.params.id;
       const { description, statusDescription, repoUrl, email } = req.body || {};
@@ -795,7 +795,7 @@ const fetch =
       res.json({ success: true, team: updated });
     } catch (error) {
       console.error('Error updating team card:', error);
-      res.status(200).json({ error: 'Failed to update team card' });
+      res.status(500).json({ error: 'Failed to update team card' });
     }
   });
 
@@ -811,7 +811,7 @@ const fetch =
       res.json(teams);
     } catch (error) {
       console.error('Error reading my teams:', error);
-      res.status(200).json({ error: 'Failed to read teams for user' });
+      res.status(500).json({ error: 'Failed to read teams for user' });
     }
   });
 
@@ -825,7 +825,7 @@ const fetch =
       res.status(201).json(newTeam);
     } catch (error) {
       console.error('Error creating team:', error);
-      res.status(200).json({ error: 'Failed to create team' });
+      res.status(500).json({ error: 'Failed to create team' });
     }
   });
 
@@ -843,7 +843,7 @@ const fetch =
       res.json(updated);
     } catch (error) {
       console.error('Error updating team:', error);
-      res.status(200).json({ error: 'Failed to update team' });
+      res.status(500).json({ error: 'Failed to update team' });
     }
   });
 
@@ -861,7 +861,7 @@ const fetch =
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting team:', error);
-      res.status(200).json({ error: 'Failed to delete team' });
+      res.status(500).json({ error: 'Failed to delete team' });
     }
   });
 
@@ -888,7 +888,7 @@ const fetch =
       res.json(events);
     } catch (error) {
       console.error('Error fetching team events:', error);
-      res.status(200).json({ error: 'Failed to fetch team events' });
+      res.status(500).json({ error: 'Failed to fetch team events' });
     }
   });
 
@@ -973,7 +973,7 @@ const fetch =
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating team event:', error);
-      res.status(200).json({ error: 'Failed to create team event' });
+      res.status(500).json({ error: 'Failed to create team event' });
     }
   });
 
@@ -993,7 +993,7 @@ const fetch =
       res.json(items);
     } catch (error) {
       console.error('Error fetching rubric:', error);
-      res.status(200).json({ error: 'Failed to fetch rubric' });
+      res.status(500).json({ error: 'Failed to fetch rubric' });
     }
   });
 
@@ -1008,7 +1008,7 @@ const fetch =
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating rubric item:', error);
-      res.status(200).json({ error: error.message || 'Failed to create rubric item' });
+      res.status(500).json({ error: error.message || 'Failed to create rubric item' });
     }
   });
 
@@ -1029,7 +1029,7 @@ const fetch =
       res.json(updated);
     } catch (error) {
       console.error('Error updating rubric item:', error);
-      res.status(200).json({ error: error.message || 'Failed to update rubric item' });
+      res.status(500).json({ error: error.message || 'Failed to update rubric item' });
     }
   });
 
@@ -1050,7 +1050,7 @@ const fetch =
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting rubric item:', error);
-      res.status(200).json({ error: error.message || 'Failed to delete rubric item' });
+      res.status(500).json({ error: error.message || 'Failed to delete rubric item' });
     }
   });
 
@@ -1095,7 +1095,7 @@ const fetch =
       res.json(evalData);
     } catch (error) {
       console.error('Error fetching evaluations:', error);
-      res.status(200).json({ error: 'Failed to fetch evaluation data' });
+      res.status(500).json({ error: 'Failed to fetch evaluation data' });
     }
   });
 
@@ -1106,7 +1106,7 @@ const fetch =
   app.get('/api/student/weekly-evaluation', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database/course not configured' });
+        return res.status(500).json({ error: 'Database/course not configured' });
       }
 
       const email = (req.query.email || '').trim().toLowerCase();
@@ -1122,7 +1122,7 @@ const fetch =
       res.json(data);
     } catch (error) {
       console.error('Error fetching student weekly evaluation:', error);
-      res.status(200).json({ error: 'Failed to fetch student weekly evaluation' });
+      res.status(500).json({ error: 'Failed to fetch student weekly evaluation' });
     }
   });
 
@@ -1144,7 +1144,7 @@ const fetch =
       res.json(notes);
     } catch (error) {
       console.error('Error fetching evaluation notes:', error);
-      res.status(200).json({ error: 'Failed to fetch evaluation notes' });
+      res.status(500).json({ error: 'Failed to fetch evaluation notes' });
     }
   });
 
@@ -1161,7 +1161,7 @@ const fetch =
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating evaluation note:', error);
-      res.status(200).json({ error: error.message || 'Failed to create evaluation note' });
+      res.status(500).json({ error: error.message || 'Failed to create evaluation note' });
     }
   });
 
@@ -1197,7 +1197,7 @@ const fetch =
       res.json(notes);
     } catch (error) {
       console.error('Error fetching eval notes by email:', error);
-      res.status(200).json({ error: 'Failed to fetch eval notes' });
+      res.status(500).json({ error: 'Failed to fetch eval notes' });
     }
   });
 
@@ -1235,7 +1235,7 @@ const fetch =
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating eval note by email:', error);
-      res.status(200).json({ error: error.message || 'Failed to create eval note' });
+      res.status(500).json({ error: error.message || 'Failed to create eval note' });
     }
   });
 
@@ -1262,7 +1262,7 @@ const fetch =
       res.json(journals);
     } catch (error) {
       console.error('Error fetching work journals:', error);
-      res.status(200).json({ error: 'Failed to fetch work journals' });
+      res.status(500).json({ error: 'Failed to fetch work journals' });
     }
   });
 
@@ -1270,14 +1270,14 @@ const fetch =
   app.post('/api/work-journals', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const created = await workJournalsDb.createWorkJournal(DEFAULT_COURSE_ID, req.body);
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating work journal:', error);
-      res.status(200).json({ error: error.message || 'Failed to create work journal' });
+      res.status(500).json({ error: error.message || 'Failed to create work journal' });
     }
   });
 
@@ -1285,7 +1285,7 @@ const fetch =
   app.put('/api/work-journals/:id', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const { id } = req.params;
@@ -1298,7 +1298,7 @@ const fetch =
       res.json(updated);
     } catch (error) {
       console.error('Error updating work journal:', error);
-      res.status(200).json({ error: error.message || 'Failed to update work journal' });
+      res.status(500).json({ error: error.message || 'Failed to update work journal' });
     }
   });
 
@@ -1306,7 +1306,7 @@ const fetch =
   app.delete('/api/work-journals/:id', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const { id } = req.params;
@@ -1319,7 +1319,7 @@ const fetch =
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting work journal:', error);
-      res.status(200).json({ error: error.message || 'Failed to delete work journal' });
+      res.status(500).json({ error: error.message || 'Failed to delete work journal' });
     }
   });
 
@@ -1447,7 +1447,7 @@ const fetch =
       res.json({ newer, read });
     } catch (error) {
       console.error('Error loading reviewer journals:', error);
-      res.status(200).json({ newer: [], read: [], error: 'Failed to load journals for review' });
+      res.status(500).json({ newer: [], read: [], error: 'Failed to load journals for review' });
     }
   });
 
@@ -1467,7 +1467,7 @@ const fetch =
       res.json({ success: true });
     } catch (error) {
       console.error('Error marking journal read:', error);
-      res.status(200).json({ success: false, message: 'Failed to mark read' });
+      res.status(500).json({ success: false, message: 'Failed to mark read' });
     }
   });
 
@@ -1487,7 +1487,7 @@ const fetch =
       res.json(replies);
     } catch (error) {
       console.error('Error fetching work journal replies:', error);
-      res.status(200).json({ error: 'Failed to fetch work journal replies' });
+      res.status(500).json({ error: 'Failed to fetch work journal replies' });
     }
   });
 
@@ -1503,7 +1503,7 @@ const fetch =
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating work journal reply:', error);
-      res.status(200).json({ error: error.message || 'Failed to create work journal reply' });
+      res.status(500).json({ error: error.message || 'Failed to create work journal reply' });
     }
   });
 
@@ -1515,7 +1515,7 @@ const fetch =
   app.get('/api/student/weekly-evaluation', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({
+        return res.status(500).json({
           error: 'Course/database not configured for weekly evaluation',
         });
       }
@@ -1540,7 +1540,7 @@ const fetch =
       res.json(data);
     } catch (error) {
       console.error('Error fetching student weekly evaluation:', error);
-      res.status(200).json({
+      res.status(500).json({
         user: null,
         reports: [],
         notes: [],
@@ -1572,7 +1572,7 @@ const fetch =
       res.json(data);
     } catch (error) {
       console.error('Error reading class directory:', error);
-      res.status(200).json({ error: 'Failed to read class directory' });
+      res.status(500).json({ error: 'Failed to read class directory' });
     }
   });
 
@@ -1586,7 +1586,7 @@ const fetch =
       res.json(course);
     } catch (error) {
       console.error('Error reading course info:', error);
-      res.status(200).json({ error: 'Failed to read course info' });
+      res.status(500).json({ error: 'Failed to read course info' });
     }
   });
 
@@ -1600,7 +1600,7 @@ const fetch =
       res.json(instructors);
     } catch (error) {
       console.error('Error reading instructors:', error);
-      res.status(200).json({ error: 'Failed to read instructors' });
+      res.status(500).json({ error: 'Failed to read instructors' });
     }
   });
 
@@ -1613,7 +1613,7 @@ const fetch =
       res.json(tas);
     } catch (error) {
       console.error('Error reading TAs:', error);
-      res.status(200).json({ error: 'Failed to read TAs' });
+      res.status(500).json({ error: 'Failed to read TAs' });
     }
   });
 
@@ -1626,7 +1626,7 @@ const fetch =
       res.json(tutors);
     } catch (error) {
       console.error('Error reading tutors:', error);
-      res.status(200).json({ error: 'Failed to read tutors' });
+      res.status(500).json({ error: 'Failed to read tutors' });
     }
   });
 
@@ -1639,7 +1639,7 @@ const fetch =
       res.json(teams);
     } catch (error) {
       console.error('Error reading class directory teams:', error);
-      res.status(200).json({ error: 'Failed to read class directory teams' });
+      res.status(500).json({ error: 'Failed to read class directory teams' });
     }
   });
 
@@ -1653,7 +1653,37 @@ const fetch =
       res.json(events);
     } catch (error) {
       console.error('Error reading events:', error);
-      res.status(200).json({ error: 'Failed to read events' });
+      res.status(500).json({ error: 'Failed to read events' });
+    }
+  });
+
+  // Aggregated class directory payload (fewer round trips, parallel queries)
+  app.get('/api/class-directory/summary', async (req, res) => {
+    try {
+      if (!ensureDb(res)) {
+        return res.json({
+          course: null,
+          instructors: [],
+          tas: [],
+          tutors: [],
+          teams: [],
+          events: [],
+        });
+      }
+
+      const [course, instructors, tas, tutors, teams, events] = await Promise.all([
+        classDirectoryDb.getCourseOverview(),
+        classDirectoryDb.getStaffByRole('professor'),
+        classDirectoryDb.getStaffByRole('ta'),
+        classDirectoryDb.getStaffByRole('tutor'),
+        classDirectoryDb.getCourseTeams(),
+        eventsDb.getEvents(),
+      ]);
+
+      res.json({ course, instructors, tas, tutors, teams, events });
+    } catch (error) {
+      console.error('Error building class directory summary:', error);
+      res.status(500).json({ error: 'Failed to build class directory summary' });
     }
   });
 
@@ -1666,7 +1696,7 @@ const fetch =
       res.status(201).json(event);
     } catch (error) {
       console.error('Error creating event:', error);
-      res.status(200).json({ error: 'Failed to create event' });
+      res.status(500).json({ error: 'Failed to create event' });
     }
   });
 
@@ -1683,7 +1713,7 @@ const fetch =
       res.json(updated);
     } catch (error) {
       console.error('Error updating event:', error);
-      res.status(200).json({ error: 'Failed to update event' });
+      res.status(500).json({ error: 'Failed to update event' });
     }
   });
 
@@ -1700,7 +1730,7 @@ const fetch =
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting event:', error);
-      res.status(200).json({ error: 'Failed to delete event' });
+      res.status(500).json({ error: 'Failed to delete event' });
     }
   });
 
@@ -1717,7 +1747,7 @@ const fetch =
       res.json(members);
     } catch (error) {
       console.error('Error reading members:', error);
-      res.status(200).json({ error: 'Failed to read members' });
+      res.status(500).json({ error: 'Failed to read members' });
     }
   });
 
@@ -1734,7 +1764,7 @@ const fetch =
       res.json(board);
     } catch (error) {
       console.error('Error reading tasks:', error);
-      res.status(200).json({ error: 'Failed to read tasks' });
+      res.status(500).json({ error: 'Failed to read tasks' });
     }
   });
 
@@ -1748,7 +1778,7 @@ const fetch =
       res.json({ message: 'Tasks updated' });
     } catch (error) {
       console.error('Error updating tasks:', error);
-      res.status(200).json({ error: 'Failed to update tasks' });
+      res.status(500).json({ error: 'Failed to update tasks' });
     }
   });
 
@@ -1768,7 +1798,7 @@ const fetch =
       res.json(sessions);
     } catch (error) {
       console.error('Error fetching attendance sessions:', error);
-      res.status(200).json({ error: 'Failed to fetch attendance sessions' });
+      res.status(500).json({ error: 'Failed to fetch attendance sessions' });
     }
   });
 
@@ -1776,7 +1806,7 @@ const fetch =
   app.post('/api/attendance/sessions', async (req, res) => {
     try {
       if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const { durationMinutes } = req.body || {};
@@ -1787,7 +1817,7 @@ const fetch =
       res.status(201).json(session);
     } catch (error) {
       console.error('Error creating attendance session:', error);
-      res.status(200).json({ error: error.message || 'Failed to create attendance session' });
+      res.status(500).json({ error: error.message || 'Failed to create attendance session' });
     }
   });
 
@@ -1795,7 +1825,7 @@ const fetch =
   app.get('/api/attendance/sessions/:id', async (req, res) => {
     try {
       if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const sessionId = req.params.id;
@@ -1811,7 +1841,7 @@ const fetch =
       res.json(session);
     } catch (error) {
       console.error('Error fetching attendance session:', error);
-      res.status(200).json({ error: 'Failed to fetch attendance session' });
+      res.status(500).json({ error: 'Failed to fetch attendance session' });
     }
   });
 
@@ -1836,7 +1866,7 @@ const fetch =
       res.json(result);
     } catch (error) {
       console.error('Error marking attendance:', error);
-      res.status(200).json({
+      res.status(500).json({
         success: false,
         message: 'Failed to mark attendance',
       });
@@ -1860,7 +1890,7 @@ const fetch =
       res.json(history);
     } catch (error) {
       console.error('Error fetching attendance history:', error);
-      res.status(200).json({
+      res.status(500).json({
         sessions: [],
         presentCount: 0,
         totalSessions: 0,
@@ -1888,7 +1918,7 @@ const fetch =
       return res.status(201).json(result.rows ? result.rows[0] : result);
     } catch (error) {
       console.error('Error saving profile:', error);
-      return res.status(200).json({ error: error.message || 'Failed to save profile' });
+      return res.status(500).json({ error: error.message || 'Failed to save profile' });
     }
   });
 
@@ -1914,7 +1944,7 @@ const fetch =
       return res.json(profile);
     } catch (error) {
       console.error('Error fetching profile:', error);
-      return res.status(200).json({ error: error.message || 'Failed to fetch profile' });
+      return res.status(500).json({ error: error.message || 'Failed to fetch profile' });
     }
   });
 
@@ -2195,6 +2225,38 @@ const fetch =
     // Handle both REST API format (single assignee) and GraphQL format (assignees array)
     const assigneeData = issue.assignee || (issue.assignees && issue.assignees.nodes && issue.assignees.nodes[0]);
     if (assigneeData) {
+  
+  // Upsert course description for the default course
+  // body: { description }
+  app.put('/api/class-directory/course/description', async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+        return;
+      }
+
+      const { description } = req.body || {};
+      const descText = (description || '').trim();
+      if (!descText) {
+        return res.status(400).json({ error: 'description is required' });
+      }
+
+      // Upsert into course_info table keyed by course_id
+      await dbCore.query(
+        `INSERT INTO course_info (course_id, description, updated_at)
+         VALUES ($1, $2, now())
+         ON CONFLICT (course_id)
+         DO UPDATE SET description = EXCLUDED.description, updated_at = now()`,
+        [DEFAULT_COURSE_ID, descText]
+      );
+
+      // Return the refreshed overview, so frontend can reflect latest description
+      const course = await classDirectoryDb.getCourseOverview();
+      return res.json({ success: true, course });
+    } catch (error) {
+      console.error('Error upserting course description:', error);
+      return res.status(500).json({ error: 'Failed to save course description' });
+    }
+  });
       const login = assigneeData.login || assigneeData;
       assignee = login;
 

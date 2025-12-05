@@ -115,17 +115,84 @@ function initCalendar() {
       const evt = info.event;
       const due = new Date(evt.start).toLocaleString();
       const desc = evt.extendedProps?.description || '';
-
-      const msg =
-        `Deadline: ${evt.title}\nDue: ${due}` +
-        (desc ? `\n\nDetails: ${desc}` : '') +
-        `\n\nDelete this event?`;
-
-      if (confirm(msg)) deleteEvent(evt.id);
+      showEventPopup({
+        title: evt.title,
+        due,
+        desc,
+      });
     }
   });
 
   calendarInstance.render();
+}
+
+// Lightweight popup card for event details
+function ensureEventPopup() {
+  let popup = document.getElementById('event-detail-popup');
+  if (popup) return popup;
+
+  // Backdrop overlay
+  let backdrop = document.getElementById('event-detail-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'event-detail-backdrop';
+    backdrop.style.position = 'fixed';
+    backdrop.style.inset = '0';
+    backdrop.style.background = 'rgba(0, 0, 0, 0.35)';
+    backdrop.style.zIndex = '999';
+    backdrop.style.display = 'none';
+    backdrop.addEventListener('click', () => hideEventPopup());
+    document.body.appendChild(backdrop);
+  }
+
+  popup = document.createElement('div');
+  popup.id = 'event-detail-popup';
+  popup.style.position = 'fixed';
+  popup.style.top = '50%';
+  popup.style.left = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  popup.style.maxWidth = '480px';
+  popup.style.width = 'calc(100% - 32px)';
+  popup.style.background = '#ffffff';
+  popup.style.border = '1px solid #e5e7eb';
+  popup.style.borderRadius = '8px';
+  popup.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+  popup.style.padding = '16px';
+  popup.style.zIndex = '1000';
+  popup.style.display = 'none';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = 'Close';
+  closeBtn.className = 'ghost-btn';
+  closeBtn.style.float = 'right';
+  closeBtn.addEventListener('click', () => hideEventPopup());
+
+  const content = document.createElement('pre');
+  content.id = 'event-detail-content';
+  content.style.whiteSpace = 'pre-wrap';
+  content.style.margin = '0';
+  content.style.fontFamily = 'inherit';
+
+  popup.appendChild(closeBtn);
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+  return popup;
+}
+
+function showEventPopup({ title, due, desc }) {
+  const popup = ensureEventPopup();
+  const content = document.getElementById('event-detail-content');
+  content.textContent = `Deadline: ${title}\nDue: ${due}` + (desc ? `\n\nDetails: ${desc}` : '');
+  const backdrop = document.getElementById('event-detail-backdrop');
+  if (backdrop) backdrop.style.display = 'block';
+  popup.style.display = 'block';
+}
+
+function hideEventPopup() {
+  const popup = document.getElementById('event-detail-popup');
+  if (popup) popup.style.display = 'none';
+  const backdrop = document.getElementById('event-detail-backdrop');
+  if (backdrop) backdrop.style.display = 'none';
 }
 
 /* ============================================================

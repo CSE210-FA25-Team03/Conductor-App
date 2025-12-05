@@ -31,7 +31,7 @@ const FALLBACK_STUDENTS = [
   },
 ];
 
-const FALLBACK_TAS = ['Sam Taylor', 'Diana Chen'];
+// const FALLBACK_TAS = ['Sam Taylor', 'Diana Chen'];
 
 /* =============================
    Global State
@@ -73,6 +73,50 @@ function showError(msg) {
     box.classList.remove('show');
     box.classList.add('hidden');
   }, 3000);
+}
+
+// Lightweight toast for non-blocking notices (success/info)
+function showToast(message, type = 'info') {
+  let toast = document.getElementById('toastBox');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toastBox';
+    toast.style.position = 'fixed';
+    toast.style.top = '16px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.zIndex = '9999';
+    toast.style.maxWidth = '480px';
+    toast.style.width = 'calc(100% - 32px)';
+    toast.style.pointerEvents = 'none';
+    toast.style.fontFamily = 'system-ui,-apple-system,Segoe UI,Roboto,Arial';
+    document.body.appendChild(toast);
+  }
+
+  const item = document.createElement('div');
+  item.textContent = message;
+  item.style.marginBottom = '8px';
+  item.style.padding = '10px 12px';
+  item.style.borderRadius = '8px';
+  item.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+  item.style.color = type === 'success' ? '#0F5132' : '#084298';
+  item.style.background = type === 'success' ? '#D1E7DD' : '#CFE2FF';
+  item.style.border = '1px solid ' + (type === 'success' ? '#BADBCC' : '#9EC5FE');
+  item.style.display = 'inline-block';
+  item.style.pointerEvents = 'auto';
+
+  toast.appendChild(item);
+
+  setTimeout(() => {
+    item.style.transition = 'opacity 300ms ease';
+    item.style.opacity = '0';
+    setTimeout(() => {
+      toast.removeChild(item);
+      if (!toast.childElementCount) {
+        toast.remove();
+      }
+    }, 320);
+  }, 2500);
 }
 
 async function fetchJSON(url, options = {}) {
@@ -321,7 +365,7 @@ async function handleAddSkillClick() {
 }
 
 function handleSaveSkillsClick() {
-  alert('Skills are already saved to the database as you add/delete them.');
+  showToast('Skills auto-save as you add or delete.', 'success');
 }
 
 /* =============================
@@ -651,9 +695,9 @@ async function handleSaveGroupsClick() {
     if (res && Array.isArray(res.groups)) {
       currentGroups = res.groups;
       renderGroupsTable(currentGroups);
-      alert('Groups saved successfully.');
+      showToast('Groups saved successfully.', 'success');
     } else {
-      alert('Groups saved, but server returned an unexpected response.');
+      showToast('Groups saved, but server returned an unexpected response.', 'info');
     }
   } catch (err) {
     console.error('Failed to save groups:', err);

@@ -263,9 +263,10 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadExistingCourseDescription() {
     if (!courseDesc) return;
     try {
-      const data = await fetchJSON(`${API_BASE}/courses/current`);
-      if (data && typeof data.description === 'string') {
-        courseDesc.value = data.description;
+      const course = await fetchJSON(`/api/class-directory/course`);
+      const desc = (course && course.description) || '';
+      if (typeof desc === 'string') {
+        courseDesc.value = desc;
       }
     } catch (err) {
       // Not fatal, just log
@@ -290,11 +291,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try {
         setStatus(descStatus, 'Saving course description...', '');
-        await fetchJSON(`${API_BASE}/courses`, {
-          method: 'POST',
+        const result = await fetchJSON(`/api/class-directory/course/description`, {
+          method: 'PUT',
           body: JSON.stringify({ description: desc }),
         });
 
+        // If API returns refreshed overview, use it to update field
+        if (result && result.course && typeof result.course.description === 'string') {
+          courseDesc.value = result.course.description;
+        }
         setStatus(descStatus, 'Course description saved.', '');
       } catch (err) {
         console.error('Failed to save course description:', err);
