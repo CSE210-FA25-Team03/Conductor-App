@@ -21,7 +21,7 @@
             <div class="profile">
                 <a href="/profile_page/profile.html" class="profile-link">
                     <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                        <img id="dashboard-profile-img" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
                         <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
                             <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
                             <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
@@ -127,7 +127,7 @@
 // ---------------------------
 // PROFILE DROPDOWN
 // ---------------------------
-const profileImg = document.getElementById('dashboardProfileImg');
+const profileImg = document.getElementById('dashboard-profile-img');
 const dropdown = document.getElementById('profileDropdown');
 const logoutBtn = document.getElementById('logoutBtn');
 if (profileImg && dropdown) {
@@ -164,7 +164,7 @@ if (logoutBtn) {
 window.addEventListener('DOMContentLoaded', () => {
     const savedImg = localStorage.getItem('profileImg');
     if (savedImg) {
-        const headerImg = document.getElementById('dashboardProfileImg');
+        const headerImg = document.getElementById('dashboard-profile-img');
         if (headerImg) headerImg.src = savedImg;
 
         const largeImg = document.getElementById('dashboardProfileImgLarge');

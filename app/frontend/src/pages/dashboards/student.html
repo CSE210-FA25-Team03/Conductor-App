@@ -27,7 +27,7 @@
                 <div class="profile">
                     <div class="profile-dropdown-container" style="position:relative;">
                         <img
-                            id="dashboardProfileImg"
+                            id="dashboard-profile-img"
                             src="/assets/logo/user.png"
                             alt="Profile"
                             style="width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;"
@@ -316,7 +316,7 @@
         // ------------------------------------------------------------
         // PROFILE DROPDOWN + LOGOUT
         // ------------------------------------------------------------
-        const profileImg = document.getElementById('dashboardProfileImg');
+        const profileImg = document.getElementById('dashboard-profile-img');
         const dropdown = document.getElementById('profileDropdown');
         const logoutBtn = document.getElementById('logoutBtn');
 
@@ -353,7 +353,7 @@
         // ------------------------------------------------------------
         const savedImg = localStorage.getItem('profileImg');
         if (savedImg) {
-          const img1 = document.getElementById('dashboardProfileImg');
+          const img1 = document.getElementById('dashboard-profile-img');
           if (img1) img1.src = savedImg;
           const img2 = document.getElementById('dashboardProfileImgLarge');
           if (img2) img2.src = savedImg;
