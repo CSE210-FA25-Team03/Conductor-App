@@ -39,25 +39,26 @@ body {
 }
 
 .brand img{
-    height: 3rem;
-    width: auto;
-    display: block;
+     
 }
 .logo-full {
     display: block;
+    height: 6rem;
 }
 
 .logo-mini {
     display: none;
 }
 
-@media (max-width: 600px) {
+
+@media (max-width: 500px) {
     .logo-full {
-        display: none;
+        display: none ;
     }
 
     .logo-mini {
-        display: block;
+        display: block ;
+        height: 2rem;
     }
 }
 
