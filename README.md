@@ -72,3 +72,21 @@ The server will run on `http://localhost:3000` (or the port specified in your `.
 - **View logs:** `docker-compose logs -f postgres`
 - **Stop and remove volumes (⚠️ deletes data):** `docker-compose down -v`
 
+## pgAdmin
+
+1. http://localhost:5050
+2. Credentials
+   * Email: admin@example.com
+   * Password: admin
+3. Right-click “Servers” → “Register” → “Server…”
+4. Fill out the “General” tab
+   * Name: conductor-postgres
+5. Go to the “Connection” tab
+6. Fill in the values
+   * Host name/address: postgres
+   * Port: 5432
+   * Maintenance DB: postgres
+   * Username: postgres
+   * Password: postgres
+7. Tables
+   * Servers, conductor, postgres, Databases, conductor, Schemas, public, Tables
