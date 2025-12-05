@@ -38,15 +38,29 @@ body {
     margin-bottom: 2.2rem;
 }
 
-.brand {
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #2a3a5e;
+.brand img{
+    height: 3rem;
+    width: auto;
+    display: block;
 }
-.brand span {
-    color: var(--accent);
-    font-weight: 700;
+.logo-full {
+    display: block;
 }
+
+.logo-mini {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    .logo-full {
+        display: none;
+    }
+
+    .logo-mini {
+        display: block;
+    }
+}
+
 
 /* ============================================================
    MAIN FORM CONTAINER

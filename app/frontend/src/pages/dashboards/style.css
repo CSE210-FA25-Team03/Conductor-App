@@ -626,20 +626,31 @@ body {
 .card-btn:hover {
   background-color: #1d4ed8;
 }
-.brand {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #232946;
-  letter-spacing: 0.5px;
+
+.brand img{
+    
+}
+.logo-full {
+    display: block;
+    height: 6rem;
 }
 
-.brand span {
-  background: linear-gradient(90deg, #2563eb, #60a5fa);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 800;
+.logo-mini {
+    display: none;
 }
+
+
+@media (max-width: 500px) {
+    .logo-full {
+        display: none ;
+    }
+
+    .logo-mini {
+        display: block ;
+        height: 2rem;
+    }
+}
+
 
 .eval-btn {
     display: inline-block;
