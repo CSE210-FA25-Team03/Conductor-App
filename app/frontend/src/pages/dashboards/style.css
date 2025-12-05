@@ -618,7 +618,7 @@ body {
     justify-content: flex-end;
   }
 
-  #dashboardProfileImg {
+  #dashboard-profile-img {
     display: block;
     margin-left: auto;
     max-width: 100%;

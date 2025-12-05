@@ -25,7 +25,7 @@
 
                 <div class="profile">
                     <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" 
+                        <img id="dashboard-profile-img" src="/assets/logo/user.png" 
                              alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
                         <div class="profile-dropdown" id="profileDropdown"
                              style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
@@ -210,7 +210,7 @@
 
     <script>
         // PROFILE DROPDOWN
-        const profileImg = document.getElementById('dashboardProfileImg');
+        const profileImg = document.getElementById('dashboard-profile-img');
         const dropdown = document.getElementById('profileDropdown');
         const logoutBtn = document.getElementById('logoutBtn');
         profileImg.addEventListener('mouseenter', () => dropdown.style.display = 'block');
@@ -232,7 +232,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             const savedImg = localStorage.getItem('profileImg');
             if (savedImg) {
-                const img1 = document.getElementById('dashboardProfileImg');
+                const img1 = document.getElementById('dashboard-profile-img');
                 if (img1) img1.src = savedImg;
             }
         });

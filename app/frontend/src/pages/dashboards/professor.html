@@ -30,7 +30,7 @@
                 <div class="profile">
                     <a href="/profile_page/profile.html" class="profile-link">
                         <div class="profile-dropdown-container" style="position:relative;">
-                            <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                            <img id="dashboard-profile-img" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
                             <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
                                 <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
                                 <!-- <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a> -->
@@ -144,7 +144,7 @@
 
     <script>
         // Dropdown logic - supports both hover (desktop) and click (mobile)
-        const profileImg = document.getElementById('dashboardProfileImg');
+        const profileImg = document.getElementById('dashboard-profile-img');
         const dropdown = document.getElementById('profileDropdown');
         const profileContainer = document.querySelector('.profile-dropdown-container');
         
@@ -205,7 +205,7 @@
             window.addEventListener('DOMContentLoaded', function() {
                 var savedImg = localStorage.getItem('profileImg');
                 if (savedImg) {
-                    var img1 = document.getElementById('dashboardProfileImg');
+                    var img1 = document.getElementById('dashboard-profile-img');
                     if (img1) img1.src = savedImg;
                     var img2 = document.getElementById('dashboardProfileImgLarge');
                     if (img2) img2.src = savedImg;
