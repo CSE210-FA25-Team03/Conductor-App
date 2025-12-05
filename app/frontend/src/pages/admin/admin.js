@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const me = await fetch("/auth/me").then(res => res.json());
+  // const me = await fetch("/auth/me").then(res => res.json());
 
   // if (!me.authenticated || me.user.role !== "admin") {
   //   // not admin → redirect to login
