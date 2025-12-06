@@ -534,6 +534,49 @@ const fetch =
     }
   });
 
+  // UPDATE a skill by id
+  app.put('/api/group-formation/skills/:id', async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+        return;
+      }
+      const { id } = req.params;
+      const { name, weight, description, position } = req.body || {};
+      const updated = await groupFormationDb.upsertSkill(DEFAULT_COURSE_ID, {
+        id,
+        name,
+        weight,
+        description,
+        position,
+      });
+      if (!updated) {
+        return res.status(404).json({ error: 'Skill not found' });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error('Error updating skill:', error);
+      res.status(500).json({ error: 'Failed to update skill' });
+    }
+  });
+
+  // DELETE a skill by id
+  app.delete('/api/group-formation/skills/:id', async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+        return;
+      }
+      const { id } = req.params;
+      const deleted = await groupFormationDb.deleteSkill(DEFAULT_COURSE_ID, id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Skill not found' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting skill:', error);
+      res.status(500).json({ error: 'Failed to delete skill' });
+    }
+  });
+
   // GET student ratings
   app.get('/api/group-formation/student-ratings', async (req, res) => {
     try {
@@ -1590,6 +1633,36 @@ const fetch =
     }
   });
 
+  // Upsert course description for the default course
+  // body: { description }
+  app.put('/api/class-directory/course/description', async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+        return;
+      }
+
+      const { description } = req.body || {};
+      const descText = (description || '').trim();
+      if (!descText) {
+        return res.status(400).json({ error: 'description is required' });
+      }
+
+      await dbCore.query(
+        `INSERT INTO course_info (course_id, description, updated_at)
+         VALUES ($1, $2, now())
+         ON CONFLICT (course_id)
+         DO UPDATE SET description = EXCLUDED.description, updated_at = now()`,
+        [DEFAULT_COURSE_ID, descText]
+      );
+
+      const course = await classDirectoryDb.getCourseOverview();
+      return res.json({ success: true, course });
+    } catch (error) {
+      console.error('Error upserting course description:', error);
+      return res.status(500).json({ error: 'Failed to save course description' });
+    }
+  });
+
   // Individual staff lists
   app.get('/api/class-directory/instructors', async (req, res) => {
     try {
@@ -2226,37 +2299,7 @@ const fetch =
     const assigneeData = issue.assignee || (issue.assignees && issue.assignees.nodes && issue.assignees.nodes[0]);
     if (assigneeData) {
   
-  // Upsert course description for the default course
-  // body: { description }
-  app.put('/api/class-directory/course/description', async (req, res) => {
-    try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return;
-      }
-
-      const { description } = req.body || {};
-      const descText = (description || '').trim();
-      if (!descText) {
-        return res.status(400).json({ error: 'description is required' });
-      }
-
-      // Upsert into course_info table keyed by course_id
-      await dbCore.query(
-        `INSERT INTO course_info (course_id, description, updated_at)
-         VALUES ($1, $2, now())
-         ON CONFLICT (course_id)
-         DO UPDATE SET description = EXCLUDED.description, updated_at = now()`,
-        [DEFAULT_COURSE_ID, descText]
-      );
-
-      // Return the refreshed overview, so frontend can reflect latest description
-      const course = await classDirectoryDb.getCourseOverview();
-      return res.json({ success: true, course });
-    } catch (error) {
-      console.error('Error upserting course description:', error);
-      return res.status(500).json({ error: 'Failed to save course description' });
-    }
-  });
+  
       const login = assigneeData.login || assigneeData;
       assignee = login;
 

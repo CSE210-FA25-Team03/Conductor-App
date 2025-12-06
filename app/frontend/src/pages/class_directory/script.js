@@ -320,8 +320,18 @@ async function putJson(url, body) {
 
 async function deleteRequest(url) {
   const res = await fetch(url, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+  // Some DELETE endpoints return 204 No Content
+  if (res.status === 204) return true;
+  // Fallback: try to parse JSON if present
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('application/json')) {
+    return res.json();
+  }
+  return true;
 }
 
 /* ============================================================
@@ -460,10 +470,48 @@ async function deleteEvent(id) {
   try {
     await deleteRequest(`${EVENTS_ENDPOINT}/${id}`);
     await loadEvents();
+    showToast('Event deleted', 'success');
   } catch (err) {
     console.error(err);
-    alert('Failed to delete event.');
+    showToast('Failed to delete event', 'error');
   }
+}
+
+// Simple toast utility
+function ensureToast() {
+  let t = document.getElementById('cd-toast');
+  if (t) return t;
+  t = document.createElement('div');
+  t.id = 'cd-toast';
+  t.style.position = 'fixed';
+  t.style.left = '50%';
+  t.style.top = '24px';
+  t.style.transform = 'translateX(-50%)';
+  t.style.maxWidth = '520px';
+  t.style.width = 'calc(100% - 32px)';
+  t.style.padding = '12px 16px';
+  t.style.borderRadius = '8px';
+  t.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+  t.style.fontWeight = '500';
+  t.style.zIndex = '1000';
+  t.style.display = 'none';
+  document.body.appendChild(t);
+  return t;
+}
+
+function showToast(message, type = 'info') {
+  const t = ensureToast();
+  t.textContent = message;
+  const isError = type === 'error';
+  const isSuccess = type === 'success';
+  t.style.background = isError ? '#fee2e2' : isSuccess ? '#dcfce7' : '#f3f4f6';
+  t.style.color = isError ? '#991b1b' : isSuccess ? '#065f46' : '#111827';
+  t.style.border = isError ? '1px solid #fca5a5' : isSuccess ? '1px solid #86efac' : '1px solid #e5e7eb';
+  t.style.display = 'block';
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => {
+    t.style.display = 'none';
+  }, 2500);
 }
 
 /* ============================================================

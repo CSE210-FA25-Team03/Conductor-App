@@ -33,6 +33,43 @@ document.addEventListener('DOMContentLoaded', () => {
     el.style.color = color || '';
   }
 
+  // Lightweight toast (shared style similar to Class Directory)
+  function ensureToast() {
+    let t = document.getElementById('cfg-toast');
+    if (t) return t;
+    t = document.createElement('div');
+    t.id = 'cfg-toast';
+    t.style.position = 'fixed';
+    t.style.left = '50%';
+    t.style.top = '24px';
+    t.style.transform = 'translateX(-50%)';
+    t.style.maxWidth = '520px';
+    t.style.width = 'calc(100% - 32px)';
+    t.style.padding = '12px 16px';
+    t.style.borderRadius = '8px';
+    t.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+    t.style.fontWeight = '500';
+    t.style.zIndex = '1000';
+    t.style.display = 'none';
+    document.body.appendChild(t);
+    return t;
+  }
+
+  function showToast(message, type = 'info') {
+    const t = ensureToast();
+    t.textContent = message;
+    const isError = type === 'error';
+    const isSuccess = type === 'success';
+    t.style.background = isError ? '#fee2e2' : isSuccess ? '#dcfce7' : '#f3f4f6';
+    t.style.color = isError ? '#991b1b' : isSuccess ? '#065f46' : '#111827';
+    t.style.border = isError ? '1px solid #fca5a5' : isSuccess ? '1px solid #86efac' : '1px solid #e5e7eb';
+    t.style.display = 'block';
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => {
+      t.style.display = 'none';
+    }, 2500);
+  }
+
   /* ----------------------------------------------------------
      Profile dropdown / navigation
   ---------------------------------------------------------- */
@@ -290,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        setStatus(descStatus, 'Saving course description...', '');
+        // setStatus(descStatus, 'Saving course description...', '');
         const result = await fetchJSON(`/api/class-directory/course/description`, {
           method: 'PUT',
           body: JSON.stringify({ description: desc }),
@@ -301,13 +338,15 @@ document.addEventListener('DOMContentLoaded', () => {
           courseDesc.value = result.course.description;
         }
         setStatus(descStatus, 'Course description saved.', '');
+        showToast('Course description saved', 'success');
       } catch (err) {
         console.error('Failed to save course description:', err);
-        setStatus(
-          descStatus,
-          'Failed to save course description. Please try again.',
-          '#b91c1c',
-        );
+        // setStatus(
+        //   descStatus,
+        //   'Failed to save course description. Please try again.',
+        //   '#b91c1c',
+        // );
+        showToast('Failed to save course description', 'error');
       }
     });
   }

@@ -168,38 +168,111 @@ function renderSkillsTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${idx + 1}</td>
-      <td>${s.name}</td>
-      <td>${s.weight}</td>
-      <td>
-        <button class="delete-btn" data-id="${s.id || ''}">
-          Delete
-        </button>
+      <td class="skill-name">${s.name}</td>
+      <td class="skill-weight">${s.weight}</td>
+      <td style="position:relative">
+        <button class="menu-btn" aria-label="Actions" title="Actions" data-id="${s.id || ''}" style="background:transparent;border:none;cursor:pointer;font-size:18px;line-height:1;">⋯</button>
+        <div class="menu" style="position:absolute; right:0; top:24px; background:#fff; border:1px solid #e5e7eb; border-radius:6px; box-shadow:0 8px 20px rgba(0,0,0,0.12); display:none; z-index:10;">
+          <button class="menu-edit" data-id="${s.id || ''}" style="display:block;padding:8px 12px;width:140px;text-align:left;background:#fff;border:none;cursor:pointer;">Edit</button>
+          <button class="menu-delete" data-id="${s.id || ''}" style="display:block;padding:8px 12px;width:140px;text-align:left;background:#fff;border:none;cursor:pointer;color:#991b1b;">Delete</button>
+        </div>
       </td>
     `;
     skillsTableBody.appendChild(tr);
   });
 
-  // Attach delete listeners
-  skillsTableBody.querySelectorAll('.delete-btn').forEach((btn) => {
+  // Action menu interactions (click to toggle, click-outside to close)
+  const openMenus = new Set();
+  skillsTableBody.querySelectorAll('.menu-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const menu = e.currentTarget.nextElementSibling;
+      if (!menu) return;
+      const isOpen = menu.style.display === 'block';
+      // Close all open menus first
+      openMenus.forEach((m) => { m.style.display = 'none'; });
+      openMenus.clear();
+      // Toggle current
+      menu.style.display = isOpen ? 'none' : 'block';
+      if (!isOpen) openMenus.add(menu);
+    });
+  });
+
+  // Close menus when clicking outside
+  document.addEventListener('click', () => {
+    if (!openMenus.size) return;
+    openMenus.forEach((m) => { m.style.display = 'none'; });
+    openMenus.clear();
+  });
+
+  // Delete action
+  skillsTableBody.querySelectorAll('.menu-delete').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
       const skillId = e.currentTarget.dataset.id;
       if (!skillId) {
         showError('Cannot delete this skill (missing ID).');
         return;
       }
-
-      if (!confirm('Are you sure you want to delete this skill?')) return;
-
       try {
-        await fetchJSON(`${API_BASE}/group-formation/skills/${skillId}`, {
-          method: 'DELETE',
-        });
+        await fetchJSON(`${API_BASE}/group-formation/skills/${skillId}`, { method: 'DELETE' });
         skills = skills.filter((s) => String(s.id) !== String(skillId));
         renderSkillsTable();
+        showToast('Skill deleted', 'success');
       } catch (err) {
         console.error('Failed to delete skill:', err);
         showError('Failed to delete skill. Please try again.');
       }
+    });
+  });
+
+  // Edit action
+  skillsTableBody.querySelectorAll('.menu-edit').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const skillId = e.currentTarget.dataset.id;
+      const row = e.currentTarget.closest('tr');
+      if (!row) return;
+      const nameCell = row.querySelector('.skill-name');
+      const weightCell = row.querySelector('.skill-weight');
+      const originalName = nameCell.textContent.trim();
+      const originalWeight = Number(weightCell.textContent.trim());
+
+      nameCell.innerHTML = `<input type="text" class="edit-name" value="${originalName}" style="width:100%">`;
+      weightCell.innerHTML = `<input type="number" class="edit-weight" value="${originalWeight}" min="1" max="10" style="width:80px">`;
+
+      const actionCell = row.cells[row.cells.length - 1];
+      actionCell.innerHTML = `
+        <button class="save-edit" data-id="${skillId}" style="margin-right:8px">Save</button>
+        <button class="cancel-edit" data-id="${skillId}">Cancel</button>
+      `;
+
+      actionCell.querySelector('.save-edit').addEventListener('click', async (evt) => {
+        evt.stopPropagation();
+        const newName = row.querySelector('.edit-name').value.trim();
+        const newWeight = Number(row.querySelector('.edit-weight').value);
+        if (!newName) { showError('Skill name is required.'); return; }
+        if (!newWeight || newWeight < 1 || newWeight > 10) { showError('Weight must be 1-10.'); return; }
+        try {
+          const updated = await fetchJSON(`${API_BASE}/group-formation/skills/${skillId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ name: newName, weight: newWeight }),
+          });
+          // Update local
+          skills = skills.map((s) => (String(s.id) === String(skillId) ? { ...s, name: updated.name, weight: updated.weight } : s));
+          renderSkillsTable();
+          showToast('Skill updated', 'success');
+        } catch (err) {
+          console.error('Failed to update skill:', err);
+          showError('Failed to update skill.');
+        }
+      });
+
+      actionCell.querySelector('.cancel-edit').addEventListener('click', () => {
+        nameCell.textContent = originalName;
+        weightCell.textContent = originalWeight;
+        renderSkillsTable();
+      });
     });
   });
 }
