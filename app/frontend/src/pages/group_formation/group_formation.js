@@ -31,7 +31,7 @@ const FALLBACK_STUDENTS = [
   },
 ];
 
-const FALLBACK_TAS = ['Sam Taylor', 'Diana Chen'];
+// const FALLBACK_TAS = ['Sam Taylor', 'Diana Chen'];
 
 /* =============================
    Global State
@@ -73,6 +73,50 @@ function showError(msg) {
     box.classList.remove('show');
     box.classList.add('hidden');
   }, 3000);
+}
+
+// Lightweight toast for non-blocking notices (success/info)
+function showToast(message, type = 'info') {
+  let toast = document.getElementById('toastBox');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'toastBox';
+    toast.style.position = 'fixed';
+    toast.style.top = '16px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.zIndex = '9999';
+    toast.style.maxWidth = '480px';
+    toast.style.width = 'calc(100% - 32px)';
+    toast.style.pointerEvents = 'none';
+    toast.style.fontFamily = 'system-ui,-apple-system,Segoe UI,Roboto,Arial';
+    document.body.appendChild(toast);
+  }
+
+  const item = document.createElement('div');
+  item.textContent = message;
+  item.style.marginBottom = '8px';
+  item.style.padding = '10px 12px';
+  item.style.borderRadius = '8px';
+  item.style.boxShadow = '0 4px 12px rgba(0,0,0,0.12)';
+  item.style.color = type === 'success' ? '#0F5132' : '#084298';
+  item.style.background = type === 'success' ? '#D1E7DD' : '#CFE2FF';
+  item.style.border = '1px solid ' + (type === 'success' ? '#BADBCC' : '#9EC5FE');
+  item.style.display = 'inline-block';
+  item.style.pointerEvents = 'auto';
+
+  toast.appendChild(item);
+
+  setTimeout(() => {
+    item.style.transition = 'opacity 300ms ease';
+    item.style.opacity = '0';
+    setTimeout(() => {
+      toast.removeChild(item);
+      if (!toast.childElementCount) {
+        toast.remove();
+      }
+    }, 320);
+  }, 2500);
 }
 
 async function fetchJSON(url, options = {}) {
@@ -124,38 +168,111 @@ function renderSkillsTable() {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${idx + 1}</td>
-      <td>${s.name}</td>
-      <td>${s.weight}</td>
-      <td>
-        <button class="delete-btn" data-id="${s.id || ''}">
-          Delete
-        </button>
+      <td class="skill-name">${s.name}</td>
+      <td class="skill-weight">${s.weight}</td>
+      <td style="position:relative">
+        <button class="menu-btn" aria-label="Actions" title="Actions" data-id="${s.id || ''}" style="background:transparent;border:none;cursor:pointer;font-size:18px;line-height:1;">⋯</button>
+        <div class="menu" style="position:absolute; right:0; top:24px; background:#fff; border:1px solid #e5e7eb; border-radius:6px; box-shadow:0 8px 20px rgba(0,0,0,0.12); display:none; z-index:10;">
+          <button class="menu-edit" data-id="${s.id || ''}" style="display:block;padding:8px 12px;width:140px;text-align:left;background:#fff;border:none;cursor:pointer;">Edit</button>
+          <button class="menu-delete" data-id="${s.id || ''}" style="display:block;padding:8px 12px;width:140px;text-align:left;background:#fff;border:none;cursor:pointer;color:#991b1b;">Delete</button>
+        </div>
       </td>
     `;
     skillsTableBody.appendChild(tr);
   });
 
-  // Attach delete listeners
-  skillsTableBody.querySelectorAll('.delete-btn').forEach((btn) => {
+  // Action menu interactions (click to toggle, click-outside to close)
+  const openMenus = new Set();
+  skillsTableBody.querySelectorAll('.menu-btn').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const menu = e.currentTarget.nextElementSibling;
+      if (!menu) return;
+      const isOpen = menu.style.display === 'block';
+      // Close all open menus first
+      openMenus.forEach((m) => { m.style.display = 'none'; });
+      openMenus.clear();
+      // Toggle current
+      menu.style.display = isOpen ? 'none' : 'block';
+      if (!isOpen) openMenus.add(menu);
+    });
+  });
+
+  // Close menus when clicking outside
+  document.addEventListener('click', () => {
+    if (!openMenus.size) return;
+    openMenus.forEach((m) => { m.style.display = 'none'; });
+    openMenus.clear();
+  });
+
+  // Delete action
+  skillsTableBody.querySelectorAll('.menu-delete').forEach((btn) => {
     btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
       const skillId = e.currentTarget.dataset.id;
       if (!skillId) {
         showError('Cannot delete this skill (missing ID).');
         return;
       }
-
-      if (!confirm('Are you sure you want to delete this skill?')) return;
-
       try {
-        await fetchJSON(`${API_BASE}/group-formation/skills/${skillId}`, {
-          method: 'DELETE',
-        });
+        await fetchJSON(`${API_BASE}/group-formation/skills/${skillId}`, { method: 'DELETE' });
         skills = skills.filter((s) => String(s.id) !== String(skillId));
         renderSkillsTable();
+        showToast('Skill deleted', 'success');
       } catch (err) {
         console.error('Failed to delete skill:', err);
         showError('Failed to delete skill. Please try again.');
       }
+    });
+  });
+
+  // Edit action
+  skillsTableBody.querySelectorAll('.menu-edit').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const skillId = e.currentTarget.dataset.id;
+      const row = e.currentTarget.closest('tr');
+      if (!row) return;
+      const nameCell = row.querySelector('.skill-name');
+      const weightCell = row.querySelector('.skill-weight');
+      const originalName = nameCell.textContent.trim();
+      const originalWeight = Number(weightCell.textContent.trim());
+
+      nameCell.innerHTML = `<input type="text" class="edit-name" value="${originalName}" style="width:100%">`;
+      weightCell.innerHTML = `<input type="number" class="edit-weight" value="${originalWeight}" min="1" max="10" style="width:80px">`;
+
+      const actionCell = row.cells[row.cells.length - 1];
+      actionCell.innerHTML = `
+        <button class="save-edit" data-id="${skillId}" style="margin-right:8px">Save</button>
+        <button class="cancel-edit" data-id="${skillId}">Cancel</button>
+      `;
+
+      actionCell.querySelector('.save-edit').addEventListener('click', async (evt) => {
+        evt.stopPropagation();
+        const newName = row.querySelector('.edit-name').value.trim();
+        const newWeight = Number(row.querySelector('.edit-weight').value);
+        if (!newName) { showError('Skill name is required.'); return; }
+        if (!newWeight || newWeight < 1 || newWeight > 10) { showError('Weight must be 1-10.'); return; }
+        try {
+          const updated = await fetchJSON(`${API_BASE}/group-formation/skills/${skillId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ name: newName, weight: newWeight }),
+          });
+          // Update local
+          skills = skills.map((s) => (String(s.id) === String(skillId) ? { ...s, name: updated.name, weight: updated.weight } : s));
+          renderSkillsTable();
+          showToast('Skill updated', 'success');
+        } catch (err) {
+          console.error('Failed to update skill:', err);
+          showError('Failed to update skill.');
+        }
+      });
+
+      actionCell.querySelector('.cancel-edit').addEventListener('click', () => {
+        nameCell.textContent = originalName;
+        weightCell.textContent = originalWeight;
+        renderSkillsTable();
+      });
     });
   });
 }
@@ -237,24 +354,24 @@ async function refreshTAsFromServer() {
           .replace(/\s+/g, '.')}@school.edu`,
       }));
 
-    if (!taMembers.length) {
-      taMembers = FALLBACK_TAS.map((name, idx) => ({
-        id: `fallback-${idx + 1}`,
-        name,
-        email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
-      }));
-      showError('No TAs found in roster; using fallback list.');
-    }
+    // if (!taMembers.length) {
+    //   taMembers = FALLBACK_TAS.map((name, idx) => ({
+    //     id: `fallback-${idx + 1}`,
+    //     name,
+    //     email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
+    //   }));
+    //   showError('No TAs found in roster; using fallback list.');
+    // }
   } catch (err) {
     console.error('Failed to load TAs from server:', err);
-    if (!taMembers.length) {
-      taMembers = FALLBACK_TAS.map((name, idx) => ({
-        id: `fallback-${idx + 1}`,
-        name,
-        email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
-      }));
-      showError('Could not load TAs. Using fallback list.');
-    }
+    // if (!taMembers.length) {
+    //   taMembers = FALLBACK_TAS.map((name, idx) => ({
+    //     id: `fallback-${idx + 1}`,
+    //     name,
+    //     email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
+    //   }));
+    //   showError('Could not load TAs. Using fallback list.');
+    // }
   }
 }
 
@@ -321,7 +438,7 @@ async function handleAddSkillClick() {
 }
 
 function handleSaveSkillsClick() {
-  alert('Skills are already saved to the database as you add/delete them.');
+  showToast('Skills auto-save as you add or delete.', 'success');
 }
 
 /* =============================
@@ -651,9 +768,9 @@ async function handleSaveGroupsClick() {
     if (res && Array.isArray(res.groups)) {
       currentGroups = res.groups;
       renderGroupsTable(currentGroups);
-      alert('Groups saved successfully.');
+      showToast('Groups saved successfully.', 'success');
     } else {
-      alert('Groups saved, but server returned an unexpected response.');
+      showToast('Groups saved, but server returned an unexpected response.', 'info');
     }
   } catch (err) {
     console.error('Failed to save groups:', err);
