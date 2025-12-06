@@ -2040,11 +2040,11 @@ const fetch =
       if (!ensureDb(res)) {
         return; // ensureDb already responded
       }
-      const faqEntry = req.body || {};
-      if (!faqEntry.question || !faqEntry.answer) {
+      const faqsEntry = req.body || {};
+      if (!faqsEntry.question || !faqsEntry.answer) {
         return res.status(400).json({ error: 'question and answer are required' });
       }
-      const result = await faqDb.createOrUpdateFaq(faqEntry);
+      const result = await faqsDb.createOrUpdateFaq(faqsEntry);
       return res.status(201).json(result.rows ? result.rows[0] : result);
     } catch (error) {
       console.error('Error saving FAQ entry:', error);
@@ -2058,7 +2058,7 @@ const fetch =
       if (!ensureDb(res)) {
         return; // ensureDb already responded
       }
-      const faqs = await faqDb.getAllFaqs();
+      const faqs = await faqsDb.getAllFaqs();
       return res.json(faqs);
     } catch (error) {
       console.error('Error fetching FAQ entries:', error);
@@ -2073,7 +2073,7 @@ const fetch =
         return; // ensureDb already responded
       }
       const id = parseInt(req.params.id, 10);
-      const deleted = await faqDb.deleteFaqById(id);
+      const deleted = await faqsDb.deleteFaqById(id);
       if (!deleted) {
         return res.status(404).json({ error: 'FAQ entry not found' });
       }
