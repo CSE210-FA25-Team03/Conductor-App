@@ -2034,7 +2034,7 @@ const fetch =
   // ------------------------------------------------------------
   // FAQ API (create/update and fetch)
 
-  // Create or update a FAQ entry
+  // Create a FAQ entry
   app.post('/api/tutor/faq', async (req, res) => {
     try {
       if (!ensureDb(res)) {
@@ -2044,11 +2044,30 @@ const fetch =
       if (!faqsEntry.question || !faqsEntry.answer) {
         return res.status(400).json({ error: 'question and answer are required' });
       }
-      const result = await faqsDb.createOrUpdateFaq(faqsEntry);
+      const result = await faqsDb.createFaq(faqsEntry);
       return res.status(201).json(result.rows ? result.rows[0] : result);
     } catch (error) {
       console.error('Error saving FAQ entry:', error);
       return res.status(500).json({ error: error.message || 'Failed to save FAQ entry' });
+    }
+  });
+
+  // Update a FAQ entry by id
+  app.put('/api/tutor/faq/:id', async (req, res) => {
+    try {
+      if (!ensureDb(res)) {
+        return; // ensureDb already responded
+      }
+      const id = parseInt(req.params.id, 10);
+      const faqData = req.body || {};
+      const updated = await faqsDb.updateFaqById(id, faqData);
+      if (!updated) {
+        return res.status(404).json({ error: 'FAQ entry not found' });
+      }
+      return res.json(updated);
+    } catch (error) {
+      console.error('Error updating FAQ entry:', error);
+      return res.status(500).json({ error: error.message || 'Failed to update FAQ entry' });
     }
   });
 
