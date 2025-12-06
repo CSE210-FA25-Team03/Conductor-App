@@ -199,9 +199,7 @@ body {
     flex-wrap: wrap; /* Allow wrapping when needed */
     min-width: 0;
 }
-.brand img{
-     
-}
+
 .logo-full {
     display: block;
     height: 6rem;
@@ -209,7 +207,7 @@ body {
 
 .logo-mini {
     display: none;
-
+}
 .brand {
     font-weight: 600;
     font-size: clamp(0.75rem, 4vw, 1.5rem);

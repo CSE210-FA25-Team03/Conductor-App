@@ -25,7 +25,7 @@ body {
 .logo-full {
     display: block;
     height: 5rem;
-    margin: 1rem auto 1rem auto;
+    margin: 1rem auto;
 }
 
 /* Login form styling */

@@ -701,6 +701,7 @@ body {
   display: flex;
   align-items: center;
 }
+
 @media (max-width: 500px) {
   .card-icon img {
     width: 1.9rem; /* slightly smaller on tiny phones */
@@ -735,12 +736,10 @@ body {
   background-color: #1d4ed8;
 }
 
-.brand img{
-     
-}
 .logo-full {
     display: block;
     height: 6rem;
+}
 .brand {
   font-size: clamp(1.2rem, 4vw, 1.6rem); 
   font-weight: 700;

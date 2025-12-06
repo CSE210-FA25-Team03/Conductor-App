@@ -288,8 +288,8 @@
     /* Story list adapts to full width */
     .story-list {
         width: 100%;
-        flex-direction: row;
-        flex-wrap: wrap;
+        display: flex;
+        flex-flow: wrap;
         gap: 10px;
     }
 

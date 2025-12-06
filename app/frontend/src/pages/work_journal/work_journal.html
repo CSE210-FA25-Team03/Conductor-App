@@ -75,10 +75,10 @@
 
       <form id="workJournalForm">
         <div class="wj-field">
-          <label for="repoLink">
+          <label for="repo-link">
             GitHub repo:
             <a
-              id="repoLink"
+              id="repo-link"
               href="#"
               target="_blank"
               rel="noopener noreferrer"
@@ -491,7 +491,7 @@
             document.querySelector("input[name='status']:checked")?.value ||
             'private';
           const repoLink =
-            document.getElementById('repoLink')?.getAttribute('href') || '';
+            document.getElementById('repo-link')?.getAttribute('href') || '';
 
           if (!tasksDone.trim()) {
             showError('Please describe what you worked on today.');
@@ -538,7 +538,7 @@
         try {
           const emailLower = (email || '').toLowerCase();
           const teams = await fetchJSON(`${API_BASE}/my-teams?email=${encodeURIComponent(emailLower)}`);
-          const repoAnchor = document.getElementById('repoLink');
+          const repoAnchor = document.getElementById('repo-link');
           if (!repoAnchor) return;
           if (Array.isArray(teams) && teams.length) {
             // Choose first team that has a repoUrl
