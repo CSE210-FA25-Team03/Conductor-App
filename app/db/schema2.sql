@@ -407,11 +407,11 @@ CREATE INDEX idx_project_tasks_course_status
 INSERT INTO users (id, email, email_verified_at, given_name, family_name, display_name)
 VALUES
   ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'professor@school.edu',     now(), 'Ada',    'Professor', 'Ada Professor'),
-  -- ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ta@school.edu',            now(), 'Sam',    'Assistant', 'Sam Assistant'),
-  -- ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'student@school.edu',       now(), 'Grace',  'Hopper',    'Grace Hopper'),
-  -- ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'teamlead@school.edu',      now(), 'Linus',  'Lead',      'Linus Lead'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'ta@school.edu',            now(), 'Sam',    'Assistant', 'Sam Assistant'),
+  ('cccccccc-cccc-cccc-cccc-cccccccccccc', 'student@school.edu',       now(), 'Grace',  'Hopper',    'Grace Hopper'),
+  ('dddddddd-dddd-dddd-dddd-dddddddddddd', 'teamlead@school.edu',      now(), 'Linus',  'Lead',      'Linus Lead'),
   -- New explicit team lead user (seed)
-  -- ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'alex_teamlead@school.edu', now(), 'Alex',  'Lee',       'Alex Lee'),
+  ('eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'alex_teamlead@school.edu', now(), 'Alex',  'Lee',       'Alex Lee'),
   -- Admin user for site/course management
   ('99999999-9999-9999-9999-999999999999', 'admin@school.edu',         now(), 'Admin', 'User',      'Site Admin');
 
@@ -462,9 +462,9 @@ VALUES (
 INSERT INTO course_memberships (id, course_id, user_id, status, created_at)
 VALUES
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'active', now()), -- professor
-  -- (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'active', now()), -- ta
-  -- (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'active', now()), -- student
-  -- (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'active', now()), -- team lead (Linus, legacy derived)
+  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'active', now()), -- ta
+  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'active', now()), -- student
+  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'active', now()), -- team lead (Linus, legacy derived)
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'active', now()), -- new explicit team lead (Alex Lee)
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', '99999999-9999-9999-9999-999999999999', 'active', now()); -- admin user
 
@@ -474,11 +474,11 @@ VALUES
   -- professor@school.edu as professor
   (gen_random_uuid(), 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'e1111111-1111-1111-1111-111111111111', 'course', '22222222-2222-2222-2222-222222222222', now()),
   -- ta@school.edu as TA
-  -- (gen_random_uuid(), 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'e3333333-3333-3333-3333-333333333333', 'course', '22222222-2222-2222-2222-222222222222', now()),
+  (gen_random_uuid(), 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'e3333333-3333-3333-3333-333333333333', 'course', '22222222-2222-2222-2222-222222222222', now()),
   -- -- student@school.edu as student
-  -- (gen_random_uuid(), 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'e2222222-2222-2222-2222-222222222222', 'course', '22222222-2222-2222-2222-222222222222', now()),
+  (gen_random_uuid(), 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'e2222222-2222-2222-2222-222222222222', 'course', '22222222-2222-2222-2222-222222222222', now()),
   -- -- teamlead@school.edu as student (legacy derived leader)
-  -- (gen_random_uuid(), 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'e2222222-2222-2222-2222-222222222222', 'course', '22222222-2222-2222-2222-222222222222', now()),
+  (gen_random_uuid(), 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'e2222222-2222-2222-2222-222222222222', 'course', '22222222-2222-2222-2222-222222222222', now()),
   -- alex_teamlead@school.edu as explicit team_lead
   (gen_random_uuid(), 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'e6666666-6666-6666-6666-666666666666', 'course', '22222222-2222-2222-2222-222222222222', now()),
   -- admin@school.edu as admin for the course

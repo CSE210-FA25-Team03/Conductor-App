@@ -126,6 +126,12 @@ const fetch =
   app.use('/attendance', express.static(path.join(__dirname, '../frontend/src/pages/attendance')));
   app.use(
     '/class_directory',
+    express.static(path.join(__dirname, '../frontend/src/pages/class_directory_student'), {
+      index: 'class_directory_student.html',
+    }),
+  );
+  app.use(
+    '/class_directory',
     express.static(path.join(__dirname, '../frontend/src/pages/class_directory')),
   );
   app.use(
