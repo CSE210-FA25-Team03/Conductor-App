@@ -39,10 +39,12 @@
                 <div class="profile">
                     <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
                         <div class="profile-dropdown-container" style="position:relative;">
-                            <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                            <img id="dashboard-profile-img" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
                             <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
                                 <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
-                                <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                                <!-- <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a> -->
+                                <a href="javascript:void(0)" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+
                             </div>
                         </div>
 
@@ -109,58 +111,118 @@
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
     <!-- Profile panel removed, navigation now goes to profile page -->
 
-    <script src="script.js"></script>
+<script src="script.js"></script>
+<script src="../../shared/auth.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // --- NAV BUTTONS ---
+    const viewTeamsBtn = document.getElementById('viewTeamsBtn');
+    const viewClassDirectoryBtn = document.getElementById('viewClassDirectoryBtn');
+    const viewEvalJournalBtn = document.getElementById('viewEvalJournalBtn');
+    const viewAttendanceBtn = document.getElementById('viewAttendanceBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    if (viewTeamsBtn) {
+      viewTeamsBtn.addEventListener('click', () => {
+        window.location.href = '/team_card/team_card.html';
+      });
+    }
+
+    if (viewClassDirectoryBtn) {
+      viewClassDirectoryBtn.addEventListener('click', () => {
+        window.location.href = '/class_directory/class_directory.html';
+      });
+    }
+
+    if (viewEvalJournalBtn) {
+      viewEvalJournalBtn.addEventListener('click', () => {
+        window.location.href = '/evaluation_journal/evaluation_journal.html';
+      });
+    }
+
+    if (viewAttendanceBtn) {
+      viewAttendanceBtn.addEventListener('click', () => {
+        window.location.href = '/attendance/professor_attendance.html';
+      });
+    }
+
+    // --- LOGOUT BUTTON ---
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();  // stop outer <a> from hijacking click
+        ConductorAuth.logout();
+      });
+    }
+  });
+</script>
+
+
     <script>
-        document.getElementById('viewTeamsBtn').addEventListener('click', function() {
-            window.location.href = '/team_card/team_card.html';
-        });
-    </script>
-    <script>
-        document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
-            window.location.href = '/class_directory/class_directory.html';
-        });
-    </script>
-    <script>
-        document.getElementById('viewEvalJournalBtn').addEventListener('click', function() {
-            window.location.href = '/evaluation_journal/evaluation_journal.html';
-        });
-    </script>
-    <script>
-        document.getElementById('viewAttendanceBtn').addEventListener('click', function() {
-            window.location.href = '/attendance/professor_attendance.html';
-        });
-    </script>
-    <script>
-        // Dropdown logic
-        const profileImg = document.getElementById('dashboardProfileImg');
+        // Dropdown logic - supports both hover (desktop) and click (mobile)
+        const profileImg = document.getElementById('dashboard-profile-img');
         const dropdown = document.getElementById('profileDropdown');
-        profileImg.addEventListener('mouseenter', function () {
-            dropdown.style.display = 'block';
-        });
-        profileImg.addEventListener('mouseleave', function () {
-            setTimeout(function () {
-                if (!dropdown.matches(':hover')) {
+        const profileContainer = document.querySelector('.profile-dropdown-container');
+        
+        // Detect if device supports touch (mobile)
+        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        
+        if (isMobile) {
+            // Mobile: Toggle dropdown on click
+            let isDropdownOpen = false;
+            
+            profileImg.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                isDropdownOpen = !isDropdownOpen;
+                dropdown.style.display = isDropdownOpen ? 'block' : 'none';
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function (e) {
+                if (isDropdownOpen && !profileContainer.contains(e.target)) {
+                    isDropdownOpen = false;
                     dropdown.style.display = 'none';
                 }
-            }, 150);
-        });
-        dropdown.addEventListener('mouseleave', function () {
-            dropdown.style.display = 'none';
-        });
-        dropdown.addEventListener('mouseenter', function () {
-            dropdown.style.display = 'block';
-        });
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            localStorage.clear();
-            window.location.href = '/login';
-        });
+            });
+            
+            // Close dropdown when clicking on a link inside
+            const dropdownLinks = dropdown.querySelectorAll('a');
+            dropdownLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    isDropdownOpen = false;
+                    dropdown.style.display = 'none';
+                });
+            });
+        } else {
+            // Desktop: Hover behavior
+            profileImg.addEventListener('mouseenter', function () {
+                dropdown.style.display = 'block';
+            });
+            
+            profileImg.addEventListener('mouseleave', function () {
+                setTimeout(function () {
+                    if (!dropdown.matches(':hover')) {
+                        dropdown.style.display = 'none';
+                    }
+                }, 150);
+            });
+            
+            dropdown.addEventListener('mouseleave', function () {
+                dropdown.style.display = 'none';
+            });
+            
+            dropdown.addEventListener('mouseenter', function () {
+                dropdown.style.display = 'block';
+            });
+        }
     </script>
         <script>
             window.addEventListener('DOMContentLoaded', function() {
                 var savedImg = localStorage.getItem('profileImg');
                 if (savedImg) {
-                    var img1 = document.getElementById('dashboardProfileImg');
+                    var img1 = document.getElementById('dashboard-profile-img');
                     if (img1) img1.src = savedImg;
                     var img2 = document.getElementById('dashboardProfileImgLarge');
                     if (img2) img2.src = savedImg;
@@ -173,11 +235,22 @@
                 var lastName = localStorage.getItem('lastName') || 'Lin';
                 var role = localStorage.getItem('role') || 'Professor';
                 var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
-                document.getElementById('profName').textContent = firstName + ' ' + lastName;
-                document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
-                document.getElementById('profRole').textContent = role + ' · CSE 210';
-                document.getElementById('profRoleMeta').textContent = role;
-                document.getElementById('profEmail').textContent = email;
+                
+                // Only set textContent if the element exists
+                var profNameEl = document.getElementById('profName');
+                if (profNameEl) profNameEl.textContent = firstName + ' ' + lastName;
+                
+                var profFullNameEl = document.getElementById('profFullName');
+                if (profFullNameEl) profFullNameEl.textContent = firstName + ' ' + lastName;
+                
+                var profRoleEl = document.getElementById('profRole');
+                if (profRoleEl) profRoleEl.textContent = role + ' · CSE 210';
+                
+                var profRoleMetaEl = document.getElementById('profRoleMeta');
+                if (profRoleMetaEl) profRoleMetaEl.textContent = role;
+                
+                var profEmailEl = document.getElementById('profEmail');
+                if (profEmailEl) profEmailEl.textContent = email;
             });
         </script>
     </section>

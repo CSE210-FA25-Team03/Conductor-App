@@ -15,6 +15,7 @@
   const membersDb = require('./db/members');
   const tasksDb = require('./db/tasks');
   const githubDb = require('./db/github');
+  const githubApi = require('./services/githubApi');
   const workJournalsDb = require('./db/workJournals');
   const attendanceDb = require('./db/attendance');
   const rubricDb = require('./db/rubric');
@@ -26,26 +27,47 @@
   const profileDb = require('./db/profile');
   const app = express();
   const PORT = process.env.PORT || 3000;
+/**
+ * Backend entry point for our Conductor App.
+ * Defines health check routes and initializes the Express server.
+ * @module server
+ */
+// Basic Express server to serve static frontend and prepare for backend features
+const cookieSession = require('cookie-session');
 
-  // ------------------------------------------------------------
-  // Configuration flags
-  // ------------------------------------------------------------
+// Add cookie sessions for state + PKCE storage
+app.use(cookieSession({
+  name: 'session',
+  keys: [process.env.SESSION_SECRET],   
+  httpOnly: true,
+  secure: false, 
+  sameSite: 'lax'
+}));
 
-  // DB is considered "configured" if we at least have a DATABASE_URL.
-  // Some routes ALSO need DEFAULT_COURSE_ID (course-scoped data).
-  const hasDbConfig = !!process.env.DATABASE_URL;
-  const hasCourseConfig = !!process.env.DEFAULT_COURSE_ID;
-  const DEFAULT_COURSE_ID = process.env.DEFAULT_COURSE_ID || null;
 
-  // Safe fetch wrapper for GitHub integration.
-  // Requires Node 18+ (global fetch). If not available, we throw a clear error.
-  const fetch =
-    global.fetch ||
-    (() => {
-      throw new Error(
-        'Global fetch is not available. Run on Node 18+ or add a fetch polyfill (e.g. node-fetch).',
-      );
-    });
+// --- Mount auth routes ---
+const authRoutes = require('./routes/auth');
+app.use('/auth', authRoutes);
+
+
+// ------------------------------------------------------------
+// Configuration flags
+// ------------------------------------------------------------
+
+// DB is considered "configured" if we at least have a DATABASE_URL.
+// Some routes ALSO need DEFAULT_COURSE_ID (course-scoped data).
+const hasDbConfig = !!process.env.DATABASE_URL;
+const hasCourseConfig = !!process.env.DEFAULT_COURSE_ID;
+const DEFAULT_COURSE_ID = process.env.DEFAULT_COURSE_ID || null;
+
+// Safe fetch wrapper for GitHub integration.
+// Requires Node 18+ (global fetch). If not available, we throw a clear error.
+const fetch =
+  global.fetch ||
+  (() => {
+    throw new Error(
+      'Global fetch is not available. Run on Node 18+ or add a fetch polyfill (e.g. node-fetch).',
+    )});
 
   // ------------------------------------------------------------
   // Middleware
@@ -58,6 +80,7 @@
   // potential header conflicts when static middleware encounters errors.
 
   // Serve static files for each role/page
+  app.use('/shared', express.static(path.join(__dirname, '../frontend/src/shared')));
   app.use('/login_page', express.static(path.join(__dirname, '../frontend/src/pages/login_page')));
   app.use(
     '/login',
@@ -155,12 +178,12 @@
    */
   function ensureDb(res, { requireCourse = false, errorOnMissingCourse = true } = {}) {
     if (!hasDbConfig) {
-      res.status(200).json({ error: 'Database not configured' });
+      res.status(500).json({ error: 'Database not configured' });
       return false;
     }
     if (requireCourse && !hasCourseConfig) {
       if (errorOnMissingCourse) {
-        res.status(200).json({ error: 'Course not configured' });
+        res.status(500).json({ error: 'Course not configured' });
       }
       return false;
     }
@@ -177,7 +200,7 @@
         !ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) ||
         !DEFAULT_COURSE_ID
       ) {
-        return res.status(200).json({
+        return res.status(500).json({
           success: false,
           message: 'Course/database not configured for login',
         });
@@ -266,7 +289,7 @@
       });
     } catch (error) {
       console.error('Error resolving login:', error);
-      return res.status(200).json({
+      return res.status(500).json({
         success: false,
         message: 'Failed to resolve login. Please try again.',
       });
@@ -441,7 +464,7 @@
       });
     } catch (error) {
       console.error('Error upserting course/professor:', error);
-      return res.status(200).json({ success: false, message: 'Failed to upsert course/professor' });
+      return res.status(500).json({ success: false, message: 'Failed to upsert course/professor' });
     }
   });
 
@@ -473,7 +496,7 @@
       res.json(result);
     } catch (error) {
       console.error('Error importing rosters:', error);
-      res.status(200).json({ error: 'Failed to import rosters' });
+      res.status(500).json({ error: 'Failed to import rosters' });
     }
   });
 
@@ -493,7 +516,7 @@
       res.json(skills);
     } catch (error) {
       console.error('Error loading skills:', error);
-      res.status(200).json({ error: 'Failed to load skills' });
+      res.status(500).json({ error: 'Failed to load skills' });
     }
   });
 
@@ -507,7 +530,50 @@
       res.status(201).json(skill);
     } catch (error) {
       console.error('Error saving skill:', error);
-      res.status(200).json({ error: 'Failed to save skill' });
+      res.status(500).json({ error: 'Failed to save skill' });
+    }
+  });
+
+  // UPDATE a skill by id
+  app.put('/api/group-formation/skills/:id', async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+        return;
+      }
+      const { id } = req.params;
+      const { name, weight, description, position } = req.body || {};
+      const updated = await groupFormationDb.upsertSkill(DEFAULT_COURSE_ID, {
+        id,
+        name,
+        weight,
+        description,
+        position,
+      });
+      if (!updated) {
+        return res.status(404).json({ error: 'Skill not found' });
+      }
+      res.json(updated);
+    } catch (error) {
+      console.error('Error updating skill:', error);
+      res.status(500).json({ error: 'Failed to update skill' });
+    }
+  });
+
+  // DELETE a skill by id
+  app.delete('/api/group-formation/skills/:id', async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+        return;
+      }
+      const { id } = req.params;
+      const deleted = await groupFormationDb.deleteSkill(DEFAULT_COURSE_ID, id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Skill not found' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting skill:', error);
+      res.status(500).json({ error: 'Failed to delete skill' });
     }
   });
 
@@ -521,7 +587,7 @@
       res.json(ratings);
     } catch (error) {
       console.error('Error loading student ratings:', error);
-      res.status(200).json({ error: 'Failed to load student ratings' });
+      res.status(500).json({ error: 'Failed to load student ratings' });
     }
   });
 
@@ -540,7 +606,7 @@
       res.json(groups);
     } catch (error) {
       console.error('Error loading groups:', error);
-      res.status(200).json({ error: 'Failed to load groups' });
+      res.status(500).json({ error: 'Failed to load groups' });
     }
   });
 
@@ -562,7 +628,7 @@
       });
     } catch (error) {
       console.error('Error saving groups:', error);
-      res.status(200).json({ error: error.message || 'Failed to save groups' });
+      res.status(500).json({ error: error.message || 'Failed to save groups' });
     }
   });
 
@@ -584,7 +650,7 @@
       res.json(ratingsBySkillId); // { [skillId]: rating }
     } catch (error) {
       console.error('Error loading current student ratings:', error);
-      res.status(200).json({ error: 'Failed to load current student ratings' });
+      res.status(500).json({ error: 'Failed to load current student ratings' });
     }
   });
 
@@ -609,7 +675,7 @@
       res.json({ message: 'Student rating saved' });
     } catch (error) {
       console.error('Error saving student rating:', error);
-      res.status(200).json({ error: 'Failed to save student rating' });
+      res.status(500).json({ error: 'Failed to save student rating' });
     }
   });
 
@@ -625,7 +691,7 @@
       res.json(ratings);
     } catch (error) {
       console.error('Error loading team lead ratings:', error);
-      res.status(200).json({ error: 'Failed to load team lead ratings' });
+      res.status(500).json({ error: 'Failed to load team lead ratings' });
     }
   });
 
@@ -640,7 +706,7 @@
       res.json({ message: 'Team lead rating saved' });
     } catch (error) {
       console.error('Error saving team lead rating:', error);
-      res.status(200).json({ error: 'Failed to save team lead rating' });
+      res.status(500).json({ error: 'Failed to save team lead rating' });
     }
   });
 
@@ -707,7 +773,7 @@
       res.json(team);
     } catch (error) {
       console.error('Error fetching team:', error);
-      res.status(200).json({ error: 'Failed to fetch team' });
+      res.status(500).json({ error: 'Failed to fetch team' });
     }
   });
 
@@ -715,7 +781,7 @@
   app.get('/api/team-card/:id', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Course/database not configured' });
+        return res.status(500).json({ error: 'Course/database not configured' });
       }
       const teamId = req.params.id;
       const data = await teamCardDb.getTeamCard(teamId);
@@ -723,7 +789,7 @@
       res.json(data);
     } catch (error) {
       console.error('Error reading team card:', error);
-      res.status(200).json({ error: 'Failed to read team card' });
+      res.status(500).json({ error: 'Failed to read team card' });
     }
   });
 
@@ -731,7 +797,7 @@
   app.put('/api/team-card/:id', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Course/database not configured' });
+        return res.status(500).json({ error: 'Course/database not configured' });
       }
       const teamId = req.params.id;
       const { description, statusDescription, repoUrl, email } = req.body || {};
@@ -772,7 +838,7 @@
       res.json({ success: true, team: updated });
     } catch (error) {
       console.error('Error updating team card:', error);
-      res.status(200).json({ error: 'Failed to update team card' });
+      res.status(500).json({ error: 'Failed to update team card' });
     }
   });
 
@@ -788,7 +854,7 @@
       res.json(teams);
     } catch (error) {
       console.error('Error reading my teams:', error);
-      res.status(200).json({ error: 'Failed to read teams for user' });
+      res.status(500).json({ error: 'Failed to read teams for user' });
     }
   });
 
@@ -802,7 +868,7 @@
       res.status(201).json(newTeam);
     } catch (error) {
       console.error('Error creating team:', error);
-      res.status(200).json({ error: 'Failed to create team' });
+      res.status(500).json({ error: 'Failed to create team' });
     }
   });
 
@@ -820,7 +886,7 @@
       res.json(updated);
     } catch (error) {
       console.error('Error updating team:', error);
-      res.status(200).json({ error: 'Failed to update team' });
+      res.status(500).json({ error: 'Failed to update team' });
     }
   });
 
@@ -838,7 +904,7 @@
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting team:', error);
-      res.status(200).json({ error: 'Failed to delete team' });
+      res.status(500).json({ error: 'Failed to delete team' });
     }
   });
 
@@ -865,7 +931,7 @@
       res.json(events);
     } catch (error) {
       console.error('Error fetching team events:', error);
-      res.status(200).json({ error: 'Failed to fetch team events' });
+      res.status(500).json({ error: 'Failed to fetch team events' });
     }
   });
 
@@ -950,7 +1016,7 @@
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating team event:', error);
-      res.status(200).json({ error: 'Failed to create team event' });
+      res.status(500).json({ error: 'Failed to create team event' });
     }
   });
 
@@ -970,7 +1036,7 @@
       res.json(items);
     } catch (error) {
       console.error('Error fetching rubric:', error);
-      res.status(200).json({ error: 'Failed to fetch rubric' });
+      res.status(500).json({ error: 'Failed to fetch rubric' });
     }
   });
 
@@ -985,7 +1051,7 @@
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating rubric item:', error);
-      res.status(200).json({ error: error.message || 'Failed to create rubric item' });
+      res.status(500).json({ error: error.message || 'Failed to create rubric item' });
     }
   });
 
@@ -1006,7 +1072,7 @@
       res.json(updated);
     } catch (error) {
       console.error('Error updating rubric item:', error);
-      res.status(200).json({ error: error.message || 'Failed to update rubric item' });
+      res.status(500).json({ error: error.message || 'Failed to update rubric item' });
     }
   });
 
@@ -1027,7 +1093,7 @@
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting rubric item:', error);
-      res.status(200).json({ error: error.message || 'Failed to delete rubric item' });
+      res.status(500).json({ error: error.message || 'Failed to delete rubric item' });
     }
   });
 
@@ -1072,7 +1138,7 @@
       res.json(evalData);
     } catch (error) {
       console.error('Error fetching evaluations:', error);
-      res.status(200).json({ error: 'Failed to fetch evaluation data' });
+      res.status(500).json({ error: 'Failed to fetch evaluation data' });
     }
   });
 
@@ -1083,7 +1149,7 @@
   app.get('/api/student/weekly-evaluation', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database/course not configured' });
+        return res.status(500).json({ error: 'Database/course not configured' });
       }
 
       const email = (req.query.email || '').trim().toLowerCase();
@@ -1099,7 +1165,7 @@
       res.json(data);
     } catch (error) {
       console.error('Error fetching student weekly evaluation:', error);
-      res.status(200).json({ error: 'Failed to fetch student weekly evaluation' });
+      res.status(500).json({ error: 'Failed to fetch student weekly evaluation' });
     }
   });
 
@@ -1121,7 +1187,7 @@
       res.json(notes);
     } catch (error) {
       console.error('Error fetching evaluation notes:', error);
-      res.status(200).json({ error: 'Failed to fetch evaluation notes' });
+      res.status(500).json({ error: 'Failed to fetch evaluation notes' });
     }
   });
 
@@ -1138,7 +1204,7 @@
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating evaluation note:', error);
-      res.status(200).json({ error: error.message || 'Failed to create evaluation note' });
+      res.status(500).json({ error: error.message || 'Failed to create evaluation note' });
     }
   });
 
@@ -1174,7 +1240,7 @@
       res.json(notes);
     } catch (error) {
       console.error('Error fetching eval notes by email:', error);
-      res.status(200).json({ error: 'Failed to fetch eval notes' });
+      res.status(500).json({ error: 'Failed to fetch eval notes' });
     }
   });
 
@@ -1212,7 +1278,7 @@
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating eval note by email:', error);
-      res.status(200).json({ error: error.message || 'Failed to create eval note' });
+      res.status(500).json({ error: error.message || 'Failed to create eval note' });
     }
   });
 
@@ -1239,7 +1305,7 @@
       res.json(journals);
     } catch (error) {
       console.error('Error fetching work journals:', error);
-      res.status(200).json({ error: 'Failed to fetch work journals' });
+      res.status(500).json({ error: 'Failed to fetch work journals' });
     }
   });
 
@@ -1247,14 +1313,14 @@
   app.post('/api/work-journals', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const created = await workJournalsDb.createWorkJournal(DEFAULT_COURSE_ID, req.body);
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating work journal:', error);
-      res.status(200).json({ error: error.message || 'Failed to create work journal' });
+      res.status(500).json({ error: error.message || 'Failed to create work journal' });
     }
   });
 
@@ -1262,7 +1328,7 @@
   app.put('/api/work-journals/:id', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const { id } = req.params;
@@ -1275,7 +1341,7 @@
       res.json(updated);
     } catch (error) {
       console.error('Error updating work journal:', error);
-      res.status(200).json({ error: error.message || 'Failed to update work journal' });
+      res.status(500).json({ error: error.message || 'Failed to update work journal' });
     }
   });
 
@@ -1283,7 +1349,7 @@
   app.delete('/api/work-journals/:id', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const { id } = req.params;
@@ -1296,7 +1362,7 @@
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting work journal:', error);
-      res.status(200).json({ error: error.message || 'Failed to delete work journal' });
+      res.status(500).json({ error: error.message || 'Failed to delete work journal' });
     }
   });
 
@@ -1424,7 +1490,7 @@
       res.json({ newer, read });
     } catch (error) {
       console.error('Error loading reviewer journals:', error);
-      res.status(200).json({ newer: [], read: [], error: 'Failed to load journals for review' });
+      res.status(500).json({ newer: [], read: [], error: 'Failed to load journals for review' });
     }
   });
 
@@ -1444,7 +1510,7 @@
       res.json({ success: true });
     } catch (error) {
       console.error('Error marking journal read:', error);
-      res.status(200).json({ success: false, message: 'Failed to mark read' });
+      res.status(500).json({ success: false, message: 'Failed to mark read' });
     }
   });
 
@@ -1464,7 +1530,7 @@
       res.json(replies);
     } catch (error) {
       console.error('Error fetching work journal replies:', error);
-      res.status(200).json({ error: 'Failed to fetch work journal replies' });
+      res.status(500).json({ error: 'Failed to fetch work journal replies' });
     }
   });
 
@@ -1480,7 +1546,7 @@
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating work journal reply:', error);
-      res.status(200).json({ error: error.message || 'Failed to create work journal reply' });
+      res.status(500).json({ error: error.message || 'Failed to create work journal reply' });
     }
   });
 
@@ -1492,7 +1558,7 @@
   app.get('/api/student/weekly-evaluation', async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({
+        return res.status(500).json({
           error: 'Course/database not configured for weekly evaluation',
         });
       }
@@ -1517,7 +1583,7 @@
       res.json(data);
     } catch (error) {
       console.error('Error fetching student weekly evaluation:', error);
-      res.status(200).json({
+      res.status(500).json({
         user: null,
         reports: [],
         notes: [],
@@ -1549,7 +1615,7 @@
       res.json(data);
     } catch (error) {
       console.error('Error reading class directory:', error);
-      res.status(200).json({ error: 'Failed to read class directory' });
+      res.status(500).json({ error: 'Failed to read class directory' });
     }
   });
 
@@ -1563,7 +1629,37 @@
       res.json(course);
     } catch (error) {
       console.error('Error reading course info:', error);
-      res.status(200).json({ error: 'Failed to read course info' });
+      res.status(500).json({ error: 'Failed to read course info' });
+    }
+  });
+
+  // Upsert course description for the default course
+  // body: { description }
+  app.put('/api/class-directory/course/description', async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+        return;
+      }
+
+      const { description } = req.body || {};
+      const descText = (description || '').trim();
+      if (!descText) {
+        return res.status(400).json({ error: 'description is required' });
+      }
+
+      await dbCore.query(
+        `INSERT INTO course_info (course_id, description, updated_at)
+         VALUES ($1, $2, now())
+         ON CONFLICT (course_id)
+         DO UPDATE SET description = EXCLUDED.description, updated_at = now()`,
+        [DEFAULT_COURSE_ID, descText]
+      );
+
+      const course = await classDirectoryDb.getCourseOverview();
+      return res.json({ success: true, course });
+    } catch (error) {
+      console.error('Error upserting course description:', error);
+      return res.status(500).json({ error: 'Failed to save course description' });
     }
   });
 
@@ -1577,7 +1673,7 @@
       res.json(instructors);
     } catch (error) {
       console.error('Error reading instructors:', error);
-      res.status(200).json({ error: 'Failed to read instructors' });
+      res.status(500).json({ error: 'Failed to read instructors' });
     }
   });
 
@@ -1590,7 +1686,7 @@
       res.json(tas);
     } catch (error) {
       console.error('Error reading TAs:', error);
-      res.status(200).json({ error: 'Failed to read TAs' });
+      res.status(500).json({ error: 'Failed to read TAs' });
     }
   });
 
@@ -1603,7 +1699,7 @@
       res.json(tutors);
     } catch (error) {
       console.error('Error reading tutors:', error);
-      res.status(200).json({ error: 'Failed to read tutors' });
+      res.status(500).json({ error: 'Failed to read tutors' });
     }
   });
 
@@ -1616,7 +1712,7 @@
       res.json(teams);
     } catch (error) {
       console.error('Error reading class directory teams:', error);
-      res.status(200).json({ error: 'Failed to read class directory teams' });
+      res.status(500).json({ error: 'Failed to read class directory teams' });
     }
   });
 
@@ -1630,7 +1726,37 @@
       res.json(events);
     } catch (error) {
       console.error('Error reading events:', error);
-      res.status(200).json({ error: 'Failed to read events' });
+      res.status(500).json({ error: 'Failed to read events' });
+    }
+  });
+
+  // Aggregated class directory payload (fewer round trips, parallel queries)
+  app.get('/api/class-directory/summary', async (req, res) => {
+    try {
+      if (!ensureDb(res)) {
+        return res.json({
+          course: null,
+          instructors: [],
+          tas: [],
+          tutors: [],
+          teams: [],
+          events: [],
+        });
+      }
+
+      const [course, instructors, tas, tutors, teams, events] = await Promise.all([
+        classDirectoryDb.getCourseOverview(),
+        classDirectoryDb.getStaffByRole('professor'),
+        classDirectoryDb.getStaffByRole('ta'),
+        classDirectoryDb.getStaffByRole('tutor'),
+        classDirectoryDb.getCourseTeams(),
+        eventsDb.getEvents(),
+      ]);
+
+      res.json({ course, instructors, tas, tutors, teams, events });
+    } catch (error) {
+      console.error('Error building class directory summary:', error);
+      res.status(500).json({ error: 'Failed to build class directory summary' });
     }
   });
 
@@ -1643,7 +1769,7 @@
       res.status(201).json(event);
     } catch (error) {
       console.error('Error creating event:', error);
-      res.status(200).json({ error: 'Failed to create event' });
+      res.status(500).json({ error: 'Failed to create event' });
     }
   });
 
@@ -1660,7 +1786,7 @@
       res.json(updated);
     } catch (error) {
       console.error('Error updating event:', error);
-      res.status(200).json({ error: 'Failed to update event' });
+      res.status(500).json({ error: 'Failed to update event' });
     }
   });
 
@@ -1677,7 +1803,7 @@
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting event:', error);
-      res.status(200).json({ error: 'Failed to delete event' });
+      res.status(500).json({ error: 'Failed to delete event' });
     }
   });
 
@@ -1694,7 +1820,7 @@
       res.json(members);
     } catch (error) {
       console.error('Error reading members:', error);
-      res.status(200).json({ error: 'Failed to read members' });
+      res.status(500).json({ error: 'Failed to read members' });
     }
   });
 
@@ -1711,7 +1837,7 @@
       res.json(board);
     } catch (error) {
       console.error('Error reading tasks:', error);
-      res.status(200).json({ error: 'Failed to read tasks' });
+      res.status(500).json({ error: 'Failed to read tasks' });
     }
   });
 
@@ -1725,7 +1851,7 @@
       res.json({ message: 'Tasks updated' });
     } catch (error) {
       console.error('Error updating tasks:', error);
-      res.status(200).json({ error: 'Failed to update tasks' });
+      res.status(500).json({ error: 'Failed to update tasks' });
     }
   });
 
@@ -1745,7 +1871,7 @@
       res.json(sessions);
     } catch (error) {
       console.error('Error fetching attendance sessions:', error);
-      res.status(200).json({ error: 'Failed to fetch attendance sessions' });
+      res.status(500).json({ error: 'Failed to fetch attendance sessions' });
     }
   });
 
@@ -1753,7 +1879,7 @@
   app.post('/api/attendance/sessions', async (req, res) => {
     try {
       if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const { durationMinutes } = req.body || {};
@@ -1764,7 +1890,7 @@
       res.status(201).json(session);
     } catch (error) {
       console.error('Error creating attendance session:', error);
-      res.status(200).json({ error: error.message || 'Failed to create attendance session' });
+      res.status(500).json({ error: error.message || 'Failed to create attendance session' });
     }
   });
 
@@ -1772,7 +1898,7 @@
   app.get('/api/attendance/sessions/:id', async (req, res) => {
     try {
       if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
-        return res.status(200).json({ error: 'Database not configured' });
+        return res.status(500).json({ error: 'Database not configured' });
       }
 
       const sessionId = req.params.id;
@@ -1788,7 +1914,7 @@
       res.json(session);
     } catch (error) {
       console.error('Error fetching attendance session:', error);
-      res.status(200).json({ error: 'Failed to fetch attendance session' });
+      res.status(500).json({ error: 'Failed to fetch attendance session' });
     }
   });
 
@@ -1813,7 +1939,7 @@
       res.json(result);
     } catch (error) {
       console.error('Error marking attendance:', error);
-      res.status(200).json({
+      res.status(500).json({
         success: false,
         message: 'Failed to mark attendance',
       });
@@ -1837,7 +1963,7 @@
       res.json(history);
     } catch (error) {
       console.error('Error fetching attendance history:', error);
-      res.status(200).json({
+      res.status(500).json({
         sessions: [],
         presentCount: 0,
         totalSessions: 0,
@@ -1865,7 +1991,7 @@
       return res.status(201).json(result.rows ? result.rows[0] : result);
     } catch (error) {
       console.error('Error saving profile:', error);
-      return res.status(200).json({ error: error.message || 'Failed to save profile' });
+      return res.status(500).json({ error: error.message || 'Failed to save profile' });
     }
   });
 
@@ -1891,7 +2017,7 @@
       return res.json(profile);
     } catch (error) {
       console.error('Error fetching profile:', error);
-      return res.status(200).json({ error: error.message || 'Failed to fetch profile' });
+      return res.status(500).json({ error: error.message || 'Failed to fetch profile' });
     }
   });
 
@@ -1901,8 +2027,11 @@
   // ------------------------------------------------------------
   // GitHub API integration
   // ------------------------------------------------------------
+  // Note: GitHub API functions are now in ./services/githubApi.js
+  // Keeping old function definitions for backward compatibility during migration
+  // TODO: Remove these and use githubApi module directly
 
-  // Fetch GitHub issues for configured repo
+  // Fetch GitHub issues for configured repo (REST API)
   async function fetchGitHubIssues(owner, repo, token = '') {
     const headers = {
       Accept: 'application/vnd.github.v3+json',
@@ -1924,32 +2053,261 @@
     return data.filter((issue) => !issue.pull_request);
   }
 
+  // Fetch GitHub issues from a Project v2 (GraphQL API)
+  // Supports both direct project ID and organization + project number
+  async function fetchGitHubProjectIssues(projectId, token, orgName = null, projectNumber = null) {
+    if (!token) {
+      throw new Error('GitHub token is required for Project API access');
+    }
+
+    const headers = {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'User-Agent': 'Conductor-App',
+    };
+
+    let query, variables;
+
+    // If org_name and project_number are provided, use organization-based query
+    if (orgName && projectNumber !== null) {
+      query = `
+        query($orgLogin: String!, $projectNumber: Int!, $first: Int!) {
+          organization(login: $orgLogin) {
+            projectV2(number: $projectNumber) {
+              id
+              title
+              items(first: $first) {
+                nodes {
+                  id
+                  fieldValues(first: 20) {
+                    nodes {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        field {
+                          ... on ProjectV2FieldCommon {
+                            name
+                          }
+                        }
+                        name
+                      }
+                    }
+                  }
+                  content {
+                    ... on Issue {
+                      id
+                      number
+                      title
+                      url
+                      state
+                      body
+                      assignees(first: 10) {
+                        nodes {
+                          login
+                        }
+                      }
+                      labels(first: 10) {
+                        nodes {
+                          name
+                        }
+                      }
+                      milestone {
+                        dueOn
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      variables = {
+        orgLogin: orgName,
+        projectNumber: parseInt(projectNumber, 10),
+        first: 100,
+      };
+    } else if (projectId) {
+      // Use direct project ID query (existing method)
+      query = `
+        query($projectId: ID!, $first: Int!) {
+          node(id: $projectId) {
+            ... on ProjectV2 {
+              id
+              title
+              items(first: $first) {
+                nodes {
+                  id
+                  fieldValues(first: 20) {
+                    nodes {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        field {
+                          ... on ProjectV2FieldCommon {
+                            name
+                          }
+                        }
+                        name
+                      }
+                    }
+                  }
+                  content {
+                    ... on Issue {
+                      id
+                      number
+                      title
+                      url
+                      state
+                      body
+                      assignees(first: 10) {
+                        nodes {
+                          login
+                        }
+                      }
+                      labels(first: 10) {
+                        nodes {
+                          name
+                        }
+                      }
+                      milestone {
+                        dueOn
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      variables = {
+        projectId: projectId,
+        first: 100,
+      };
+    } else {
+      throw new Error('Either project_id or org_name + project_number must be provided');
+    }
+
+    const response = await fetch('https://api.github.com/graphql', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query, variables }),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`GitHub GraphQL API error: ${response.status} ${response.statusText} - ${text}`);
+    }
+
+    const result = await response.json();
+
+    if (result.errors) {
+      throw new Error(`GitHub GraphQL errors: ${JSON.stringify(result.errors)}`);
+    }
+
+    // Handle both organization-based and direct ID queries
+    let project;
+    if (orgName && projectNumber !== null) {
+      project = result.data?.organization?.projectV2;
+    } else {
+      project = result.data?.node;
+    }
+
+    if (!project || !project.items) {
+      throw new Error('Invalid project or project not found. Check organization name, project number, or project ID.');
+    }
+
+    // Extract issues from project items
+    const issues = [];
+    for (const item of project.items.nodes) {
+      if (item.content) {
+        // Check if content is an Issue (has number field which is unique to issues)
+        if (item.content.number !== undefined) {
+          const issue = item.content;
+          
+          // Find status field value from project item
+          let statusFieldValue = null;
+          if (item.fieldValues && item.fieldValues.nodes) {
+            const statusField = item.fieldValues.nodes.find(
+              (fv) => fv && fv.field && fv.field.name && 
+              (fv.field.name.toLowerCase().includes('status') || 
+               fv.field.name.toLowerCase().includes('state'))
+            );
+            if (statusField && statusField.name) {
+              statusFieldValue = statusField.name;
+            }
+          }
+
+          // Normalize GraphQL response to match REST API format for mapping function
+          const normalizedIssue = {
+            number: issue.number,
+            title: issue.title,
+            url: issue.url,
+            html_url: issue.url, // GraphQL uses 'url', REST uses 'html_url'
+            state: issue.state,
+            body: issue.body,
+            milestone: issue.milestone ? { due_on: issue.milestone.dueOn } : null,
+            projectStatus: statusFieldValue,
+            // Normalize labels: GraphQL returns { nodes: [...] }, REST returns [...]
+            labels: issue.labels && issue.labels.nodes 
+              ? issue.labels.nodes.map(l => ({ name: l.name }))
+              : (issue.labels || []),
+            // Normalize assignees: GraphQL returns { nodes: [...] }, REST returns single assignee
+            assignee: issue.assignees && issue.assignees.nodes && issue.assignees.nodes.length > 0
+              ? { login: issue.assignees.nodes[0].login }
+              : null,
+            assignees: issue.assignees, // Keep original for reference
+          };
+
+          issues.push(normalizedIssue);
+        }
+      }
+    }
+
+    return issues;
+  }
+
   // Map a GitHub issue to our task format
   function mapGitHubIssueToTask(issue, members = []) {
-    // Determine status bucket based on issue state and labels
+    // Determine status bucket based on project status field, issue state, and labels
     let group = 'todo';
-    if (issue.state === 'closed') {
+    
+    // First, check if we have a project status field (from GitHub Projects)
+    if (issue.projectStatus) {
+      const status = issue.projectStatus.toLowerCase();
+      if (status.includes('done') || status.includes('complete') || status.includes('closed')) {
+        group = 'done';
+      } else if (status.includes('progress') || status.includes('doing') || status.includes('in progress')) {
+        group = 'progress';
+      } else if (status.includes('todo') || status.includes('backlog') || status.includes('not started')) {
+        group = 'todo';
+      }
+    }
+    
+    // Fall back to issue state and labels if no project status
+    if (group === 'todo' && issue.state === 'closed') {
       group = 'done';
-    } else if (
-      issue.labels &&
-      issue.labels.some((label) => {
-        const name = label.name.toLowerCase();
-        return name.includes('in-progress') || name.includes('progress') || name.includes('doing');
-      })
-    ) {
+    } else if (group === 'todo' && issue.labels && issue.labels.some((label) => {
+      const name = typeof label === 'string' ? label : (label.name || '').toLowerCase();
+      return name.includes('in-progress') || name.includes('progress') || name.includes('doing');
+    })) {
       group = 'progress';
     }
 
     // Default assignee is GitHub login or "None"
     let assignee = 'None';
-    if (issue.assignee) {
-      assignee = issue.assignee.login;
+    // Handle both REST API format (single assignee) and GraphQL format (assignees array)
+    const assigneeData = issue.assignee || (issue.assignees && issue.assignees.nodes && issue.assignees.nodes[0]);
+    if (assigneeData) {
+  
+  
+      const login = assigneeData.login || assigneeData;
+      assignee = login;
 
       // Try to map to a known member name if possible
       const matchedMember = members.find(
         (m) =>
-          (m.name && m.name.toLowerCase().includes(issue.assignee.login.toLowerCase())) ||
-          (m.initials && m.initials.toLowerCase() === issue.assignee.login.toLowerCase()),
+          (m.name && m.name.toLowerCase().includes(login.toLowerCase())) ||
+          (m.initials && m.initials.toLowerCase() === login.toLowerCase()),
       );
       if (matchedMember) {
         assignee = matchedMember.name;
@@ -1958,19 +2316,23 @@
 
     // Priority badge from labels (high/medium/low)
     let badge = 'medium';
-    if (issue.labels && issue.labels.some((label) => label.name.toLowerCase().includes('high'))) {
+    const labels = issue.labels || (issue.labels && issue.labels.nodes ? issue.labels.nodes : []);
+    if (labels && labels.some((label) => {
+      const name = typeof label === 'string' ? label : (label.name || '').toLowerCase();
+      return name.includes('high');
+    })) {
       badge = 'high';
-    } else if (
-      issue.labels &&
-      issue.labels.some((label) => label.name.toLowerCase().includes('low'))
-    ) {
+    } else if (labels && labels.some((label) => {
+      const name = typeof label === 'string' ? label : (label.name || '').toLowerCase();
+      return name.includes('low');
+    })) {
       badge = 'low';
     }
 
     // Due date from milestone if present
     let due = 'TBD';
-    if (issue.milestone && issue.milestone.due_on) {
-      const dueDate = new Date(issue.milestone.due_on);
+    if (issue.milestone && (issue.milestone.due_on || issue.milestone.dueOn)) {
+      const dueDate = new Date(issue.milestone.due_on || issue.milestone.dueOn);
       due = dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     }
 
@@ -1980,7 +2342,7 @@
       due: issue.state === 'closed' ? 'Completed' : due,
       assignee,
       githubIssueNumber: issue.number,
-      githubUrl: issue.html_url,
+      githubUrl: issue.html_url || issue.url,
       githubState: issue.state,
       group,
     };
@@ -2053,8 +2415,15 @@
       if (!ensureDb(res)) {
         return;
       }
-      const { owner, repo, token } = req.body;
-      const saved = await githubDb.upsertGithubConfig({ owner, repo, token });
+      const { owner, repo, token, project_id, org_name, project_number } = req.body;
+      const saved = await githubDb.upsertGithubConfig({ 
+        owner, 
+        repo, 
+        token, 
+        project_id, 
+        org_name, 
+        project_number: project_number ? parseInt(project_number, 10) : null 
+      });
       res.json(saved);
     } catch (error) {
       console.error('Error saving GitHub config:', error);
@@ -2070,13 +2439,34 @@
       }
 
       const config = await githubDb.getGithubConfig();
-      if (!config.owner || !config.repo) {
+      
+      let issues = [];
+      
+      // If org_name and project_number are configured, fetch from GitHub Projects
+      if (config.org_name && config.project_number !== null) {
+        if (!config.token) {
+          return res.status(400).json({
+            error: 'GitHub token is required for Project API access.',
+          });
+        }
+        issues = await fetchGitHubProjectIssues(null, config.token, config.org_name, config.project_number);
+      } else if (config.project_id) {
+        // Use direct project ID
+        if (!config.token) {
+          return res.status(400).json({
+            error: 'GitHub token is required for Project API access.',
+          });
+        }
+        issues = await fetchGitHubProjectIssues(config.project_id, config.token);
+      } else if (config.owner && config.repo) {
+        // Fall back to repository issues
+        issues = await fetchGitHubIssues(config.owner, config.repo, config.token);
+      } else {
         return res.status(400).json({
-          error: 'GitHub repository not configured. Please set owner and repo.',
+          error: 'GitHub not configured. Please set org_name/project_number, project_id, or owner/repo.',
         });
       }
 
-      const issues = await fetchGitHubIssues(config.owner, config.repo, config.token);
       const members = await membersDb.getMembers();
       const mappedTasks = issues.map((issue) => mapGitHubIssueToTask(issue, members));
 
@@ -2098,13 +2488,38 @@
       }
 
       const config = await githubDb.getGithubConfig();
-      if (!config.owner || !config.repo) {
+      
+      let issues = [];
+      let githubStoryName = '';
+      
+      // If org_name and project_number are configured, fetch from GitHub Projects
+      if (config.org_name && config.project_number !== null) {
+        if (!config.token) {
+          return res.status(400).json({
+            error: 'GitHub token is required for Project API access.',
+          });
+        }
+        issues = await fetchGitHubProjectIssues(null, config.token, config.org_name, config.project_number);
+        githubStoryName = `GitHub Project: ${config.org_name}/project-${config.project_number}`;
+      } else if (config.project_id) {
+        // Use direct project ID
+        if (!config.token) {
+          return res.status(400).json({
+            error: 'GitHub token is required for Project API access.',
+          });
+        }
+        issues = await fetchGitHubProjectIssues(config.project_id, config.token);
+        githubStoryName = `GitHub Project: ${config.project_id.substring(0, 12)}...`;
+      } else if (config.owner && config.repo) {
+        // Fall back to repository issues
+        issues = await fetchGitHubIssues(config.owner, config.repo, config.token);
+        githubStoryName = `GitHub: ${config.owner}/${config.repo}`;
+      } else {
         return res.status(400).json({
-          error: 'GitHub repository not configured',
+          error: 'GitHub not configured. Please set org_name/project_number, project_id, or owner/repo.',
         });
       }
 
-      const issues = await fetchGitHubIssues(config.owner, config.repo, config.token);
       const members = await membersDb.getMembers();
       const mappedTasks = issues.map((issue) => mapGitHubIssueToTask(issue, members));
 
@@ -2112,7 +2527,6 @@
       const currentTasks = await tasksDb.getTasksBoard();
 
       // Ensure a story exists for GitHub issues
-      const githubStoryName = `GitHub: ${config.owner}/${config.repo}`;
       if (!currentTasks[githubStoryName]) {
         currentTasks[githubStoryName] = { todo: [], progress: [], done: [] };
       }
@@ -2142,6 +2556,217 @@
     }
   });
 
+  // Update GitHub project issues to match task board positions
+  // Note: Uses functions from ./services/githubApi.js
+  app.post('/api/github/update', async (req, res) => {
+    // Ensure we always return JSON, even on errors
+    const sendError = (status, message) => {
+      if (!res.headersSent) {
+        return res.status(status).json({ error: message });
+      }
+    };
+
+    try {
+      if (!ensureDb(res)) {
+        return sendError(500, 'Database not configured');
+      }
+
+      const config = await githubDb.getGithubConfig();
+      
+      // Check if using GitHub Projects (required for status updates)
+      if (!config.org_name && !config.project_id) {
+        return res.status(400).json({
+          error: 'GitHub Projects not configured. Please configure org_name/project_number or project_id.',
+        });
+      }
+
+      if (!config.token) {
+        return res.status(400).json({
+          error: 'GitHub token is required for Project API access.',
+        });
+      }
+
+      // Load current tasks board from DB
+      const board = await tasksDb.getTasksBoard();
+      
+      // Find GitHub story (could be different formats)
+      let githubStoryName = null;
+      let story = null;
+      
+      if (config.org_name && config.project_number !== null) {
+        githubStoryName = `GitHub Project: ${config.org_name}/project-${config.project_number}`;
+        story = board[githubStoryName];
+      }
+      
+      if (!story && config.project_id) {
+        githubStoryName = `GitHub Project: ${config.project_id.substring(0, 12)}...`;
+        story = board[githubStoryName];
+      }
+      
+      if (!story && config.owner && config.repo) {
+        githubStoryName = `GitHub: ${config.owner}/${config.repo}`;
+        story = board[githubStoryName];
+      }
+
+      if (!story) {
+        return res.status(400).json({
+          error: `No GitHub story found in task board. Please sync GitHub issues first.`,
+        });
+      }
+
+      // Fetch project items with their IDs using the service module
+      const project = await githubApi.fetchProjectItemsWithIds(
+        config.project_id,
+        config.token,
+        config.org_name,
+        config.project_number
+      );
+
+      // Find status field ID and options
+      const statusField = project.fields?.nodes?.find(
+        (field) => field && field.name && 
+        (field.name.toLowerCase().includes('status') || field.name.toLowerCase().includes('state'))
+      );
+
+      if (!statusField || !statusField.id) {
+        return res.status(400).json({
+          error: 'Status field not found in GitHub project. Please ensure your project has a status field.',
+        });
+      }
+
+      // Get status field options (if available from the query)
+      let statusOptions = statusField.options || [];
+
+      // Get all possible status field values (we'll need to query for options)
+      // For now, we'll map our columns to common status values
+      const statusMapping = {
+        'todo': ['Todo', 'To Do', 'Not Started', 'Backlog'],
+        'progress': ['In Progress', 'InProgress', 'Doing', 'Active'],
+        'done': ['Done', 'Completed', 'Complete', 'Closed'],
+      };
+
+      // Create a map of issue number -> project item ID
+      const issueToItemMap = new Map();
+      for (const item of project.items?.nodes || []) {
+        if (item.content && item.content.number !== undefined) {
+          issueToItemMap.set(item.content.number, item.id);
+        }
+      }
+
+      // If options weren't included in the initial query, fetch them separately
+      if (!statusOptions || statusOptions.length === 0) {
+        const fieldOptionsQuery = `
+          query($projectId: ID!, $fieldId: ID!) {
+            node(id: $projectId) {
+              ... on ProjectV2 {
+                field(id: $fieldId) {
+                  ... on ProjectV2SingleSelectField {
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `;
+
+        const fieldOptionsResponse = await fetch('https://api.github.com/graphql', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${config.token}`,
+            'Content-Type': 'application/json',
+            'User-Agent': 'Conductor-App',
+          },
+          body: JSON.stringify({
+            query: fieldOptionsQuery,
+            variables: { projectId: project.id, fieldId: statusField.id },
+          }),
+        });
+
+        if (fieldOptionsResponse.ok) {
+          const fieldOptionsResult = await fieldOptionsResponse.json();
+          if (!fieldOptionsResult.errors && fieldOptionsResult.data?.node?.field?.options) {
+            statusOptions = fieldOptionsResult.data.node.field.options;
+          }
+        }
+      }
+
+      // Helper function to find status option ID by name
+      const findStatusOptionId = (columnName) => {
+        const possibleNames = statusMapping[columnName] || [columnName];
+        for (const name of possibleNames) {
+          const option = statusOptions.find(
+            opt => opt.name && opt.name.toLowerCase() === name.toLowerCase()
+          );
+          if (option) return option.id;
+        }
+        // If exact match not found, try partial match
+        for (const name of possibleNames) {
+          const option = statusOptions.find(
+            opt => opt.name && opt.name.toLowerCase().includes(name.toLowerCase())
+          );
+          if (option) return option.id;
+        }
+        return null;
+      };
+
+      let updated = 0;
+      const groups = ['todo', 'progress', 'done'];
+
+      // Update each task's status in GitHub
+      for (const group of groups) {
+        const tasks = story[group] || [];
+        for (const task of tasks) {
+          if (!task.githubIssueNumber) continue;
+
+          const itemId = issueToItemMap.get(task.githubIssueNumber);
+          if (!itemId) {
+            console.warn(`Project item not found for issue #${task.githubIssueNumber}`);
+            continue;
+          }
+
+          const statusOptionId = findStatusOptionId(group);
+          if (!statusOptionId) {
+            console.warn(`Status option not found for column "${group}"`);
+            continue;
+          }
+
+          try {
+            await githubApi.updateProjectItemStatus(
+              project.id,
+              itemId,
+              statusField.id,
+              statusOptionId,
+              config.token
+            );
+            updated += 1;
+          } catch (error) {
+            console.error(`Error updating issue #${task.githubIssueNumber}:`, error);
+            // Continue with other updates
+          }
+        }
+      }
+
+      if (!res.headersSent) {
+        res.json({
+          message: 'Updated GitHub project issues',
+          updated,
+          total: updated,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating GitHub issues:', error);
+      console.error('Error stack:', error.stack);
+      if (!res.headersSent) {
+        res.status(500).json({
+          error: 'Failed to update GitHub issues',
+          message: error.message || 'Unknown error occurred',
+        });
+      }
+    }
+  });
 
   // Push local tasks in the GitHub story that don't have an issue number yet
   app.post('/api/github/push', async (req, res) => {

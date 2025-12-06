@@ -32,7 +32,7 @@
                 <div class="profile">
                     <div class="profile-dropdown-container" style="position:relative;">
                         <img
-                            id="dashboardProfileImg"
+                            id="dashboard-profile-img"
                             src="/assets/logo/user.png"
                             alt="Profile"
                             style="width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;"
@@ -263,7 +263,7 @@
          MAIN DASHBOARD SCRIPT (existing behavior: open/close panels, etc.)
     ============================================================ -->
     <script src="script.js"></script>
-
+    <script src="../../shared/auth.js"></script>
     <!-- ============================================================
          STUDENT WEEKLY EVAL SCRIPT (calls /student/weekly-evaluation)
          Populates:
@@ -328,10 +328,12 @@
         if (viewWorkJournalBtn) viewWorkJournalBtn.addEventListener('click', () => { window.location.href = '/work_journal/work_journal.html'; });
         if (viewTeamsBtn) viewTeamsBtn.addEventListener('click', () => { window.location.href = '/student_team_card/student_team_card.html'; });
 
+                
+ 
         // ------------------------------------------------------------
         // PROFILE DROPDOWN + LOGOUT
         // ------------------------------------------------------------
-        const profileImg = document.getElementById('dashboardProfileImg');
+        const profileImg = document.getElementById('dashboard-profile-img');
         const dropdown = document.getElementById('profileDropdown');
         const logoutBtn = document.getElementById('logoutBtn');
 
@@ -354,21 +356,21 @@
             dropdown.style.display = 'none';
           });
         }
-
         if (logoutBtn) {
-          logoutBtn.addEventListener('click', (e) => {
+          logoutBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            localStorage.clear();
-            window.location.href = '/login';
+            e.stopPropagation(); // stop outer <a> from hijacking click
+            ConductorAuth.logout();
           });
         }
+        
 
         // ------------------------------------------------------------
         // PROFILE IMAGE SYNC
         // ------------------------------------------------------------
         const savedImg = localStorage.getItem('profileImg');
         if (savedImg) {
-          const img1 = document.getElementById('dashboardProfileImg');
+          const img1 = document.getElementById('dashboard-profile-img');
           if (img1) img1.src = savedImg;
           const img2 = document.getElementById('dashboardProfileImgLarge');
           if (img2) img2.src = savedImg;

@@ -112,6 +112,11 @@
 
                     modalName.textContent = data.name || 'Unnamed Team';
                     statusBadge.textContent = data.status || 'N/A';
+                    if (!data.status || String(data.status).trim().toLowerCase() === 'on track') {
+                        statusBadge.style.display = 'none';
+                    } else {
+                        statusBadge.style.display = '';
+                    }
                     modalDesc.textContent = data.description || 'No description available.';
                                         modalStatusDesc.textContent = data.statusDescription || 'No status details.';
                                         const repoNode = document.getElementById('modalRepoLink');
