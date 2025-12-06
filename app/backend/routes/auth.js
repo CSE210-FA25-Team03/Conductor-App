@@ -18,46 +18,78 @@ const DEFAULT_COURSE_ID =
 // ------------------------------------------------------------
 // Helper: find role for a user email from the database
 // ------------------------------------------------------------
+// ------------------------------------------------------------
+// Helper: find role + core identity for a user email
+// ------------------------------------------------------------
 async function findRoleForEmail(email) {
+  const normalizedEmail = (email || "").trim().toLowerCase();
+
   // 1) check user exists
   const userRes = await db.query(
-    `SELECT id FROM users WHERE email = $1`,
-    [email]
+    `SELECT id, email, display_name
+     FROM users
+     WHERE email = $1`,
+    [normalizedEmail]
   );
   if (userRes.rowCount === 0) {
-    return { enrolled: false, role: null };
+    return { enrolled: false, role: null, user: null, course: null };
   }
 
-  const userId = userRes.rows[0].id;
+  const user = userRes.rows[0];
+  const userId = user.id;
 
   // 2) check enrollment in the default course
-  const courseRes = await db.query(
-    `SELECT id FROM course_memberships 
+  const courseMembershipRes = await db.query(
+    `SELECT course_id
+     FROM course_memberships 
      WHERE user_id = $1 AND course_id = $2`,
-    [userId, DEFAULT_COURSE_ID]       
+    [userId, DEFAULT_COURSE_ID]
   );
-  if (courseRes.rowCount === 0) {
-    return { enrolled: false, role: null };
+
+  if (courseMembershipRes.rowCount === 0) {
+    // user exists, but not enrolled in this course
+    return { enrolled: false, role: null, user, course: null };
   }
 
-  // 3) check role assignments
+  const courseId = courseMembershipRes.rows[0].course_id;
+
+  // 3) find primary role for that course
   const roleRes = await db.query(
-    `SELECT r.key AS role
-     FROM role_assignments ra
-     JOIN roles r ON r.id = ra.role_id
-     WHERE ra.user_id = $1 
-       AND ra.scope_type = 'course'
-       AND ra.scope_id = $2`,
-    [userId, DEFAULT_COURSE_ID]        
+    `SELECT role
+       FROM role_assignments
+      WHERE user_id = $1
+        AND course_id = $2
+      LIMIT 1`,
+    [userId, courseId]
   );
 
-  if (roleRes.rowCount === 0) {
-    // enrolled in course, but no course-scoped role
-    return { enrolled: true, role: null };
-  }
+  const role = roleRes.rowCount > 0 ? roleRes.rows[0].role : null;
 
-  return { enrolled: true, role: roleRes.rows[0].role };  // e.g. 'admin', 'professor'
+  // 4) (optional but nice) get course code/label for UI
+  const courseInfoRes = await db.query(
+    `SELECT c.id, c.code, c.name
+       FROM courses c
+      WHERE c.id = $1`,
+    [courseId]
+  );
+
+  const course =
+    courseInfoRes.rowCount > 0
+      ? {
+          id: courseInfoRes.rows[0].id,
+          code: courseInfoRes.rows[0].code, // e.g., 'CSE 210'
+          name: courseInfoRes.rows[0].name,
+        }
+      : { id: courseId, code: null, name: null };
+
+  return {
+    enrolled: true,
+    role,
+    user,
+    course,
+  };
 }
+
 
 // Cache the Google OIDC client (discover once)
 let googleClientPromise;
@@ -134,34 +166,38 @@ router.get("/google/callback", async (req, res) => {
     const claims = tokenSet.claims();
 
     // Look up enrollment + role in DB
-    const { enrolled, role } = await findRoleForEmail(claims.email);
+const { enrolled, role, user, course } = await findRoleForEmail(claims.email);
 
-    // Not enrolled in this course → refuse login
-    if (!enrolled) {
-      console.warn("Login blocked: email not enrolled in course", claims.email);
-      req.session = null;
-      return res.redirect("/login/?error=not_enrolled");
-    }
+// Not enrolled in this course →
+if (!enrolled) {
+  console.warn("Login blocked: email not enrolled in course", claims.email);
+  req.session = null;
+  return res.redirect("/login/?error=not_enrolled");
+}
 
-    // Enrolled but no role mapping → separate error
-    if (!role) {
-      console.warn("Login blocked: enrolled but no role", claims.email);
-      req.session = null;
-      return res.redirect("/login/?error=no_role");
-    }
+// Enrolled but no role mapping →
+if (!role) {
+  console.warn("Login blocked: enrolled but no role", claims.email);
+  req.session = null;
+  return res.redirect("/login/?error=no_role");
+}
 
-    // Only keep what we actually need in the session
-    const safeUser = {
-      sub: claims.sub,
-      email: claims.email,
-      emailVerified: Boolean(claims.email_verified),
-      name: claims.name || "",
-      picture: typeof claims.picture === "string" ? claims.picture : null,
-      role,  // e.g. 'admin', 'professor', 'student', 'ta', 'team_lead'
-    };
+// Build canonical session user
+const safeUser = {
+  id: user.id,
+  email: user.email,
+  name: user.display_name || claims.name || "",
+  role, // 'admin' | 'professor' | 'student' | ...
+  courseId: course?.id || DEFAULT_COURSE_ID,
+  courseCode: course?.code || null,
+  courseName: course?.name || null,
+  emailVerified: Boolean(claims.email_verified),
+  picture:
+    typeof claims.picture === "string" ? claims.picture : null,
+};
 
-    // Store on session for later use
-    req.session.user = safeUser;
+// Store on session for later use
+req.session.user = safeUser;
 
     // Redirect back to frontend (e.g. dashboard or home)
     if (role === "admin") {

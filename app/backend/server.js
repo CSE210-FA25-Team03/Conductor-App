@@ -25,6 +25,7 @@
   const studentWeeklyEvalDb = require('./db/studentWeeklyEval');
   const rostersDb = require('./db/rosters');
   const profileDb = require('./db/profile');
+  const authRoutes = require('./routes/auth');
   const app = express();
   const PORT = process.env.PORT || 3000;
 /**
@@ -35,7 +36,7 @@
 // Basic Express server to serve static frontend and prepare for backend features
 const cookieSession = require('cookie-session');
 
-// Add cookie sessions for state + PKCE storage
+// Add cookie sessions for state
 app.use(cookieSession({
   name: 'session',
   keys: [process.env.SESSION_SECRET],   
@@ -46,7 +47,7 @@ app.use(cookieSession({
 
 
 // --- Mount auth routes ---
-const authRoutes = require('./routes/auth');
+
 app.use('/auth', authRoutes);
 
 
@@ -256,43 +257,75 @@ const fetch =
         const profCourseId = profCourse[0].course_id;
         const primaryRole = 'professor';
         const redirectPath = '/dashboards/professor.html';
-        return res.json({
-          success: true,
-          user: ctx.user,
-          courseId: profCourseId,
-          primaryRole,
-          redirectPath,
-          roles: ['professor'],
-          isTeamLead: false,
-          teamLeadTeams: [],
-        });
+const canonicalSessionUser = {
+  id: ctx.user.id,
+  email: ctx.user.email,
+  name:
+    ctx.user.display_name ||
+    `${ctx.user.first_name || ''} ${ctx.user.last_name || ''}`.trim(),
+  role: primaryRole,
+  courseId: ctx.courseId,
+  courseCode: ctx.courseCode || trimmedClassCode || null,
+  courseName: ctx.courseName || null,
+  emailVerified: true,
+  picture: null,
+};
+
+req.session.user = canonicalSessionUser;
+
+return res.json({
+  success: true,
+  user: ctx.user,
+  courseId: profCourseId,
+  primaryRole,
+  redirectPath,
+  roles: ['professor'],
+  isTeamLead: false,
+  teamLeadTeams: [],
+});
       }
 
       const primaryRole = ctx.primaryRole;
       let redirectPath = '/dashboards/student.html';
+if (primaryRole === 'admin') {
+  redirectPath = '/admin/admin.html';
+} else if (primaryRole === 'professor') {
+  redirectPath = '/dashboards/professor.html';
+} else if (primaryRole === 'ta') {
+  redirectPath = '/dashboards/ta.html';
+} else if (primaryRole === 'team_lead') {
+  redirectPath = '/dashboards/team_lead.html';
+} else if (primaryRole === 'tutor') {
+  redirectPath = '/dashboards/student.html';
+}
 
-      if (primaryRole === 'admin') {
-        redirectPath = '/admin/admin.html';
-      } else if (primaryRole === 'professor') {
-        redirectPath = '/dashboards/professor.html';
-      } else if (primaryRole === 'ta') {
-        redirectPath = '/dashboards/ta.html';
-      } else if (primaryRole === 'team_lead') {
-        redirectPath = '/dashboards/team_lead.html';
-      } else if (primaryRole === 'tutor') {
-        // You can point tutors to a special dashboard later; for now treat as student.
-        redirectPath = '/dashboards/student.html';
-      }
-      return res.json({
-        success: true,
-        user: ctx.user,
-        courseId: ctx.courseId,
-        primaryRole,
-        redirectPath,
-        roles: ctx.roles,
-        isTeamLead: ctx.isTeamLead,
-        teamLeadTeams: ctx.teamLeadTeams,
-      });
+// ✅ SET SESSION HERE
+const canonicalSessionUser = {
+  id: ctx.user.id,
+  email: ctx.user.email,
+  name:
+    ctx.user.display_name ||
+    `${ctx.user.first_name || ''} ${ctx.user.last_name || ''}`.trim(),
+  role: primaryRole,
+  courseId: ctx.courseId,
+  courseCode: ctx.courseCode || null,  // if you add these
+  courseName: ctx.courseName || null,
+  emailVerified: true,
+  picture: null,
+};
+
+req.session.user = canonicalSessionUser;
+
+return res.json({
+  success: true,
+  user: ctx.user,
+  courseId: ctx.courseId,
+  primaryRole,
+  redirectPath,
+  roles: ctx.roles,
+  isTeamLead: ctx.isTeamLead,
+  teamLeadTeams: ctx.teamLeadTeams,
+});
     } catch (error) {
       console.error('Error resolving login:', error);
       return res.status(500).json({
@@ -1505,12 +1538,18 @@ const fetch =
     try {
       if (!ensureDb(res, { requireCourse: false })) return;
       const { id } = req.params;
-      const { email } = req.body || {};
-      const viewerEmail = (email || '').trim().toLowerCase();
+      const { email, classCode } = req.body || {};
+      const normalizedEmail = (email || '').trim().toLowerCase();
+      const trimmedClassCode = (classCode || '').trim();
       if (!id || !viewerEmail) {
         return res.status(400).json({ success: false, message: 'id and email required' });
       }
-      const ctx = await classDirectoryDb.getUserCourseContextByEmail(viewerEmail);
+      const ctx = await classDirectoryDb.getUserCourseContextByEmail(
+          normalizedEmail,
+          trimmedClassCode
+            ? { classCode: trimmedClassCode }
+            : {}
+        );
       if (!ctx.user) return res.status(404).json({ success: false, message: 'Viewer not found' });
       await workJournalsDb.markJournalRead(id, ctx.user.id);
       res.json({ success: true });

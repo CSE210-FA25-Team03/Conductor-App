@@ -51,10 +51,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function resolveLogin(email) {
+    const classCodeInput = document.getElementById('classCode');
+    const classCode = (classCodeInput?.value || '').trim();
+
     const res = await fetch('/api/auth/resolve-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, classCode }),
     });
 
     const text = await res.text().catch(() => '');
