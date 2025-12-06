@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+  <script defer src="/assets/js/class-directory-nav.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile | Conductor</title>
+  <link rel="stylesheet" href="profile.css" />
+</head>
+<body>
+  <header class="top-nav">
+    <div class="brand">Conductor <span>App</span></div>
+    <div class="nav-actions">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+    </div>
+  </header>
+
+  <!-- Status / error banner -->
+  <div
+    id="profileStatus"
+    class="status-text"
+    aria-live="polite"
+    style="max-width:680px;margin:0.75rem auto 0;display:none;"
+  ></div>
+
+  <main class="profile-container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-photo">
+          <img id="profile-img" src="/assets/logo/user.png" alt="Profile Picture" />
+          <div
+            style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:0.5rem;"
+          >
+            <label for="upload-photo" class="upload-btn" style="margin:0;">Change</label>
+            <label
+              id="save-photo"
+              class="upload-btn"
+              style="display:none; margin:0; cursor:pointer;"
+            >
+              Save
+            </label>
+          </div>
+          <input type="file" id="upload-photo" accept="image/*" hidden />
+        </div>
+
+        <h1 id="profileFullName"></h1>
+        <p class="role" id="profileRole"></p>
+      </div>
+
+      <div class="info-card">
+        <h2>Personal Information</h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <label>First Name</label>
+            <input type="text" id="profileFirstName" value="" disabled />
+          </div>
+          <div class="info-item">
+            <label>Last Name</label>
+            <input type="text" id="profileLastName" value="" disabled />
+          </div>
+          <div class="info-item">
+            <label>Pronoun</label>
+            <input type="text" id="profilePronoun" value="" disabled />
+          </div>
+          <div class="info-item full">
+            <label>Role</label>
+            <input type="text" id="profileRoleField" value="" disabled />
+          </div>
+          <div class="info-item full">
+            <label>Public Link</label>
+            <input type="text" id="profilePublicLink" value="" disabled />
+          </div>
+        </div>
+        <button class="edit-btn" data-section="personal">Edit Information</button>
+      </div>
+
+      <div class="info-card">
+        <h2>Contact/Availability</h2>
+        <div class="info-grid">
+          <div class="info-item full">
+            <label>Email</label>
+            <input type="email" id="profileEmail" value="" disabled />
+          </div>
+          <div class="info-item">
+            <label>Phone Number</label>
+            <input type="text" id="profilePhone" value="" disabled />
+          </div>
+          <div class="info-item full">
+            <label>Availability Time</label>
+            <textarea
+              id="profileAvailability"
+              placeholder="Enter availability here..."
+              disabled
+            ></textarea>
+          </div>
+        </div>
+        <button class="edit-btn" data-section="contact">Edit Contact</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_BASE = '/api';
+
+      // ---------------- Helpers ----------------
+      async function fetchJSON(url, options = {}) {
+        const res = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' },
+          ...options,
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+        }
+
+        return res.json();
+      }
+
+      const statusBox = document.getElementById('profileStatus');
+      function showStatus(message, type = 'info') {
+        if (!statusBox) return;
+        statusBox.textContent = message;
+        statusBox.style.display = 'block';
+        if (type === 'error') {
+          statusBox.style.color = '#b91c1c';
+        } else if (type === 'success') {
+          statusBox.style.color = '#16a34a';
+        } else {
+          statusBox.style.color = '#4b5563';
+        }
+        setTimeout(() => {
+          statusBox.style.display = 'none';
+        }, 4000);
+      }
+
+      async function updateProfile(partial) {
+        // We need user_id to update profile; get it from currentProfile or resolve by email
+        const userId = currentProfile?.user_id;
+        if (!userId) throw new Error('Missing user_id for profile update');
+        const payload = { user_id: userId, ...partial };
+        const updated = await fetchJSON(`${API_BASE}/profile`, {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        return updated;
+      }
+
+      // ---------------- Elements ----------------
+      const uploadInput = document.getElementById('upload-photo');
+      const profileImg = document.getElementById('profile-img');
+      const savePhotoLabel = document.getElementById('save-photo');
+
+      const fullNameEl = document.getElementById('profileFullName');
+      const roleBadgeEl = document.getElementById('profileRole');
+
+      const firstNameEl = document.getElementById('profileFirstName');
+      const lastNameEl = document.getElementById('profileLastName');
+      const pronounEl = document.getElementById('profilePronoun');
+      const roleFieldEl = document.getElementById('profileRoleField');
+      const publicLinkEl = document.getElementById('profilePublicLink');
+
+      const emailEl = document.getElementById('profileEmail');
+      const phoneEl = document.getElementById('profilePhone');
+      const availabilityEl = document.getElementById('profileAvailability');
+
+      const backDashboard = document.getElementById('backDashboard');
+
+      let uploadedImgData = null;
+      let currentProfile = null;
+
+      // ---------------- Load profile from backend ----------------
+      async function loadProfileFromBackend() {
+        try {
+          // Try to load by email first (from localStorage), else fall back to hardcoded demo email
+          const localEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
+          let me;
+          if (localEmail) {
+            me = await fetchJSON(`${API_BASE}/profile?email=${encodeURIComponent(localEmail)}`);
+          } else {
+            me = await fetchJSON(`${API_BASE}/profile?email=${encodeURIComponent('student@school.edu')}`);
+          }
+          currentProfile = me || {};
+
+          const givenName = me.given_name || '';
+          const familyName = me.family_name || '';
+          const displayName = me.display_name || [givenName, familyName].filter(Boolean).join(' ') || '';
+          const role = localStorage.getItem('role') || 'Member';
+          const email = me.email || localEmail || '';
+          const pronouns = me.pronouns || '';
+          const publicLink = me.public_link || '';
+          const phone = me.phone || '';
+          const availability = me.availability_notes || '';
+
+          if (fullNameEl) fullNameEl.textContent = displayName;
+          if (roleBadgeEl)
+            roleBadgeEl.textContent =
+              role + (me.courseLabel ? ' · ' + me.courseLabel : '');
+
+          if (firstNameEl) firstNameEl.value = givenName;
+          if (lastNameEl) lastNameEl.value = familyName;
+          if (pronounEl) pronounEl.value = pronouns;
+          if (roleFieldEl) roleFieldEl.value = role;
+          if (publicLinkEl) publicLinkEl.value = publicLink;
+
+          if (emailEl) emailEl.value = email;
+          if (phoneEl) phoneEl.value = phone;
+          if (availabilityEl) availabilityEl.value = availability;
+
+          if (me.photo_url && profileImg) {
+            profileImg.src = me.photo_url;
+          } else {
+            // fallback to localStorage
+            const savedImg = localStorage.getItem('profileImg');
+            if (savedImg) profileImg.src = savedImg;
+          }
+
+          // Keep localStorage in sync for other pages that still read it
+          if (givenName) localStorage.setItem('firstName', givenName);
+          if (familyName) localStorage.setItem('lastName', familyName);
+          if (role) localStorage.setItem('role', role);
+          if (email) localStorage.setItem('email', email);
+          if (me.photo_url && String(me.photo_url).startsWith('data:')) {
+            localStorage.setItem('profileImg', me.photo_url);
+          }
+
+        } catch (err) {
+          console.error('Failed to load profile from backend:', err);
+          showStatus('Could not load profile from server; using local data.', 'error');
+
+          // Fallback: use localStorage like before
+          const firstName = localStorage.getItem('firstName') || '';
+          const lastName = localStorage.getItem('lastName') || '';
+          const role = localStorage.getItem('role') || 'Professor';
+          const email =
+            localStorage.getItem('email') || 'avery.lin@university.edu';
+          const savedImg = localStorage.getItem('profileImg');
+
+          if (firstNameEl) firstNameEl.value = firstName;
+          if (lastNameEl) lastNameEl.value = lastName;
+          if (roleFieldEl) roleFieldEl.value = role;
+          if (emailEl) emailEl.value = email;
+          if (fullNameEl)
+            fullNameEl.textContent =
+              firstName && lastName ? firstName + ' ' + lastName : '';
+          if (roleBadgeEl)
+            roleBadgeEl.textContent = role + ' · CSE 210';
+          if (savedImg && profileImg) profileImg.src = savedImg;
+        }
+      }
+
+      // ---------------- Photo upload + save ----------------
+      if (uploadInput && profileImg && savePhotoLabel) {
+        uploadInput.addEventListener('change', (event) => {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              profileImg.src = e.target.result;
+              uploadedImgData = e.target.result;
+              savePhotoLabel.style.display = 'inline-block';
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+
+        savePhotoLabel.addEventListener('click', async () => {
+          if (!uploadedImgData) return;
+          try {
+            showStatus('Saving profile photo...', 'info');
+            const updated = await updateProfile({
+              photo_url: uploadedImgData,
+            });
+
+            currentProfile = updated;
+
+            // Store in localStorage to keep other pages consistent
+            localStorage.setItem('profileImg', uploadedImgData);
+            savePhotoLabel.style.display = 'none';
+            showStatus('Profile photo saved.', 'success');
+          } catch (err) {
+            console.error('Failed to save photo:', err);
+            showStatus('Failed to save profile photo.', 'error');
+          }
+        });
+      }
+
+      // ---------------- Edit buttons (save to backend) ----------------
+      document.querySelectorAll('.edit-btn').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const section = btn.getAttribute('data-section');
+          const card = btn.closest('.info-card');
+          if (!card) return;
+
+          const inputs = card.querySelectorAll('input, textarea');
+          const isSaving = btn.classList.contains('saving');
+
+          // Enter edit mode
+          if (!isSaving) {
+            inputs.forEach((i) => {
+              if (i.id === 'profileRoleField' || i.id === 'profileEmail') {
+                i.disabled = true;
+              } else {
+                i.disabled = false;
+              }
+            });
+            btn.textContent = 'Save';
+            btn.classList.add('saving');
+            return;
+          }
+
+          // Save mode -> send to backend
+          let payload = {};
+
+          const addIfNonEmpty = (obj, key, val) => {
+            if (val !== undefined && val !== null && String(val).trim() !== '') {
+              obj[key] = String(val).trim();
+            }
+          };
+
+          const clear = [];
+
+          if (section === 'personal') {
+            payload = {};
+            const g = firstNameEl ? firstNameEl.value : '';
+            const f = lastNameEl ? lastNameEl.value : '';
+            const p = pronounEl ? pronounEl.value : '';
+            const l = publicLinkEl ? publicLinkEl.value : '';
+            if (g && g.trim()) payload.givenName = g.trim(); else clear.push('givenName');
+            if (f && f.trim()) payload.familyName = f.trim(); else clear.push('familyName');
+            if (p && p.trim()) payload.pronouns = p.trim(); else clear.push('pronouns');
+            if (l && l.trim()) payload.publicLink = l.trim(); else clear.push('publicLink');
+          } else if (section === 'contact') {
+            payload = {};
+            const ph = phoneEl ? phoneEl.value : '';
+            const av = availabilityEl ? availabilityEl.value : '';
+            if (ph && ph.trim()) payload.phone = ph.trim(); else clear.push('phone');
+            if (av && av.trim()) payload.availabilityNotes = av.trim(); else clear.push('availabilityNotes');
+          }
+
+          if (clear.length) payload.clear = clear;
+
+          try {
+            showStatus('Saving profile...', 'info');
+            const updated = await updateProfile(payload);
+            currentProfile = updated;
+
+            // Update display name + role from server if provided
+            const givenName =
+              updated.givenName || updated.firstName || firstNameEl?.value || '';
+            const familyName =
+              updated.familyName || updated.lastName || lastNameEl?.value || '';
+            const role = updated.role || updated.primaryRole || roleFieldEl?.value || '';
+
+            if (fullNameEl) {
+              const displayName =
+                updated.displayName ||
+                [givenName, familyName].filter(Boolean).join(' ');
+              fullNameEl.textContent = displayName;
+            }
+            if (roleBadgeEl) {
+              roleBadgeEl.textContent =
+                role +
+                (updated.courseLabel ? ' · ' + updated.courseLabel : '');
+            }
+
+            // Keep localStorage in sync for other pages
+            localStorage.setItem('firstName', givenName || '');
+            localStorage.setItem('lastName', familyName || '');
+            localStorage.setItem('role', role || '');
+            if (updated && updated.email) {
+              localStorage.setItem('email', updated.email);
+              if (emailEl) emailEl.value = updated.email;
+            }
+
+            // Disable fields again
+            inputs.forEach((i) => (i.disabled = true));
+            btn.textContent =
+              section === 'contact' ? 'Edit Contact' : 'Edit Information';
+            btn.classList.remove('saving');
+            showStatus('Profile saved.', 'success');
+          } catch (err) {
+            console.error('Failed to save profile:', err);
+            showStatus('Failed to save profile changes.', 'error');
+          }
+        });
+      });
+
+      // ---------------- Dynamic dashboard link based on role ----------------
+      if (backDashboard) {
+        backDashboard.addEventListener('click', function (e) {
+          e.preventDefault();
+          const role = localStorage.getItem('role');
+          if (role === 'professor') {
+            window.location.href = '/dashboards/professor.html';
+          } else if (role === 'Teaching Assistant') {
+            window.location.href = '/dashboards/ta.html';
+          } else if (role === 'team_lead') {
+            window.location.href = '/dashboards/team_lead.html';
+          } else {
+            window.location.href = '/dashboards/student.html';
+          }
+        });
+      }
+
+      // ---------------- Initial load ----------------
+      loadProfileFromBackend();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Staff Class Directory</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css">
+</head>
+<body>
+    <header>
+        <button id="back-btn">← Back</button>
+        <h2>STAFF CLASS DIRECTORY</h2>
+
+        <div class="course-info">
+            <div id="courseCode" class="course-line">--</div>
+            <div id="courseTerm" class="course-line">--</div>
+        </div>
+    </header>
+
+    <main class="page-layout">
+        <section class="class-summary card">
+            <div class="summary-text">
+                <p class="summary-eyebrow">Class Overview</p>
+                <h3 id="summaryTitle">Course Snapshot</h3>
+                <p id="courseDescription" class="summary-body">
+                    Welcome to your staff directory. Use this space to highlight expectations, logistics, or quick reminders for the course.
+                </p>
+            </div>
+            <div class="summary-tags">
+                <div class="summary-tag">
+                    <span class="tag-label">Current Term</span>
+                    <strong id="summaryTerm">--</strong>
+                </div>
+                <div class="summary-tag">
+                    <span class="tag-label">Support Staff</span>
+                    <strong id="summaryStaffCount">0</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="calendar-section card">
+            <div class="calendar-header">
+                <div>
+                    <h3>Course Calendar</h3>
+                    <p>Canvas-style deadlines with quick add/remove support.</p>
+                </div>
+                <button id="addGoogleCalBtn" class="google-btn">Add to Google Calendar</button>
+            </div>
+
+            <div id="calendar"></div>
+
+            <div class="event-management">
+                <form id="event-form" class="event-form">
+                    <h4>Add Deadline</h4>
+                    <label for="eventTitle">Title</label>
+                    <input type="text" id="eventTitle" placeholder="e.g., HW3 Draft" required>
+
+                    <label for="eventDescription">Details</label>
+                    <textarea id="eventDescription" rows="3" placeholder="Optional context"></textarea>
+
+                    <label for="eventType">Event Type</label>
+                    <select id="eventType">
+                        <option value="Lecture">Lecture</option>
+                        <option value="Lab">Lab</option>
+                        <option value="Discussion">Discussion</option>
+                        <option value="Assignment" selected>Assignment</option>
+                        <option value="Exam">Exam</option>
+                        <option value="Other">Other</option>
+                    </select>
+
+                    <label for="eventDueDate">Due Date</label>
+                    <input type="datetime-local" id="eventDueDate" required>
+
+                    <button type="submit">Save Event</button>
+                </form>
+
+                <div class="event-list">
+                    <div class="card-heading">
+                        <h4>Upcoming Deadlines</h4>
+                        <span class="card-subtitle">Tap calendar items to view/delete</span>
+                    </div>
+                    <div id="eventsList" class="event-items"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="directory-section">
+            <!-- Instructor Info Block -->
+            <div class="card staff-card">
+                <div class="card-heading with-actions">
+                    <div>
+                        <h3>Instructor Info</h3>
+                        <span class="card-subtitle">Loaded from /api/class_directory</span>
+                    </div>
+                    <!-- Add button removed for read-only view -->
+                </div>
+
+                <div id="instructorsList" class="staff-list"></div>
+
+                <!-- Instructor form removed for read-only view -->
+            </div>
+
+            <!-- Add TA Section -->
+            <div class="card staff-card">
+                <div class="card-heading with-actions">
+                    <div>
+                        <h3>TA Info</h3>
+                        <span class="card-subtitle">Updated via /api/class-directory/tas</span>
+                    </div>
+                    <!-- Add button removed for read-only view -->
+                </div>
+
+                <div id="tasList" class="staff-list"></div>
+
+                <!-- TA form removed for read-only view -->
+            </div>
+
+            <!-- Add Tutor Section -->
+            <div class="card staff-card">
+                <div class="card-heading with-actions">
+                    <div>
+                        <h3>Tutor Info</h3>
+                        <span class="card-subtitle">Updated via /api/class-directory/tutors</span>
+                    </div>
+                    <!-- Add button removed for read-only view -->
+                </div>
+
+                <div id="tutorsList" class="staff-list"></div>
+
+                <!-- Tutor form removed for read-only view -->
+            </div>
+
+            <!-- Team Section -->
+            <div class="card">
+                <div class="card-heading">
+                    <h3>Teams</h3>
+                    <span class="card-subtitle">Synced with /api/class-directory/teams</span>
+                </div>
+
+                <div id="teamsList" class="team-list"></div>
+
+                <!-- Team form removed for read-only view -->
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

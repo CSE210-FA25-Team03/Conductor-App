@@ -1,0 +1,20 @@
+---
+tools:
+  - name: eslint-8
+    enabled: true
+
+# Only care about backend code
+paths:
+  - "app/backend/**"
+
+# Things we *never* want Codacy to walk
+exclude_paths:
+  - "app/backend/node_modules/**"
+  - "app/backend/docs/**"
+  - "app/backend/coverage/**"
+  - "app/backend/tmp/**"
+  # belt-and-suspenders extra excludes:
+  - "node_modules/**"
+  - "docs/**"
+  - "coverage/**"
+  - "tmp/**"

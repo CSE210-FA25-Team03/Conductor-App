@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="formTitle">Group Formation | Member</title>
+  <link rel="stylesheet" href="group_member_form.css" />
+</head>
+<body>
+  <header class="top-nav">
+    <div class="brand">Conductor <span>App</span></div>
+    <div class="nav-actions">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+    </div>
+  </header>
+  <div class="container">
+    <section class="panel">
+      <h2 id="formHeader">Rate Your Skills</h2>
+      <form id="memberSkillForm">
+        <div id="skillsInputs"></div>
+        <button type="submit" class="primary-btn">Submit Ratings</button>
+      </form>
+    </section>
+    <div id="submitMessage" style="display:none; color:green; margin-top:1rem; text-align:center;">Submitted!</div>
+  </div>
+  <script src="group_member_form.js"></script>
+<script src="script.js"></script>
+<script>
+  // Profile dropdown logic
+  const profileImg = document.getElementById('dashboardProfileImg');
+  const dropdown = document.getElementById('profileDropdown');
+  if (profileImg && dropdown) {
+    profileImg.addEventListener('mouseenter', () => {
+      dropdown.style.display = 'block';
+    });
+    profileImg.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+      }, 150);
+    });
+    dropdown.addEventListener('mouseleave', () => {
+      dropdown.style.display = 'none';
+    });
+    dropdown.addEventListener('mouseenter', () => {
+      dropdown.style.display = 'block';
+    });
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.clear();
+      window.location.href = '/login';
+    });
+  }
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', function() {
+    var savedImg = localStorage.getItem('profileImg');
+    if (savedImg) {
+      var img1 = document.getElementById('dashboardProfileImg');
+      if (img1) img1.src = savedImg;
+    }
+  });
+</script>
+<script>
+  window.addEventListener('DOMContentLoaded', function() {
+    var firstName = localStorage.getItem('firstName') || 'Avery';
+    var lastName = localStorage.getItem('lastName') || 'Lin';
+    var role = localStorage.getItem('role') || 'Professor';
+    var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
+    if (document.getElementById('profName')) document.getElementById('profName').textContent = firstName + ' ' + lastName;
+    if (document.getElementById('profFullName')) document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
+    if (document.getElementById('profRole')) document.getElementById('profRole').textContent = role + ' · CSE 210';
+    if (document.getElementById('profRoleMeta')) document.getElementById('profRoleMeta').textContent = role;
+    if (document.getElementById('profEmail')) document.getElementById('profEmail').textContent = email;
+  });
+</script>
+<script>
+  // Dynamic dashboard link based on role
+  document.getElementById('backDashboard').addEventListener('click', function(e) {
+    e.preventDefault();
+    var role = localStorage.getItem('role');
+    if (role === 'professor') {
+      window.location.href = '/dashboards/professor.html';
+    } else if (role === 'Teaching Assistant') {
+      window.location.href = '/dashboards/ta.html';
+    } else if (role === 'team_lead') {
+      window.location.href = '/dashboards/team_lead.html';
+    } else {
+      window.location.href = '/dashboards/student.html';
+    }
+  });
+</script>
+</body>
+
+
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluation Journal | Conductor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top-nav">
+    <div class="brand">Conductor <span>App</span></div>
+    <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+      <div class="profile">
+        <a href="/profile_page/profile.html" class="profile-link">
+          <div class="profile-dropdown-container" style="position:relative;">
+            <img
+              id="dashboardProfileImg"
+              src="/assets/logo/user.png"
+              alt="Profile"
+              style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;"
+            />
+            <div
+              class="profile-dropdown"
+              id="profileDropdown"
+              style="
+                display:none;
+                position:absolute;
+                top:48px;
+                right:0;
+                background:#fff;
+                border:1px solid #ddd;
+                border-radius:8px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                min-width:140px;
+                z-index:10;
+              "
+            >
+              <a
+                href="/profile_page/profile.html"
+                style="display:block; padding:10px 16px; color:#222; text-decoration:none;"
+              >
+                Profile
+              </a>
+              <a
+                href="#"
+                id="logoutBtn"
+                style="display:block; padding:10px 16px; color:#d00; text-decoration:none;"
+              >
+                Log Out
+              </a>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="eval-container">
+    <!-- Page Title -->
+    <section class="eval-page-title">
+      <h1>Notes</h1>
+    </section>
+
+    <!-- Team Header -->
+    <section class="eval-header">
+      <div class="tag-box">Team #</div>
+    </section>
+
+    <!-- Main Layout -->
+    <div class="eval-main">
+      <!-- LEFT: Eval Cards -->
+      <section class="eval-cards">
+        <h2 id="cardsHeader">All Eval Cards (Group & Individual)</h2>
+
+        <div class="eval-cards-box" id="evalCardsBox">
+          <!-- Empty State Message -->
+          <div id="emptyMessage" class="empty-message">
+            <div>No cards yet</div>
+            <div class="empty-sub">Add your first note using the + button</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT: New Eval -->
+      <aside class="new-eval">
+        <div class="new-eval-header">
+          <h3>New Eval Note</h3>
+          <button id="addEvalBtn" class="add-plus-btn">+</button>
+        </div>
+
+        <div class="eval-field">
+          <label>To:</label>
+          <input type="text" id="toInput" placeholder="@student_or_team"/>
+        </div>
+
+        <div class="eval-field">
+          <label>Private Notes</label>
+          <textarea id="privateInput" placeholder="Private notes (only staff can see)"></textarea>
+        </div>
+
+        <div class="eval-field">
+          <label>Public Notes</label>
+          <textarea id="publicInput" placeholder="Notes visible to student"></textarea>
+        </div>
+
+        <!-- Sentiment -->
+        <div class="sentiment-section">
+          <h4>Sentiment Score</h4>
+          <!-- Simplified: rubric-only UI -->
+
+          <div class="rubric-panel" id="rubricPanel">
+            <div class="rubric-row">
+              <label>Independence & Leadership</label>
+              <input type="number" min="0" max="5" class="score-input"/>
+            </div>
+
+            <div class="rubric-row">
+              <label>Technical Contributions</label>
+              <input type="number" min="0" max="5" class="score-input"/>
+            </div>
+
+            <div class="rubric-row">
+              <label>Teamwork</label>
+              <input type="number" min="0" max="5" class="score-input"/>
+            </div>
+
+            <div class="sentiment-bar">
+              <div class="sentiment-fill" id="sentimentFill"></div>
+            </div>
+
+            <div class="rubric-summary">
+              Total Score: <span id="scoreTotal">0</span> / 15
+            </div>
+            <div class="rubric-status" id="sentimentStatus" style="margin-top:6px;font-weight:600;"></div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Work Journals -->
+    <section class="work-journals">
+      <h2 style="display:flex;align-items:center;gap:10px;">
+        Recent Work Journals
+      </h2>
+      <div class="wj-sec" id="wjSections">
+        <!-- Sections rendered by script.js -->
+      </div>
+    </section>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+      <div class="close-btn" id="closeModal">Close</div>
+
+      <div class="modal-content">
+        <div id="modalTo"></div>
+        <div id="modalTime"></div>
+        <div id="modalPrivate"></div>
+        <div id="modalPublic"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+
+  <!-- Profile dropdown + avatar -->
+  <script>
+    const profileImg = document.getElementById('dashboardProfileImg');
+    const dropdown = document.getElementById('profileDropdown');
+    if (profileImg && dropdown) {
+      profileImg.addEventListener('mouseenter', () => {
+        dropdown.style.display = 'block';
+      });
+      profileImg.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+          if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+        }, 150);
+      });
+      dropdown.addEventListener('mouseleave', () => {
+        dropdown.style.display = 'none';
+      });
+      dropdown.addEventListener('mouseenter', () => {
+        dropdown.style.display = 'block';
+      });
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = '/login';
+        });
+      }
+    }
+  </script>
+
+  <!-- Avatar image from localStorage -->
+  <script>
+    window.addEventListener('DOMContentLoaded', function() {
+      var savedImg = localStorage.getItem('profileImg');
+      if (savedImg) {
+        var img1 = document.getElementById('dashboardProfileImg');
+        if (img1) img1.src = savedImg;
+      }
+    });
+  </script>
+
+  <!-- Role-based back button -->
+  <script>
+    document.getElementById('backDashboard').addEventListener('click', function(e) {
+      e.preventDefault();
+      var role = localStorage.getItem('role');
+      if (role === 'professor') {
+        window.location.href = '/dashboards/professor.html';
+      } else if (role === 'Teaching Assistant') {
+        window.location.href = '/dashboards/ta.html';
+      } else if (role === 'team_lead') {
+        window.location.href = '/dashboards/team_lead.html';
+      } else {
+        window.location.href = '/dashboards/student.html';
+      }
+    });
+  </script>
+</body>
+</html>

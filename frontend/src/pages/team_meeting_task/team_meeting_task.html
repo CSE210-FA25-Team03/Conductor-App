@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="/assets/css/class-directory-nav.css" />
+  <script defer src="/assets/js/class-directory-nav.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Meetings & Tasks | Conductor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="top-nav">
+    <div class="brand">Conductor <span>App</span></div>
+    <div class="nav-actions">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+      <div class="profile">
+        <div class="profile-dropdown-container">
+          <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" />
+          <div class="profile-dropdown" id="profileDropdown">
+            <a href="/profile_page/profile.html">Profile</a>
+            <a href="#" id="logoutBtn">Log Out</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Error banner -->
+  <div
+    id="tmError"
+    style="
+      max-width:960px;
+      margin:0.75rem auto 0;
+      padding:0.5rem 0.75rem;
+      background:#fee2e2;
+      color:#b91c1c;
+      border-radius:4px;
+      font-size:0.9rem;
+      display:none;
+    "
+  ></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- TEAM LEADER VIEW SECTION -->
+    <section class="team-leader-section" id="teamLeadLeaderSection">
+      <article class="dashboard-card full-width-card">
+        <div class="card-icon">🧭</div>
+        <div class="card-content">
+          <h2>Team Meetings &amp; Tasks</h2>
+          <p class="card-description">
+            Schedule recurring meetings and group-specific tasks. Your teammates
+            will see these on their Calendar view.
+          </p>
+
+          <!-- Event Form (will hide for students) -->
+          <form class="leader-event-form" id="leaderEventForm">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="leaderEventTitle">Title</label>
+                <input
+                  type="text"
+                  id="leaderEventTitle"
+                  placeholder="Weekly standup, Sprint review..."
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="leaderEventType">Type</label>
+                <select id="leaderEventType">
+                  <option value="meeting">Meeting</option>
+                  <option value="task">Task / Deadline</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="leaderEventDateTime">First Occurrence</label>
+                <input type="datetime-local" id="leaderEventDateTime" required />
+              </div>
+              <div class="form-group checkbox-group">
+                <label>
+                  <input type="checkbox" id="leaderEventRepeatWeekly" />
+                  Repeat weekly
+                </label>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="leaderEventAudience">Audience tag</label>
+              <select id="leaderEventAudience">
+                <option value="team">Whole team</option>
+                <!-- Member options injected dynamically -->
+              </select>
+              <div id="audienceHelp" style="font-size:0.75rem;color:#555;margin-top:4px;display:none;"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="leaderEventDescription">Notes / who is it for</label>
+              <textarea
+                id="leaderEventDescription"
+                placeholder="Add notes or describe audience..."
+              ></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" id="leaderEventSaveBtn" class="card-btn">
+                Add Event
+              </button>
+            </div>
+          </form>
+
+          <!-- Group Events (visible for all roles) -->
+          <div class="group-events">
+            <h3>Group Events</h3>
+            <div id="leaderEventsList" class="events-list"></div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_BASE = '/api';
+
+      // ------------------ Helpers ------------------
+      async function fetchJSON(url, options = {}) {
+        const res = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' },
+          ...options,
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+        }
+
+        return res.json();
+      }
+
+      function showError(message) {
+        const box = document.getElementById('tmError');
+        if (!box) {
+          alert(message);
+          return;
+        }
+        box.textContent = message;
+        box.style.display = 'block';
+        setTimeout(() => {
+          box.style.display = 'none';
+        }, 4000);
+      }
+
+      // ------------------ Profile Dropdown ------------------
+      const profileImg = document.getElementById('dashboardProfileImg');
+      const dropdown = document.getElementById('profileDropdown');
+
+      if (profileImg && dropdown) {
+        profileImg.addEventListener('mouseenter', () =>
+          dropdown.classList.add('show'),
+        );
+        profileImg.addEventListener('mouseleave', () =>
+          setTimeout(() => {
+            if (!dropdown.matches(':hover')) dropdown.classList.remove('show');
+          }, 150),
+        );
+        dropdown.addEventListener('mouseleave', () =>
+          dropdown.classList.remove('show'),
+        );
+        dropdown.addEventListener('mouseenter', () =>
+          dropdown.classList.add('show'),
+        );
+      }
+
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = '/login';
+        });
+      }
+
+      // Saved profile image
+      const savedImg = localStorage.getItem('profileImg');
+      if (savedImg && profileImg) {
+        profileImg.src = savedImg;
+      }
+
+      // ------------------ Back-to-dashboard ------------------
+      const backDashboardBtn = document.getElementById('backDashboard');
+      if (backDashboardBtn) {
+        backDashboardBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const role = localStorage.getItem('role');
+          if (role === 'professor') {
+            window.location.href = '/dashboards/professor.html';
+          } else if (role === 'Teaching Assistant') {
+            window.location.href = '/dashboards/ta.html';
+          } else if (role === 'team_lead') {
+            window.location.href = '/dashboards/team_lead.html';
+          } else {
+            window.location.href = '/dashboards/student.html';
+          }
+        });
+      }
+
+      // ------------------ Role-based form visibility ------------------
+      const leaderEventForm = document.getElementById('leaderEventForm');
+      const eventsList = document.getElementById('leaderEventsList');
+
+      const role = (localStorage.getItem('role') || 'student').toLowerCase();
+      if (role === 'student' && leaderEventForm) {
+        leaderEventForm.style.display = 'none';
+      }
+
+      // ------------------ Render events ------------------
+      // Cache of members for active team
+      let activeTeamMembers = [];
+
+      function renderEvents(events) {
+        if (!eventsList) return;
+
+        eventsList.innerHTML = '';
+
+        if (!events || !events.length) {
+          eventsList.innerHTML =
+            '<p style="font-size:0.9rem;color:#777;">No team events yet.</p>';
+          return;
+        }
+
+        const sorted = events
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(a.startsAt || a.datetime || 0) -
+              new Date(b.startsAt || b.datetime || 0),
+          );
+
+        sorted.forEach((evt) => {
+          const div = document.createElement('div');
+          div.className = 'event-item';
+
+          const title = evt.title || 'Untitled Event';
+          const type = evt.type || 'meeting';
+          const startsAt = new Date(
+            evt.startsAt || evt.datetime || Date.now(),
+          ).toLocaleString();
+          const repeatWeekly = !!evt.repeatWeekly;
+          const audienceTag = evt.audienceTag || evt.audience || 'team';
+          let audienceLabel = 'Whole team';
+          if (audienceTag.startsWith('member:')) {
+            const email = audienceTag.slice('member:'.length).trim().toLowerCase();
+            const m = activeTeamMembers.find(x => x.email.toLowerCase() === email);
+            if (m) audienceLabel = `${m.name} (${m.email})`;
+            else audienceLabel = email;
+          }
+          const description = evt.description || '';
+
+          div.innerHTML = `
+            <strong>${title}</strong> - ${type}<br>
+            <small>${startsAt}${repeatWeekly ? ' (Repeats Weekly)' : ''}</small><br>
+            <small>Audience: ${audienceLabel}</small><br>
+            <p>${description}</p>
+          `;
+
+          eventsList.appendChild(div);
+        });
+      }
+
+      async function populateAudienceSelect() {
+        try {
+          const sel = document.getElementById('leaderEventAudience');
+          if (!sel) return;
+          // Clear existing member options
+          [...sel.querySelectorAll('option[data-member]')].forEach(o => o.remove());
+          if (!activeTeamMembers.length) return;
+          activeTeamMembers
+            .filter(m => !m.isLeader) // exclude leader from targeting if desired
+            .forEach(m => {
+              const opt = document.createElement('option');
+              opt.value = `member:${m.email}`;
+              opt.textContent = `${m.name} (${m.email})`;
+              opt.setAttribute('data-member', 'true');
+              sel.appendChild(opt);
+            });
+          const help = document.getElementById('audienceHelp');
+          if (help) {
+            help.style.display = 'block';
+            help.textContent = 'Select a teammate to target a private member-only event.';
+          }
+        } catch (e) {
+          console.warn('Audience select population failed', e);
+        }
+      }
+
+      async function loadTeamEvents() {
+        try {
+          // Need user email & optionally a selected team. For now fetch all user team events.
+          const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+          const email = currentUser.email || localStorage.getItem('email') || '';
+          // Ensure activeTeamId is set when user has exactly one team
+          const role = (localStorage.getItem('role') || '').toLowerCase();
+          // Always fetch teams to ensure members list is fresh (previous logic skipped if activeTeamId existed)
+          if (email) {
+            try {
+              const myTeamsRes = await fetch(`${API_BASE}/my-teams?email=${encodeURIComponent(email)}`);
+              if (myTeamsRes.ok) {
+                const myTeams = await myTeamsRes.json();
+                if (Array.isArray(myTeams) && myTeams.length) {
+                  // Preserve existing activeTeamId if still valid; else set first
+                  let activeId = localStorage.getItem('activeTeamId');
+                  if (!activeId || !myTeams.find(t => t.id === activeId)) {
+                    activeId = myTeams[0].id;
+                    localStorage.setItem('activeTeamId', activeId);
+                  }
+                  localStorage.setItem('teamLeadTeams', JSON.stringify(myTeams.map(t => t.id)));
+                  const activeTeam = myTeams.find(t => t.id === activeId) || myTeams[0];
+                  activeTeamMembers = Array.isArray(activeTeam?.members) ? activeTeam.members : [];
+                  populateAudienceSelect();
+                } else {
+                  activeTeamMembers = [];
+                  populateAudienceSelect();
+                  const help = document.getElementById('audienceHelp');
+                  if (help) {
+                    help.style.display = 'block';
+                    help.textContent = 'No team members found; verify team formation.';
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn('Failed to refresh teams for audience select', e);
+              activeTeamMembers = [];
+              populateAudienceSelect();
+              const help = document.getElementById('audienceHelp');
+              if (help) {
+                help.style.display = 'block';
+                help.textContent = 'Could not load team members (network or server issue).';
+              }
+            }
+          }
+          if (!email) {
+            renderEvents([]);
+            return;
+          }
+          const events = await fetchJSON(`${API_BASE}/team-events?email=${encodeURIComponent(email)}`);
+          renderEvents(Array.isArray(events) ? events : []);
+        } catch (err) {
+          console.error('Failed to load team meetings:', err);
+          showError('Failed to load team meetings.');
+          renderEvents([]);
+        }
+      }
+
+      // ------------------ Submit form (POST to backend) ------------------
+      if (leaderEventForm) {
+        leaderEventForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const titleEl = document.getElementById('leaderEventTitle');
+          const typeEl = document.getElementById('leaderEventType');
+          const dtEl = document.getElementById('leaderEventDateTime');
+          const repeatEl = document.getElementById('leaderEventRepeatWeekly');
+          const audienceEl = document.getElementById('leaderEventAudience');
+          const descEl = document.getElementById('leaderEventDescription');
+
+          const title = titleEl ? titleEl.value.trim() : '';
+          const type = typeEl ? typeEl.value : 'meeting';
+          const datetime = dtEl ? dtEl.value : '';
+          const repeatWeekly = repeatEl ? repeatEl.checked : false;
+          const audience = audienceEl ? audienceEl.value : 'team';
+          const description = descEl ? descEl.value.trim() : '';
+
+          if (!title || !datetime) {
+            showError('Please provide a title and first occurrence date/time.');
+            return;
+          }
+
+          const payload = {
+            teamId: localStorage.getItem('activeTeamId') || (localStorage.getItem('teamLeadTeams') ? JSON.parse(localStorage.getItem('teamLeadTeams'))[0] : ''),
+            email: (JSON.parse(localStorage.getItem('currentUser') || '{}').email || localStorage.getItem('email') || '').trim(),
+            title,
+            type,
+            startsAt: datetime,
+            repeatWeekly,
+            audience,
+            description,
+          };
+
+          if (!payload.teamId) {
+            showError('No team context found. Open My Teams first to set context.');
+            return;
+          }
+          if (!payload.email) {
+            showError('No user email found (login required).');
+            return;
+          }
+
+          try {
+            await fetchJSON(`${API_BASE}/team-events`, {
+              method: 'POST',
+              body: JSON.stringify(payload),
+            });
+
+            leaderEventForm.reset();
+            await loadTeamEvents();
+          } catch (err) {
+            console.error('Failed to create team meeting:', err);
+            showError('Failed to create team event. Please try again.');
+          }
+        });
+      }
+
+      // ------------------ Initial load ------------------
+      loadTeamEvents();
+    });
+  </script>
+</body>
+</html>
