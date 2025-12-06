@@ -275,3 +275,55 @@
         transform: translateY(0);
     }
 }
+
+
+@media (max-width: 500px) {
+
+    /* Stack story list above board */
+    .story-layout {
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    /* Story list adapts to full width */
+    .story-list {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .story-item {
+        flex: 1 1 calc(50% - 10px); /* 2 per row on mobile */
+        min-width: 140px;
+    }
+
+    .story-add-btn {
+        flex: 1 1 100%;
+    }
+
+    /* Board wrapper shrinks properly */
+    .task-board-wrapper {
+        width: 100% !important;
+        padding: 12px;
+        box-sizing: border-box;
+    }
+
+    /* Columns stack vertically */
+    .task-board {
+        flex-direction: column;
+        gap: 16px;
+        width: 90%;
+    }
+
+    .task-column {
+        width: 100%;
+    }
+
+    /* Task card responsiveness */
+    .task-card {
+        width: 100%;
+    }
+
+  
+}
