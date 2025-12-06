@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 
 <head>
+    <link rel="stylesheet" href="../../../assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
     <script defer src="/assets/js/class-directory-nav.js"></script>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
     <title>Team Task Tracker | Conductor</title>
     <link rel="stylesheet" href="/dashboards/style.css" />
     <link rel="stylesheet" href="style.css" />
@@ -17,7 +19,8 @@
         
         <!-- Header -->
         <header class="top-nav">
-            <div class="brand">Conductor <span>App</span></div>
+            <!-- <div class="brand">Conductor <span>App</span></div> -->
+        
 
             <div class="nav-actions">
                 <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
@@ -41,14 +44,19 @@
             </div>
         </header>
 
+
+        <div style="display:flex; gap:12px; align-items:center;">
+            <button id="githubConfigBtn" class="github-btn" style="padding:8px 16px; background:#24292e; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">GitHub Config</button>
+            <button id="githubSyncBtn" class="github-btn" style="padding:8px 16px; background:#28a745; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">Sync GitHub</button>
+            <!-- NEW -->
+            <button id="githubPushBtn" class="github-btn" style="padding:8px 16px; background:#0366d6; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">🔄 Update</button>
+        </div>
+
+
         <!-- Page Title -->
         <section class="dashboard-header">
             <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
                 <h1>Task Tracker</h1>
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <button id="githubConfigBtn" class="github-btn" style="padding:8px 16px; background:#24292e; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">⚙️ GitHub Config</button>
-                    <button id="githubSyncBtn" class="github-btn" style="padding:8px 16px; background:#28a745; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">🔄 Sync GitHub</button>
-                </div>
             </div>
         </section>
 
@@ -103,19 +111,43 @@
             </div>
             
             <div style="margin-bottom:16px;">
-                <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Owner:</label>
-                <input type="text" id="githubOwner" placeholder="e.g., octocat" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-            </div>
-            
-            <div style="margin-bottom:16px;">
-                <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Name:</label>
-                <input type="text" id="githubRepo" placeholder="e.g., Hello-World" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-            </div>
-            
-            <div style="margin-bottom:16px;">
-                <label style="display:block; margin-bottom:6px; font-weight:600;">Personal Access Token (optional):</label>
+                <label style="display:block; margin-bottom:6px; font-weight:600;">Personal Access Token:</label>
                 <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-                <small style="color:#666; font-size:12px;">Required for private repos. Create one at: github.com/settings/tokens</small>
+                <small style="color:#666; font-size:12px;">Required for Projects API. Create one at: github.com/settings/tokens (needs 'repo' and 'read:project' scopes)</small>
+            </div>
+
+            <div style="margin-bottom:20px; padding:12px; background:#f5f5f5; border-radius:6px;">
+                <strong style="display:block; margin-bottom:8px;">Option 1: GitHub Organization Project (Recommended)</strong>
+                <div style="margin-bottom:12px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:600;">Organization Name:</label>
+                    <input type="text" id="githubOrgName" placeholder="e.g., CSE210-FA25-Team03" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:600;">Project Number:</label>
+                    <input type="number" id="githubProjectNumber" placeholder="e.g., 1" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                    <small style="color:#666; font-size:12px;">Found in project URL: github.com/orgs/ORG_NAME/projects/NUMBER</small>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px; padding:12px; background:#f5f5f5; border-radius:6px;">
+                <strong style="display:block; margin-bottom:8px;">Option 2: Direct Project ID</strong>
+                <div style="margin-bottom:8px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:600;">GitHub Project ID:</label>
+                    <input type="text" id="githubProjectId" placeholder="PVT_kwHOA..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                    <small style="color:#666; font-size:12px;">Direct Project ID (alternative to org/project number)</small>
+                </div>
+            </div>
+
+            <div style="margin-bottom:20px; padding:12px; background:#f5f5f5; border-radius:6px;">
+                <strong style="display:block; margin-bottom:8px;">Option 3: Repository Issues (Fallback)</strong>
+                <div style="margin-bottom:12px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Owner:</label>
+                    <input type="text" id="githubOwner" placeholder="e.g., octocat" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                </div>
+                <div style="margin-bottom:8px;">
+                    <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Name:</label>
+                    <input type="text" id="githubRepo" placeholder="e.g., Hello-World" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                </div>
             </div>
             
             <div id="githubConfigStatus" class="status-message" style="display:none; padding:12px; border-radius:6px; margin-bottom:16px;"></div>

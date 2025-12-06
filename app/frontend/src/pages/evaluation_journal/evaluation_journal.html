@@ -1,29 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile | Conductor</title>
+  <link rel="stylesheet" href="../../../assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
+  <title>Evaluation Journal | Conductor</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header class="top-nav">
-        <div class="brand">Conductor <span>App</span></div>
-        <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
-            <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
-            <div class="profile">
-                <a href="/profile_page/profile.html" class="profile-link">
-                    <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
-                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
-                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
-                        </div>
-                    </div>
-                </a>
+  <header class="top-nav">
+    <div class="brand">
+                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    </div>
+
+    <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+      <div class="profile">
+        <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
+          <div class="profile-dropdown-container" style="position:relative;">
+            <img
+              id="dashboardProfileImg"
+              src="/assets/logo/user.png"
+              alt="Profile"
+              style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;"
+            />
+            <div
+              class="profile-dropdown"
+              id="profileDropdown"
+              style="
+                display:none;
+                position:absolute;
+                top:48px;
+                right:0;
+                background:#fff;
+                border:1px solid #ddd;
+                border-radius:8px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                min-width:140px;
+                z-index:10;
+              "
+            >
+              <a
+                href="/profile_page/profile.html"
+                style="display:block; padding:10px 16px; color:#222; text-decoration:none;"
+              >
+                Profile
+              </a>
+              <a
+                href="#"
+                id="logoutBtn"
+                style="display:block; padding:10px 16px; color:#d00; text-decoration:none;"
+              >
+                Log Out
+              </a>
             </div>
-        </div>
-    </header>
+          </div>
+        <!-- </a> -->
+      </div>
+    </div>
+  </header>
+
   <div class="eval-container">
     <!-- Page Title -->
     <section class="eval-page-title">
@@ -37,21 +75,28 @@
 
     <!-- Main Layout -->
     <div class="eval-main">
+      <!-- Mobile Tab Bar -->
+      <div class="mobile-tab-bar" id="mobileTabBar">
+        <button class="mobile-tab active" data-tab="eval-cards">All Eval Cards</button>
+        <button class="mobile-tab" data-tab="new-eval">New Eval Note</button>
+        <button class="mobile-tab" data-tab="work-journals">Recent Work Journals</button>
+      </div>
+
       <!-- LEFT: Eval Cards -->
-      <section class="eval-cards">
+      <section class="eval-cards mobile-tab-content" data-tab="eval-cards">
         <h2 id="cardsHeader">All Eval Cards (Group & Individual)</h2>
 
         <div class="eval-cards-box" id="evalCardsBox">
           <!-- Empty State Message -->
           <div id="emptyMessage" class="empty-message">
             <div>No cards yet</div>
-            <div class="empty-sub">Add your first note using the + button</div>
+            <div class="empty-sub">Add your first note by creating a new eval note</div>
           </div>
         </div>
       </section>
 
       <!-- RIGHT: New Eval -->
-      <aside class="new-eval">
+      <aside class="new-eval mobile-tab-content" data-tab="new-eval">
         <div class="new-eval-header">
           <h3>New Eval Note</h3>
           <button id="addEvalBtn" class="add-plus-btn">+</button>
@@ -60,11 +105,6 @@
         <div class="eval-field">
           <label>To:</label>
           <input type="text" id="toInput" placeholder="@student_or_team"/>
-        </div>
-
-        <div class="eval-field">
-          <label>Time / Date</label>
-          <div class="date-display" id="dateDisplay"></div>
         </div>
 
         <div class="eval-field">
@@ -80,17 +120,7 @@
         <!-- Sentiment -->
         <div class="sentiment-section">
           <h4>Sentiment Score</h4>
-
-          <div class="emoji-row">
-            <span class="emoji-icon">=D</span>
-            <span class="emoji-icon">-_-</span>
-            <span class="emoji-icon">:[</span>
-          </div>
-
-          <div class="sentiment-toggle">
-            <button id="modeDefault" class="mode-btn active">Default</button>
-            <button id="modeRubric" class="mode-btn">Rubric</button>
-          </div>
+          <!-- Simplified: rubric-only UI -->
 
           <div class="rubric-panel" id="rubricPanel">
             <div class="rubric-row">
@@ -115,15 +145,20 @@
             <div class="rubric-summary">
               Total Score: <span id="scoreTotal">0</span> / 15
             </div>
+            <div class="rubric-status" id="sentimentStatus" style="margin-top:6px;font-weight:600;"></div>
           </div>
         </div>
       </aside>
     </div>
 
     <!-- Work Journals -->
-    <section class="work-journals">
-      <h2>Recent Work Journals (Group / Individual)</h2>
-      <div class="work-journal-box" id="workJournalBox"></div>
+    <section class="work-journals mobile-tab-content" data-tab="work-journals">
+      <h2 style="display:flex;align-items:center;gap:10px;">
+        Recent Work Journals
+      </h2>
+      <div class="wj-sec" id="wjSections">
+        <!-- Sections rendered by script.js -->
+      </div>
     </section>
   </div>
 
@@ -142,8 +177,9 @@
   </div>
 
   <script src="script.js"></script>
+
+  <!-- Profile dropdown + avatar -->
   <script>
-    // Profile dropdown logic
     const profileImg = document.getElementById('dashboardProfileImg');
     const dropdown = document.getElementById('profileDropdown');
     if (profileImg && dropdown) {
@@ -161,13 +197,18 @@
       dropdown.addEventListener('mouseenter', () => {
         dropdown.style.display = 'block';
       });
-      document.getElementById('logoutBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        localStorage.clear();
-        window.location.href = '/login';
-      });
+      const logoutBtn = document.getElementById('logoutBtn');
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = '/login';
+        });
+      }
     }
   </script>
+
+  <!-- Avatar image from localStorage -->
   <script>
     window.addEventListener('DOMContentLoaded', function() {
       var savedImg = localStorage.getItem('profileImg');
@@ -177,21 +218,9 @@
       }
     });
   </script>
+
+  <!-- Role-based back button -->
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
-      var firstName = localStorage.getItem('firstName') || 'Avery';
-      var lastName = localStorage.getItem('lastName') || 'Lin';
-      var role = localStorage.getItem('role') || 'Professor';
-      var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
-      if (document.getElementById('profName')) document.getElementById('profName').textContent = firstName + ' ' + lastName;
-      if (document.getElementById('profFullName')) document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
-            if (document.getElementById('profRole')) document.getElementById('profRole').textContent = role + ' · CSE 210';
-      if (document.getElementById('profRoleMeta')) document.getElementById('profRoleMeta').textContent = role;
-      if (document.getElementById('profEmail')) document.getElementById('profEmail').textContent = email;
-    });
-  </script>
-  <script>
-    // Dynamic dashboard link based on role
     document.getElementById('backDashboard').addEventListener('click', function(e) {
       e.preventDefault();
       var role = localStorage.getItem('role');
@@ -203,6 +232,47 @@
         window.location.href = '/dashboards/team_lead.html';
       } else {
         window.location.href = '/dashboards/student.html';
+      }
+    });
+  </script>
+
+  <!-- Mobile Tab Switching -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const tabBar = document.getElementById('mobileTabBar');
+      const tabs = document.querySelectorAll('.mobile-tab');
+      const tabContents = document.querySelectorAll('.mobile-tab-content');
+
+      // Only enable tab switching on mobile
+      if (window.innerWidth <= 768 && tabBar) {
+        tabs.forEach(tab => {
+          tab.addEventListener('click', function() {
+            const targetTab = this.getAttribute('data-tab');
+
+            // Remove active class from all tabs and contents
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to clicked tab and corresponding content
+            this.classList.add('active');
+            const targetContent = document.querySelector(`.mobile-tab-content[data-tab="${targetTab}"]`);
+            if (targetContent) {
+              targetContent.classList.add('active');
+            }
+          });
+        });
+
+        // Show first tab by default
+        if (tabs.length > 0 && tabContents.length > 0) {
+          tabs[0].classList.add('active');
+          tabContents[0].classList.add('active');
+        }
+      } else {
+        // Desktop: show all content
+        tabContents.forEach(content => {
+          content.style.display = '';
+          content.classList.add('active');
+        });
       }
     });
   </script>

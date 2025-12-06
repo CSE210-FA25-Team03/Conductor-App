@@ -1,16 +1,83 @@
 // class_config.js
 
 // Utility: show/hide element
-function show(el) { el.style.display = 'block'; el.setAttribute('aria-hidden', 'false'); }
-function hide(el) { el.style.display = 'none'; el.setAttribute('aria-hidden', 'true'); }
+function show(el) {
+  el.style.display = 'block';
+  el.setAttribute('aria-hidden', 'false');
+}
+function hide(el) {
+  el.style.display = 'none';
+  el.setAttribute('aria-hidden', 'true');
+}
 
 document.addEventListener('DOMContentLoaded', () => {
+  const API_BASE = '/api';
+
+  async function fetchJSON(url, options = {}) {
+    const res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+    }
+
+    return res.json();
+  }
+
+  function setStatus(el, message, color = '') {
+    if (!el) return;
+    el.textContent = message;
+    el.style.color = color || '';
+  }
+
+  // Lightweight toast (shared style similar to Class Directory)
+  function ensureToast() {
+    let t = document.getElementById('cfg-toast');
+    if (t) return t;
+    t = document.createElement('div');
+    t.id = 'cfg-toast';
+    t.style.position = 'fixed';
+    t.style.left = '50%';
+    t.style.top = '24px';
+    t.style.transform = 'translateX(-50%)';
+    t.style.maxWidth = '520px';
+    t.style.width = 'calc(100% - 32px)';
+    t.style.padding = '12px 16px';
+    t.style.borderRadius = '8px';
+    t.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+    t.style.fontWeight = '500';
+    t.style.zIndex = '1000';
+    t.style.display = 'none';
+    document.body.appendChild(t);
+    return t;
+  }
+
+  function showToast(message, type = 'info') {
+    const t = ensureToast();
+    t.textContent = message;
+    const isError = type === 'error';
+    const isSuccess = type === 'success';
+    t.style.background = isError ? '#fee2e2' : isSuccess ? '#dcfce7' : '#f3f4f6';
+    t.style.color = isError ? '#991b1b' : isSuccess ? '#065f46' : '#111827';
+    t.style.border = isError ? '1px solid #fca5a5' : isSuccess ? '1px solid #86efac' : '1px solid #e5e7eb';
+    t.style.display = 'block';
+    clearTimeout(showToast._timer);
+    showToast._timer = setTimeout(() => {
+      t.style.display = 'none';
+    }, 2500);
+  }
+
+  /* ----------------------------------------------------------
+     Profile dropdown / navigation
+  ---------------------------------------------------------- */
   const profileImg = document.getElementById('dashboardProfileImg');
   const dropdown = document.getElementById('profileDropdown');
   const logoutBtn = document.getElementById('logoutBtn');
   const backDashboard = document.getElementById('backDashboard');
 
-  // Profile dropdown: show on hover, toggle on click for accessibility
   let dropdownTimeout = null;
   if (profileImg && dropdown) {
     profileImg.addEventListener('mouseenter', () => {
@@ -30,7 +97,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     profileImg.addEventListener('click', (e) => {
       e.preventDefault();
-      if (dropdown.style.display === 'block') hide(dropdown); else show(dropdown);
+      if (dropdown.style.display === 'block') hide(dropdown);
+      else show(dropdown);
     });
   }
 
@@ -38,17 +106,33 @@ document.addEventListener('DOMContentLoaded', () => {
     logoutBtn.addEventListener('click', (e) => {
       e.preventDefault();
       localStorage.clear();
-      // go to login (adjust path as needed)
       window.location.href = '/login';
     });
   }
 
-  // Back to dashboard routing by role
   if (backDashboard) {
     backDashboard.addEventListener('click', (e) => {
       e.preventDefault();
-      const role = (localStorage.getItem('role') || '').toLowerCase();
-      if (role === 'professor' || role === 'prof') {
+
+      // Prefer canonical role from currentUser, fall back to legacy localStorage.role
+      let role = '';
+      try {
+        const cuRaw = localStorage.getItem('currentUser');
+        if (cuRaw) {
+          const cu = JSON.parse(cuRaw);
+          if (cu && cu.role) {
+            role = String(cu.role).toLowerCase();
+          }
+        }
+      } catch {
+        // ignore
+      }
+
+      if (!role) {
+        role = (localStorage.getItem('role') || '').toLowerCase();
+      }
+
+      if (role === 'professor') {
         window.location.href = '/dashboards/professor.html';
       } else if (role === 'teaching assistant' || role === 'ta') {
         window.location.href = '/dashboards/ta.html';
@@ -60,21 +144,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Prefill profile image from localStorage if present
   const savedImg = localStorage.getItem('profileImg');
   if (savedImg && profileImg) profileImg.src = savedImg;
 
-  // Roster handling
+  /* ----------------------------------------------------------
+     Roster upload (CSV -> backend)
+     (unchanged logic; just decoupled from course description)
+  ---------------------------------------------------------- */
   const classFileInput = document.getElementById('classRosterFile');
   const staffFileInput = document.getElementById('staffRosterFile');
   const uploadBtn = document.getElementById('uploadRostersBtn');
   const rosterStatus = document.getElementById('rosterStatus');
 
-  let parsedClassRoster = null;
-  let parsedStaffRoster = null;
-
   function readCsvFile(file, onSuccess, onError) {
-    if (!file) { onError('No file selected'); return; }
+    if (!file) {
+      onError('No file selected');
+      return;
+    }
     if (!file.name.toLowerCase().endsWith('.csv')) {
       onError('Please upload a .csv file');
       return;
@@ -82,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const reader = new FileReader();
     reader.onload = () => {
       const text = reader.result;
-      // Basic sanity check: ensure at least one comma and one newline
       if (!text.includes(',') || !text.includes('\n')) {
         onError('File does not look like CSV (missing commas/newlines).');
         return;
@@ -93,82 +178,179 @@ document.addEventListener('DOMContentLoaded', () => {
     reader.readAsText(file);
   }
 
-  uploadBtn.addEventListener('click', async (e) => {
-    e.preventDefault();
-    rosterStatus.textContent = '';
-    const classFile = classFileInput.files[0];
-    const staffFile = staffFileInput.files[0];
+  if (uploadBtn) {
+    uploadBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      setStatus(rosterStatus, '', '');
 
-    if (!classFile && !staffFile) {
-      rosterStatus.textContent = 'Select at least one roster to upload.';
-      return;
-    }
+      const classFile = classFileInput?.files?.[0] || null;
+      const staffFile = staffFileInput?.files?.[0] || null;
 
-    rosterStatus.textContent = 'Processing...';
+      if (!classFile && !staffFile) {
+        setStatus(
+          rosterStatus,
+          'Select at least one roster to upload.',
+          '#b45309',
+        );
+        return;
+      }
 
-    const promises = [];
+      setStatus(rosterStatus, 'Reading files...', '');
 
-    if (classFile) {
-      promises.push(new Promise((resolve) => {
-        readCsvFile(classFile, (text) => {
-          parsedClassRoster = text;
-          resolve({ type: 'class', ok: true, rows: text.split(/\r?\n/).filter(Boolean).length - 1 });
-        }, (err) => {
-          resolve({ type: 'class', ok: false, error: err });
+      let classCsv = null;
+      let staffCsv = null;
+      const errors = [];
+
+      const promises = [];
+
+      if (classFile) {
+        promises.push(
+          new Promise((resolve) => {
+            readCsvFile(
+              classFile,
+              (text) => {
+                classCsv = text;
+                resolve();
+              },
+              (err) => {
+                errors.push(`student roster: ${err}`);
+                resolve();
+              },
+            );
+          }),
+        );
+      }
+
+      if (staffFile) {
+        promises.push(
+          new Promise((resolve) => {
+            readCsvFile(
+              staffFile,
+              (text) => {
+                staffCsv = text;
+                resolve();
+              },
+              (err) => {
+                errors.push(`staff roster: ${err}`);
+                resolve();
+              },
+            );
+          }),
+        );
+      }
+
+      await Promise.all(promises);
+
+      if (errors.length) {
+        setStatus(
+          rosterStatus,
+          `Upload finished with errors: ${errors.join(' • ')}`,
+          '#b45309',
+        );
+        return;
+      }
+
+      // Send CSV content to backend
+      try {
+        setStatus(rosterStatus, 'Uploading to server...', '');
+        const body = {
+          classRosterCsv: classCsv,
+          staffRosterCsv: staffCsv,
+        };
+
+        const result = await fetchJSON(`${API_BASE}/courses/rosters`, {
+          method: 'POST',
+          body: JSON.stringify(body),
         });
-      }));
-    }
 
-    if (staffFile) {
-      promises.push(new Promise((resolve) => {
-        readCsvFile(staffFile, (text) => {
-          parsedStaffRoster = text;
-          resolve({ type: 'staff', ok: true, rows: text.split(/\r?\n/).filter(Boolean).length - 1 });
-        }, (err) => {
-          resolve({ type: 'staff', ok: false, error: err });
-        });
-      }));
-    }
+        // Expecting something like:
+        // { classRows: number, staffRows: number }
+        const parts = [];
+        if (typeof result.classRows === 'number') {
+          parts.push(`students(${result.classRows} rows)`);
+        }
+        if (typeof result.staffRows === 'number') {
+          parts.push(`staff(${result.staffRows} rows)`);
+        }
 
-    const results = await Promise.all(promises);
-    const errors = results.filter(r => !r.ok);
-    if (errors.length) {
-      rosterStatus.textContent = `Upload finished with errors: ${errors.map(e => `${e.type}: ${e.error}`).join('; ')}`;
-      rosterStatus.style.color = '#b45309'; // amber
-      return;
-    }
+        setStatus(
+          rosterStatus,
+          `Upload successful: ${parts.join(' • ') || 'no rows detected'}`,
+          '',
+        );
+      } catch (err) {
+        console.error('Failed to upload rosters:', err);
+        setStatus(
+          rosterStatus,
+          'Failed to upload rosters to server. Please try again.',
+          '#b91c1c',
+        );
+      }
+    });
+  }
 
-    rosterStatus.style.color = ''; // reset
-    rosterStatus.textContent = `Upload successful: ${results.map(r => `${r.type}(${r.rows} rows)`).join(' • ')}`;
-  });
-
-  // Create course button
-  const createBtn = document.getElementById('createCourseBtn');
-  const createStatus = document.getElementById('createCourseStatus');
+  /* ----------------------------------------------------------
+     Course description: load + save
+     (no dependency on roster upload anymore)
+  ---------------------------------------------------------- */
+  const saveDescBtn = document.getElementById('saveDescriptionBtn');
+  const descStatus = document.getElementById('courseDescriptionStatus');
   const courseDesc = document.getElementById('courseDescription');
 
-  createBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    createStatus.textContent = '';
-
-    // Basic validation: course description non-empty and at least one roster uploaded
-    const desc = (courseDesc.value || '').trim();
-    if (!desc) {
-      createStatus.textContent = 'Please enter a course description.';
-      createStatus.style.color = '#b45309';
-      return;
+  async function loadExistingCourseDescription() {
+    if (!courseDesc) return;
+    try {
+      const course = await fetchJSON(`/api/class-directory/course`);
+      const desc = (course && course.description) || '';
+      if (typeof desc === 'string') {
+        courseDesc.value = desc;
+      }
+    } catch (err) {
+      // Not fatal, just log
+      console.warn('No existing course description found:', err);
     }
-    if (!parsedClassRoster && !parsedStaffRoster) {
-      createStatus.textContent = 'Please upload at least one roster before creating the course.';
-      createStatus.style.color = '#b45309';
-      return;
-    }
+  }
 
-    // Simulate successful creation (replace with fetch/ajax to server in real app)
-    createStatus.style.color = '';
-    createStatus.textContent = 'Course created successfully.';
-    // Example: store course description in localStorage (for demo purposes)
-    localStorage.setItem('lastCourseDescription', desc);
-  });
+  if (saveDescBtn) {
+    saveDescBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      setStatus(descStatus, '', '');
 
+      const desc = (courseDesc?.value || '').trim();
+      if (!desc) {
+        setStatus(
+          descStatus,
+          'Please enter a course description before saving.',
+          '#b45309',
+        );
+        return;
+      }
+
+      try {
+        // setStatus(descStatus, 'Saving course description...', '');
+        const result = await fetchJSON(`/api/class-directory/course/description`, {
+          method: 'PUT',
+          body: JSON.stringify({ description: desc }),
+        });
+
+        // If API returns refreshed overview, use it to update field
+        if (result && result.course && typeof result.course.description === 'string') {
+          courseDesc.value = result.course.description;
+        }
+        setStatus(descStatus, 'Course description saved.', '');
+        showToast('Course description saved', 'success');
+      } catch (err) {
+        console.error('Failed to save course description:', err);
+        // setStatus(
+        //   descStatus,
+        //   'Failed to save course description. Please try again.',
+        //   '#b91c1c',
+        // );
+        showToast('Failed to save course description', 'error');
+      }
+    });
+  }
+
+  // Initial load of existing course description (if any)
+  loadExistingCourseDescription();
 });

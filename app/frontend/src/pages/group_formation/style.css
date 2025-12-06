@@ -63,14 +63,25 @@ body {
     margin-bottom: 2.2rem;
 }
 
-.brand {
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #2a3a5e;
+.logo-full {
+    display: block;
+    height: 6rem;
 }
-.brand span {
-    color: var(--accent);
-    font-weight: 700;
+
+.logo-mini {
+    display: none;
+}
+
+
+@media (max-width: 500px) {
+    .logo-full {
+        display: none ;
+    }
+
+    .logo-mini {
+        display: block ;
+        height: 2rem;
+    }
 }
 
 
@@ -197,14 +208,17 @@ input {
 .save-btn {
   margin-top: 1rem;
   padding: 10px 20px;
-  background: #4caf50;
+  background: #2563eb;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
 }
+
 .save-btn:hover {
-  background: #429b46;
+  background-color: #1d4ed8;
 }
 
 .data-table {

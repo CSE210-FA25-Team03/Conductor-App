@@ -1,24 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 <head>
+    <link rel="stylesheet" href="../../../assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
     <script defer src="/assets/js/class-directory-nav.js"></script>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
     <title>Team Lead Dashboard | Conductor</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="teamlead.css" />
 </head>
 
 <body>
     <div class="page" data-role="team-lead">
         <header class="top-nav">
-            <div class="brand">Conductor <span>App</span></div>
+            <div class="brand">
+                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+
+            </div>
             <div class="nav-actions">
+                <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
+                    Teams Meetings and Tasks
+                </a>
+                <a href="/group_formation/student_group_form.html?role=team_lead" class="nav-btn eval-btn">
+                    Group Formation Form
+                </a>
+
                 <div class="profile">
                     <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" 
+                        <img id="dashboard-profile-img" src="/assets/logo/user.png" 
                              alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
                         <div class="profile-dropdown" id="profileDropdown"
                              style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
@@ -33,190 +45,193 @@
         <section class="dashboard-header">
             <div>
                 <h1>Team Lead Dashboard</h1>
-                <small>Team Beacon · Weekly rituals</small>
             </div>
         </section>
 
-        <!-- Two-Column Layout: Left (Cards) + Right (FAQ) -->
-         <!-- Two-Column Layout: Left (Cards) + Right (FAQ) -->
-        <section class="teamlead-content-wrapper">
-            <!-- LEFT COLUMN: Stacked Cards -->
-            <div class="teamlead-left-column">
-                <!-- Class Directory Card -->
-                <article class="dashboard-card">
-                    <div class="card-icon">📚</div>
-                    <div class="card-content">
-                        <h2>Class Directory</h2>
-                        <p>Browse your course overview, roster, and calendar in one place.</p>
-                        <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
-                    </div>
-                </article>
+        <section class="content-grid">
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="directory_icon.png" alt="Directory Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Class Directory</h2>
+                    <p>Browse your course overview, roster, and assignments</p>
+                    <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
+                </div>
+            </article>
 
-                <!-- Submit Ticket Card -->
-                <article class="dashboard-card">
-                    <div class="card-icon">🎫</div>
-                    <div class="card-content">
-                        <h2>Submit Support Ticket</h2>
-                        <p>Report issues, request assistance, or submit feedback to course staff.</p>
-                        <button id="viewTicketBtn" class="card-btn">Create Ticket</button>
-                    </div>
-                </article>
-            </div>
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="team_icon.png" alt="Team Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>My Teams</h2>
+                    <p>View insights of your team's tasks, progress, and collaboration</p>
+                    <button class="card-btn" id="viewTeamsBtn">View Teams</button>
+                </div>
+            </article>
 
-            <!-- RIGHT COLUMN: FAQ Section -->
-            <aside class="teamlead-right-column">
-                <section class="faq-section">
-                    <h3>Frequently Asked Questions</h3>
-                    <div class="faq-container">
-                        <!-- FAQ Item 1 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">What are my responsibilities as a Team Lead?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>As a Team Lead, you're responsible for coordinating team meetings, tracking team tasks, managing group formation, and submitting weekly evaluations. You also facilitate communication between your team and the course instructor.</p>
-                            </div>
-                        </div>
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="task_tracker_icon.png" alt="Task Tracker Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Team Task Tracker</h2>
+                    <p>Highlight priority tasks and keep owners aligned.</p>
+                    <button id="viewTasksBtn" class="card-btn">View Tasks</button>
+                </div>
+            </article>
 
-                        <!-- FAQ Item 2 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I access the Class Directory?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>Click the "Go to Class Directory" button on this dashboard. You can view the course roster, instructor information, meeting schedule, and all relevant class resources in one place.</p>
-                            </div>
-                        </div>
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="Work Journal.png" alt="Work Journal Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Work Journal</h2>
+                    <p>Create, organize, or review your meeting notes and class discussions.</p>
+                    <button id="viewWorkJournalBtn" class="card-btn">Open Notes</button>
+                </div>
+            </article>
 
-                        <!-- FAQ Item 3 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I submit a support ticket?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>Click the "Create Ticket" button on this dashboard. Fill out the ticket form with details about your issue, question, or feedback. The course instructor and teaching assistants will review and respond within 24-48 hours.</p>
-                            </div>
-                        </div>
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="eval_journal_icon.PNG" alt="Eval Journal Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Evaluation Journal</h2>
+                    <p>Review performance metrics and grading insights of your team</p>
+                    <button id="viewEvalJournalBtn" class="card-btn">Open Journal</button>
+                </div>
+            </article>
 
-                        <!-- FAQ Item 4 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I schedule team meetings and track tasks?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>Use the Teams Meetings and Tasks button in the navigation bar. You can schedule meetings, assign tasks to team members, set deadlines, and track completion status. Share the meeting link with your team.</p>
-                            </div>
-                        </div>
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="weekly_eval_icon.png" alt="Weekly Eval Feedback Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Weekly Evaluation</h2>
+                    <p>Set the mood score and collect direct quotes for each week.</p>
+                    <button class="card-btn evaluation-trigger" data-member-id="1" aria-expanded="false">View Evaluation</button>
+                </div>
+            </article>
 
-                        <!-- FAQ Item 5 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I submit weekly evaluations for my team?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>Access the Weekly Evaluation section to set mood scores and add direct quotes from team members. Evaluations are submitted per week and help track team morale and progress. Submit by Friday for the current week.</p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ Item 6 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">When and how do I submit attendance?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>Attendance codes are announced during class. Open the attendance drawer and enter the code provided. Your attendance record is automatically tracked. Submit attendance within the same class session.</p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ Item 7 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I use the Work Journal?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>The Work Journal lets you document team meetings, discussion notes, and progress updates. Use it to keep records of decisions made and action items assigned during meetings.</p>
-                            </div>
-                        </div>
-
-                        <!-- FAQ Item 8 -->
-                        <div class="faq-item">
-                            <button class="faq-toggle" aria-expanded="false">
-                                <span class="faq-question">How do I manage group formation for my team?</span>
-                                <span class="faq-icon">+</span>
-                            </button>
-                            <div class="faq-answer" style="display:none;">
-                                <p>Use the Group Formation Form accessible from the navigation bar. You can add team members, assign roles, and organize sub-groups if needed. This information helps structure team collaboration.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </aside>
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="attendance_icon.PNG" alt="Attendance Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Submit Attendance</h2>
+                    <p>Enter your weekly attendance code.</p>
+                    <button id="openAttendanceDrawer" class="card-btn">Submit Attendance</button>
+                </div>
+            </article>
         </section>
     </div>
 
 
+    <!-- ============================================================
+         NEW ATTENDANCE DRAWER (REPLACED CONTENT)
+         ============================================================ -->
+    <section class="attendance-panel" id="attendancePanel" aria-hidden="true">
+        <article class="attendance-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Attendance</p>
+                    <h2>Enter Attendance Code</h2>
+                    <p>Enter the code announced during class.</p>
+                </div>
+                <button class="close-attendance" aria-label="Close attendance drawer">×</button>
+            </header>
+
+            <!-- Attendance Input -->
+            <div class="attendance-input-box">
+                <input id="attendanceInput" type="text" placeholder="Enter code…" />
+                <button id="attendanceSubmitBtn" class="submit-btn">Submit</button>
+            </div>
+
+            <!-- Success/Error Message -->
+            <p id="attendanceMessage" class="attendance-message"></p>
+
+            <!-- Attendance Record -->
+            <div class="attendance-record-box">
+                <h3>Your Attendance Record</h3>
+                <p id="attendanceOverall" class="attendance-overall"></p>
+
+                <table class="attendance-table">
+                    <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceRecordBody"></tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+
+    <!-- Evaluation Drawer (unchanged) -->
+    <section class="evaluation-panel" aria-hidden="true">
+        <article class="evaluation-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Weekly evaluation</p>
+                    <h2 data-eval-context>Beacon AR · Team Lead</h2>
+                    <p>Use the week selector to swap notes and mood scores.</p>
+                </div>
+                <button class="close-evaluation" aria-label="Close weekly evaluation">×</button>
+            </header>
+
+            <div class="evaluation-filter">
+                <label for="lead-week">Filter by week</label>
+                <select id="lead-week" data-week-filter></select>
+            </div>
+
+            <!-- <div class="mood-display">
+                <div class="evaluation-face" data-mood-face>🙂</div>
+                <div>
+                    <p class="mood-status" data-mood-status>Making progress</p>
+                    <p class="mood-meta" data-mood-meta>Captured for Week 6</p>
+                </div>
+            </div> -->
+
+            <div class="notes-panel">
+                <label>Evaluation notes</label>
+                <p data-eval-notes>Notes for the selected week will appear here.</p>
+            </div>
+        </article>
+    </section>
+
+
+    <!-- ============================================================
+         NAV, PROFILE, & ATTENDANCE LOGIC JS
+         ============================================================ -->
+
     <script src="script.js"></script>
-
+    <script src="student_weekly_eval.js"></script>
+    <script src="../../shared/auth.js"></script>
     <script>
-        document.getElementById('viewClassDirectoryBtn').onclick = () =>
-            window.location.href = '/class_directory_student/class_directory_student.html';
+        // Navigation buttons (consistent with TA/professor)
+        const nav = {
+            viewTasksBtn: '/task_tracker/task_tracker.html',
+            viewClassDirectoryBtn: '/class_directory_student/class_directory_student.html',
+            viewWorkJournalBtn: '/work_journal/work_journal.html',
+            viewTeamsBtn: '/student_team_card/student_team_card.html',
+            viewEvalJournalBtn: '/evaluation_journal/evaluation_journal.html'
+        };
 
-        document.getElementById('viewTicketBtn').onclick = () =>
-            window.location.href = '/app/frontend/src/pages/support_tickets/submit_ticket.html';
-    </script>
-
-    <!-- FAQ Toggle Logic -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const faqToggles = document.querySelectorAll('.faq-toggle');
-
-            faqToggles.forEach(toggle => {
-                toggle.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const faqItem = this.parentElement;
-                    const answer = this.nextElementSibling;
-                    const icon = this.querySelector('.faq-icon');
-                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
-
-                    // Toggle all other items closed
-                    document.querySelectorAll('.faq-item').forEach(item => {
-                        if (item !== faqItem) {
-                            const btn = item.querySelector('.faq-toggle');
-                            const ans = btn.nextElementSibling;
-                            const icn = btn.querySelector('.faq-icon');
-                            btn.setAttribute('aria-expanded', 'false');
-                            ans.style.display = 'none';
-                            icn.textContent = '+';
-                        }
-                    });
-
-                    // Toggle current item
-                    if (isExpanded) {
-                        answer.style.display = 'none';
-                        this.setAttribute('aria-expanded', 'false');
-                        icon.textContent = '+';
-                    } else {
-                        answer.style.display = 'block';
-                        this.setAttribute('aria-expanded', 'true');
-                        icon.textContent = '−';
-                    }
-                });
-            });
+        Object.entries(nav).forEach(([id, link]) => {
+            const btn = document.getElementById(id);
+            if (btn) btn.onclick = () => (window.location.href = link);
         });
     </script>
 
     <script>
         // PROFILE DROPDOWN
-        const profileImg = document.getElementById('dashboardProfileImg');
+        const profileImg = document.getElementById('dashboard-profile-img');
         const dropdown = document.getElementById('profileDropdown');
-
+        const logoutBtn = document.getElementById('logoutBtn');
         profileImg.addEventListener('mouseenter', () => dropdown.style.display = 'block');
         profileImg.addEventListener('mouseleave', () =>
             setTimeout(() => { if (!dropdown.matches(':hover')) dropdown.style.display = 'none'; }, 150)
@@ -224,20 +239,140 @@
         dropdown.addEventListener('mouseenter', () => dropdown.style.display = 'block');
         dropdown.addEventListener('mouseleave', () => dropdown.style.display = 'none');
 
-        document.getElementById('logoutBtn').onclick = (e) => {
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", (e) => {
             e.preventDefault();
-            localStorage.clear();
-            window.location.href = '/login';
-        };
+            e.stopPropagation(); // stop outer <a> from hijacking click
+            ConductorAuth.logout();
+          });
+        }
+        
 
         window.addEventListener('DOMContentLoaded', () => {
             const savedImg = localStorage.getItem('profileImg');
             if (savedImg) {
-                const img1 = document.getElementById('dashboardProfileImg');
+                const img1 = document.getElementById('dashboard-profile-img');
                 if (img1) img1.src = savedImg;
             }
         });
     </script>
+
+        <script>
+            // Backend-integrated attendance (mirrors student dashboard logic)
+            document.addEventListener('DOMContentLoaded', () => {
+                const API_BASE = '/api';
+
+                const drawer = document.getElementById('attendancePanel');
+                const openBtn = document.getElementById('openAttendanceDrawer');
+                const closeBtn = document.querySelector('.close-attendance');
+                const input = document.getElementById('attendanceInput');
+                const submitBtn = document.getElementById('attendanceSubmitBtn');
+                const messageEl = document.getElementById('attendanceMessage');
+                const recordBody = document.getElementById('attendanceRecordBody');
+                const overallEl = document.getElementById('attendanceOverall');
+
+                function fetchJSON(url, options = {}) {
+                    return fetch(url, {
+                        headers: { 'Content-Type': 'application/json' },
+                        ...options,
+                    }).then(async (res) => {
+                        if (!res.ok) {
+                            const text = await res.text().catch(() => '');
+                            throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+                        }
+                        return res.json();
+                    });
+                }
+
+                function getCurrentUserEmail() {
+                    try {
+                        const stored = JSON.parse(localStorage.getItem('currentUser'));
+                        if (stored && stored.email) return String(stored.email).toLowerCase();
+                    } catch {}
+                    return (localStorage.getItem('email') || 'teamlead@school.edu').toLowerCase();
+                }
+
+                const email = getCurrentUserEmail();
+
+                function loadAttendanceHistory() {
+                    fetchJSON(`${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`)
+                        .then((data) => {
+                            const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+                            const presentCount = data.presentCount || 0;
+                            const total = data.totalSessions || sessions.length;
+                            const pct = total ? Math.round((presentCount / total) * 100) : 0;
+
+                            if (!sessions.length) {
+                                recordBody.innerHTML = '<tr><td colspan="2">No attendance sessions created yet.</td></tr>';
+                                overallEl.textContent = '';
+                                return;
+                            }
+
+                            const rowsHtml = sessions
+                                .slice()
+                                .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+                                .map((s) => {
+                                    const when = new Date(s.createdAt).toLocaleString();
+                                    const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
+                                    return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
+                                })
+                                .join('');
+
+                            recordBody.innerHTML = rowsHtml;
+                            overallEl.textContent = `Present ${presentCount} out of ${total} sessions (${pct}%)`;
+                        })
+                        .catch((err) => {
+                            console.error('[team_lead] Attendance history error:', err);
+                            recordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
+                            overallEl.textContent = '';
+                        });
+                }
+
+                function openDrawer() {
+                    drawer.setAttribute('aria-hidden', 'false');
+                    input.value = '';
+                    messageEl.textContent = '';
+                    messageEl.style.color = '#333';
+                    loadAttendanceHistory();
+                }
+                function closeDrawer() {
+                    drawer.setAttribute('aria-hidden', 'true');
+                }
+                openBtn.addEventListener('click', openDrawer);
+                closeBtn.addEventListener('click', closeDrawer);
+                drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
+
+                async function handleSubmit() {
+                    const code = (input.value || '').trim().toUpperCase();
+                    if (!code) {
+                        messageEl.textContent = 'Please enter a code.';
+                        messageEl.style.color = '#b00020';
+                        return;
+                    }
+                    try {
+                        const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
+                            method: 'POST',
+                            body: JSON.stringify({ code, email }),
+                        });
+                        if (result && result.success) {
+                            messageEl.textContent = '✔ You are marked present for this session.';
+                            messageEl.style.color = '#0a7a30';
+                            loadAttendanceHistory();
+                        } else {
+                            messageEl.textContent = (result && result.message) || 'Invalid or expired code.';
+                            messageEl.style.color = '#b00020';
+                        }
+                    } catch (err) {
+                        console.error('[team_lead] Failed to mark attendance:', err);
+                        messageEl.textContent = 'Could not submit attendance. Please retry.';
+                        messageEl.style.color = '#b00020';
+                    }
+                }
+
+                submitBtn.addEventListener('click', handleSubmit);
+                input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } });
+            });
+        </script>
 
 </body>
 </html>

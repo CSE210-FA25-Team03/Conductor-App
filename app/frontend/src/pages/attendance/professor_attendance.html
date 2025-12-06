@@ -1,69 +1,97 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../../assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
   <title>Attendance | Conductor</title>
   <link rel="stylesheet" href="professor_attendance.css" />
 </head>
 
 <body>
-    <header class="top-nav">
-        <div class="brand">Conductor <span>App</span></div>
+  <header class="top-nav">
+  <div class="brand">
+                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+  </div>
 
-        <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
-            <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+    <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
 
-            <!-- FIXED PROFILE DROPDOWN (no wrapping <a>) -->
-            <div class="profile">
-                <div class="profile-dropdown-container" style="position:relative;">
-                    <img id="dashboardProfileImg"
-                        src="/assets/logo/user.png"
-                        alt="Profile"
-                        style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+      <!-- PROFILE DROPDOWN -->
+      <div class="profile">
+        <div class="profile-dropdown-container" style="position:relative;">
+          <img
+            id="dashboardProfileImg"
+            src="/assets/logo/user.png"
+            alt="Profile"
+            style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;"
+          />
 
-                    <div class="profile-dropdown" id="profileDropdown">
-                        <a href="/profile_page/profile.html">Profile</a>
-                        <a href="#" id="logoutBtn" class="logout">Log Out</a>
-                    </div>
-                </div>
-            </div>
+          <div class="profile-dropdown" id="profileDropdown">
+            <a href="/profile_page/profile.html">Profile</a>
+            <a href="#" id="logoutBtn" class="logout">Log Out</a>
+          </div>
         </div>
-    </header>
+      </div>
+    </div>
+  </header>
 
-    <main class="attendance-container">
-        <h1 class="page-title">Attendance</h1>
-        <p class="subtitle">
-          Generate a code for each class meeting. Students entering the code within
-          the active window will be marked present.
-        </p>
+  <!-- Error box for network / API errors -->
+  <div
+    id="errorBox"
+    class="error-box hidden"
+    style="
+      max-width: 960px;
+      margin: 0.75rem auto 0;
+      padding: 0.5rem 0.75rem;
+      background: #fee2e2;
+      color: #b91c1c;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      display: none;
+    "
+  ></div>
 
-        <!-- Generate Code Card -->
-        <section class="card">
-            <h2>Generate Attendance Code</h2>
+  <main class="attendance-container">
+    <h1 class="page-title">Attendance</h1>
+    <p class="subtitle">
+      Generate a code for each class meeting. Students entering the code within
+      the active window will be marked present.
+    </p>
 
-            <div class="generate-row">
-                <div class="duration-field">
-                    <label for="attendanceDuration">Active for (minutes)</label>
-                    <input type="number" id="attendanceDuration" value="10" min="1" max="60">
-                </div>
+    <!-- Generate Code Card -->
+    <section class="card">
+      <h2>Generate Attendance Code</h2>
 
-                <button id="generateAttendanceCodeBtn" class="primary-btn">
-                    Generate Code
-                </button>
-            </div>
+      <div class="generate-row">
+        <div class="duration-field">
+          <label for="attendanceDuration">Active for (minutes)</label>
+          <input
+            type="number"
+            id="attendanceDuration"
+            value="10"
+            min="1"
+            max="60"
+          />
+        </div>
 
-            <div id="currentCodeDisplay" class="code-display"></div>
-        </section>
+        <button id="generateAttendanceCodeBtn" class="primary-btn">
+          Generate Code
+        </button>
+      </div>
 
-        <!-- Attendance Sessions Card -->
-        <section class="card">
-            <h2>Class Attendance Sessions</h2>
-            <div id="attendanceSessionsContainer"></div>
-        </section>
-    </main>
+      <div id="currentCodeDisplay" class="code-display"></div>
+    </section>
 
-    
-    <script src="professor_attendance.js"></script>
+    <!-- Attendance Sessions Card -->
+    <section class="card">
+      <h2>Class Attendance Sessions</h2>
+      <div id="attendanceSessionsContainer"></div>
+    </section>
+  </main>
+
+  <script src="professor_attendance.js"></script>
 </body>
 </html>

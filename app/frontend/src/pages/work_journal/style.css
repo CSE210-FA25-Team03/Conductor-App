@@ -38,15 +38,27 @@ body {
     margin-bottom: 2.2rem;
 }
 
-.brand {
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #2a3a5e;
+.logo-full {
+    display: block;
+    height: 6rem;
 }
-.brand span {
-    color: var(--accent);
-    font-weight: 700;
+
+.logo-mini {
+    display: none;
 }
+
+
+@media (max-width: 500px) {
+    .logo-full {
+        display: none ;
+    }
+
+    .logo-mini {
+        display: block ;
+        height: 2rem;
+    }
+}
+
 
 /* ============================================================
    MAIN FORM CONTAINER
@@ -95,11 +107,59 @@ body {
     resize: vertical;
 }
 
+
+#repo-link {
+  background: linear-gradient(to bottom, #4083f3 0%, #4083f3 100%);
+	background-position: 0 100%;
+	background-repeat: repeat-x;
+	background-size: 2px 2px;
+  color: #000;
+  text-decoration: none;
+}
+
+#repo-link:hover {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg id='squiggle-link' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:ev='http://www.w3.org/2001/xml-events' viewBox='0 0 20 4'%3E%3Cstyle type='text/css'%3E.squiggle{animation:shift .3s linear infinite;}@keyframes shift {from {transform:translateX(0);}to {transform:translateX(-20px);}}%3C/style%3E%3Cpath fill='none' stroke='%234083f3' stroke-width='2' class='squiggle' d='M0,3.5 c 5,0,5,-3,10,-3 s 5,3,10,3 c 5,0,5,-3,10,-3 s 5,3,10,3'/%3E%3C/svg%3E");
+  background-position: 0 100%;
+  background-size: auto 6px;
+  background-repeat: repeat-x;
+  text-decoration: none;
+  padding-bottom: 4px;     
+  /* background-position: 0 calc(100% - 1.5px);  */
+}
+
+
+
 .sentiment-options {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    margin-bottom: .8rem;
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.sentiment-options label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.sentiment-options input[type="radio"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+.sentiment-options span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.visibility-options { 
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: .8rem;
 }
 
 .wj-btn {
@@ -138,7 +198,7 @@ body {
     color: #fff;
     padding: 12px 18px;
     font-size: 1.1rem;
-    border-radius: 50px;
+    border-radius: 8px;
     cursor: pointer;
     box-shadow: 0 4px 14px rgba(0,0,0,0.18);
     border: none;

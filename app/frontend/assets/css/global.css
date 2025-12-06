@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+body {
+    font-family: "Inter", sans-serif;
+    font-weight: 400;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Inter", sans-serif;
+    font-weight: 900;
+}
+
+/* Mobile layout so top buttons + profile don't get cut off */
+@media (max-width: 640px) {
+  .top-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .nav-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;          
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .nav-actions .nav-btn {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .nav-actions .profile {
+    margin-left: auto;
+  }
+
+  .class-directory-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Colors: */
+

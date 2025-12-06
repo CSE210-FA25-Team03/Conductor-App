@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../../assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
   <title>Group Formation | Conductor</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
   <header class="top-nav">
-    <div class="brand">Conductor <span>App</span></div>
+    <div class="brand">
+                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+   </div>
+
     <div class="nav-actions">
       <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
     </div>
@@ -18,14 +24,20 @@
   <div id="errorBox" class="error-box hidden"></div>
   
   <div class="container">
-    
     <!-- SKILL/TAGS -->
     <section class="panel">
       <h2>Define Skills / Tags</h2>
 
       <div class="form-grid">
-        <input id="skillName" type="text" placeholder="Skill Name" required/>
-        <input id="skillWeight" type="number" min="1" max="10" value="5" required />
+        <input id="skillName" type="text" placeholder="Skill Name" required />
+        <input
+          id="skillWeight"
+          type="number"
+          min="1"
+          max="10"
+          value="5"
+          required
+        />
         <button class="primary-btn" id="addSkillBtn">Add Skill</button>
       </div>
 
@@ -45,9 +57,48 @@
     </section>
 
     <!-- STUDENT OVERVIEW -->
+    <!-- <section class="panel">
+      <h2>Students Overview</h2>
+      <p class="description">
+        These are the students who have already rated themselves.
+      </p>
+
+      <table class="data-table" id="studentsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Ratings</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section> -->
+
+    <!-- TA OVERVIEW -->
+    <!-- <section class="panel">
+      <h2>Teaching Assistants</h2>
+
+      <table class="data-table" id="taTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section> -->
+
+    <!-- GENERATE GROUPS -->
+         <!-- STUDENT OVERVIEW -->
     <section class="panel">
       <h2>Students Overview</h2>
-      <p class="description">These are the students who have already rated themselves.</p>
+      <p class="description">
+        These are all students in the course. Each has a default skill rating of 2 unless they update it.
+      </p>
 
       <table class="data-table" id="studentsTable">
         <thead>
@@ -83,12 +134,21 @@
       <h2>Generate Group</h2>
 
       <div class="form-grid">
-        <input type="number" id="groupSize" placeholder="Group Size (ex: 2)" />
+        <input
+          type="number"
+          id="groupSize"
+          placeholder="Group Size (ex: 2)"
+        />
         <button class="primary-btn" id="generateBtn">Smart Generate</button>
         <button class="primary-btn" id="randomizeBtn">Randomize Generate</button>
+        <button class="primary-btn" id="saveGroupsBtn">Save Groups</button>
       </div>
 
-      <div style="margin-top:8px;overflow-x:auto;">
+      <p class="description" style="margin-top:8px;">
+        You can adjust team, role, and TA for each student below before saving.
+      </p>
+
+      <div style="margin-top: 8px; overflow-x: auto;">
         <table class="config-table">
           <thead>
             <tr>
@@ -106,6 +166,8 @@
         </table>
       </div>
     </section>
+
+
   </div>
 
   <!-- MAIN GROUP-FORMATION LOGIC -->
@@ -114,6 +176,7 @@
 
   <!-- PROFILE + DASHBOARD SCRIPTS (unchanged) -->
   <script src="script.js"></script>
+
   <script>
     // Profile dropdown logic
     const profileImg = document.getElementById('dashboardProfileImg');
@@ -133,15 +196,18 @@
       dropdown.addEventListener('mouseenter', () => {
         dropdown.style.display = 'block';
       });
-      document.getElementById('logoutBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        localStorage.clear();
-        window.location.href = '/login';
-      });
+      document
+        .getElementById('logoutBtn')
+        .addEventListener('click', function (e) {
+          e.preventDefault();
+          localStorage.clear();
+          window.location.href = '/login';
+        });
     }
   </script>
+
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
+    window.addEventListener('DOMContentLoaded', function () {
       var savedImg = localStorage.getItem('profileImg');
       if (savedImg) {
         var img1 = document.getElementById('dashboardProfileImg');
@@ -149,34 +215,47 @@
       }
     });
   </script>
+
   <script>
-    window.addEventListener('DOMContentLoaded', function() {
+    window.addEventListener('DOMContentLoaded', function () {
       var firstName = localStorage.getItem('firstName') || 'Avery';
       var lastName = localStorage.getItem('lastName') || 'Lin';
       var role = localStorage.getItem('role') || 'Professor';
-      var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
-      if (document.getElementById('profName')) document.getElementById('profName').textContent = firstName + ' ' + lastName;
-      if (document.getElementById('profFullName')) document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
-            if (document.getElementById('profRole')) document.getElementById('profRole').textContent = role + ' · CSE 210';
-      if (document.getElementById('profRoleMeta')) document.getElementById('profRoleMeta').textContent = role;
-      if (document.getElementById('profEmail')) document.getElementById('profEmail').textContent = email;
+      var email =
+        localStorage.getItem('email') || 'avery.lin@conductor.edu';
+      if (document.getElementById('profName'))
+        document.getElementById('profName').textContent =
+          firstName + ' ' + lastName;
+      if (document.getElementById('profFullName'))
+        document.getElementById('profFullName').textContent =
+          firstName + ' ' + lastName;
+      if (document.getElementById('profRole'))
+        document.getElementById('profRole').textContent =
+          role + ' · CSE 210';
+      if (document.getElementById('profRoleMeta'))
+        document.getElementById('profRoleMeta').textContent = role;
+      if (document.getElementById('profEmail'))
+        document.getElementById('profEmail').textContent = email;
     });
   </script>
+
   <script>
     // Dynamic dashboard link based on role
-    document.getElementById('backDashboard').addEventListener('click', function(e) {
-      e.preventDefault();
-      var role = localStorage.getItem('role');
-      if (role === 'professor') {
-        window.location.href = '/dashboards/professor.html';
-      } else if (role === 'Teaching Assistant') {
-        window.location.href = '/dashboards/ta.html';
-      } else if (role === 'team_lead') {
-        window.location.href = '/dashboards/team_lead.html';
-      } else {
-        window.location.href = '/dashboards/student.html';
-      }
-    });
+    document
+      .getElementById('backDashboard')
+      .addEventListener('click', function (e) {
+        e.preventDefault();
+        var role = localStorage.getItem('role');
+        if (role === 'professor') {
+          window.location.href = '/dashboards/professor.html';
+        } else if (role === 'Teaching Assistant') {
+          window.location.href = '/dashboards/ta.html';
+        } else if (role === 'team_lead') {
+          window.location.href = '/dashboards/team_lead.html';
+        } else {
+          window.location.href = '/dashboards/student.html';
+        }
+      });
   </script>
 </body>
 </html>

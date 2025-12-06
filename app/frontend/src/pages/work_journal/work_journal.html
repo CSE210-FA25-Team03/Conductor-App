@@ -1,119 +1,148 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 <head>
-    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
-    <script defer src="/assets/js/class-directory-nav.js"></script>
+  <link rel="stylesheet" href="../../../assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+  <script defer src="/assets/js/class-directory-nav.js"></script>
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
   <title>Work Journal | Conductor</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-
   <header class="top-nav">
-      <div class="brand">Conductor <span>App</span></div>
+    <div class="brand">
+        <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+        <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    </div>
 
-      <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
-          <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+    <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
 
-          <div class="profile">
-              <a href="/profile_page/profile.html" class="profile-link">
-                  <div class="profile-dropdown-container" style="position:relative;">
-                      <img id="dashboardProfileImg" src="/assets/logo/user.png" 
-                           style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-                      <div id="profileDropdown" class="profile-dropdown"
-                          style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px;">
-                          <a href="/profile_page/profile.html" style="padding:10px 16px; display:block;">Profile</a>
-                          <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
-                      </div>
-                  </div>
-              </a>
+      <div class="profile">
+        <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
+          <div class="profile-dropdown-container" style="position:relative;">
+            <img
+              id="dashboardProfileImg"
+              src="/assets/logo/user.png"
+              style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;"
+            />
+            <div
+              id="profileDropdown"
+              class="profile-dropdown"
+              style="
+                display:none;
+                position:absolute;
+                top:48px;
+                right:0;
+                background:#fff;
+                border:1px solid #ddd;
+                border-radius:8px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                min-width:140px;
+              "
+            >
+              <a href="/profile_page/profile.html" style="padding:10px 16px; display:block;">Profile</a>
+              <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
+            </div>
           </div>
+        <!-- </a> -->
       </div>
+    </div>
   </header>
 
-
+  <!-- Optional error banner -->
+  <div
+    id="wjError"
+    style="
+      max-width:960px;
+      margin:0.75rem auto 0;
+      padding:0.5rem 0.75rem;
+      background:#fee2e2;
+      color:#b91c1c;
+      border-radius:4px;
+      font-size:0.9rem;
+      display:none;
+    "
+  ></div>
 
   <div class="page-layout">
     <section class="work-journal-container">
+      <h2 class="wj-title">Daily Work Journal Form</h2>
 
-        <h2 class="wj-title">Daily Work Journal Form</h2>
+      <form id="workJournalForm">
+        <div class="wj-field">
+          <label for="repo-link">
+            GitHub repo:
+            <a
+              id="repo-link"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              (not set)
+            </a>
+          </label>
+        </div>
 
-        <form id="workJournalForm">
-            
-            <div class="wj-field">
-                <label for="repoLink">
-                    GitHub repo:
-                    <a href="https://github.com/CSE210-FA25-Team03/Conductor-App" target="_blank" rel="noopener noreferrer">
-                        https://github.com/CSE210-FA25-Team03/Conductor-App
-                    </a>
-                </label>
-            </div>
+        <div class="wj-field">
+          <label for="tasksDone">What did you work on today?</label>
+          <textarea id="tasksDone" required></textarea>
+        </div>
 
-            <div class="wj-field">
-                <label for="tasksDone">What did you work on today?</label>
-                <textarea id="tasksDone" required></textarea>
-            </div>
+        <div class="wj-field">
+          <label>How are you feeling?</label>
+          <div class="sentiment-options">
+            <label><input type="radio" name="sentiment" value="😀 Great"> 😀 Great</label>
+            <label><input type="radio" name="sentiment" value="🙂 Good"> 🙂 Good</label>
+            <label><input type="radio" name="sentiment" value="😐 Okay"> 😐 Okay</label>
+            <label><input type="radio" name="sentiment" value="😟 Stressed"> 😟 Stressed</label>
+            <label><input type="radio" name="sentiment" value="😫 Overwhelmed"> 😫 Overwhelmed</label>
+          </div>
+          <textarea id="sentimentNotes" placeholder="Optional: describe your mood..."></textarea>
+        </div>
 
-            <div class="wj-field">
-                <label>How are you feeling?</label>
-                <div class="sentiment-options">
-                    <label><input type="radio" name="sentiment" value="😀 Great"> 😀 Great</label>
-                    <label><input type="radio" name="sentiment" value="🙂 Good"> 🙂 Good</label>
-                    <label><input type="radio" name="sentiment" value="😐 Okay"> 😐 Okay</label>
-                    <label><input type="radio" name="sentiment" value="😟 Stressed"> 😟 Stressed</label>
-                    <label><input type="radio" name="sentiment" value="😫 Overwhelmed"> 😫 Overwhelmed</label>
-                </div>
-                <textarea id="sentimentNotes" placeholder="Optional: describe your mood..."></textarea>
-            </div>
+        <div class="wj-field">
+          <label for="reachOut">Do you need to reach out to someone?</label>
+          <select id="reachOut">
+            <option value="">No, I'm good</option>
+            <option value="team_lead">Team Lead</option>
+            <option value="ta">Teaching Assistant</option>
+            <option value="professor">Professor</option>
+          </select>
+          <br />
 
-            <div class="wj-field">
-                <label for="reachOut">Do you need to reach out to someone?</label>
-                <select id="reachOut">
-                    <option value="">No, I'm good</option>
-                    <option value="team_lead">Team Lead</option>
-                    <option value="ta">Teaching Assistant</option>
-                    <option value="professor">Professor</option>
-                </select>
-                <br>
+          <textarea
+            id="reachOutMessage"
+            placeholder="Message..."
+            style="display:none;"
+          ></textarea>
+        </div>
 
-                <textarea id="reachOutMessage" placeholder="Message..." style="display:none;"></textarea>
-            </div>
-            <script>
-                const reachOutSelect = document.getElementById('reachOut');
-                const reachOutMsg = document.getElementById('reachOutMessage');
-                reachOutSelect.addEventListener('change', function() {
-                    if (this.value === 'team_lead' || this.value === 'ta' || this.value === 'professor') {
-                        reachOutMsg.style.display = '';
-                        reachOutMsg.required = true;
-                    } else {
-                        reachOutMsg.style.display = 'none';
-                        reachOutMsg.value = '';
-                        reachOutMsg.required = false;
-                    }
-                });
-            </script>
-            
+        <div class="visibility-options">
+          <label>
+            <input type="radio" name="status" value="public" required>
+            Public
+          </label>
+          <label>
+            <input type="radio" name="status" value="private" required>
+            Private (Only visible to Staff)
+          </label>
+        </div>
 
-            <div class="sentiment-options">
-                    <label><input type="radio" name="status" value="public" required> Public</label>
-                    <label><input type="radio" name="status" value="private" required> Private (Only visible to Staff)</label>
-            </div>
+        <button class="wj-btn" type="submit">Submit Journal Entry</button>
+      </form>
 
-            <button class="wj-btn" type="submit">Submit Journal Entry</button>
-        </form>
-
-        <div id="wjSuccess" class="wj-success">✔ Journal submitted!</div>
+      <div id="wjSuccess" class="wj-success">✔ Journal submitted!</div>
     </section>
   </div>
 
-
-
   <aside class="wj-past-sidebar" id="wjPastSidebar">
-      <h3 class="wj-past-title">Past Journal Entries</h3>
-      <div id="wjPastList" class="wj-past-list"></div>
+    <h3 class="wj-past-title">Past Journal Entries</h3>
+    <div id="wjPastList" class="wj-past-list"></div>
   </aside>
 
   <!-- Overlay -->
@@ -122,182 +151,420 @@
   <!-- Floating Button -->
   <button id="wjToggleBtn" class="wj-toggle-btn">Past Journals</button>
 
-
-
+  <!-- Preview modal -->
   <div id="wjPreviewModal" class="wj-preview-modal">
-      <div class="wj-preview-content">
-          <span id="wjClosePreview" class="wj-close-preview">✖</span>
+    <div class="wj-preview-content">
+      <span id="wjClosePreview" class="wj-close-preview">✖</span>
 
-          <h3 id="wjPreviewDate"></h3>
+      <h3 id="wjPreviewDate"></h3>
 
-          <p><strong>Work Done:</strong></p>
-          <p id="wjPreviewTasks"></p>
+      <p><strong>Work Done:</strong></p>
+      <p id="wjPreviewTasks"></p>
 
-          <p><strong>Mood:</strong></p>
-          <p id="wjPreviewSentiment"></p>
+      <p><strong>Mood:</strong></p>
+      <p id="wjPreviewSentiment"></p>
 
-          <p><strong>Mood Notes:</strong></p>
-          <p id="wjPreviewNotes"></p>
+      <p><strong>Mood Notes:</strong></p>
+      <p id="wjPreviewNotes"></p>
 
-          <p><strong>Reach Out:</strong></p>
-          <p id="wjPreviewReachOut"></p>
+      <p><strong>Reach Out:</strong></p>
+      <p id="wjPreviewReachOut"></p>
 
-          <p><strong>Repo Link:</strong></p>
-          <p id="wjPreviewRepo"></p>
-      </div>
+      <p><strong>Repo Link:</strong></p>
+      <p id="wjPreviewRepo"></p>
+      <p><strong>Status:</strong></p>
+      <p id="wjPreviewStatus"></p>
+    </div>
   </div>
 
-
-
-
+  <!-- Shared dashboard/profile JS (unchanged) -->
   <script src="script.js"></script>
 
-    <script>
-    // Profile dropdown logic
-    const profileImg = document.getElementById('dashboardProfileImg');
-    const dropdown = document.getElementById('profileDropdown');
-    if (profileImg && dropdown) {
+  <!-- Work journal logic (DB-backed) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_BASE = '/api';
+
+      // -------------------------------------------------------------
+      // Basic helper: fetch JSON
+      // -------------------------------------------------------------
+      async function fetchJSON(url, options = {}) {
+        const res = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' },
+          ...options,
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+        }
+
+        return res.json();
+      }
+
+      function showError(message) {
+        const box = document.getElementById('wjError');
+        if (!box) return;
+        box.textContent = message;
+        box.style.display = 'block';
+        setTimeout(() => {
+          box.style.display = 'none';
+        }, 4000);
+      }
+
+      function showSuccess() {
+        const el = document.getElementById('wjSuccess');
+        if (!el) return;
+        el.style.display = 'block';
+        setTimeout(() => {
+          el.style.display = 'none';
+        }, 4000);
+      }
+
+      // -------------------------------------------------------------
+      // Reach-out select toggle
+      // -------------------------------------------------------------
+      const reachOutSelect = document.getElementById('reachOut');
+      const reachOutMsg = document.getElementById('reachOutMessage');
+
+      if (reachOutSelect) {
+        // Enforce: Team Lead cannot select Team Lead in Reach Out
+        try {
+          const userRole = (localStorage.getItem('role') || '').toLowerCase();
+          if (userRole === 'team_lead') {
+            const tlOpt = Array.from(reachOutSelect.options).find(o => (o.value || '').toLowerCase() === 'team_lead');
+            if (tlOpt) {
+              reachOutSelect.removeChild(tlOpt);
+            }
+          }
+        } catch { /* ignore */ }
+      }
+
+      if (reachOutSelect && reachOutMsg) {
+        reachOutSelect.addEventListener('change', function () {
+          if (
+            this.value === 'team_lead' ||
+            this.value === 'ta' ||
+            this.value === 'professor'
+          ) {
+            reachOutMsg.style.display = '';
+            reachOutMsg.required = true;
+          } else {
+            reachOutMsg.style.display = 'none';
+            reachOutMsg.value = '';
+            reachOutMsg.required = false;
+          }
+        });
+      }
+
+      // -------------------------------------------------------------
+      // Profile dropdown logic
+      // -------------------------------------------------------------
+      const profileImg = document.getElementById('dashboardProfileImg');
+      const dropdown = document.getElementById('profileDropdown');
+      if (profileImg && dropdown) {
         profileImg.addEventListener('mouseenter', () => {
-            dropdown.style.display = 'block';
+          dropdown.style.display = 'block';
         });
         profileImg.addEventListener('mouseleave', () => {
-            setTimeout(() => {
-                if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
-            }, 150);
+          setTimeout(() => {
+            if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+          }, 150);
         });
         dropdown.addEventListener('mouseleave', () => {
-            dropdown.style.display = 'none';
+          dropdown.style.display = 'none';
         });
         dropdown.addEventListener('mouseenter', () => {
-            dropdown.style.display = 'block';
+          dropdown.style.display = 'block';
         });
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
             localStorage.clear();
             window.location.href = '/login';
-        });
-    }
-    </script>
-
-    <script>
-    window.addEventListener('DOMContentLoaded', function() {
-        var savedImg = localStorage.getItem('profileImg');
-        if (savedImg) {
-            var img1 = document.getElementById('dashboardProfileImg');
-            if (img1) img1.src = savedImg;
+          });
         }
-    });
-    </script>
+      }
 
-    <script>
-    window.addEventListener('DOMContentLoaded', function() {
-        var firstName = localStorage.getItem('firstName') || 'Avery';
-        var lastName = localStorage.getItem('lastName') || 'Lin';
-        var role = localStorage.getItem('role') || 'Professor';
-        var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
-        document.getElementById('profName').textContent = firstName + ' ' + lastName;
-        document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
-        document.getElementById('profRole').textContent = role + ' · CSE 210';
-        document.getElementById('profRoleMeta').textContent = role;
-        document.getElementById('profEmail').textContent = email;
-    });
-    </script>
+      // Saved profile image
+      const savedImg = localStorage.getItem('profileImg');
+      if (savedImg && profileImg) {
+        profileImg.src = savedImg;
+      }
 
-    <script>
-    // Dynamic dashboard link based on role
-    document.getElementById('backDashboard').addEventListener('click', function(e) {
-        e.preventDefault();
-        var role = localStorage.getItem('role');
-        if (role === 'professor') {
+      // -------------------------------------------------------------
+      // Professor info (guarded)
+      // -------------------------------------------------------------
+      const profNameEl = document.getElementById('profName');
+      const profFullNameEl = document.getElementById('profFullName');
+      const profRoleEl = document.getElementById('profRole');
+      const profRoleMetaEl = document.getElementById('profRoleMeta');
+      const profEmailEl = document.getElementById('profEmail');
+
+      const firstName = localStorage.getItem('firstName') || 'Avery';
+      const lastName = localStorage.getItem('lastName') || 'Lin';
+      const role = localStorage.getItem('role') || 'Professor';
+      const email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
+
+      if (profNameEl) profNameEl.textContent = firstName + ' ' + lastName;
+      if (profFullNameEl) profFullNameEl.textContent = firstName + ' ' + lastName;
+      if (profRoleEl) profRoleEl.textContent = role + ' · CSE 210';
+      if (profRoleMetaEl) profRoleMetaEl.textContent = role;
+      if (profEmailEl) profEmailEl.textContent = email;
+
+      // -------------------------------------------------------------
+      // Back-to-dashboard button
+      // -------------------------------------------------------------
+      const backBtn = document.getElementById('backDashboard');
+      if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const r = localStorage.getItem('role');
+          if (r === 'professor') {
             window.location.href = '/dashboards/professor.html';
-        } else if (role === 'Teaching Assistant') {
+          } else if (r === 'Teaching Assistant') {
             window.location.href = '/dashboards/ta.html';
-        } else if (role === 'team_lead') {
+          } else if (r === 'team_lead') {
             window.location.href = '/dashboards/team_lead.html';
-        } else {
+          } else {
             window.location.href = '/dashboards/student.html';
+          }
+        });
+      }
+
+      // -------------------------------------------------------------
+      // Sidebar toggle
+      // -------------------------------------------------------------
+      const sidebar = document.getElementById('wjPastSidebar');
+      const toggleBtn = document.getElementById('wjToggleBtn');
+      const overlay = document.getElementById('wjOverlay');
+
+      if (toggleBtn && sidebar && overlay) {
+        toggleBtn.addEventListener('click', () => {
+          sidebar.classList.toggle('open');
+          overlay.classList.toggle('show');
+        });
+
+        overlay.addEventListener('click', () => {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('show');
+        });
+      }
+
+      // -------------------------------------------------------------
+      // Preview modal
+      // -------------------------------------------------------------
+      const previewModal = document.getElementById('wjPreviewModal');
+      const closePreviewBtn = document.getElementById('wjClosePreview');
+
+      function showJournalPreview(entry) {
+        const dateEl = document.getElementById('wjPreviewDate');
+        const tasksEl = document.getElementById('wjPreviewTasks');
+        const sentimentEl = document.getElementById('wjPreviewSentiment');
+        const notesEl = document.getElementById('wjPreviewNotes');
+        const reachOutEl = document.getElementById('wjPreviewReachOut');
+        const repoEl = document.getElementById('wjPreviewRepo');
+        const statusEl = document.getElementById('wjPreviewStatus');
+
+        if (dateEl)
+          dateEl.textContent = new Date(entry.createdAt || entry.date || Date.now()).toLocaleString();
+        if (tasksEl) {
+          let workText = entry.tasksDone || entry.content || '';
+          if (!entry.tasksDone && workText) {
+            // Strip any appended sections like Reach-out message and Repo from content
+            // Prefer splitting at Notes marker if present
+            const notesIdx = workText.indexOf('\n\nNotes:\n');
+            if (notesIdx !== -1) {
+              workText = workText.slice(0, notesIdx).trim();
+            }
+            // Fallback: remove explicit Reach-out and Repo tails
+            workText = workText.split(/\n\nReach-out message:/)[0].split(/\n\nRepo:/)[0].trim();
+          }
+          tasksEl.textContent = workText || '—';
         }
-    });
-    </script>
-    <script>
-        const sidebar = document.getElementById("wjPastSidebar");
-        const toggleBtn = document.getElementById("wjToggleBtn");
-        const overlay = document.getElementById("wjOverlay");
+        if (sentimentEl) sentimentEl.textContent = entry.sentiment || '—';
+        if (notesEl) notesEl.textContent = entry.sentimentNotes || entry.moodText || '—';
 
-        toggleBtn.addEventListener("click", () => {
-            sidebar.classList.toggle("open");
-            overlay.classList.toggle("show");
+        // Show only role (Professor/Teaching Assistant/Team Lead) or None
+        if (reachOutEl) {
+          // Use reachOut or reachOutLabel if present
+          const raw = (entry.reachOut || entry.reachOutLabel || '').toLowerCase();
+          const r = raw.trim();
+          let roleLabel = '';
+          if (r === 'professor') roleLabel = 'Professor';
+          else if (r === 'ta' || r === 'teaching assistant' || r === 'teaching assistant (ta)') roleLabel = 'Teaching Assistant';
+          else if (r === 'team_lead' || r === 'team lead') roleLabel = 'Team Lead';
+          reachOutEl.textContent = roleLabel || 'None';
+        }
+
+        if (repoEl) repoEl.textContent = entry.repoLink || 'None';
+
+        // Status: Public or Private
+        if (statusEl) {
+          const v = (entry.visibility || entry.status || '').toLowerCase();
+          statusEl.textContent = v === 'public' ? 'Public' : v === 'private' ? 'Private' : '—';
+        }
+
+        if (previewModal) {
+          previewModal.style.display = 'flex';
+        }
+      }
+
+      if (closePreviewBtn && previewModal) {
+        closePreviewBtn.addEventListener('click', () => {
+          previewModal.style.display = 'none';
         });
+      }
 
-        overlay.addEventListener("click", () => {
-            sidebar.classList.remove("open");
-            overlay.classList.remove("show");
-        });
-    </script>
+      // -------------------------------------------------------------
+      // Load past journals from backend
+      // -------------------------------------------------------------
+      const pastListEl = document.getElementById('wjPastList');
 
-    <!-- Save journal -->
-    <script>
-        document.getElementById("workJournalForm").addEventListener("submit", function(e) {
-            e.preventDefault();
+      async function loadPastJournals() {
+        if (!pastListEl) return;
 
-            const entry = {
-                tasksDone: document.getElementById("tasksDone").value,
-                sentiment: document.querySelector("input[name='sentiment']:checked")?.value || "",
-                sentimentNotes: document.getElementById("sentimentNotes").value,
-                reachOut: document.getElementById("reachOut").value,
-                reachOutMessage: document.getElementById("reachOutMessage").value,
-                date: new Date().toISOString()
-            };
+        pastListEl.innerHTML = '<p style="font-size:0.9rem;color:#777;">Loading...</p>';
 
-            let journal = JSON.parse(localStorage.getItem("workJournal") || "[]");
-            journal.push(entry);
-            localStorage.setItem("workJournal", JSON.stringify(journal));
+        try {
+              const entries = await fetchJSON(
+                `${API_BASE}/work-journals?email=${encodeURIComponent(email)}`,
+                );
+          const journal = Array.isArray(entries) ? entries : [];
 
-            document.getElementById("wjSuccess").style.display = "block";
-            setTimeout(() => document.getElementById("wjSuccess").style.display = "none", 4000);
+          if (!journal.length) {
+            pastListEl.innerHTML =
+              '<p style="font-size:0.9rem;color:#777;">No journal entries yet.</p>';
+            return;
+          }
 
-            this.reset();
-            loadPastJournals();
-        });
-    </script>
+          journal.sort(
+            (a, b) =>
+              new Date(b.createdAt || b.date) - new Date(a.createdAt || a.date),
+          );
 
-    <!-- Load past journals -->
-    <script>
-        function loadPastJournals() {
-            const list = document.getElementById("wjPastList");
-            list.innerHTML = "";
+          pastListEl.innerHTML = '';
+          journal.forEach((entry) => {
+            const item = document.createElement('div');
+            item.className = 'wj-past-item';
+            const dt = new Date(entry.createdAt || entry.date || Date.now());
+            item.textContent = dt.toLocaleString();
+            item.addEventListener('click', () => showJournalPreview(entry));
+            pastListEl.appendChild(item);
+          });
+        } catch (err) {
+          console.error('Failed to load past journals:', err);
+          pastListEl.innerHTML =
+            '<p style="font-size:0.9rem;color:#b91c1c;">Failed to load past journals.</p>';
+          showError('Failed to load past journals.');
+        }
+      }
 
-            let journal = JSON.parse(localStorage.getItem("workJournal") || "[]");
-            journal.sort((a, b) => new Date(b.date) - new Date(a.date));
+      // -------------------------------------------------------------
+      // Submit journal (POST to backend)
+      // -------------------------------------------------------------
+      const form = document.getElementById('workJournalForm');
 
-            journal.forEach(entry => {
-                const item = document.createElement("div");
-                item.className = "wj-past-item";
-                item.textContent = new Date(entry.date).toLocaleString();
-                item.addEventListener("click", () => showJournalPreview(entry));
-                list.appendChild(item);
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+
+          const tasksDone = document.getElementById('tasksDone')?.value || '';
+          const sentiment =
+            document.querySelector("input[name='sentiment']:checked")?.value || '';
+          const sentimentNotes =
+            document.getElementById('sentimentNotes')?.value || '';
+          const reachOut = document.getElementById('reachOut')?.value || '';
+          // Safety: if user is team_lead, do not allow selecting team_lead
+          try {
+            const userRole = (localStorage.getItem('role') || '').toLowerCase();
+            if (userRole === 'team_lead' && (reachOut || '').toLowerCase() === 'team_lead') {
+              showError('Team Leads cannot select Team Lead for Reach Out.');
+              return;
+            }
+          } catch { /* ignore */ }
+          const reachOutMessage =
+            document.getElementById('reachOutMessage')?.value || '';
+          const visibility =
+            document.querySelector("input[name='status']:checked")?.value ||
+            'private';
+          const repoLink =
+            document.getElementById('repo-link')?.getAttribute('href') || '';
+
+          if (!tasksDone.trim()) {
+            showError('Please describe what you worked on today.');
+            return;
+          }
+
+          const payload = {
+  tasksDone,
+  sentiment,
+  sentimentNotes,
+  reachOut,
+  reachOutMessage,
+  visibility,
+  repoLink,
+  email, // NEW: so backend can resolve userId
+};
+
+
+          try {
+            await fetchJSON(`${API_BASE}/work-journals`, {
+              method: 'POST',
+              body: JSON.stringify(payload),
             });
-        }
-        loadPastJournals();
-    </script>
 
-    <!-- Preview modal -->
-    <script>
-        function showJournalPreview(entry) {
-            document.getElementById("wjPreviewDate").textContent = new Date(entry.date).toLocaleString();
-            document.getElementById("wjPreviewTasks").textContent = entry.tasksDone || "—";
-            document.getElementById("wjPreviewSentiment").textContent = entry.sentiment || "—";
-            document.getElementById("wjPreviewNotes").textContent = entry.sentimentNotes || "—";
-            document.getElementById("wjPreviewReachOut").textContent = entry.reachOut ? entry.reachOut + ": " + entry.reachOutMessage : "—";
-            document.getElementById("wjPreviewRepo").textContent = entry.repoLink || "—";
-
-            document.getElementById("wjPreviewModal").style.display = "flex";
-        }
-
-        document.getElementById("wjClosePreview").addEventListener("click", () => {
-            document.getElementById("wjPreviewModal").style.display = "none";
+            showSuccess();
+            form.reset();
+            // Hide reachOut message field if it was visible
+            if (reachOutMsg) {
+              reachOutMsg.style.display = 'none';
+              reachOutMsg.required = false;
+            }
+            await loadPastJournals();
+          } catch (err) {
+            console.error('Failed to submit journal:', err);
+            showError('Failed to submit journal. Please try again.');
+          }
         });
-    </script>
+      }
 
+      // -------------------------------------------------------------
+      // Load team repo URL (first team) and set anchor
+      // -------------------------------------------------------------
+      async function loadRepoLink() {
+        try {
+          const emailLower = (email || '').toLowerCase();
+          const teams = await fetchJSON(`${API_BASE}/my-teams?email=${encodeURIComponent(emailLower)}`);
+          const repoAnchor = document.getElementById('repo-link');
+          if (!repoAnchor) return;
+          if (Array.isArray(teams) && teams.length) {
+            // Choose first team that has a repoUrl
+            const withRepo = teams.find(t => t.repoUrl && t.repoUrl.trim());
+            const team = withRepo || teams[0];
+            if (team.repoUrl) {
+              const safe = team.repoUrl.trim();
+              repoAnchor.href = safe;
+              repoAnchor.textContent = safe;
+            } else {
+              repoAnchor.href = '#';
+              repoAnchor.textContent = '(not set)';
+            }
+          } else {
+            repoAnchor.href = '#';
+            repoAnchor.textContent = '(no teams)';
+          }
+        } catch (err) {
+          console.error('Failed to load repo link:', err);
+        }
+      }
+
+      // Initial loads
+      loadPastJournals();
+      loadRepoLink();
+    });
+  </script>
 </body>
 </html>

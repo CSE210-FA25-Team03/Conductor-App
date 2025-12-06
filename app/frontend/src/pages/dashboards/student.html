@@ -1,56 +1,119 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 <head>
+    <link rel="stylesheet" href="../../../assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
     <script defer src="/assets/js/class-directory-nav.js"></script>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
     <title>Student Dashboard | Conductor</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <div class="page" data-role="student">
+        <!-- ============================================================
+             TOP NAV
+        ============================================================ -->
         <header class="top-nav">
-            <div class="brand">Conductor <span>App</span></div>
+            <div class="brand">
+                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+
+            </div>
             <div class="nav-actions">
                 <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
                     Teams Meetings and Tasks
                 </a>
-                <a href="/group_formation/group_member_form.html" class="nav-btn eval-btn">
+                <a href="/group_formation/student_group_form.html" class="nav-btn eval-btn">
                     Group Formation Form 
                 </a>
                 <div class="profile">
                     <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-                        <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
-                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
-                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                        <img
+                            id="dashboard-profile-img"
+                            src="/assets/logo/user.png"
+                            alt="Profile"
+                            style="width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;"
+                        />
+                        <div
+                            class="profile-dropdown"
+                            id="profileDropdown"
+                            style="
+                                display:none;
+                                position:absolute;
+                                top:40px;
+                                right:0;
+                                background:#fff;
+                                border:1px solid #ddd;
+                                border-radius:8px;
+                                box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                                min-width:140px;
+                                z-index:10;
+                            "
+                        >
+                            <a
+                                href="/profile_page/profile.html"
+                                style="display:block; padding:10px 16px; color:#222; text-decoration:none;"
+                            >
+                                Profile
+                            </a>
+                            <a
+                                href="#"
+                                id="logoutBtn"
+                                style="display:block; padding:10px 16px; color:#d00; text-decoration:none;"
+                            >
+                                Log Out
+                            </a>
                         </div>
                     </div>
                 </div>
             </div>
         </header>
 
+        <!-- ============================================================
+             HEADER
+        ============================================================ -->
         <section class="dashboard-header">
             <div>
                 <h1>Student Dashboard</h1>
-                <small>Student view · CSE 210 </small>
+                <small>Student view · CSE 210</small>
             </div>
         </section>
 
+        <!-- ============================================================
+             MAIN GRID CARDS
+        ============================================================ -->
         <section class="content-grid">
+            <!-- Class Directory -->
             <article class="dashboard-card">
-                <div class="card-icon">📚</div>
-                <div class="card-content">
+               <div class="card-icon">
+                    <img src="directory_icon.png" alt="Directory Icon">
+                </div> 
+              <div class="card-content">
                     <h2>Class Directory</h2>
-                    <p>Browse your course overview, roster, and calendar in one place.</p>
+                    <p>Browse your course overview, roster, and assignments</p>
                     <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
                 </div>
             </article>
-
+            
             <article class="dashboard-card">
-                <div class="card-icon">🗂️</div>
+               <div class="card-icon">
+                    <img src="team_icon.png" alt="Teams Icon">
+                </div> 
+              <div class="card-content">
+                    <h2>My Teams</h2>
+                    <p>View insights of your team's tasks, progress, and collaboration</p>
+                <button class="card-btn" id="viewTeamsBtn">View Teams</button>
+                </div>
+            </article>
+
+            <!-- Task Tracker -->
+            <article class="dashboard-card">
+               <div class="card-icon">
+                    <img src="task_tracker_icon.png" alt="Task Tracker Icon">
+                </div> 
                 <div class="card-content">
                     <h2>Task Tracker</h2>
                     <p>Monitor assigned tasks, due dates, and progress updates.</p>
@@ -58,46 +121,60 @@
                 </div>
             </article>
 
+            <!-- Work Journal -->
             <article class="dashboard-card">
-                <div class="card-icon">📝</div>
+               <div class="card-icon">
+                    <img src="work_journal_icon.png" alt="Work Journal Icon">
+                </div> 
                 <div class="card-content">
                     <h2>Work Journal</h2>
-                    <p>Create, organize, or review your meeting notes and class discussions.</p>
-                    <button id="viewWorkJournalBtn" class="card-btn">Open Notes</button>
+                    <p>Create, organize, or review your weekly work journals.</p>
+                    <button id="viewWorkJournalBtn" class="card-btn">Open Work Journal</button>
                 </div>
             </article>
 
+            <!-- Weekly Evaluation (opens side panel) -->
             <article class="dashboard-card">
-                <div class="card-icon">📈</div>
+               <div class="card-icon">
+                    <img src="weekly_eval_icon.png" alt="Weekly Evaluation Feedback Icon">
+                </div> 
                 <div class="card-content">
                     <h2>Weekly Evaluation</h2>
-                    <p>Review your notes and mood score by selecting a timeframe.</p>
-                    <button class="card-btn evaluation-trigger" data-member-id="1" aria-expanded="false">
+                    <p>Review your weekly status, public notes, and journal replies.</p>
+                    <button
+                        class="card-btn evaluation-trigger"
+                        data-member-id="1"
+                        aria-expanded="false"
+                    >
                         View Evaluation
                     </button>
                 </div>
             </article>
 
+            <!-- Attendance -->
             <article class="dashboard-card">
-                <div class="card-icon">✅</div>
+               <div class="card-icon">
+                    <img src="attendance_icon.PNG" alt="Attendance Icon">
+                </div> 
                 <div class="card-content">
                     <h2>Submit Attendance</h2>
                     <p>Enter your weekly attendance code.</p>
                     <button id="openAttendanceDrawer" class="card-btn">Submit Attendance</button>
                 </div>
             </article>
-
         </section>
-
     </div>
 
+    <!-- ============================================================
+         PROFILE PANEL (placeholder, navigation goes to profile page)
+    ============================================================ -->
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
-    <!-- Profile panel removed, navigation now goes to profile page -->
+        <!-- Profile panel removed, navigation now goes to profile page -->
     </section>
 
-        <!-- ============================================================
-         NEW ATTENDANCE DRAWER (REPLACED CONTENT)
-         ============================================================ -->
+    <!-- ============================================================
+         ATTENDANCE DRAWER (CURRENTLY LOCAL / DEV IMPLEMENTATION)
+    ============================================================ -->
     <section class="attendance-panel" id="attendancePanel" aria-hidden="true">
         <article class="attendance-drawer">
             <header>
@@ -136,165 +213,348 @@
         </article>
     </section>
 
-
+    <!-- ============================================================
+         WEEKLY EVALUATION SLIDE-OUT PANEL
+         (Student view; filled by student_weekly_eval.js)
+    ============================================================ -->
     <section class="evaluation-panel" aria-hidden="true">
         <article class="evaluation-drawer">
             <header>
                 <div>
                     <p class="meta-label">Weekly evaluation</p>
-                    <h2 data-eval-context>Jordan Lee · Team Beacon</h2>
+                    <h2 data-eval-context>Student · Team</h2>
                     <p>Mood score and notes update as you change the week.</p>
                 </div>
                 <button class="close-evaluation" aria-label="Close weekly evaluation">×</button>
             </header>
+
+            <!-- Existing week filter + mood display (kept for UI continuity) -->
             <div class="evaluation-filter">
                 <label for="student-week">Filter by week</label>
                 <select id="student-week" data-week-filter></select>
             </div>
-            <div class="mood-display">
+
+            <!-- <div class="mood-display">
                 <div class="evaluation-face" data-mood-face>😊</div>
                 <div>
                     <p class="mood-status" data-mood-status>On track</p>
-                    <p class="mood-meta" data-mood-meta>Captured for Week 6</p>
+                    <p class="mood-meta" data-mood-meta>Captured for most recent week</p>
                 </div>
-            </div>
+            </div> -->
+
             <div class="notes-panel">
                 <label>Evaluation notes</label>
                 <p data-eval-notes>Notes for the selected week will appear here.</p>
             </div>
+
+            <!-- New detailed weekly evaluation content populated by student_weekly_eval.js -->
+            <div class="weekly-eval-expanded">
+                <div id="weeklyEvalSummary"></div>
+
+                <div class="weekly-eval-body">
+                    <div id="weeklyEvalPublicNotes"></div>
+                    <div id="weeklyEvalJournalReplies"></div>
+                </div>
+            </div>
         </article>
     </section>
 
+    <!-- ============================================================
+         MAIN DASHBOARD SCRIPT (existing behavior: open/close panels, etc.)
+    ============================================================ -->
     <script src="script.js"></script>
-        <script>
-            document.getElementById('viewTasksBtn').addEventListener('click', function() {
-            window.location.href = '/task_tracker/task_tracker.html';
-            });
-        </script>
-        <script>
-            document.getElementById('viewClassDirectoryBtn').addEventListener('click', function() {
-            window.location.href = '/class_directory_student/class_directory_student.html';
-            });
-        </script>
-        <script>
-            document.getElementById('viewWorkJournalBtn').addEventListener('click', function() {
-            window.location.href = '/work_journal/work_journal.html';
-            });
-        </script>
-        <script>
-            // Dropdown logic
-            const profileImg = document.getElementById('dashboardProfileImg');
-            const dropdown = document.getElementById('profileDropdown');
-            profileImg.addEventListener('mouseenter', function () {
-                dropdown.style.display = 'block';
-            });
-            profileImg.addEventListener('mouseleave', function () {
-                setTimeout(function () {
-                    if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
-                }, 150);
-            });
-            dropdown.addEventListener('mouseleave', function () {
-                dropdown.style.display = 'none';
-            });
-            dropdown.addEventListener('mouseenter', function () {
-                dropdown.style.display = 'block';
-            });
-            document.getElementById('logoutBtn').addEventListener('click', function(e) {
-                e.preventDefault();
-                // Clear localStorage and redirect to login
-                localStorage.clear();
-                window.location.href = '/login';
-            });
-        </script>
+    <script src="../../shared/auth.js"></script>
+    <!-- ============================================================
+         STUDENT WEEKLY EVAL SCRIPT (calls /student/weekly-evaluation)
+         Populates:
+           - #weeklyEvalSummary
+           - #weeklyEvalPublicNotes
+           - #weeklyEvalJournalReplies
+    ============================================================ -->
+    <script src="student_weekly_eval.js"></script>
 
-        <script>
-            window.addEventListener('DOMContentLoaded', function() {
-                var savedImg = localStorage.getItem('profileImg');
-                if (savedImg) {
-                    var img1 = document.getElementById('dashboardProfileImg');
-                    if (img1) img1.src = savedImg;
-                    var img2 = document.getElementById('dashboardProfileImgLarge');
-                    if (img2) img2.src = savedImg;
-                }
-            });
-        </script>
+    <!-- ============================================================
+         NAVIGATION BUTTONS
+    ============================================================ -->
+        <!-- ============================================================
+         MAIN DASHBOARD SCRIPT + PROFILE + ATTENDANCE (BACKEND-INTEGRATED)
+    ============================================================ -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const API_BASE = '/api';
 
-        <script>
-            // ============================================================
-            // ATTENDANCE DRAWER OPEN/CLOSE
-            // ============================================================
-            const drawer = document.getElementById("attendancePanel");
-            const openBtn = document.getElementById("openAttendanceDrawer");
-            const closeBtn = document.querySelector(".close-attendance");
+        // ------------------------------------------------------------
+        // Helpers
+        // ------------------------------------------------------------
+        async function fetchJSON(url, options = {}) {
+          const res = await fetch(url, {
+            headers: { 'Content-Type': 'application/json' },
+            ...options,
+          });
 
-            openBtn.onclick = () => drawer.setAttribute("aria-hidden", "false");
-            closeBtn.onclick = () => drawer.setAttribute("aria-hidden", "true");
+          if (!res.ok) {
+            const text = await res.text().catch(() => '');
+            throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+          }
 
+          return res.json();
+        }
 
-            // ============================================================
-            // ATTENDANCE CODE SYSTEM
-            // ============================================================
-            const input = document.getElementById("attendanceInput");
-            const submitBtn = document.getElementById("attendanceSubmitBtn");
-            const message = document.getElementById("attendanceMessage");
-            const recordBody = document.getElementById("attendanceRecordBody");
-            const overall = document.getElementById("attendanceOverall");
+        function getCurrentUser() {
+          const fallback = {
+            email: 'student@school.edu',
+            role: 'student',
+            classId: 'CSE210',
+          };
 
-            const VALID_CODE = "ABC123"; // <--- Replace with real code if needed
+          try {
+            const stored = JSON.parse(localStorage.getItem('currentUser'));
+            return stored || fallback;
+          } catch {
+            return fallback;
+          }
+        }
 
-            submitBtn.onclick = () => {
-                const code = input.value.trim();
-                const history = JSON.parse(localStorage.getItem("attendanceCodeHistory") || "[]");
+        // ------------------------------------------------------------
+        // NAVIGATION BUTTONS
+        // ------------------------------------------------------------
+        const viewTasksBtn = document.getElementById('viewTasksBtn');
+        const viewClassDirectoryBtn = document.getElementById('viewClassDirectoryBtn');
+        const viewWorkJournalBtn = document.getElementById('viewWorkJournalBtn');
+        const viewTeamsBtn = document.getElementById('viewTeamsBtn');
 
-                const sessionNumber = history.length + 1;
-                const success = code === VALID_CODE;
+        if (viewTasksBtn) viewTasksBtn.addEventListener('click', () => { window.location.href = '/task_tracker/task_tracker.html'; });
+        if (viewClassDirectoryBtn) viewClassDirectoryBtn.addEventListener('click', () => { window.location.href = '/class_directory_student/class_directory_student.html'; });
+        if (viewWorkJournalBtn) viewWorkJournalBtn.addEventListener('click', () => { window.location.href = '/work_journal/work_journal.html'; });
+        if (viewTeamsBtn) viewTeamsBtn.addEventListener('click', () => { window.location.href = '/student_team_card/student_team_card.html'; });
 
-                history.unshift({
-                    session: sessionNumber,
-                    status: success ? "Present" : "Invalid Code"
-                });
+                
+ 
+        // ------------------------------------------------------------
+        // PROFILE DROPDOWN + LOGOUT
+        // ------------------------------------------------------------
+        const profileImg = document.getElementById('dashboard-profile-img');
+        const dropdown = document.getElementById('profileDropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
 
-                localStorage.setItem("attendanceCodeHistory", JSON.stringify(history));
+        if (profileImg && dropdown) {
+          profileImg.addEventListener('mouseenter', () => {
+            dropdown.style.display = 'block';
+          });
 
-                message.textContent = success ? "✔ Attendance recorded!" : "✖ Invalid code.";
-                message.style.color = success ? "green" : "red";
+          profileImg.addEventListener('mouseleave', () => {
+            setTimeout(() => {
+              if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+            }, 150);
+          });
 
-                loadAttendanceTable();
-            };
+          dropdown.addEventListener('mouseenter', () => {
+            dropdown.style.display = 'block';
+          });
 
-            function loadAttendanceTable() {
-                const history = JSON.parse(localStorage.getItem("attendanceCodeHistory") || "[]");
+          dropdown.addEventListener('mouseleave', () => {
+            dropdown.style.display = 'none';
+          });
+        }
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // stop outer <a> from hijacking click
+            ConductorAuth.logout();
+          });
+        }
+        
 
-                recordBody.innerHTML = history.map(item => `
+        // ------------------------------------------------------------
+        // PROFILE IMAGE SYNC
+        // ------------------------------------------------------------
+        const savedImg = localStorage.getItem('profileImg');
+        if (savedImg) {
+          const img1 = document.getElementById('dashboard-profile-img');
+          if (img1) img1.src = savedImg;
+          const img2 = document.getElementById('dashboardProfileImgLarge');
+          if (img2) img2.src = savedImg;
+        }
+
+        // ------------------------------------------------------------
+        // ATTENDANCE DRAWER (BACKEND-INTEGRATED)
+        // ------------------------------------------------------------
+        const drawer = document.getElementById('attendancePanel');
+        const openBtn = document.getElementById('openAttendanceDrawer');
+        const closeBtn = document.querySelector('.close-attendance');
+
+        const input = document.getElementById('attendanceInput');
+        const submitBtn = document.getElementById('attendanceSubmitBtn');
+        const messageEl = document.getElementById('attendanceMessage');
+        const recordBody = document.getElementById('attendanceRecordBody');
+        const overallEl = document.getElementById('attendanceOverall');
+
+        const currentUser = getCurrentUser();
+        const email =
+          currentUser && currentUser.email
+            ? String(currentUser.email).toLowerCase()
+            : null;
+
+        if (!email) {
+          console.warn('[student] Attendance: missing currentUser email; attendance disabled.');
+        }
+
+        if (
+          drawer &&
+          openBtn &&
+          closeBtn &&
+          input &&
+          submitBtn &&
+          messageEl &&
+          recordBody &&
+          overallEl &&
+          email
+        ) {
+          // ----------------------------
+          // Load attendance history
+          // ----------------------------
+          async function loadAttendanceHistory() {
+            try {
+              const data = await fetchJSON(
+                `${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`,
+              );
+
+              const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+              const presentCount =
+                typeof data.presentCount === 'number' ? data.presentCount : 0;
+              const total =
+                typeof data.totalSessions === 'number'
+                  ? data.totalSessions
+                  : sessions.length;
+
+              recordBody.innerHTML = '';
+
+              if (!sessions.length) {
+                recordBody.innerHTML = `
+                  <tr>
+                    <td colspan="2">No attendance sessions have been created yet.</td>
+                  </tr>
+                `;
+                overallEl.textContent = '';
+                return;
+              }
+
+              const pct = total ? Math.round((presentCount / total) * 100) : 0;
+
+              const sorted = sessions
+                .slice()
+                .sort(
+                  (a, b) =>
+                    new Date(a.createdAt).getTime() -
+                    new Date(b.createdAt).getTime(),
+                );
+
+              const rowsHtml = sorted
+                .map((s) => {
+                  const when = new Date(s.createdAt).toLocaleString();
+                  const status =
+                    (s.status || '').toLowerCase() === 'present'
+                      ? 'Present'
+                      : 'Absent';
+
+                  return `
                     <tr>
-                        <td>Session ${item.session}</td>
-                        <td>${item.status}</td>
+                      <td>Session on ${when}</td>
+                      <td>${status}</td>
                     </tr>
-                `).join("");
+                  `;
+                })
+                .join('');
 
-                const presentCount = history.filter(h => h.status === "Present").length;
-                overall.textContent = `Present ${presentCount} out of ${history.length} sessions`;
+              recordBody.innerHTML = rowsHtml;
+              overallEl.textContent = `Present ${presentCount} out of ${total} sessions (${pct}%)`;
+            } catch (err) {
+              console.error('[student] Failed to load attendance history:', err);
+              recordBody.innerHTML = `
+                <tr>
+                  <td colspan="2" style="color:#b00020;">Failed to load attendance history.</td>
+                </tr>
+              `;
+              overallEl.textContent = '';
+            }
+          }
+
+          // ----------------------------
+          // Drawer open/close
+          // ----------------------------
+          function openDrawer() {
+            drawer.setAttribute('aria-hidden', 'false');
+            input.value = '';
+            messageEl.textContent = '';
+            messageEl.style.color = '#333';
+            loadAttendanceHistory();
+          }
+
+          function closeDrawer() {
+            drawer.setAttribute('aria-hidden', 'true');
+          }
+
+          openBtn.addEventListener('click', openDrawer);
+          closeBtn.addEventListener('click', closeDrawer);
+
+          // Optional: click backdrop closes
+          drawer.addEventListener('click', (e) => {
+            if (e.target === drawer) {
+              closeDrawer();
+            }
+          });
+
+          // ----------------------------
+          // Submit code (POST to backend)
+          // ----------------------------
+          async function handleSubmit() {
+            const raw = input.value || '';
+            const code = raw.trim().toUpperCase();
+
+            if (!code) {
+              messageEl.textContent = 'Please enter a code.';
+              messageEl.style.color = '#b00020';
+              return;
             }
 
-            loadAttendanceTable();
-        </script>
+            try {
+              const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
+                method: 'POST',
+                body: JSON.stringify({ code, email }),
+              });
 
+              if (result && result.success) {
+                messageEl.textContent = '✔ You are marked present for this session.';
+                messageEl.style.color = '#0a7a30';
+                await loadAttendanceHistory();
+              } else {
+                messageEl.textContent =
+                  (result && result.message) ||
+                  'Code not found or expired. Make sure you enter it during the class window.';
+                messageEl.style.color = '#b00020';
+              }
+            } catch (err) {
+              console.error('[student] Failed to mark attendance:', err);
+              messageEl.textContent =
+                'Could not submit attendance. Please check the code and try again.';
+              messageEl.style.color = '#b00020';
+            }
+          }
 
+          submitBtn.addEventListener('click', handleSubmit);
+          input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleSubmit();
+            }
+          });
+        } else {
+          console.warn(
+            '[student] Attendance drawer not fully initialized (missing DOM elements or email).',
+          );
+        }
+      });
+    </script>
 
-        <script>
-            /*
-            window.addEventListener('DOMContentLoaded', function() {
-                var firstName = localStorage.getItem('firstName') || 'Avery';
-                var lastName = localStorage.getItem('lastName') || 'Lin';
-                var role = localStorage.getItem('role') || 'Professor';
-                var email = localStorage.getItem('email') || 'avery.lin@conductor.edu';
-                document.getElementById('profName').textContent = firstName + ' ' + lastName;
-                document.getElementById('profFullName').textContent = firstName + ' ' + lastName;
-                document.getElementById('profRole').textContent = role + ' · CSE 210';
-                document.getElementById('profRoleMeta').textContent = role;
-                document.getElementById('profEmail').textContent = email;
-            });
-            */
-        </script>
 </body>
 </html>

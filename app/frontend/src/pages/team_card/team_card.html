@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 <head>
+    <link rel="stylesheet" href="../../../assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
     <script defer src="/assets/js/class-directory-nav.js"></script>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
     <title>Team Group Dashboard | Conductor</title>
     <link rel="stylesheet" href="/dashboards/style.css" />
 </head>
@@ -16,7 +18,7 @@
             <div class="nav-actions">
                  <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
                 <div class="profile">
-                    <a href="/profile_page/profile.html" class="profile-link">
+                    <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
                         <div class="profile-dropdown-container" style="position:relative;">
                             <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
         <!-- Use style.css for consistent dashboard styling -->
@@ -25,7 +27,7 @@
                                 <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
                             </div>
                         </div>
-                    </a>
+                    <!-- </a> -->
                 </div>
             </div>
         </header>
@@ -61,6 +63,10 @@
                     <h3>Status Description</h3>
                     <p id="modalStatusDesc">What the team is currently working on...</p>
                 </div>
+                <div class="modal-section">
+                    <h3>Repo Link</h3>
+                    <p id="modalRepoLink">Repo not set.</p>
+                </div>
                 
                 <!-- Progress section removed from modal -->
                 
@@ -86,78 +92,59 @@
 
         <script>
             // Define showTeamInfo function first and make it globally accessible
-            function showTeamInfo(team) {
-                console.log('showTeamInfo called with team:', team);
-                
-                // Use actual team data, with defaults for missing fields
-                const teamData = {
-                    name: team.name || "Unnamed Team",
-                    description: team.description || "No description available.",
-                    statusDescription: team.description || "Currently working on team projects and assignments.",
-                    ta: "Sarah Chen", // Default TA (can be enhanced later)
-                    members: (team.members || [])
-                        .filter(member => {
-                            if (typeof member === 'string' && member.startsWith('+')) {
-                                return false;
-                            }
-                            return true;
-                        })
-                        .map((member, index) => {
-                            if (typeof member === 'string') {
-                                return {
-                                    name: member,
-                                    isLeader: index === 0,
-                                    score: 85 + Math.floor(Math.random() * 15)
-                                };
-                            } else {
-                                return member;
-                            }
-                        })
-                };
-                
+            async function showTeamInfo(team) {
                 try {
-                    // Populate modal with data
+                    const res = await fetch(`/api/team-card/${team.id}`);
+                    if (!res.ok) throw new Error('Failed to load team details');
+                    const data = await res.json();
+
                     const modalName = document.getElementById('modalTeamName');
                     const modalDesc = document.getElementById('modalDescription');
                     const modalStatusDesc = document.getElementById('modalStatusDesc');
                     const modalTA = document.getElementById('modalTA');
-                    
-                    if (!modalName || !modalDesc || !modalStatusDesc || !modalTA) {
+                    const membersList = document.getElementById('modalMembers');
+                    const statusBadge = document.getElementById('modalTeamStatus');
+
+                    if (!modalName || !modalDesc || !modalStatusDesc || !modalTA || !membersList) {
                         console.error('Modal elements not found');
                         return;
                     }
-                    
-                    modalName.textContent = teamData.name;
-                    modalDesc.textContent = teamData.description;
-                    modalStatusDesc.textContent = teamData.statusDescription;
-                    modalTA.textContent = teamData.ta;
-                    
-                    // Status badge and progress bar removed
-                    
-                    // Populate members list
-                    const membersList = document.getElementById('modalMembers');
-                    if (membersList) {
-                        membersList.innerHTML = teamData.members.map(member => `
-                            <li class="member-item">
-                                <span class="member-name">
-                                    ${member.name}
-                                    ${member.isLeader ? '<span class="leader-badge">👑 Leader</span>' : ''}
-                                </span>
-                                <span class="member-score">Score: ${member.score}</span>
-                            </li>
-                        `).join('');
-                    }
-                    
-                    // Show modal
-                    const modal = document.getElementById('teamModal');
-                    if (modal) {
-                        console.log('Showing modal');
-                        modal.style.display = 'flex';
+
+                    modalName.textContent = data.name || 'Unnamed Team';
+                    statusBadge.textContent = data.status || 'N/A';
+                    if (!data.status || String(data.status).trim().toLowerCase() === 'on track') {
+                        statusBadge.style.display = 'none';
                     } else {
-                        console.error('Modal element not found');
+                        statusBadge.style.display = '';
                     }
+                    modalDesc.textContent = data.description || 'No description available.';
+                                        modalStatusDesc.textContent = data.statusDescription || 'No status details.';
+                                        const repoNode = document.getElementById('modalRepoLink');
+                                        if (repoNode) {
+                                            if (data.repoUrl) {
+                                                const safe = data.repoUrl.trim();
+                                                repoNode.innerHTML = `<a href="${safe}" target="_blank" rel="noopener noreferrer">${safe}</a>`;
+                                            } else {
+                                                repoNode.textContent = 'Repo not set.';
+                                            }
+                                        }
+                    modalTA.textContent = data.ta ? `${data.ta.name} (${data.ta.email})` : 'None assigned';
+
+                    membersList.innerHTML = (data.members || [])
+                      .map(m => `
+                        <li class="member-item">
+                          <span class="member-name">
+                            ${m.name} <small style="color:#555;">${m.email || ''}</small>
+                            ${m.isLeader ? '<span class="leader-badge">👑 Leader</span>' : ''}
+                          </span>
+                        </li>
+                      `).join('') || '<li style="color:#777;">No members.</li>';
+
+                    const modal = document.getElementById('teamModal');
+                    if (modal) modal.style.display = 'flex';
                 } catch (error) {
                     console.error('Error showing team info:', error);
+                    alert('Failed to load team details.');
                 }
             }
             

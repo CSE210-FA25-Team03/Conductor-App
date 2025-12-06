@@ -1,67 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="auto">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../../assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
   <title>Course Configuration | Conductor</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <header class="top-nav">
-        <div class="brand">Conductor <span>App</span></div>
-        <div class="nav-actions">
-            <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+  <header class="top-nav">
+    <div class="brand">
+                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    </div>
 
-            <div class="profile profile-dropdown-container">
-                <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" class="profile-img" />
-                <div class="profile-dropdown" id="profileDropdown" aria-hidden="true">
-                    <a href="/profile_page/profile.html">Profile</a>
-                    <a href="#" id="logoutBtn" class="logout">Log Out</a>
-                </div>
-            </div>
+    <div class="nav-actions">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+
+      <div class="profile profile-dropdown-container">
+        <img
+          id="dashboardProfileImg"
+          src="/assets/logo/user.png"
+          alt="Profile"
+          class="profile-img"
+        />
+        <div
+          class="profile-dropdown"
+          id="profileDropdown"
+          aria-hidden="true"
+        >
+          <a href="/profile_page/profile.html">Profile</a>
+          <a href="#" id="logoutBtn" class="logout">Log Out</a>
         </div>
-    </header>
+      </div>
+    </div>
+  </header>
 
-    <main class="config-container">
+  <main class="config-container">
+    <!-- Class & Staff Roster Card -->
+    <section class="config-card">
+      <h2>Class &amp; Staff Rosters</h2>
+      <p>Upload a student roster and staff roster for this course.</p>
 
-        <!-- Class & Staff Roster Card -->
-        <section class="config-card">
-            <h2>Class & Staff Rosters</h2>
-            <p>Upload a student roster and staff roster for this course.</p>
+      <label class="file-label">
+        Student roster (CSV:
+        <span class="muted">email,pid,name[,skills]</span>)
+      </label>
+      <input type="file" id="classRosterFile" accept=".csv,text/csv" />
 
-            <label class="file-label">Student roster (CSV: <span class="muted">email,pid,name[,skills]</span>)</label>
-            <input type="file" id="classRosterFile" accept=".csv,text/csv" />
+      <label class="file-label">
+        Staff roster (CSV:
+        <span class="muted">email,pid,name,role</span>)
+      </label>
+      <input type="file" id="staffRosterFile" accept=".csv,text/csv" />
 
-            <label class="file-label">Staff roster (CSV: <span class="muted">email,pid,name,role</span>)</label>
-            <input type="file" id="staffRosterFile" accept=".csv,text/csv" />
+      <div class="row">
+        <button class="primary-btn" id="uploadRostersBtn">Upload Rosters</button>
+        <div
+          id="rosterStatus"
+          class="status-text"
+          aria-live="polite"
+        ></div>
+      </div>
+    </section>
 
-            <div class="row">
-                <button class="primary-btn" id="uploadRostersBtn">Upload Rosters</button>
-                <div id="rosterStatus" class="status-text" aria-live="polite"></div>
-            </div>
-        </section>
+    <!-- Course Description -->
+    <section class="config-card">
+      <h2>Course Description</h2>
+      <p>Enter a short description for this course (shown to students).</p>
 
-        <!-- Course Description -->
-        <section class="config-card">
-            <h2>Course Description</h2>
-            <p>Enter a short description for this course (shown to students).</p>
+      <textarea
+        id="courseDescription"
+        placeholder="Enter course description here..."
+      ></textarea>
 
-            <textarea id="courseDescription" placeholder="Enter course description here..."></textarea>
-        </section>
+      <div class="row" style="margin-top: 12px;">
+        <button id="saveDescriptionBtn" class="primary-btn">
+          Save Description
+        </button>
+        <div
+          id="courseDescriptionStatus"
+          class="status-text"
+          aria-live="polite"
+        ></div>
+      </div>
+    </section>
+  </main>
 
-        <!-- Create Course -->
-        <section class="config-card finalize-card">
-            <h2>Finalize Course Setup</h2>
-            <p>After uploading rosters and entering a course description, create the course.</p>
-
-            <div class="row">
-                <button id="createCourseBtn" class="primary-btn">Create Course</button>
-                <div id="createCourseStatus" class="status-text" aria-live="polite"></div>
-            </div>
-        </section>
-
-    </main>
-
-    <script src="class_config.js"></script>
+  <script src="class_config.js"></script>
 </body>
 </html>

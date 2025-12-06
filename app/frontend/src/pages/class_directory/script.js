@@ -115,17 +115,84 @@ function initCalendar() {
       const evt = info.event;
       const due = new Date(evt.start).toLocaleString();
       const desc = evt.extendedProps?.description || '';
-
-      const msg =
-        `Deadline: ${evt.title}\nDue: ${due}` +
-        (desc ? `\n\nDetails: ${desc}` : '') +
-        `\n\nDelete this event?`;
-
-      if (confirm(msg)) deleteEvent(evt.id);
+      showEventPopup({
+        title: evt.title,
+        due,
+        desc,
+      });
     }
   });
 
   calendarInstance.render();
+}
+
+// Lightweight popup card for event details
+function ensureEventPopup() {
+  let popup = document.getElementById('event-detail-popup');
+  if (popup) return popup;
+
+  // Backdrop overlay
+  let backdrop = document.getElementById('event-detail-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'event-detail-backdrop';
+    backdrop.style.position = 'fixed';
+    backdrop.style.inset = '0';
+    backdrop.style.background = 'rgba(0, 0, 0, 0.35)';
+    backdrop.style.zIndex = '999';
+    backdrop.style.display = 'none';
+    backdrop.addEventListener('click', () => hideEventPopup());
+    document.body.appendChild(backdrop);
+  }
+
+  popup = document.createElement('div');
+  popup.id = 'event-detail-popup';
+  popup.style.position = 'fixed';
+  popup.style.top = '50%';
+  popup.style.left = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  popup.style.maxWidth = '480px';
+  popup.style.width = 'calc(100% - 32px)';
+  popup.style.background = '#ffffff';
+  popup.style.border = '1px solid #e5e7eb';
+  popup.style.borderRadius = '8px';
+  popup.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+  popup.style.padding = '16px';
+  popup.style.zIndex = '1000';
+  popup.style.display = 'none';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = 'Close';
+  closeBtn.className = 'ghost-btn';
+  closeBtn.style.float = 'right';
+  closeBtn.addEventListener('click', () => hideEventPopup());
+
+  const content = document.createElement('pre');
+  content.id = 'event-detail-content';
+  content.style.whiteSpace = 'pre-wrap';
+  content.style.margin = '0';
+  content.style.fontFamily = 'inherit';
+
+  popup.appendChild(closeBtn);
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+  return popup;
+}
+
+function showEventPopup({ title, due, desc }) {
+  const popup = ensureEventPopup();
+  const content = document.getElementById('event-detail-content');
+  content.textContent = `Deadline: ${title}\nDue: ${due}` + (desc ? `\n\nDetails: ${desc}` : '');
+  const backdrop = document.getElementById('event-detail-backdrop');
+  if (backdrop) backdrop.style.display = 'block';
+  popup.style.display = 'block';
+}
+
+function hideEventPopup() {
+  const popup = document.getElementById('event-detail-popup');
+  if (popup) popup.style.display = 'none';
+  const backdrop = document.getElementById('event-detail-backdrop');
+  if (backdrop) backdrop.style.display = 'none';
 }
 
 /* ============================================================
@@ -253,8 +320,18 @@ async function putJson(url, body) {
 
 async function deleteRequest(url) {
   const res = await fetch(url, { method: 'DELETE' });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+  // Some DELETE endpoints return 204 No Content
+  if (res.status === 204) return true;
+  // Fallback: try to parse JSON if present
+  const ct = res.headers.get('content-type') || '';
+  if (ct.includes('application/json')) {
+    return res.json();
+  }
+  return true;
 }
 
 /* ============================================================
@@ -393,10 +470,48 @@ async function deleteEvent(id) {
   try {
     await deleteRequest(`${EVENTS_ENDPOINT}/${id}`);
     await loadEvents();
+    showToast('Event deleted', 'success');
   } catch (err) {
     console.error(err);
-    alert('Failed to delete event.');
+    showToast('Failed to delete event', 'error');
   }
+}
+
+// Simple toast utility
+function ensureToast() {
+  let t = document.getElementById('cd-toast');
+  if (t) return t;
+  t = document.createElement('div');
+  t.id = 'cd-toast';
+  t.style.position = 'fixed';
+  t.style.left = '50%';
+  t.style.top = '24px';
+  t.style.transform = 'translateX(-50%)';
+  t.style.maxWidth = '520px';
+  t.style.width = 'calc(100% - 32px)';
+  t.style.padding = '12px 16px';
+  t.style.borderRadius = '8px';
+  t.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+  t.style.fontWeight = '500';
+  t.style.zIndex = '1000';
+  t.style.display = 'none';
+  document.body.appendChild(t);
+  return t;
+}
+
+function showToast(message, type = 'info') {
+  const t = ensureToast();
+  t.textContent = message;
+  const isError = type === 'error';
+  const isSuccess = type === 'success';
+  t.style.background = isError ? '#fee2e2' : isSuccess ? '#dcfce7' : '#f3f4f6';
+  t.style.color = isError ? '#991b1b' : isSuccess ? '#065f46' : '#111827';
+  t.style.border = isError ? '1px solid #fca5a5' : isSuccess ? '1px solid #86efac' : '1px solid #e5e7eb';
+  t.style.display = 'block';
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => {
+    t.style.display = 'none';
+  }, 2500);
 }
 
 /* ============================================================
@@ -417,15 +532,23 @@ function renderStaffList(type, staff = []) {
   staff.forEach(person => {
     const row = document.createElement('div');
     row.className = 'staff-row';
+    const avatar = resolveStaffPicture(person.photo_url || person.staff_picture);
+    const name = person.name || person.staff_name || 'Unnamed';
+    const pronouns = person.pronouns || '';
+    const email = person.email || '';
+    const phone = person.phone || person.contact || '';
+    const availability = person.office_hours || person.availability || '';
+    const publicLink = person.public_link || '';
 
     row.innerHTML = `
-      <img class="staff-avatar" src="${resolveStaffPicture(person.staff_picture)}" />
+      <img class="staff-avatar" src="${avatar}" />
       <div class="staff-row-text">
-        <strong>${person.staff_name || 'Unnamed'}</strong>
-        ${person.pronoun ? `<span>Pronouns: ${person.pronoun}</span>` : ''}
-        ${person.email ? `<span>Email: ${person.email}</span>` : ''}
-        ${person.contact ? `<span>Contact: ${person.contact}</span>` : ''}
-        ${person.availability ? `<span>Availability: ${person.availability}</span>` : ''}
+        <strong>${name}</strong>
+        ${pronouns ? `<span>Pronouns: ${pronouns}</span>` : ''}
+        ${email ? `<span>Email: ${email}</span>` : ''}
+        ${phone ? `<span>Phone: ${phone}</span>` : ''}
+        ${availability ? `<span>Availability: ${availability}</span>` : ''}
+        ${publicLink ? `<span>Link: <a href="${publicLink}" target="_blank" rel="noopener">${publicLink}</a></span>` : ''}
       </div>
     `;
 
@@ -448,9 +571,13 @@ function renderTeams(teams = []) {
     const row = document.createElement('div');
     row.className = 'team-row';
 
+    const code = team.teamNumber || team.displayNumber || team.code || team.team_id || '--';
+    const name = team.name || team.team_name || '';
+    const status = team.status ? ` · ${team.status}` : '';
+
     row.innerHTML = `
-      <strong>Team ${team.team_id || '--'}</strong>
-      <span>${team.team_name || ''}</span>
+      <strong>Team ${code}</strong>
+      <span>${name}${status}</span>
     `;
 
     box.appendChild(row);
