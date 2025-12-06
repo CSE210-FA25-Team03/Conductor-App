@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
+  <link rel="stylesheet" href="../../../assets/css/global.css">
   <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
   <script defer src="/assets/js/class-directory-nav.js"></script>
 
@@ -13,13 +14,16 @@
 
 <body>
   <header class="top-nav">
-    <div class="brand">Conductor <span>App</span></div>
+    <div class="brand">
+        <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+        <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    </div>
 
     <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
       <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
 
       <div class="profile">
-        <a href="/profile_page/profile.html" class="profile-link">
+        <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
           <div class="profile-dropdown-container" style="position:relative;">
             <img
               id="dashboardProfileImg"
@@ -45,7 +49,7 @@
               <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
             </div>
           </div>
-        </a>
+        <!-- </a> -->
       </div>
     </div>
   </header>
@@ -71,10 +75,10 @@
 
       <form id="workJournalForm">
         <div class="wj-field">
-          <label for="repoLink">
+          <label for="repo-link">
             GitHub repo:
             <a
-              id="repoLink"
+              id="repo-link"
               href="#"
               target="_blank"
               rel="noopener noreferrer"
@@ -118,7 +122,7 @@
           ></textarea>
         </div>
 
-        <div class="sentiment-options">
+        <div class="visibility-options">
           <label>
             <input type="radio" name="status" value="public" required>
             Public
@@ -487,7 +491,7 @@
             document.querySelector("input[name='status']:checked")?.value ||
             'private';
           const repoLink =
-            document.getElementById('repoLink')?.getAttribute('href') || '';
+            document.getElementById('repo-link')?.getAttribute('href') || '';
 
           if (!tasksDone.trim()) {
             showError('Please describe what you worked on today.');
@@ -534,7 +538,7 @@
         try {
           const emailLower = (email || '').toLowerCase();
           const teams = await fetchJSON(`${API_BASE}/my-teams?email=${encodeURIComponent(emailLower)}`);
-          const repoAnchor = document.getElementById('repoLink');
+          const repoAnchor = document.getElementById('repo-link');
           if (!repoAnchor) return;
           if (Array.isArray(teams) && teams.length) {
             // Choose first team that has a repoUrl

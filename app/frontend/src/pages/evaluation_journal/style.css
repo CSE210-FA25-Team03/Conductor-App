@@ -200,6 +200,14 @@ body {
     min-width: 0;
 }
 
+.logo-full {
+    display: block;
+    height: 6rem;
+}
+
+.logo-mini {
+    display: none;
+}
 .brand {
     font-weight: 600;
     font-size: clamp(0.75rem, 4vw, 1.5rem);
@@ -243,6 +251,17 @@ body {
     border-radius: 50%;
     object-fit: cover;
     cursor: pointer;
+}
+
+@media (max-width: 500px) {
+    .logo-full {
+        display: none ;
+    }
+
+    .logo-mini {
+        display: block ;
+        height: 2rem;
+    }
 }
 
 

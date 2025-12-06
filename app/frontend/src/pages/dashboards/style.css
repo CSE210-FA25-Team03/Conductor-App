@@ -229,7 +229,7 @@ body {
 }
 
 .team-card {
-  border-left: 6px solid var(--primary);
+  border: 1.6px solid #000;
 }
 
 .team-card.risk {
@@ -685,11 +685,30 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-.card-icon {
+/* .card-icon {
   font-size: 2.2rem;
   margin-bottom: 0.75rem;
+} */
+
+.card-icon img {
+  width: 5.2rem;   /* same visual size as your emoji */
+  height: auto;    /* keeps aspect ratio */
+  display: block;
+  object-fit: contain;
+}
+.card-icon {
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
 }
 
+@media (max-width: 500px) {
+  .card-icon img {
+    width: 1.9rem; /* slightly smaller on tiny phones */
+  }
+}
+
+/* end of icon image replacement */ 
 .card-content h2 {
   font-size: 1.25rem;
   margin: 0;
@@ -716,6 +735,11 @@ body {
 .card-btn:hover {
   background-color: #1d4ed8;
 }
+
+.logo-full {
+    display: block;
+    height: 6rem;
+}
 .brand {
   font-size: clamp(1.2rem, 4vw, 1.6rem); 
   font-weight: 700;
@@ -724,13 +748,22 @@ body {
   line-height: 1.2; 
 }
 
-.brand span {
-  background: linear-gradient(90deg, #2563eb, #60a5fa);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 800;
+.logo-mini {
+    display: none;
 }
+
+
+@media (max-width: 500px) {
+    .logo-full {
+        display: none ;
+    }
+
+    .logo-mini {
+        display: block ;
+        height: 2rem;
+    }
+}
+
 
 .eval-btn {
     display: inline-block;
@@ -1061,16 +1094,18 @@ body {
 }
 
 .submit-btn {
-    padding: 10px 14px;
-    background: #5560ff;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
+  padding: 10px 14px;
+  background: #2563eb; 
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
 }
 
 .submit-btn:hover {
-    opacity: 0.9;
+  background-color: #1d4ed8; 
 }
 
 .attendance-message {

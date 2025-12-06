@@ -34,15 +34,27 @@ body {
     margin-bottom: 2.2rem;
 }
 
-.brand {
-    font-weight: 600;
-    font-size: 1.5rem;
-    color: #2a3a5e;
+.logo-full {
+    display: block;
+    height: 6rem;
 }
-.brand span {
-    color: var(--accent);
-    font-weight: 700;
+
+.logo-mini {
+    display: none;
 }
+
+
+@media (max-width: 500px) {
+    .logo-full {
+        display: none ;
+    }
+
+    .logo-mini {
+        display: block ;
+        height: 2rem;
+    }
+}
+
 
 /* --- Main Page Panel --- */
 .page[data-role="professor"] {
@@ -70,11 +82,14 @@ body {
     display: flex;
     justify-content: center; /* Center the table horizontally */
     margin-top: 2rem;
+     padding: 0 16px;        
+    box-sizing: border-box; 
 }
 
 .evaluation-form-table {
+    
     width: 100%;
-    max-width: 1200px; /* Prevent table from stretching full width */
+    max-width: 1000px; /* Prevent table from stretching full width */
     border-collapse: collapse;
     background: var(--table-row);
     border-radius: var(--radius);
