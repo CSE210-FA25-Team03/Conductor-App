@@ -10,7 +10,7 @@ body {
     min-height: 100vh;
     padding: 0 10px;
     display: flex;
-    background: #232946;
+    background: radial-gradient(circle, #2563eb 20%, #1565c0 100%);
     justify-content: center;
     align-items: center;
     font-size: 13px;
