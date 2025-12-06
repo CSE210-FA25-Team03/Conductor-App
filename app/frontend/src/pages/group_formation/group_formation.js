@@ -354,24 +354,24 @@ async function refreshTAsFromServer() {
           .replace(/\s+/g, '.')}@school.edu`,
       }));
 
-    if (!taMembers.length) {
-      taMembers = FALLBACK_TAS.map((name, idx) => ({
-        id: `fallback-${idx + 1}`,
-        name,
-        email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
-      }));
-      showError('No TAs found in roster; using fallback list.');
-    }
+    // if (!taMembers.length) {
+    //   taMembers = FALLBACK_TAS.map((name, idx) => ({
+    //     id: `fallback-${idx + 1}`,
+    //     name,
+    //     email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
+    //   }));
+    //   showError('No TAs found in roster; using fallback list.');
+    // }
   } catch (err) {
     console.error('Failed to load TAs from server:', err);
-    if (!taMembers.length) {
-      taMembers = FALLBACK_TAS.map((name, idx) => ({
-        id: `fallback-${idx + 1}`,
-        name,
-        email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
-      }));
-      showError('Could not load TAs. Using fallback list.');
-    }
+    // if (!taMembers.length) {
+    //   taMembers = FALLBACK_TAS.map((name, idx) => ({
+    //     id: `fallback-${idx + 1}`,
+    //     name,
+    //     email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
+    //   }));
+    //   showError('Could not load TAs. Using fallback list.');
+    // }
   }
 }
 
