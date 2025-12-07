@@ -170,6 +170,43 @@ body {
   margin-bottom: 12px;
 }
 
+@media (max-width: 600px) {
+
+  #calendar {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    transform: scale(1);  
+  }
+
+  .calendar-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start
+  }
+
+  .calendar-header button {
+    width: 100%; 
+  }
+
+  .event-management {
+    grid-template-columns: 1fr !important;  
+  }
+
+  .event-form,
+  .event-list {
+    width: 90%;
+  }
+
+  .event-form input,
+  .event-form select,
+  .event-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
 .event-type-filter {
   display: flex;
   gap: 8px;
