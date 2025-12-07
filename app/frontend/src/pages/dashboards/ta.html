@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 <head>
+    <link rel="stylesheet" href="../../../assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
     <script defer src="/assets/js/class-directory-nav.js"></script>
 
@@ -16,19 +17,23 @@
 <div class="page" data-role="teaching-assistant">
 
     <header class="top-nav">
-        <div class="brand">Conductor <span>App</span></div>
+          <div class="brand">
+                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+
+            </div>
         <div class="nav-actions">
             <div class="profile">
-                <a href="/profile_page/profile.html" class="profile-link">
+                <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
                     <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                        <img id="dashboard-profile-img" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
                         <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
                             <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
                             <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
                         </div>
                     </div>
 
-                </a>
+                <!-- </a> -->
             </div>
         </div>
     </header>
@@ -43,37 +48,45 @@
     <section class="content-grid">
 
         <article class="dashboard-card">
-            <div class="card-icon">📚</div>
+             <div class="card-icon">
+                    <img src="directory_icon.png" alt="Directory Icon">
+                </div> 
             <div class="card-content">
                 <h2>Class Directory</h2>
-                <p>Browse your course overview, roster, and calendar in one place.</p>
+                <p>Browse your course overview, roster, and assignments</p>
                 <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
             </div>
         </article>
 
         <article class="dashboard-card">
-            <div class="card-icon">👥</div>
+             <div class="card-icon">
+                    <img src="team_icon.png" alt="Team Icon">
+                </div> 
             <div class="card-content">
                 <h2>Team Card</h2>
-                <p>Access team assignments, progress updates, and collaboration tools.</p>
+                <p>View insights into all teams you are assigned.Their tasks, progress, and collaboration</p>
                 <button id="viewTeamsBtn" class="card-btn">View Teams</button>
             </div>
         </article>
 
         <article class="dashboard-card">
-            <div class="card-icon">📊</div>
+             <div class="card-icon">
+                    <img src="eval_journal_icon.PNG" alt="Evaluation Journal Icon">
+                </div> 
             <div class="card-content">
                 <h2>Evaluation Journal</h2>
-                <p>Review performance metrics and grading insights.</p>
+                <p>Review performance metrics and grading insights of all teams you are assigned</p>
                 <button id="viewEvalJournalBtn" class="card-btn">Open Journal</button>
             </div>
         </article>
 
         <article class="dashboard-card">
-            <div class="card-icon">✅</div>
+             <div class="card-icon">
+                    <img src="attendance_icon.PNG" alt="Attendance Icon">
+                </div> 
             <div class="card-content">
                 <h2>Submit Attendance</h2>
-                <p>Submit attendance/activity for this week.</p>
+                <p>Submit attendance for this week</p>
                 <button id="openAttendanceDrawer" class="card-btn">Submit Attendance</button>
             </div>
         </article>
@@ -127,7 +140,7 @@
 // ---------------------------
 // PROFILE DROPDOWN
 // ---------------------------
-const profileImg = document.getElementById('dashboardProfileImg');
+const profileImg = document.getElementById('dashboard-profile-img');
 const dropdown = document.getElementById('profileDropdown');
 const logoutBtn = document.getElementById('logoutBtn');
 if (profileImg && dropdown) {
@@ -164,7 +177,7 @@ if (logoutBtn) {
 window.addEventListener('DOMContentLoaded', () => {
     const savedImg = localStorage.getItem('profileImg');
     if (savedImg) {
-        const headerImg = document.getElementById('dashboardProfileImg');
+        const headerImg = document.getElementById('dashboard-profile-img');
         if (headerImg) headerImg.src = savedImg;
 
         const largeImg = document.getElementById('dashboardProfileImgLarge');
@@ -202,7 +215,7 @@ window.addEventListener('DOMContentLoaded', () => {
 // ---------------------------
 const nav = {
     viewTeamsBtn: "/team_card/team_card.html",
-    viewClassDirectoryBtn: "/class_directory/class_directory.html",
+    viewClassDirectoryBtn: "/class_directory/class_directory_student.html",
     viewEvalJournalBtn: "/evaluation_journal/evaluation_journal.html"
 };
 

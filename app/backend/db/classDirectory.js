@@ -20,9 +20,11 @@ async function getCourseOverview() {
            c.code,
            c.title,
            t.code AS term_code,
-           t.name AS term_name
+           t.name AS term_name,
+           ci.description
     FROM courses c
     JOIN terms t ON c.term_id = t.id
+    LEFT JOIN course_info ci ON ci.course_id = c.id
     WHERE c.id = $1
     `,
     [courseId],
@@ -34,6 +36,7 @@ async function getCourseOverview() {
     course_code: row.code,
     term_year: row.term_code,
     title: row.title,
+    description: row.description || '',
   };
 }
 

@@ -91,7 +91,7 @@ const privateInput = document.getElementById('privateInput');
 const publicInput = document.getElementById('publicInput');
 const dateDisplay = document.getElementById('dateDisplay');
 const emptyMessage = document.getElementById('emptyMessage');
-let weekSelect = document.getElementById('weekSelect');
+let weekSelect = document.getElementById('week-select');
 let peopleList = [];
 let typeaheadMenu;
 let teamMemberEmails = null; // when role is team_lead, restrict to these emails
@@ -186,7 +186,7 @@ updateDate();
   if (!sel) {
     // Build a Week block with label and dropdown stacked
     const block = document.createElement('div');
-    block.id = 'weekBlock';
+    block.id = 'week-block';
     block.style.display = 'flex';
     block.style.flexDirection = 'column';
     block.style.marginTop = '8px';
@@ -198,7 +198,7 @@ updateDate();
     label.style.fontSize = '0.95rem';
 
     const created = document.createElement('select');
-    created.id = 'weekSelect';
+    created.id = 'week-select';
     created.style.padding = '6px 8px';
     created.style.border = '1px solid #ddd';
     created.style.borderRadius = '6px';
@@ -560,7 +560,7 @@ if (addBtn) {
           email: staffEmail,
           // Read week from DOM to avoid stale reference
           week: (function() {
-            const sel = document.getElementById('weekSelect') || weekSelect;
+            const sel = document.getElementById('week-select') || weekSelect;
             return sel ? (parseInt(sel.value || '0', 10) || null) : null;
           })(),
         }),

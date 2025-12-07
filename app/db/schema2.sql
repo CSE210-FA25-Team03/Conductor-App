@@ -325,13 +325,16 @@ CREATE TABLE project_tasks (
 );
 
 CREATE TABLE github_configs (
-  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  course_id  uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  owner      text NOT NULL,
-  repo       text NOT NULL,
-  token      text NOT NULL,
-  created_at timestamptz NOT NULL DEFAULT now(),
-  updated_at timestamptz NOT NULL DEFAULT now(),
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id     uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  owner         text,  -- Repository owner (optional if using org projects)
+  repo          text,  -- Repository name (optional if using org projects)
+  token         text NOT NULL,
+  project_id    text,  -- GitHub Project v2 ID (optional, direct ID usage)
+  org_name      text,  -- Organization name (optional, for org projects)
+  project_number int,  -- Project number (optional, for org projects)
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT github_configs_course_unique UNIQUE (course_id)
 );
 
@@ -472,9 +475,9 @@ VALUES
   (gen_random_uuid(), 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'e1111111-1111-1111-1111-111111111111', 'course', '22222222-2222-2222-2222-222222222222', now()),
   -- ta@school.edu as TA
   (gen_random_uuid(), 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'e3333333-3333-3333-3333-333333333333', 'course', '22222222-2222-2222-2222-222222222222', now()),
-  -- student@school.edu as student
+  -- -- student@school.edu as student
   (gen_random_uuid(), 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'e2222222-2222-2222-2222-222222222222', 'course', '22222222-2222-2222-2222-222222222222', now()),
-  -- teamlead@school.edu as student (legacy derived leader)
+  -- -- teamlead@school.edu as student (legacy derived leader)
   (gen_random_uuid(), 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'e2222222-2222-2222-2222-222222222222', 'course', '22222222-2222-2222-2222-222222222222', now()),
   -- alex_teamlead@school.edu as explicit team_lead
   (gen_random_uuid(), 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'e6666666-6666-6666-6666-666666666666', 'course', '22222222-2222-2222-2222-222222222222', now()),
@@ -482,118 +485,118 @@ VALUES
   (gen_random_uuid(), '99999999-9999-9999-9999-999999999999', 'e5555555-5555-5555-5555-555555555555', 'course', '22222222-2222-2222-2222-222222222222', now());
 
 -- One demo team
-INSERT INTO teams (id, course_id, code, name, display_number, status, description, created_at)
-VALUES (
-  '33333333-3333-3333-3333-333333333333',
-  '22222222-2222-2222-2222-222222222222',
-  'TEAM-1',
-  'Team 1',
-  '1',
-  'On Track',
-  'Default demo team for the course.',
-  now()
-);
+-- INSERT INTO teams (id, course_id, code, name, display_number, status, description, created_at)
+-- VALUES (
+--   '33333333-3333-3333-3333-333333333333',
+--   '22222222-2222-2222-2222-222222222222',
+--   'TEAM-1',
+--   'Team 1',
+--   '1',
+--   'On Track',
+--   'Default demo team for the course.',
+--   now()
+-- );
 
 -- Team members: student + team lead
-INSERT INTO team_members (id, team_id, user_id, is_leader, joined_at)
-VALUES
-  (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'cccccccc-cccc-cccc-cccc-cccccccccccc', false, now()),
-  (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true,  now());
+-- INSERT INTO team_members (id, team_id, user_id, is_leader, joined_at)
+-- VALUES
+--   (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'cccccccc-cccc-cccc-cccc-cccccccccccc', false, now()),
+--   (gen_random_uuid(), '33333333-3333-3333-3333-333333333333', 'dddddddd-dddd-dddd-dddd-dddddddddddd', true,  now());
 
 -- TA assignment to team
-INSERT INTO team_ta_assignments (id, team_id, ta_user_id, created_at)
-VALUES (
-  gen_random_uuid(),
-  '33333333-3333-3333-3333-333333333333',
-  'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-  now()
-);
+-- INSERT INTO team_ta_assignments (id, team_id, ta_user_id, created_at)
+-- VALUES (
+--   gen_random_uuid(),
+--   '33333333-3333-3333-3333-333333333333',
+--   'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
+--   now()
+-- );
 
 -- Some initial class events
-INSERT INTO class_events (id, course_id, created_by, title, description, type, starts_at, due_at, created_at, updated_at)
-VALUES
-  (
-    gen_random_uuid(),
-    '22222222-2222-2222-2222-222222222222',
-    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    'Project Kickoff',
-    'Intro to course and team project.',
-    'Class',
-    now() + interval '1 day',
-    null,
-    now(),
-    now()
-  ),
-  (
-    gen_random_uuid(),
-    '22222222-2222-2222-2222-222222222222',
-    'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-    'Milestone 1',
-    'First project milestone deliverable.',
-    'Assignment',
-    now() + interval '7 days',
-    now() + interval '7 days',
-    now(),
-    now()
-  );
+-- INSERT INTO class_events (id, course_id, created_by, title, description, type, starts_at, due_at, created_at, updated_at)
+-- VALUES
+--   (
+--     gen_random_uuid(),
+--     '22222222-2222-2222-2222-222222222222',
+--     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+--     'Project Kickoff',
+--     'Intro to course and team project.',
+--     'Class',
+--     now() + interval '1 day',
+--     null,
+--     now(),
+--     now()
+--   ),
+--   (
+--     gen_random_uuid(),
+--     '22222222-2222-2222-2222-222222222222',
+--     'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+--     'Milestone 1',
+--     'First project milestone deliverable.',
+--     'Assignment',
+--     now() + interval '7 days',
+--     now() + interval '7 days',
+--     now(),
+--     now()
+--   );
 
 -- Example skills for group formation
-INSERT INTO skills (id, course_id, name, description, weight, position, created_at, updated_at)
-VALUES
-  (
-    gen_random_uuid(),
-    '22222222-2222-2222-2222-222222222222',
-    'Frontend (React / JS)',
-    'Comfort building basic UI components and wiring up API calls.',
-    1.50,
-    1,
-    now(),
-    now()
-  ),
-  (
-    gen_random_uuid(),
-    '22222222-2222-2222-2222-222222222222',
-    'Backend (Node / APIs)',
-    'Comfort designing routes, DB queries, and server logic.',
-    1.50,
-    2,
-    now(),
-    now()
-  ),
-  (
-    gen_random_uuid(),
-    '22222222-2222-2222-2222-222222222222',
-    'Collaboration & Communication',
-    'Able to coordinate, document, and help keep the team on track.',
-    1.00,
-    3,
-    now(),
-    now()
-  );
+-- INSERT INTO skills (id, course_id, name, description, weight, position, created_at, updated_at)
+-- VALUES
+--   (
+--     gen_random_uuid(),
+--     '22222222-2222-2222-2222-222222222222',
+--     'Frontend (React / JS)',
+--     'Comfort building basic UI components and wiring up API calls.',
+--     1.50,
+--     1,
+--     now(),
+--     now()
+--   ),
+--   (
+--     gen_random_uuid(),
+--     '22222222-2222-2222-2222-222222222222',
+--     'Backend (Node / APIs)',
+--     'Comfort designing routes, DB queries, and server logic.',
+--     1.50,
+--     2,
+--     now(),
+--     now()
+--   ),
+--   (
+--     gen_random_uuid(),
+--     '22222222-2222-2222-2222-222222222222',
+--     'Collaboration & Communication',
+--     'Able to coordinate, document, and help keep the team on track.',
+--     1.00,
+--     3,
+--     now(),
+--     now()
+--   );
 
 -- Optional: simple rubric items
-INSERT INTO course_rubric_items (course_id, item_key, label, enabled, weight, updated_at)
-VALUES
-  ('22222222-2222-2222-2222-222222222222', 'attendance',   'Attendance / Participation', true, 20.00, now()),
-  ('22222222-2222-2222-2222-222222222222', 'work_journal', 'Weekly Work Journal',        true, 30.00, now()),
-  ('22222222-2222-2222-2222-222222222222', 'project',      'Project Contributions',      true, 50.00, now());
+-- INSERT INTO course_rubric_items (course_id, item_key, label, enabled, weight, updated_at)
+-- VALUES
+--   ('22222222-2222-2222-2222-222222222222', 'attendance',   'Attendance / Participation', true, 20.00, now()),
+--   ('22222222-2222-2222-2222-222222222222', 'work_journal', 'Weekly Work Journal',        true, 30.00, now()),
+--   ('22222222-2222-2222-2222-222222222222', 'project',      'Project Contributions',      true, 50.00, now());
 
 -- Optional: one initial evaluation report so student weekly view isn't empty
-INSERT INTO evaluation_reports (
-  course_id, user_id, team_id, team_role, week_label, status, mood, notes, created_by, created_at, updated_at
-) VALUES (
-  '22222222-2222-2222-2222-222222222222',
-  'cccccccc-cccc-cccc-cccc-cccccccccccc',
-  '33333333-3333-3333-3333-333333333333',
-  'Developer',
-  'Week 1',
-  'On Track',
-  'Green',
-  'Good start to the quarter. Keep contributing regularly.',
-  'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
-  now(),
-  now()
-);
+-- INSERT INTO evaluation_reports (
+--   course_id, user_id, team_id, team_role, week_label, status, mood, notes, created_by, created_at, updated_at
+-- ) VALUES (
+--   '22222222-2222-2222-2222-222222222222',
+--   'cccccccc-cccc-cccc-cccc-cccccccccccc',
+--   '33333333-3333-3333-3333-333333333333',
+--   'Developer',
+--   'Week 1',
+--   'On Track',
+--   'Green',
+--   'Good start to the quarter. Keep contributing regularly.',
+--   'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',
+--   now(),
+--   now()
+-- );
 
 -- Done.
 -- IMPORTANT for the app:

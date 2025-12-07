@@ -152,6 +152,23 @@ async function upsertSkill(courseId, skill) {
   return createdSkill;
 }
 
+async function deleteSkill(courseId, id) {
+  if (!courseId) {
+    throw new Error('courseId is required to delete a skill');
+  }
+  if (!id) {
+    throw new Error('skill id is required');
+  }
+  const { rowCount } = await db.query(
+    `
+    DELETE FROM skills
+    WHERE id = $1 AND course_id = $2
+    `,
+    [id, courseId],
+  );
+  return rowCount > 0;
+}
+
 // ------------------------------------------------------------
 // Ratings – professor view (ALL students, with default = 2)
 // ------------------------------------------------------------
@@ -606,6 +623,7 @@ async function saveGroups(courseId, groups = []) {
 module.exports = {
   getSkills,
   upsertSkill,
+  deleteSkill,
   getStudentRatings,
   getStudentRatingsForUser,
   upsertStudentRating,
