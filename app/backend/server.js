@@ -154,7 +154,12 @@ const fetch =
       ),
     );
   });
-
+  app.use(
+    "/common",
+    express.static(
+      path.join(__dirname, "../frontend/src/pages/common")
+    )
+  );
   app.use(
     '/evaluation_rubric',
     express.static(path.join(__dirname, '../frontend/src/pages/evaluation_rubric')),

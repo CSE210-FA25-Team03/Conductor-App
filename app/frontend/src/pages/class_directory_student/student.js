@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function getDashboardUrl() {
   const role = getUserRole();
   if (role === 'professor') return '/dashboards/professor.html';
-  if (role === 'teaching assistant') return '/dashboards/ta.html';
+  if (role === 'ta') return '/dashboards/ta.html';
   if (role === 'team_lead') return '/dashboards/team_lead.html';
   return '/dashboards/student.html';
 }

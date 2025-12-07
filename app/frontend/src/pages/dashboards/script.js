@@ -25,7 +25,7 @@
 //   return data;
 // };
 
-import { ensureAuthenticated } from "../../common/auth.js";
+import { ensureAuthenticated } from "../common/auth.js";
 
 const setupProfilePanel = () => {
   const panel = document.querySelector('.profile-panel');

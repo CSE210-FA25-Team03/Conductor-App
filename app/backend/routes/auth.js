@@ -122,6 +122,7 @@ router.get("/google/start", async (req, res) => {
       state,
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
+      prompt: "select_account",
     });
 
     return res.redirect(authUrl);
