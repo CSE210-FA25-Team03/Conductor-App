@@ -43,10 +43,11 @@
         </header>
 
         <section class="dashboard-header">
-            <div>
-                <h1>Team Lead Dashboard</h1>
-            </div>
-        </section>
+    <div>
+        <h1>Team Lead Dashboard</h1>
+        <small id="teamLeadCourseLabel">Team Lead view</small>
+    </div>
+</section>
 
         <section class="content-grid">
             <article class="dashboard-card">
@@ -208,7 +209,7 @@
          NAV, PROFILE, & ATTENDANCE LOGIC JS
          ============================================================ -->
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
     <script src="student_weekly_eval.js"></script>
     <script src="../../shared/auth.js"></script>
     <script>
@@ -373,6 +374,39 @@
                 input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } });
             });
         </script>
+        <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    function getCurrentCourseLabel() {
+      let courseLabel = 'CSE 210';
+      try {
+        if (window.ConductorAuth && typeof ConductorAuth.getCurrentUser === 'function') {
+          const user = ConductorAuth.getCurrentUser();
+          if (user && (user.courseCode || user.courseName)) {
+            return user.courseCode || user.courseName;
+          }
+        }
+        const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (stored) {
+          if (stored.courseCode) return stored.courseCode;
+          if (stored.courseName) return stored.courseName;
+          if (stored.classId) return stored.classId;
+        }
+      } catch (e) {
+        console.warn('[team_lead] Could not read current course:', e);
+      }
+      return courseLabel;
+    }
+
+    const lbl = document.getElementById('teamLeadCourseLabel')
+      || document.querySelector('.dashboard-header small');
+
+    if (lbl) {
+      const baseText = 'Team Lead view';
+      const courseLabel = getCurrentCourseLabel();
+      lbl.textContent = `${baseText} · ${courseLabel}`;
+    }
+  });
+</script>
 
 </body>
 </html>

@@ -309,35 +309,38 @@
     }
   }
 
-  function wirePanelOpenClose() {
-    const panel = document.querySelector('.evaluation-panel');
-    const openBtns = document.querySelectorAll('.evaluation-trigger');
-    const closeBtn = document.querySelector('.close-evaluation');
+function wirePanelOpenClose() {
+  const panel = document.querySelector('.evaluation-panel');
+  const openBtns = document.querySelectorAll('.evaluation-trigger');
+  const closeBtn = document.querySelector('.close-evaluation');
 
-    if (!panel) return;
+  if (!panel) return;
 
-    openBtns.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        panel.setAttribute('aria-hidden', 'false');
-        loadWeeklyEvaluation();
-      });
+  openBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      panel.classList.add('active');
+      panel.setAttribute('aria-hidden', 'false');
+      loadWeeklyEvaluation();
     });
+  });
 
-    if (closeBtn) {
-      closeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        panel.setAttribute('aria-hidden', 'true');
-      });
-    }
-
-    // Click backdrop to close, if desired
-    panel.addEventListener('click', (e) => {
-      if (e.target === panel) {
-        panel.setAttribute('aria-hidden', 'true');
-      }
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      panel.classList.remove('active');
+      panel.setAttribute('aria-hidden', 'true');
     });
   }
+
+  panel.addEventListener('click', (e) => {
+    if (e.target === panel) {
+      panel.classList.remove('active');
+      panel.setAttribute('aria-hidden', 'true');
+    }
+  });
+}
+
 
   document.addEventListener('DOMContentLoaded', () => {
     wirePanelOpenClose();

@@ -25,6 +25,7 @@
   const studentWeeklyEvalDb = require('./db/studentWeeklyEval');
   const rostersDb = require('./db/rosters');
   const profileDb = require('./db/profile');
+  const authRoutes = require('./routes/auth');
   const app = express();
   const PORT = process.env.PORT || 3000;
 /**
@@ -35,7 +36,7 @@
 // Basic Express server to serve static frontend and prepare for backend features
 const cookieSession = require('cookie-session');
 
-// Add cookie sessions for state + PKCE storage
+// Add cookie sessions for state
 app.use(cookieSession({
   name: 'session',
   keys: [process.env.SESSION_SECRET],   
@@ -46,7 +47,7 @@ app.use(cookieSession({
 
 
 // --- Mount auth routes ---
-const authRoutes = require('./routes/auth');
+
 app.use('/auth', authRoutes);
 
 
@@ -196,12 +197,56 @@ const fetch =
     return true;
   }
 
-  // ------------------------------------------------------------
-  // Auth / Login: resolve user role & target dashboard from DB
-  // ------------------------------------------------------------
+    /**
+   * Helper: get the current session user (or null).
+   */
+  function getSessionUser(req) {
+    return req.session && req.session.user ? req.session.user : null;
+  }
+
+  /**
+   * Middleware: require that the user is authenticated.
+   * Attaches `req.currentUser`.
+   */
+  function requireAuth(req, res, next) {
+    const user = getSessionUser(req);
+    if (!user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    req.currentUser = user;
+    next();
+  }
+
+  /**
+   * Middleware: require that a course is selected in the session.
+   * Attaches `req.currentUser` and `req.courseId`.
+   *
+   * This assumes the login flow (/api/auth/resolve-login)
+   * already set `req.session.user.courseId`.
+   */
+  function requireCourseContext(req, res, next) {
+    const user = getSessionUser(req);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    if (!user.courseId) {
+      return res.status(400).json({
+        error:
+          'No course selected for this session. Please log in again with the correct class code.',
+      });
+    }
+
+    req.currentUser = user;
+    req.courseId = user.courseId;
+    next();
+  }
+
+
   app.post('/api/auth/resolve-login', async (req, res) => {
     try {
-      // Need DB + course configured
+      // Need DB + course configured. We still require DEFAULT_COURSE_ID as a baseline,
+      // but when classCode is supplied we’ll resolve the course from the DB.
       if (
         !ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) ||
         !DEFAULT_COURSE_ID
@@ -212,65 +257,65 @@ const fetch =
         });
       }
 
-      const { email } = req.body || {};
+      const { email, classCode } = req.body || {};
+
       const normalizedEmail = (email || '').trim().toLowerCase();
+      const rawClassCode = (classCode || '').trim();
 
       if (!normalizedEmail) {
         return res.status(400).json({
           success: false,
-          message: 'Email is required',
+          message: 'Email is required.',
         });
       }
 
+      // Ask DB for user context, tied to a specific class code if provided
       const ctx = await classDirectoryDb.getUserCourseContextByEmail(
         normalizedEmail,
+        { classCode: rawClassCode || null },
       );
 
+      // 1) No user at all (email unknown, or no user in this DB)
       if (!ctx.user) {
-        return res.status(404).json({
-          success: false,
-          message:
-            'No user found with that email in the course roster. Please check with your instructor.',
-        });
-      }
-
-      if (!ctx.inCourse || !ctx.primaryRole) {
-        // Fallback: allow professors to log in using any course they are assigned to
-        const { rows: profCourse } = await dbCore.query(
-          `SELECT ra.scope_id AS course_id
-             FROM role_assignments ra
-             JOIN roles r ON r.id = ra.role_id
-            WHERE ra.user_id = $1 AND ra.scope_type = 'course' AND r.key = 'professor'
-            LIMIT 1`,
-          [ctx.user.id]
-        );
-        if (!profCourse.length) {
-          return res.status(403).json({
+        // If the user typed a class number, make the message explicit
+        if (rawClassCode) {
+          return res.status(404).json({
             success: false,
             message:
-              'This account is not enrolled in the current course. Please check with your instructor.',
+              'No user with that email is known for this course. Please check the class number or contact your instructor.',
           });
         }
 
-        // Build a synthetic context for professor on their course
-        const profCourseId = profCourse[0].course_id;
-        const primaryRole = 'professor';
-        const redirectPath = '/dashboards/professor.html';
-        return res.json({
-          success: true,
-          user: ctx.user,
-          courseId: profCourseId,
-          primaryRole,
-          redirectPath,
-          roles: ['professor'],
-          isTeamLead: false,
-          teamLeadTeams: [],
+        return res.status(404).json({
+          success: false,
+          message:
+            'No user found with that email in the course roster. Please contact your instructor.',
         });
       }
 
-      const primaryRole = ctx.primaryRole;
-      let redirectPath = '/dashboards/student.html';
+      // 2) If a class code was supplied but we couldn’t resolve a course
+      if (rawClassCode && !ctx.courseId) {
+        return res.status(404).json({
+          success: false,
+          message:
+            'No course found with that class number. Please double-check and try again.',
+        });
+      }
 
+      // 3) User exists but is NOT enrolled in the selected course
+      //    (or has no role there). Admins are allowed to bypass this.
+      if (!ctx.inCourse && ctx.primaryRole !== 'admin') {
+        return res.status(403).json({
+          success: false,
+          message:
+            'This account is not enrolled in the selected course. Please check the class number or contact your instructor.',
+        });
+      }
+
+      const primaryRole = ctx.primaryRole || 'student';
+
+      // Pick dashboard based on primary role
+      let redirectPath = '/dashboards/student.html';
       if (primaryRole === 'admin') {
         redirectPath = '/admin/admin.html';
       } else if (primaryRole === 'professor') {
@@ -279,28 +324,211 @@ const fetch =
         redirectPath = '/dashboards/ta.html';
       } else if (primaryRole === 'team_lead') {
         redirectPath = '/dashboards/team_lead.html';
-      } else if (primaryRole === 'tutor') {
-        // You can point tutors to a special dashboard later; for now treat as student.
-        redirectPath = '/dashboards/student.html';
       }
+
+      // Canonical session user: this is what *all* pages should read
+      const canonicalSessionUser = {
+        id: ctx.user.id,
+        email: ctx.user.email,
+        name: ctx.user.displayName || ctx.user.email,
+        role: primaryRole,
+        courseId: ctx.courseId || null,
+        courseCode: ctx.courseCode || (rawClassCode || null),
+        courseName: ctx.courseName || null,
+        emailVerified: true, // dummy login → treat as verified for now
+        picture: null,
+      };
+
+      // Store in cookie-session
+      req.session.user = canonicalSessionUser;
+
       return res.json({
         success: true,
-        user: ctx.user,
-        courseId: ctx.courseId,
+        user: canonicalSessionUser,
+        courseId: canonicalSessionUser.courseId,
         primaryRole,
         redirectPath,
-        roles: ctx.roles,
-        isTeamLead: ctx.isTeamLead,
-        teamLeadTeams: ctx.teamLeadTeams,
+        roles: ctx.roles && ctx.roles.length ? ctx.roles : [primaryRole],
+        isTeamLead: !!ctx.isTeamLead,
+        teamLeadTeams: ctx.teamLeadTeams || [],
       });
     } catch (error) {
       console.error('Error resolving login:', error);
       return res.status(500).json({
         success: false,
-        message: 'Failed to resolve login. Please try again.',
+        message: 'Unexpected error while resolving login.',
       });
     }
   });
+//   app.post('/api/auth/resolve-login', async (req, res) => {
+//     try {
+//       // Need DB + course configured
+//       if (
+//         !ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) ||
+//         !DEFAULT_COURSE_ID
+//       ) {
+//         return res.status(500).json({
+//           success: false,
+//           message: 'Course/database not configured for login',
+//         });
+//       }
+
+//       const { email } = req.body || {};
+//       const normalizedEmail = (email || '').trim().toLowerCase();
+
+//       if (!normalizedEmail) {
+//         return res.status(400).json({
+//           success: false,
+//           message: 'Email is required',
+//         });
+//       }
+
+//       const ctx = await classDirectoryDb.getUserCourseContextByEmail(
+//         normalizedEmail,
+//       );
+
+//       if (!ctx.user) {
+//         return res.status(404).json({
+//           success: false,
+//           message:
+//             'No user found with that email in the course roster. Please check with your instructor.',
+//         });
+//       }
+
+//       if (!ctx.inCourse || !ctx.primaryRole) {
+//         // Fallback: allow professors to log in using any course they are assigned to
+//         const { rows: profCourse } = await dbCore.query(
+//           `SELECT ra.scope_id AS course_id
+//              FROM role_assignments ra
+//              JOIN roles r ON r.id = ra.role_id
+//             WHERE ra.user_id = $1 AND ra.scope_type = 'course' AND r.key = 'professor'
+//             LIMIT 1`,
+//           [ctx.user.id]
+//         );
+//         if (!profCourse.length) {
+//           return res.status(403).json({
+//             success: false,
+//             message:
+//               'This account is not enrolled in the current course. Please check with your instructor.',
+//           });
+//         }
+
+//         // Build a synthetic context for professor on their course
+//         const profCourseId = profCourse[0].course_id;
+//         const primaryRole = 'professor';
+//         const redirectPath = '/dashboards/professor.html';
+// const canonicalSessionUser = {
+//   id: ctx.user.id,
+//   email: ctx.user.email,
+//   name:
+//     ctx.user.display_name ||
+//     `${ctx.user.first_name || ''} ${ctx.user.last_name || ''}`.trim(),
+//   role: primaryRole,
+//   courseId: ctx.courseId,
+//   courseCode: ctx.courseCode || trimmedClassCode || null,
+//   courseName: ctx.courseName || null,
+//   emailVerified: true,
+//   picture: null,
+// };
+
+// req.session.user = canonicalSessionUser;
+
+// return res.json({
+//   success: true,
+//   user: ctx.user,
+//   courseId: profCourseId,
+//   primaryRole,
+//   redirectPath,
+//   roles: ['professor'],
+//   isTeamLead: false,
+//   teamLeadTeams: [],
+// });
+//       }
+
+
+// Normalize a course code like "CSE 210" → "CSE210"
+function normalizeCourseCode(raw) {
+  return (raw || '').replace(/\s+/g, '').toUpperCase();
+}
+
+/**
+ * Find a course by code (e.g. 'CSE210').
+ * Returns { id, code, title } or null if not found.
+ */
+async function findCourseForLogin(rawCode) {
+  const key = normalizeCourseCode(rawCode);
+  if (!key) return null;
+
+  const { rows } = await db.query(
+    `
+      SELECT c.id, c.code, c.title
+      FROM courses c
+      WHERE REPLACE(UPPER(c.code), ' ', '') = $1
+      ORDER BY c.created_at DESC
+      LIMIT 1
+    `,
+    [key],
+  );
+
+  if (!rows.length) return null;
+
+  const row = rows[0];
+  return {
+    id: row.id,
+    code: row.code,
+    title: row.title,
+  };
+}
+
+//       const primaryRole = ctx.primaryRole;
+//       let redirectPath = '/dashboards/student.html';
+// if (primaryRole === 'admin') {
+//   redirectPath = '/admin/admin.html';
+// } else if (primaryRole === 'professor') {
+//   redirectPath = '/dashboards/professor.html';
+// } else if (primaryRole === 'ta') {
+//   redirectPath = '/dashboards/ta.html';
+// } else if (primaryRole === 'team_lead') {
+//   redirectPath = '/dashboards/team_lead.html';
+// } else if (primaryRole === 'tutor') {
+//   redirectPath = '/dashboards/student.html';
+// }
+
+// // ✅ SET SESSION HERE
+// const canonicalSessionUser = {
+//   id: ctx.user.id,
+//   email: ctx.user.email,
+//   name:
+//     ctx.user.display_name ||
+//     `${ctx.user.first_name || ''} ${ctx.user.last_name || ''}`.trim(),
+//   role: primaryRole,
+//   courseId: ctx.courseId,
+//   courseCode: ctx.courseCode || null,  // if you add these
+//   courseName: ctx.courseName || null,
+//   emailVerified: true,
+//   picture: null,
+// };
+
+// req.session.user = canonicalSessionUser;
+
+// return res.json({
+//   success: true,
+//   user: ctx.user,
+//   courseId: ctx.courseId,
+//   primaryRole,
+//   redirectPath,
+//   roles: ctx.roles,
+//   isTeamLead: ctx.isTeamLead,
+//   teamLeadTeams: ctx.teamLeadTeams,
+// });
+//     } catch (error) {
+//       console.error('Error resolving login:', error);
+//       return res.status(500).json({
+//         success: false,
+//         message: 'Failed to resolve login. Please try again.',
+//       });
+//     }
+//   });
 
   // ------------------------------------------------------------
   // Admin: Create/Update Course and Professor linkage
@@ -479,32 +707,49 @@ const fetch =
   // Course Rosters API (upload from class_config page)
   // ------------------------------------------------------------
 
-  app.post('/api/courses/rosters', async (req, res) => {
-    try {
-      // Need DB + course configured
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return;
+  // ------------------------------------------------------------
+  // Course Rosters API (upload from class_config page)
+  // ------------------------------------------------------------
+
+  app.post(
+    '/api/courses/rosters',
+    requireAuth,
+    requireCourseContext,
+    async (req, res) => {
+      try {
+        if (!hasDbConfig) {
+          return res.status(500).json({ error: 'Database not configured' });
+        }
+
+        const courseId = req.courseId; // from the logged-in user’s session
+        const { classRosterCsv, staffRosterCsv } = req.body || {};
+
+        if (
+          (!classRosterCsv || !classRosterCsv.trim()) &&
+          (!staffRosterCsv || !staffRosterCsv.trim())
+        ) {
+          return res.status(400).json({ error: 'No roster data provided' });
+        }
+
+        // (Optional but recommended) Restrict who can upload rosters:
+        const role = req.currentUser.role;
+        if (!['admin', 'professor', 'ta'].includes(role)) {
+          return res.status(403).json({ error: 'Not allowed to upload rosters' });
+        }
+
+        const result = await rostersDb.importRosters(courseId, {
+          classRosterCsv,
+          staffRosterCsv,
+        });
+
+        // Frontend expects { classRows, staffRows }
+        return res.json(result);
+      } catch (error) {
+        console.error('Error importing rosters:', error);
+        return res.status(500).json({ error: 'Failed to import rosters' });
       }
-
-      const { classRosterCsv, staffRosterCsv } = req.body || {};
-
-      if ((!classRosterCsv || !classRosterCsv.trim()) &&
-          (!staffRosterCsv || !staffRosterCsv.trim())) {
-        return res.status(400).json({ error: 'No roster data provided' });
-      }
-
-      const result = await rostersDb.importRosters(DEFAULT_COURSE_ID, {
-        classRosterCsv,
-        staffRosterCsv,
-      });
-
-      // Your frontend expects { classRows, staffRows }
-      res.json(result);
-    } catch (error) {
-      console.error('Error importing rosters:', error);
-      res.status(500).json({ error: 'Failed to import rosters' });
-    }
-  });
+    },
+  );
 
 
   // ------------------------------------------------------------
@@ -512,33 +757,46 @@ const fetch =
   // ------------------------------------------------------------
 
   // GET skills
-  app.get('/api/group-formation/skills', async (req, res) => {
+app.get(
+  '/api/group-formation/skills',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      // Read-only: if course missing, return empty list instead of 500
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.json([]);
       }
-      const skills = await groupFormationDb.getSkills(DEFAULT_COURSE_ID);
+      const skills = await groupFormationDb.getSkills(req.courseId);
       res.json(skills);
     } catch (error) {
       console.error('Error loading skills:', error);
       res.status(500).json({ error: 'Failed to load skills' });
     }
-  });
+  }
+);
+
 
   // POST (create/update) a skill
-  app.post('/api/group-formation/skills', async (req, res) => {
+app.post(
+  '/api/group-formation/skills',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return; // ensureDb already responded with 500
+      if (!ensureDb(res, { requireCourse: true })) {
+        return;
       }
-      const skill = await groupFormationDb.upsertSkill(DEFAULT_COURSE_ID, req.body);
+      const skill = await groupFormationDb.upsertSkill(req.courseId, req.body);
       res.status(201).json(skill);
     } catch (error) {
       console.error('Error saving skill:', error);
       res.status(500).json({ error: 'Failed to save skill' });
     }
-  });
+  }
+);
+
+// etc. for PUT and DELETE using req.courseId
+
 
   // UPDATE a skill by id
   app.put('/api/group-formation/skills/:id', async (req, res) => {
@@ -584,95 +842,123 @@ const fetch =
   });
 
   // GET student ratings
-  app.get('/api/group-formation/student-ratings', async (req, res) => {
+app.get(
+  '/api/group-formation/student-ratings',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.json([]);
       }
-      const ratings = await groupFormationDb.getStudentRatings(DEFAULT_COURSE_ID);
+      const ratings = await groupFormationDb.getStudentRatings(req.courseId);
       res.json(ratings);
     } catch (error) {
       console.error('Error loading student ratings:', error);
       res.status(500).json({ error: 'Failed to load student ratings' });
     }
-  });
+  }
+);
+
 
   // ------------------------------------------------------------
   // Group Formation – Groups (teams, members, TA assignments)
   // ------------------------------------------------------------
 
   // GET existing groups for current course
-  app.get('/api/group-formation/groups', async (req, res) => {
+app.get(
+  '/api/group-formation/groups',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.json([]);
       }
 
-      const groups = await groupFormationDb.getGroups(DEFAULT_COURSE_ID);
+      const groups = await groupFormationDb.getGroups(req.courseId);
       res.json(groups);
     } catch (error) {
       console.error('Error loading groups:', error);
       res.status(500).json({ error: 'Failed to load groups' });
     }
-  });
+  }
+);
 
   // POST save groups for current course
   // body: { groups: [ { teamName?, taUserId?, members: [{ userId, role }] } ] }
-  app.post('/api/group-formation/groups', async (req, res) => {
+// POST save groups for current course
+// body: { groups: [ { teamName?, taUserId?, members: [{ userId, role }] } ] }
+app.post(
+  '/api/group-formation/groups',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true })) {
         return;
       }
 
-      const { groups } = req.body || {};
-      await groupFormationDb.saveGroups(DEFAULT_COURSE_ID, Array.isArray(groups) ? groups : []);
+      const groups = (req.body && req.body.groups) || [];
 
-      const saved = await groupFormationDb.getGroups(DEFAULT_COURSE_ID);
-      res.json({
-        message: 'Groups saved successfully',
-        groups: saved,
-      });
+      // Persist groups
+      await groupFormationDb.saveGroups(req.courseId, groups);
+
+      // Reload from DB so frontend gets the normalized representation
+      const savedGroups = await groupFormationDb.getGroups(req.courseId);
+
+      // IMPORTANT: frontend expects an object with a `groups` array
+      res.json({ groups: savedGroups });
     } catch (error) {
       console.error('Error saving groups:', error);
-      res.status(500).json({ error: error.message || 'Failed to save groups' });
+      res
+        .status(500)
+        .json({ error: error.message || 'Failed to save groups' });
     }
-  });
+  }
+);
 
 
-  // GET ratings for the current student (by email or userId)
-  app.get('/api/group-formation/student-ratings/me', async (req, res) => {
+
+app.get(
+  '/api/group-formation/student-ratings/me',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.json({});
       }
 
       const { email, userId } = req.query;
 
-      const ratingsBySkillId = await groupFormationDb.getStudentRatingsForUser(
-        DEFAULT_COURSE_ID,
-        { userId, email },
-      );
+      const ratingsBySkillId =
+        await groupFormationDb.getStudentRatingsForUser(req.courseId, {
+          userId,
+          email,
+        });
 
-      res.json(ratingsBySkillId); // { [skillId]: rating }
+      res.json(ratingsBySkillId);
     } catch (error) {
-      console.error('Error loading current student ratings:', error);
-      res.status(500).json({ error: 'Failed to load current student ratings' });
+      console.error('Error loading ratings for me:', error);
+      res.status(500).json({ error: 'Failed to load ratings for current user' });
     }
-  });
+  }
+);
 
-
-  // POST student ratings
-  // POST student ratings
-  // POST student ratings
-  app.post('/api/group-formation/student-ratings', async (req, res) => {
+app.post(
+  '/api/group-formation/student-ratings',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true })) {
         return;
       }
 
       const { userId, email, skillRatings } = req.body;
 
-      await groupFormationDb.upsertStudentRating(DEFAULT_COURSE_ID, {
+      await groupFormationDb.upsertStudentRating(req.courseId, {
         userId,
         email,
         skillRatings,
@@ -683,7 +969,11 @@ const fetch =
       console.error('Error saving student rating:', error);
       res.status(500).json({ error: 'Failed to save student rating' });
     }
-  });
+  }
+);
+
+// Similar for team-lead ratings: getTeamLeadRatings(req.courseId), upsertTeamLeadRating(req.courseId, ...)
+
 
 
 
@@ -722,23 +1012,26 @@ const fetch =
 
   // GET all teams
 
-  app.get('/api/teams', async (req, res) => {
+  // GET all teams
+
+  // GET all teams for the current course
+  app.get('/api/teams', requireAuth, requireCourseContext, async (req, res) => {
     try {
-      // Always return an array for this read-only route
       if (!hasDbConfig) {
-        return res.json([]);
-      }
-      if (!hasCourseConfig || !DEFAULT_COURSE_ID) {
+        // DB not configured → empty list (consistent with old behavior)
         return res.json([]);
       }
 
-      const teams = await teamsDb.getAllTeams(DEFAULT_COURSE_ID);
+      const courseId = req.courseId;
+      const teams = await teamsDb.getAllTeams(courseId);
+
       res.json(Array.isArray(teams) ? teams : []);
     } catch (error) {
       console.error('Error fetching teams:', error);
-      return res.json([]); // 200 by default; guarantee array
+      return res.json([]); // keep the "always an array" behavior
     }
   });
+
 
 
   // app.get('/api/teams', async (req, res) => {
@@ -784,148 +1077,217 @@ const fetch =
   });
 
   // Team Card detailed info
-  app.get('/api/team-card/:id', async (req, res) => {
+app.get(
+  '/api/team-card/:id',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.status(500).json({ error: 'Course/database not configured' });
       }
       const teamId = req.params.id;
-      const data = await teamCardDb.getTeamCard(teamId);
+      const data = await teamCardDb.getTeamCard(teamId, req.courseId);
       if (!data) return res.status(404).json({ error: 'Team not found' });
       res.json(data);
     } catch (error) {
       console.error('Error reading team card:', error);
       res.status(500).json({ error: 'Failed to read team card' });
     }
-  });
+  }
+);
+
 
   // Update team card description / status description (team lead, TA, professor)
-  app.put('/api/team-card/:id', async (req, res) => {
+// Update team card description / status description (team lead, TA, professor)
+app.put(
+  '/api/team-card/:id',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.status(500).json({ error: 'Course/database not configured' });
       }
+
+      const courseId = req.courseId;
       const teamId = req.params.id;
-      const { description, statusDescription, repoUrl, email } = req.body || {};
-      const normalizedEmail = (email || '').trim().toLowerCase();
-      if (!normalizedEmail) {
-        return res.status(400).json({ error: 'email is required for authorization' });
+      const { description, statusDescription, repoUrl } = req.body || {};
+      const currentUser = req.currentUser;
+
+      if (!currentUser) {
+        return res.status(401).json({ error: 'Not authenticated' });
       }
 
-      // Load user context (roles & team lead flag) for authorization
-      const ctx = await classDirectoryDb.getUserCourseContextByEmail(normalizedEmail);
-      if (!ctx.user || !ctx.inCourse) {
-        return res.status(403).json({ error: 'User not in course' });
-      }
-
-      const primaryRole = ctx.primaryRole;
       let authorized = false;
-      if (primaryRole === 'professor' || primaryRole === 'ta') {
-        authorized = true; // instructors & TAs can edit any team
-      } else if (primaryRole === 'team_lead') {
-        // Verify this user is the leader of the target team
-        const { rows: leadRows } = await dbCore.query(
-          `SELECT 1
-           FROM team_members tm
-           JOIN users u ON u.id = tm.user_id
-           WHERE tm.team_id = $1 AND LOWER(u.email) = LOWER($2) AND tm.is_leader = true
-           LIMIT 1`,
-          [teamId, normalizedEmail]
+
+      // Professors and TAs can always edit
+      if (currentUser.role === 'professor' || currentUser.role === 'ta') {
+        authorized = true;
+      } else {
+        // Otherwise, must be the leader of THIS team in THIS course
+        const { rows } = await dbCore.query(
+          `
+          SELECT 1
+          FROM team_members tm
+          JOIN teams t ON t.id = tm.team_id
+          WHERE tm.team_id = $1
+            AND tm.user_id = $2
+            AND tm.is_leader = true
+            AND t.course_id = $3
+          LIMIT 1
+          `,
+          [teamId, currentUser.id, courseId],
         );
-        authorized = leadRows.length > 0;
+        authorized = rows.length > 0;
       }
 
       if (!authorized) {
         return res.status(403).json({ error: 'Not authorized to edit this team' });
       }
 
-      const updated = await teamCardDb.updateTeamDescriptions(teamId, { description, statusDescription, repoUrl });
-      if (!updated) return res.status(404).json({ error: 'Team not found' });
-      res.json({ success: true, team: updated });
+      const updated = await teamCardDb.updateTeamDescriptions(
+        teamId,
+        { description, statusDescription, repoUrl },
+        courseId,
+      );
+
+      res.json(updated);
     } catch (error) {
       console.error('Error updating team card:', error);
       res.status(500).json({ error: 'Failed to update team card' });
     }
-  });
+  }
+);
 
   // Teams for current user (by email or userId)
-  app.get('/api/my-teams', async (req, res) => {
+app.get(
+  '/api/my-teams',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.json([]);
       }
       const { email, userId } = req.query || {};
-      if (!email && !userId) return res.status(400).json({ error: 'email or userId is required' });
-      const teams = await teamCardDb.getTeamsForUser({ email, userId });
+      if (!email && !userId) {
+        return res.status(400).json({ error: 'email or userId is required' });
+      }
+
+      const teams = await teamCardDb.getTeamsForUser({
+        email,
+        userId,
+        courseId: req.courseId,
+      });
       res.json(teams);
     } catch (error) {
       console.error('Error reading my teams:', error);
       res.status(500).json({ error: 'Failed to read teams for user' });
     }
-  });
+  }
+);
+
 
   // CREATE team
-  app.post('/api/teams', async (req, res) => {
-    try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return;
+  // CREATE team for the current course
+  app.post(
+    '/api/teams',
+    requireAuth,
+    requireCourseContext,
+    async (req, res) => {
+      try {
+        if (!hasDbConfig) {
+          return res.status(500).json({ error: 'Database not configured' });
+        }
+
+        const courseId = req.courseId;
+        const newTeam = await teamsDb.createTeam(courseId, req.body);
+        res.status(201).json(newTeam);
+      } catch (error) {
+        console.error('Error creating team:', error);
+        res.status(500).json({ error: 'Failed to create team' });
       }
-      const newTeam = await teamsDb.createTeam(DEFAULT_COURSE_ID, req.body);
-      res.status(201).json(newTeam);
-    } catch (error) {
-      console.error('Error creating team:', error);
-      res.status(500).json({ error: 'Failed to create team' });
     }
-  });
+  );
+
 
   // UPDATE team
-  app.put('/api/teams/:id', async (req, res) => {
-    try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return;
+  // UPDATE team in the current course
+  app.put(
+    '/api/teams/:id',
+    requireAuth,
+    requireCourseContext,
+    async (req, res) => {
+      try {
+        if (!hasDbConfig) {
+          return res.status(500).json({ error: 'Database not configured' });
+        }
+
+        const courseId = req.courseId;
+        const teamId = req.params.id;
+        const updated = await teamsDb.updateTeam(teamId, courseId, req.body);
+
+        if (!updated) {
+          return res.status(404).json({ error: 'Team not found' });
+        }
+
+        res.json(updated);
+      } catch (error) {
+        console.error('Error updating team:', error);
+        res.status(500).json({ error: 'Failed to update team' });
       }
-      const teamId = req.params.id;
-      const updated = await teamsDb.updateTeam(teamId, DEFAULT_COURSE_ID, req.body);
-      if (!updated) {
-        return res.status(404).json({ error: 'Team not found' });
-      }
-      res.json(updated);
-    } catch (error) {
-      console.error('Error updating team:', error);
-      res.status(500).json({ error: 'Failed to update team' });
     }
-  });
+  );
 
   // DELETE team
-  app.delete('/api/teams/:id', async (req, res) => {
-    try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return;
+  // DELETE team in the current course
+  app.delete(
+    '/api/teams/:id',
+    requireAuth,
+    requireCourseContext,
+    async (req, res) => {
+      try {
+        if (!hasDbConfig) {
+          return res.status(500).json({ error: 'Database not configured' });
+        }
+
+        const courseId = req.courseId;
+        const teamId = req.params.id;
+        const deleted = await teamsDb.deleteTeam(teamId, courseId);
+
+        if (!deleted) {
+          return res.status(404).json({ error: 'Team not found' });
+        }
+
+        res.status(204).send();
+      } catch (error) {
+        console.error('Error deleting team:', error);
+        res.status(500).json({ error: 'Failed to delete team' });
       }
-      const teamId = req.params.id;
-      const deleted = await teamsDb.deleteTeam(teamId, DEFAULT_COURSE_ID);
-      if (!deleted) {
-        return res.status(404).json({ error: 'Team not found' });
-      }
-      res.status(204).send();
-    } catch (error) {
-      console.error('Error deleting team:', error);
-      res.status(500).json({ error: 'Failed to delete team' });
     }
-  });
+  );
+
 
   // ------------------------------------------------------------
   // Team Events API (Meetings & Tasks per team)
   // ------------------------------------------------------------
-
-  // GET team events for current user's teams OR specific team via query
-  // /api/team-events?teamId=... OR /api/team-events?email=user@school.edu
-  app.get('/api/team-events', async (req, res) => {
+// GET team events for current user's teams OR specific team via query
+// /api/team-events?teamId=... OR /api/team-events?email=user@school.edu
+app.get(
+  '/api/team-events',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.json([]);
       }
-      const { teamId, email } = req.query || {};
+
+      const { teamId, email: emailParam } = req.query || {};
+      const email =
+        (emailParam || req.currentUser?.email || '').trim().toLowerCase();
+
       let events = [];
       if (teamId) {
         events = await teamEventsDb.getEventsForTeam(teamId);
@@ -934,68 +1296,69 @@ const fetch =
       } else {
         return res.status(400).json({ error: 'teamId or email required' });
       }
+
       res.json(events);
     } catch (error) {
       console.error('Error fetching team events:', error);
       res.status(500).json({ error: 'Failed to fetch team events' });
     }
-  });
+  }
+);
 
-  // POST create a team event (must be team lead of team OR professor/ta)
-  app.post('/api/team-events', async (req, res) => {
+// POST create a team event (team lead of that team OR professor/TA)
+app.post(
+  '/api/team-events',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true })) {
         return;
       }
-      let { teamId, email, title, type, startsAt, repeatWeekly, audience, description } = req.body || {};
-      if (!email || !title) {
-        return res.status(400).json({ error: 'email and title are required' });
+
+      const { teamId, title, type, startsAt, repeatWeekly, audience, description } =
+        req.body || {};
+      const currentUser = req.currentUser;
+      const courseId = req.courseId;
+
+      if (!currentUser) {
+        return res.status(401).json({ error: 'Not authenticated' });
       }
-      const normalizedEmail = email.trim().toLowerCase();
-      const ctx = await classDirectoryDb.getUserCourseContextByEmail(normalizedEmail);
-      if (!ctx.user || !ctx.inCourse) {
-        return res.status(403).json({ error: 'User not in course' });
+      if (!teamId || !title) {
+        return res.status(400).json({ error: 'teamId and title are required' });
       }
-      const primaryRole = ctx.primaryRole;
+
+      const normalizedEmail = (currentUser.email || '').trim().toLowerCase();
+
       let authorized = false;
-      if (primaryRole === 'professor' || primaryRole === 'ta') {
+
+      if (currentUser.role === 'professor' || currentUser.role === 'ta') {
         authorized = true;
-      } else if (primaryRole === 'team_lead') {
-        const { rows: leadRows } = await dbCore.query(
-          `SELECT 1 FROM team_members tm
-            JOIN users u ON u.id = tm.user_id
-           WHERE tm.team_id = $1 AND LOWER(u.email)=LOWER($2) AND tm.is_leader = true
-           LIMIT 1`,
-          [teamId || null, normalizedEmail]
+      } else {
+        // Check if this user is leader of THIS team in THIS course
+        const { rows } = await dbCore.query(
+          `
+          SELECT 1
+          FROM team_members tm
+          JOIN teams t ON t.id = tm.team_id
+          WHERE tm.team_id = $1
+            AND tm.user_id = $2
+            AND tm.is_leader = true
+            AND t.course_id = $3
+          LIMIT 1
+          `,
+          [teamId, currentUser.id, courseId],
         );
-        // If teamId not provided, try to derive it from user's leader teams
-        if (!teamId) {
-          const { rows: myLeadTeams } = await dbCore.query(
-            `SELECT tm.team_id AS id
-               FROM team_members tm
-               JOIN users u ON u.id = tm.user_id
-              WHERE LOWER(u.email) = LOWER($1) AND tm.is_leader = true`,
-            [normalizedEmail]
-          );
-          if (myLeadTeams.length === 1) {
-            teamId = myLeadTeams[0].id;
-            authorized = true;
-          } else if (myLeadTeams.length > 1) {
-            return res.status(400).json({ error: 'Multiple leader teams found; specify teamId' });
-          } else {
-            authorized = false;
-          }
-        } else {
-          authorized = leadRows.length > 0;
-        }
+        authorized = rows.length > 0;
       }
+
       if (!authorized) {
-        return res.status(403).json({ error: 'Not authorized to create event for this team' });
+        return res
+          .status(403)
+          .json({ error: 'Not authorized to create event for this team' });
       }
-      if (!teamId) {
-        return res.status(400).json({ error: 'teamId could not be resolved' });
-      }
-      // Sanitize audience tag: allow 'team' or 'member:<email>' only
+
+      // Sanitize audience tag: allow 'team' or 'member:<email>'
       let audienceTag = null;
       if (audience) {
         const audLower = audience.trim().toLowerCase();
@@ -1003,12 +1366,12 @@ const fetch =
           audienceTag = 'team';
         } else if (audLower.startsWith('member:')) {
           const targetEmail = audLower.slice('member:'.length).trim();
-          // simple email format check
           if (targetEmail && targetEmail.includes('@')) {
             audienceTag = `member:${targetEmail}`;
           }
         }
       }
+
       const created = await teamEventsDb.createTeamEvent({
         teamId,
         creatorEmail: normalizedEmail,
@@ -1019,12 +1382,14 @@ const fetch =
         audienceTag,
         notes: description,
       });
+
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating team event:', error);
       res.status(500).json({ error: 'Failed to create team event' });
     }
-  });
+  }
+);
 
   // ------------------------------------------------------------
   // Course Rubric API
@@ -1152,28 +1517,7 @@ const fetch =
   // Student Weekly Evaluation API
   // ------------------------------------------------------------
 
-  app.get('/api/student/weekly-evaluation', async (req, res) => {
-    try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(500).json({ error: 'Database/course not configured' });
-      }
 
-      const email = (req.query.email || '').trim().toLowerCase();
-      if (!email) {
-        return res.status(400).json({ error: 'email query parameter is required' });
-      }
-
-      const data = await studentWeeklyEvalDb.getWeeklyEvaluationForStudent(
-        DEFAULT_COURSE_ID,
-        email,
-      );
-
-      res.json(data);
-    } catch (error) {
-      console.error('Error fetching student weekly evaluation:', error);
-      res.status(500).json({ error: 'Failed to fetch student weekly evaluation' });
-    }
-  });
 
 
   // ------------------------------------------------------------
@@ -1221,11 +1565,18 @@ const fetch =
   // ------------------------------------------------------------
 
   // GET /api/eval-notes?email=student@school.edu
-  app.get('/api/eval-notes', async (req, res) => {
+// GET /api/eval-notes?email=student@school.edu[&week=NUMBER]
+app.get(
+  '/api/eval-notes',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (
-        !ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) ||
-        !DEFAULT_COURSE_ID
+        !ensureDb(res, {
+          requireCourse: true,
+          errorOnMissingCourse: false,
+        })
       ) {
         return res.json([]);
       }
@@ -1235,26 +1586,40 @@ const fetch =
         return res.json([]);
       }
 
-      let notes = await evalNotesDb.getNotesForUserEmail(DEFAULT_COURSE_ID, email);
-      // Optional week filter (week is numeric)
+      let notes = await evalNotesDb.getNotesForUserEmail(
+        req.courseId,
+        email,
+      );
+
       if (week) {
         const wNum = parseInt(week, 10);
         if (Number.isFinite(wNum)) {
-          notes = notes.filter(n => parseInt(n.week, 10) === wNum);
+          notes = notes.filter(
+            (n) => parseInt(n.week, 10) === wNum,
+          );
         }
       }
+
       res.json(notes);
     } catch (error) {
       console.error('Error fetching eval notes by email:', error);
       res.status(500).json({ error: 'Failed to fetch eval notes' });
     }
-  });
+  }
+);
+
 
   // POST /api/eval-notes
   // body: { targetEmail, privateText, publicText, mode, scores, email: authorEmail }
-  app.post('/api/eval-notes', async (req, res) => {
+// POST /api/eval-notes
+// body: { targetEmail, privateText, publicText, mode, scores, email: authorEmail, week }
+app.post(
+  '/api/eval-notes',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true })) {
         return;
       }
 
@@ -1268,8 +1633,19 @@ const fetch =
         week,
       } = req.body || {};
 
+      if (!targetEmail) {
+        return res
+          .status(400)
+          .json({ error: 'targetEmail is required' });
+      }
+      if (!authorEmail) {
+        return res
+          .status(400)
+          .json({ error: 'email (author) is required' });
+      }
+
       const created = await evalNotesDb.createNoteForUserEmail(
-        DEFAULT_COURSE_ID,
+        req.courseId,
         {
           targetEmail,
           privateText,
@@ -1284,9 +1660,14 @@ const fetch =
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating eval note by email:', error);
-      res.status(500).json({ error: error.message || 'Failed to create eval note' });
+      res
+        .status(500)
+        .json({
+          error: error.message || 'Failed to create eval note',
+        });
     }
-  });
+  }
+);
 
 
 
@@ -1296,49 +1677,71 @@ const fetch =
 
   // GET /api/work-journals?forName=@student_or_team
   // GET /api/work-journals?forName=@student_or_team&email=someone@school.edu
-  app.get('/api/work-journals', async (req, res) => {
+// Work Journals API (student view / personal view)
+app.get(
+  '/api/work-journals',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!hasDbConfig) {
         return res.json([]);
       }
 
       const { forName, email } = req.query;
-      const journals = await workJournalsDb.getWorkJournals(DEFAULT_COURSE_ID, {
+      const courseId = req.courseId;
+
+      const journals = await workJournalsDb.getWorkJournals(courseId, {
         forName: forName || null,
         email: email || null,
       });
 
-      res.json(journals);
+      res.json(Array.isArray(journals) ? journals : []);
     } catch (error) {
       console.error('Error fetching work journals:', error);
-      res.status(500).json({ error: 'Failed to fetch work journals' });
+      res.json([]);
     }
-  });
+  }
+);
 
   // CREATE a new work journal entry
-  app.post('/api/work-journals', async (req, res) => {
+// CREATE work journal in the current course
+app.post(
+  '/api/work-journals',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+      if (!hasDbConfig) {
         return res.status(500).json({ error: 'Database not configured' });
       }
 
-      const created = await workJournalsDb.createWorkJournal(DEFAULT_COURSE_ID, req.body);
+      const courseId = req.courseId;
+      const created = await workJournalsDb.createWorkJournal(courseId, req.body);
       res.status(201).json(created);
     } catch (error) {
       console.error('Error creating work journal:', error);
-      res.status(500).json({ error: error.message || 'Failed to create work journal' });
+      res.status(500).json({ error: 'Failed to create work journal entry' });
     }
-  });
+  }
+);
 
   // UPDATE an existing work journal entry
-  app.put('/api/work-journals/:id', async (req, res) => {
+// UPDATE work journal in the current course
+app.put(
+  '/api/work-journals/:id',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+      if (!hasDbConfig) {
         return res.status(500).json({ error: 'Database not configured' });
       }
 
+      const courseId = req.courseId;
       const { id } = req.params;
-      const updated = await workJournalsDb.updateWorkJournal(DEFAULT_COURSE_ID, id, req.body);
+
+      const updated = await workJournalsDb.updateWorkJournal(courseId, id, req.body);
 
       if (!updated) {
         return res.status(404).json({ error: 'Work journal entry not found' });
@@ -1347,19 +1750,27 @@ const fetch =
       res.json(updated);
     } catch (error) {
       console.error('Error updating work journal:', error);
-      res.status(500).json({ error: error.message || 'Failed to update work journal' });
+      res.status(500).json({ error: 'Failed to update work journal entry' });
     }
-  });
+  }
+);
+
 
   // DELETE a work journal entry
-  app.delete('/api/work-journals/:id', async (req, res) => {
+// DELETE work journal in the current course
+app.delete(
+  '/api/work-journals/:id',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+      if (!hasDbConfig) {
         return res.status(500).json({ error: 'Database not configured' });
       }
 
+      const courseId = req.courseId;
       const { id } = req.params;
-      const deleted = await workJournalsDb.deleteWorkJournal(DEFAULT_COURSE_ID, id);
+      const deleted = await workJournalsDb.deleteWorkJournal(courseId, id);
 
       if (!deleted) {
         return res.status(404).json({ error: 'Work journal entry not found' });
@@ -1368,41 +1779,40 @@ const fetch =
       res.status(204).send();
     } catch (error) {
       console.error('Error deleting work journal:', error);
-      res.status(500).json({ error: error.message || 'Failed to delete work journal' });
+      res.status(500).json({ error: 'Failed to delete work journal entry' });
     }
-  });
+  }
+);
+
+
 
   // Reviewer view: Role-aware journals, split into new vs read
   // GET /api/work-journals/review?to=@student_or_email&email=viewer@school.edu
   // If `to` omitted, returns viewer-scoped recent journals (last 30 days)
-  app.get('/api/work-journals/review', async (req, res) => {
+app.get(
+  '/api/work-journals/review',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false }) || !DEFAULT_COURSE_ID) {
+      if (!hasDbConfig) {
         return res.json({ newer: [], read: [] });
       }
 
+      const courseId = req.courseId;
+      const viewerId = req.currentUser.id;
+      const role = req.currentUser.role; // 'professor' | 'ta' | 'team_lead' | 'student'
       const rawTo = (req.query.to || '').trim();
-      const viewerEmail = (req.query.email || '').trim().toLowerCase();
-      if (!viewerEmail) {
-        return res.status(400).json({ error: 'email is required' });
-      }
-
-      const ctx = await classDirectoryDb.getUserCourseContextByEmail(viewerEmail);
-      if (!ctx.user || !ctx.inCourse) {
-        return res.status(403).json({ error: 'Viewer not in course' });
-      }
-      const viewerId = ctx.user.id;
-      const role = ctx.primaryRole; // 'professor' | 'ta' | 'team_lead' | 'student'
 
       let journals = [];
       if (rawTo) {
-        journals = await workJournalsDb.getWorkJournals(DEFAULT_COURSE_ID, { forName: rawTo });
+        // Filter by target name/email within this course
+        journals = await workJournalsDb.getWorkJournals(courseId, { forName: rawTo });
       } else {
-        // No target provided: load recent journals for course (limit inside query) then role-filter below
-        journals = await workJournalsDb.getWorkJournals(DEFAULT_COURSE_ID, {});
-        // Optionally, reduce to last 30 days
+        // Recent journals in this course, later filtered by role
+        journals = await workJournalsDb.getWorkJournals(courseId, {});
         const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
-        journals = journals.filter(j => {
+        journals = journals.filter((j) => {
           const t = j.createdAt ? new Date(j.createdAt).getTime() : 0;
           return t >= cutoff;
         });
@@ -1560,24 +1970,75 @@ const fetch =
   // Student Weekly Evaluation API
   // ------------------------------------------------------------
 
-  // GET /api/student/weekly-evaluation?email=student@school.edu
-  app.get('/api/student/weekly-evaluation', async (req, res) => {
+
+  // app.get('/api/student/weekly-evaluation', async (req, res) => {
+  //   try {
+  //     if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+  //       return res.status(500).json({
+  //         error: 'Course/database not configured for weekly evaluation',
+  //       });
+  //     }
+
+  //     const email = (req.query.email || '').trim().toLowerCase();
+  //     if (!email) {
+  //       return res.status(400).json({ error: 'email query param is required' });
+  //     }
+
+  //     const data = await studentWeeklyDb.getWeeklyEvaluation(DEFAULT_COURSE_ID, email);
+
+  //     if (!data) {
+  //       // No such user (or not in users table)
+  //       return res.json({
+  //         user: null,
+  //         reports: [],
+  //         notes: [],
+  //         journals: [],
+  //       });
+  //     }
+
+  //     res.json(data);
+  //   } catch (error) {
+  //     console.error('Error fetching student weekly evaluation:', error);
+  //     res.status(500).json({
+  //       user: null,
+  //       reports: [],
+  //       notes: [],
+  //       journals: [],
+  //       error: 'Failed to fetch weekly evaluation',
+  //     });
+  //   }
+  // });
+
+
+// Student Weekly Evaluation API
+// GET /api/student/weekly-evaluation?email=student@school.edu
+
+// ------------------------------------------------------------
+// Student Weekly Evaluation API (course-scoped)
+// ------------------------------------------------------------
+
+// GET /api/student/weekly-evaluation?email=student@school.edu
+app.get(
+  '/api/student/weekly-evaluation',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
-        return res.status(500).json({
-          error: 'Course/database not configured for weekly evaluation',
-        });
+      if (!ensureDb(res, { requireCourse: true })) {
+        return;
       }
 
-      const email = (req.query.email || '').trim().toLowerCase();
+      const courseId = req.courseId;
+      const email =
+        (req.query.email || req.currentUser?.email || '').trim().toLowerCase();
+
       if (!email) {
         return res.status(400).json({ error: 'email query param is required' });
       }
 
-      const data = await studentWeeklyDb.getWeeklyEvaluation(DEFAULT_COURSE_ID, email);
+      const data = await studentWeeklyDb.getWeeklyEvaluation(courseId, email);
 
       if (!data) {
-        // No such user (or not in users table)
         return res.json({
           user: null,
           reports: [],
@@ -1589,24 +2050,23 @@ const fetch =
       res.json(data);
     } catch (error) {
       console.error('Error fetching student weekly evaluation:', error);
-      res.status(500).json({
-        user: null,
-        reports: [],
-        notes: [],
-        journals: [],
-        error: 'Failed to fetch weekly evaluation',
-      });
+      res
+        .status(500)
+        .json({ error: 'Failed to fetch student weekly evaluation' });
     }
-  });
-
-
+  }
+);
 
   // ------------------------------------------------------------
   // Class directory (course + staff + teams) & events
   // ------------------------------------------------------------
 
   // Main class directory payload
-  app.get('/api/class_directory', async (req, res) => {
+app.get(
+  '/api/class_directory',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return res.json({
@@ -1617,36 +2077,49 @@ const fetch =
           Teams: [],
         });
       }
-      const data = await classDirectoryDb.getClassDirectory();
+
+      const data = await classDirectoryDb.getClassDirectory(req.courseId);
       res.json(data);
     } catch (error) {
       console.error('Error reading class directory:', error);
       res.status(500).json({ error: 'Failed to read class directory' });
     }
-  });
+  }
+);
+
 
   // Course info only
-  app.get('/api/class-directory/course', async (req, res) => {
+app.get(
+  '/api/class-directory/course',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return res.json(null);
       }
-      const course = await classDirectoryDb.getCourseOverview();
+      const courseId = req.courseId;
+      const course = await classDirectoryDb.getCourseOverview(courseId);
       res.json(course);
     } catch (error) {
       console.error('Error reading course info:', error);
       res.status(500).json({ error: 'Failed to read course info' });
     }
-  });
+  }
+);
 
-  // Upsert course description for the default course
-  // body: { description }
-  app.put('/api/class-directory/course/description', async (req, res) => {
+
+app.put(
+  '/api/class-directory/course/description',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res, { requireCourse: true }) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res, { requireCourse: true })) {
         return;
       }
 
+      const courseId = req.courseId;
       const { description } = req.body || {};
       const descText = (description || '').trim();
       if (!descText) {
@@ -1658,86 +2131,127 @@ const fetch =
          VALUES ($1, $2, now())
          ON CONFLICT (course_id)
          DO UPDATE SET description = EXCLUDED.description, updated_at = now()`,
-        [DEFAULT_COURSE_ID, descText]
+        [courseId, descText],
       );
 
-      const course = await classDirectoryDb.getCourseOverview();
-      return res.json({ success: true, course });
+      res.json({ success: true });
     } catch (error) {
-      console.error('Error upserting course description:', error);
-      return res.status(500).json({ error: 'Failed to save course description' });
+      console.error('Error updating course description:', error);
+      res.status(500).json({ error: 'Failed to update course description' });
     }
-  });
+  }
+);
+
 
   // Individual staff lists
-  app.get('/api/class-directory/instructors', async (req, res) => {
+app.get(
+  '/api/class-directory/instructors',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return res.json([]);
       }
-      const instructors = await classDirectoryDb.getStaffByRole('professor');
+      const instructors = await classDirectoryDb.getStaffByRole(
+        req.courseId,
+        'professor',
+      );
       res.json(instructors);
     } catch (error) {
       console.error('Error reading instructors:', error);
       res.status(500).json({ error: 'Failed to read instructors' });
     }
-  });
+  }
+);
 
-  app.get('/api/class-directory/tas', async (req, res) => {
+
+app.get(
+  '/api/class-directory/tas',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return res.json([]);
       }
-      const tas = await classDirectoryDb.getStaffByRole('ta');
+      const tas = await classDirectoryDb.getStaffByRole(req.courseId, 'ta');
       res.json(tas);
     } catch (error) {
       console.error('Error reading TAs:', error);
       res.status(500).json({ error: 'Failed to read TAs' });
     }
-  });
+  }
+);
 
-  app.get('/api/class-directory/tutors', async (req, res) => {
+
+app.get(
+  '/api/class-directory/tutors',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return res.json([]);
       }
-      const tutors = await classDirectoryDb.getStaffByRole('tutor');
+      const tutors = await classDirectoryDb.getStaffByRole(
+        req.courseId,
+        'tutor',
+      );
       res.json(tutors);
     } catch (error) {
       console.error('Error reading tutors:', error);
       res.status(500).json({ error: 'Failed to read tutors' });
     }
-  });
+  }
+);
 
-  app.get('/api/class-directory/teams', async (req, res) => {
+
+app.get(
+  '/api/class-directory/teams',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return res.json([]);
       }
-      const teams = await classDirectoryDb.getCourseTeams();
+      const teams = await classDirectoryDb.getCourseTeams(req.courseId);
       res.json(teams);
     } catch (error) {
       console.error('Error reading class directory teams:', error);
       res.status(500).json({ error: 'Failed to read class directory teams' });
     }
-  });
+  }
+);
+
 
   // Class events
-  app.get('/api/class-directory/events', async (req, res) => {
+app.get(
+  '/api/class-directory/events',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return res.json([]);
       }
-      const events = await eventsDb.getEvents();
+      const events = await eventsDb.getEvents(req.courseId);
       res.json(events);
     } catch (error) {
       console.error('Error reading events:', error);
       res.status(500).json({ error: 'Failed to read events' });
     }
-  });
+  }
+);
+
 
   // Aggregated class directory payload (fewer round trips, parallel queries)
-  app.get('/api/class-directory/summary', async (req, res) => {
+app.get(
+  '/api/class-directory/summary',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return res.json({
@@ -1750,42 +2264,61 @@ const fetch =
         });
       }
 
-      const [course, instructors, tas, tutors, teams, events] = await Promise.all([
-        classDirectoryDb.getCourseOverview(),
-        classDirectoryDb.getStaffByRole('professor'),
-        classDirectoryDb.getStaffByRole('ta'),
-        classDirectoryDb.getStaffByRole('tutor'),
-        classDirectoryDb.getCourseTeams(),
-        eventsDb.getEvents(),
+      const courseId = req.courseId;
+
+      const [course, staff, teams, events] = await Promise.all([
+        classDirectoryDb.getCourseOverview(courseId),
+        classDirectoryDb.getAllStaff(courseId),
+        classDirectoryDb.getCourseTeams(courseId),
+        eventsDb.getEvents(courseId),
       ]);
 
-      res.json({ course, instructors, tas, tutors, teams, events });
+      res.json({
+        course,
+        instructors: staff.instructors,
+        tas: staff.TAs,
+        tutors: staff.tutors,
+        teams,
+        events,
+      });
     } catch (error) {
       console.error('Error building class directory summary:', error);
       res.status(500).json({ error: 'Failed to build class directory summary' });
     }
-  });
+  }
+);
 
-  app.post('/api/class-directory/events', async (req, res) => {
+
+app.post(
+  '/api/class-directory/events',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
-        return; // ensureDb already sent 500
+        return;
       }
-      const event = await eventsDb.createEvent(req.body);
+      const event = await eventsDb.createEvent(req.courseId, req.body);
       res.status(201).json(event);
     } catch (error) {
       console.error('Error creating event:', error);
       res.status(500).json({ error: 'Failed to create event' });
     }
-  });
+  }
+);
 
-  app.put('/api/class-directory/events/:id', async (req, res) => {
+
+app.put(
+  '/api/class-directory/events/:id',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return;
       }
       const id = req.params.id;
-      const updated = await eventsDb.updateEvent(id, req.body);
+      const updated = await eventsDb.updateEvent(req.courseId, id, req.body);
       if (!updated) {
         return res.status(404).json({ error: 'Event not found' });
       }
@@ -1794,15 +2327,21 @@ const fetch =
       console.error('Error updating event:', error);
       res.status(500).json({ error: 'Failed to update event' });
     }
-  });
+  }
+);
 
-  app.delete('/api/class-directory/events/:id', async (req, res) => {
+
+app.delete(
+  '/api/class-directory/events/:id',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
       if (!ensureDb(res)) {
         return;
       }
       const id = req.params.id;
-      const deleted = await eventsDb.deleteEvent(id);
+      const deleted = await eventsDb.deleteEvent(req.courseId, id);
       if (!deleted) {
         return res.status(404).json({ error: 'Event not found' });
       }
@@ -1811,24 +2350,33 @@ const fetch =
       console.error('Error deleting event:', error);
       res.status(500).json({ error: 'Failed to delete event' });
     }
-  });
+  }
+);
 
   // ------------------------------------------------------------
   // Members API (for task tracker & student directory)
   // ------------------------------------------------------------
 
-  app.get('/api/members', async (req, res) => {
+// Members API (for task tracker, class directory, evaluation journal, etc.)
+app.get(
+  '/api/members',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res)) {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
         return res.json([]);
       }
-      const members = await membersDb.getMembers();
+
+      const members = await membersDb.getMembers(req.courseId);
       res.json(members);
     } catch (error) {
       console.error('Error reading members:', error);
       res.status(500).json({ error: 'Failed to read members' });
     }
-  });
+  }
+);
+
 
   // ------------------------------------------------------------
   // Tasks API (task board)
@@ -1866,39 +2414,51 @@ const fetch =
   // ------------------------------------------------------------
 
   // GET all attendance sessions for the default course
-  app.get('/api/attendance/sessions', async (req, res) => {
+app.get(
+  '/api/attendance/sessions',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      // Read-only: if DB/course missing, return empty list
-      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res)) {
         return res.json([]);
       }
 
-      const sessions = await attendanceDb.getSessions(DEFAULT_COURSE_ID);
+      const sessions = await attendanceDb.getSessions(req.courseId);
       res.json(sessions);
     } catch (error) {
       console.error('Error fetching attendance sessions:', error);
       res.status(500).json({ error: 'Failed to fetch attendance sessions' });
     }
-  });
+  }
+);
 
   // CREATE a new attendance session (professor)
-  app.post('/api/attendance/sessions', async (req, res) => {
+app.post(
+  '/api/attendance/sessions',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res)) {
         return res.status(500).json({ error: 'Database not configured' });
       }
 
       const { durationMinutes } = req.body || {};
-      const session = await attendanceDb.createSession(DEFAULT_COURSE_ID, {
+      const session = await attendanceDb.createSession(req.courseId, {
         durationMinutes,
       });
 
       res.status(201).json(session);
     } catch (error) {
       console.error('Error creating attendance session:', error);
-      res.status(500).json({ error: error.message || 'Failed to create attendance session' });
+      res.status(500).json({
+        error: error.message || 'Failed to create attendance session',
+      });
     }
-  });
+  }
+);
+
 
   // Optional: GET a single session + attendance records (for debugging)
   app.get('/api/attendance/sessions/:id', async (req, res) => {
@@ -1925,9 +2485,13 @@ const fetch =
   });
 
   // Student marks themselves present using a code
-  app.post('/api/attendance/mark', async (req, res) => {
+app.post(
+  '/api/attendance/mark',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res)) {
         return res.json({
           success: false,
           message: 'Attendance not configured for this course',
@@ -1936,12 +2500,11 @@ const fetch =
 
       const { code, email } = req.body || {};
       const result = await attendanceDb.markAttendanceByCode(
-        DEFAULT_COURSE_ID,
+        req.courseId,
         code,
         email,
       );
 
-      // Always 200 with success flag; frontend uses result.success/message
       res.json(result);
     } catch (error) {
       console.error('Error marking attendance:', error);
@@ -1950,12 +2513,18 @@ const fetch =
         message: 'Failed to mark attendance',
       });
     }
-  });
+  }
+);
+
 
   // Get attendance history for a student by email
-  app.get('/api/attendance/history', async (req, res) => {
+app.get(
+  '/api/attendance/history',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
     try {
-      if (!ensureDb(res) || !DEFAULT_COURSE_ID) {
+      if (!ensureDb(res)) {
         return res.json({
           sessions: [],
           presentCount: 0,
@@ -1964,7 +2533,10 @@ const fetch =
       }
 
       const { email } = req.query;
-      const history = await attendanceDb.getHistoryByEmail(DEFAULT_COURSE_ID, email);
+      const history = await attendanceDb.getHistoryByEmail(
+        req.courseId,
+        email,
+      );
 
       res.json(history);
     } catch (error) {
@@ -1976,7 +2548,9 @@ const fetch =
         error: 'Failed to fetch attendance history',
       });
     }
-  });
+  }
+);
+
 
   // ------------------------------------------------------------
   // Profile Page

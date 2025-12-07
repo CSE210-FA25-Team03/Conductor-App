@@ -5,6 +5,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const passwordToggle = document.getElementById('passwordToggle');
   const successMessage = document.getElementById('successMessage');
   const errorBox = document.getElementById('loginError');
+  const googleLoginButton = document.getElementById('googleLoginButton');
+
+  if (googleLoginButton) {
+    googleLoginButton.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      const classCodeInput = document.getElementById('classCode');
+      const classCode = (classCodeInput?.value || '').trim();
+
+      if (!classCode) {
+        // use your real UI error mechanism if you have one
+        alert('Please enter a class number before using Google login.');
+        return;
+      }
+
+      const url = `/auth/google/start?classCode=${encodeURIComponent(
+        classCode
+      )}`;
+
+      window.location.href = url;
+    });
+  }
 
   function showError(message) {
     if (!errorBox) {
@@ -51,10 +73,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function resolveLogin(email) {
+    const classCodeInput = document.getElementById('classCode');
+    const classCode = (classCodeInput?.value || '').trim();
+
     const res = await fetch('/api/auth/resolve-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, classCode }),
     });
 
     const text = await res.text().catch(() => '');

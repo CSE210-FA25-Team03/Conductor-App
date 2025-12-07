@@ -608,6 +608,9 @@ async function saveGroups(courseId, groups = []) {
     }
 
     await client.query('COMMIT');
+
+    const savedGroups = await getGroups(courseId);
+    return savedGroups;
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -615,6 +618,7 @@ async function saveGroups(courseId, groups = []) {
     client.release();
   }
 }
+
 
 // ------------------------------------------------------------
 // Exports

@@ -25,6 +25,8 @@
 //   return data;
 // };
 
+import { ensureAuthenticated } from "../../common/auth.js";
+
 const setupProfilePanel = () => {
   const panel = document.querySelector('.profile-panel');
   if (!panel) return;
@@ -210,7 +212,9 @@ const setupEvaluationPanel = () => {
   });
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const user = await ensureAuthenticated();
+  if (!user) return; // redirected
   setupProfilePanel();
   setupEvaluationPanel();
 });

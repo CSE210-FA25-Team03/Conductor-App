@@ -1,125 +1,184 @@
-// backend/db/classDirectory.js
+// app/backend/db/classDirectory.js
 const db = require('./index');
 
 /**
- * For now assume a single current course ID from env.
- * Later we can derive from auth/user/session.
+ * Single current course ID from env (used as fallback if no classCode is provided).
+ * In your .env it should be:
+ *   DEFAULT_COURSE_ID=22222222-2222-2222-2222-222222222222
  */
 function getCurrentCourseId() {
-  return process.env.DEFAULT_COURSE_ID; // uuid from your DB
+  return process.env.DEFAULT_COURSE_ID || null;
 }
 
-/** Course + term info */
-async function getCourseOverview() {
-  const courseId = getCurrentCourseId();
+/**
+ * Normalize a course code like "CSE 210" → "CSE210"
+ */
+function normalizeCourseCode(raw) {
+  return (raw || '').replace(/\s+/g, '').toUpperCase();
+}
+
+/**
+ * Find a course by code (e.g. 'CSE210').
+ * Returns { id, code, title } or null if not found.
+ */
+async function findCourseForLogin(rawCode) {
+  const key = normalizeCourseCode(rawCode);
+  if (!key) return null;
+
+  const { rows } = await db.query(
+    `
+      SELECT c.id, c.code, c.title
+      FROM courses c
+      WHERE REPLACE(UPPER(c.code), ' ', '') = $1
+      ORDER BY c.created_at DESC
+      LIMIT 1
+    `,
+    [key]
+  );
+
+  if (!rows.length) return null;
+
+  const row = rows[0];
+  return {
+    id: row.id,
+    code: row.code,
+    title: row.title,
+  };
+}
+
+/** Course + term info for the "directory" page */
+async function getCourseOverview(courseIdOverride) {
+  const courseId = courseIdOverride || getCurrentCourseId();
   if (!courseId) return null;
 
   const { rows } = await db.query(
     `
-    SELECT c.id,
-           c.code,
-           c.title,
-           t.code AS term_code,
-           t.name AS term_name,
-           ci.description
-    FROM courses c
-    JOIN terms t ON c.term_id = t.id
-    LEFT JOIN course_info ci ON ci.course_id = c.id
-    WHERE c.id = $1
+      SELECT
+        c.id,
+        c.code,
+        c.title,
+        t.code AS term_code,
+        t.name AS term_name,
+        ci.description
+      FROM courses c
+      JOIN terms t
+        ON t.id = c.term_id
+      LEFT JOIN course_info ci
+        ON ci.course_id = c.id
+      WHERE c.id = $1
+      LIMIT 1
     `,
-    [courseId],
+    [courseId]
   );
-  const row = rows[0];
-  if (!row) return null;
 
+  if (!rows.length) return null;
+
+  const row = rows[0];
   return {
+    id: row.id,
     course_code: row.code,
-    term_year: row.term_code,
     title: row.title,
+    term_code: row.term_code,
+    term_name: row.term_name,
     description: row.description || '',
   };
 }
-
-async function getStaffByRole(roleKey) {
-  const courseId = getCurrentCourseId();
-  if (!courseId) return [];
-
+/** Staff list for a given role key (professor, ta, tutor) */
+async function getStaffByRole(courseId, roleKey) {
   const { rows } = await db.query(
     `
-        SELECT u.id,
-          u.display_name AS name,
-          u.pronouns,
-          COALESCE(up.email, u.email) AS email,
-           up.photo_url AS staff_picture,
-           up.phone AS contact,
-           up.availability_notes AS office_hours,
-           up.public_link AS public_link
-    FROM role_assignments ra
-    JOIN roles r ON ra.role_id = r.id
-    JOIN users u ON ra.user_id = u.id
-    LEFT JOIN user_profiles up ON up.user_id = u.id
-    WHERE ra.scope_type = 'course'
-      AND ra.scope_id = $1
-      AND r.key = $2
-    ORDER BY u.display_name
+      SELECT
+        u.id,
+        u.display_name,
+        up.photo_url,
+        up.pronouns,
+        up.phone,
+        up.email          AS profile_email,
+        up.availability_notes,
+        up.public_link
+      FROM role_assignments ra
+      JOIN roles r
+        ON r.id = ra.role_id
+      JOIN users u
+        ON u.id = ra.user_id
+      LEFT JOIN user_profiles up
+        ON up.user_id = u.id
+      WHERE ra.scope_type = 'course'
+        AND ra.scope_id = $1
+        AND r.key = $2
+      ORDER BY u.display_name ASC
     `,
-    [courseId, roleKey],
+    [courseId, roleKey]
   );
 
   return rows.map((r) => ({
     id: r.id,
-    staff_picture: r.staff_picture || '',
-    photo_url: r.staff_picture || '',
-    name: r.name,
+    staff_picture: r.photo_url || '',
+    photo_url: r.photo_url || '',
+    name: r.display_name || r.profile_email || '',
     role: roleKey,
     pronouns: r.pronouns || '',
-    contact: r.contact || '',
-    phone: r.contact || '',
-    office_hours: r.office_hours || '',
+    contact: r.phone || '',
+    phone: r.phone || '',
+    office_hours: r.availability_notes || '',
     public_link: r.public_link || '',
-    email: r.email || '',
+    email: r.profile_email || '',
   }));
 }
 
-async function getAllStaff() {
+/** All staff grouped by role for the directory view */
+async function getAllStaff(courseIdOverride) {
+  const courseId = courseIdOverride || getCurrentCourseId();
+  if (!courseId) return { instructors: [], TAs: [], tutors: [] };
+
   const [instructors, TAs, tutors] = await Promise.all([
-    getStaffByRole('professor'),
-    getStaffByRole('ta'),
-    getStaffByRole('tutor'),
+    getStaffByRole(courseId, 'professor'),
+    getStaffByRole(courseId, 'ta'),
+    getStaffByRole(courseId, 'tutor'),
   ]);
 
   return { instructors, TAs, tutors };
 }
 
-// ==== Teams for class directory ====
 
-async function getCourseTeams() {
-  const courseId = getCurrentCourseId();
+/** Teams for the current course */
+async function getCourseTeams(courseIdOverride) {
+  const courseId = courseIdOverride || getCurrentCourseId();
   if (!courseId) return [];
 
   const { rows } = await db.query(
     `
-    SELECT t.id,
-           t.code AS "teamNumber",
-           t.name,
-           t.status,
-           t.description,
-           t.display_number AS "displayNumber"
-    FROM teams t
-    WHERE t.course_id = $1
-    ORDER BY t.created_at ASC
+      SELECT
+        t.id,
+        t.code,
+        t.name,
+        t.display_number,
+        t.status,
+        t.description
+      FROM teams t
+      WHERE t.course_id = $1
+      ORDER BY t.display_number::int NULLS LAST, t.created_at ASC
     `,
-    [courseId],
+    [courseId]
   );
-  return rows;
+
+  return rows.map((r) => ({
+    id: r.id,
+    teamNumber: r.display_number,
+    team_name: r.name,
+    code: r.code,
+    status: r.status || '',
+    description: r.description || '',
+  }));
 }
 
-// This is the main shape used by /api/class_directory
-async function getClassDirectory() {
+
+/** Aggregated class directory payload */
+async function getClassDirectory(courseIdOverride) {
   const [course, staff, teams] = await Promise.all([
-    getCourseOverview(),
-    getAllStaff(),
-    getCourseTeams(),
+    getCourseOverview(courseIdOverride),
+    getAllStaff(courseIdOverride),
+    getCourseTeams(courseIdOverride),
   ]);
 
   return {
@@ -131,18 +190,93 @@ async function getClassDirectory() {
   };
 }
 
+
 /**
- * Resolve a user's course context (roles, team lead, etc.) from email.
- * Used by the login flow so users can't "choose" roles manually.
+ * Compute a user's course context from email and (optionally) classCode.
+ *
+ * options: { classCode?: string }
  */
-async function getUserCourseContextByEmail(emailRaw) {
-  const courseId = getCurrentCourseId();
+async function getUserCourseContextByEmail(emailRaw, options = {}) {
   const email = (emailRaw || '').trim().toLowerCase();
+  const { classCode } = options;
+
+  let courseMeta = null;
+
+  // 0) Decide which course we’re talking about
+  if (classCode && classCode.trim()) {
+    // Caller supplied a class code → look it up in courses table
+    courseMeta = await findCourseForLogin(classCode);
+    if (!courseMeta) {
+      // No course matches that class code
+      return {
+        user: null,
+        courseId: null,
+        courseCode: null,
+        courseName: null,
+        roles: [],
+        inCourse: false,
+        isTeamLead: false,
+        teamLeadTeams: [],
+        primaryRole: null,
+      };
+    }
+  } else {
+    // No class code provided → fall back to DEFAULT_COURSE_ID
+    const currentCourseId = getCurrentCourseId();
+    if (!currentCourseId || !email) {
+      return {
+        user: null,
+        courseId: null,
+        courseCode: null,
+        courseName: null,
+        roles: [],
+        inCourse: false,
+        isTeamLead: false,
+        teamLeadTeams: [],
+        primaryRole: null,
+      };
+    }
+
+    const { rows } = await db.query(
+      `
+        SELECT c.id, c.code, c.title
+        FROM courses c
+        WHERE c.id = $1
+        LIMIT 1
+      `,
+      [currentCourseId]
+    );
+
+    if (!rows.length) {
+      return {
+        user: null,
+        courseId: null,
+        courseCode: null,
+        courseName: null,
+        roles: [],
+        inCourse: false,
+        isTeamLead: false,
+        teamLeadTeams: [],
+        primaryRole: null,
+      };
+    }
+
+    const row = rows[0];
+    courseMeta = {
+      id: row.id,
+      code: row.code,
+      title: row.title,
+    };
+  }
+
+  const courseId = courseMeta.id;
 
   if (!courseId || !email) {
     return {
       user: null,
       courseId: null,
+      courseCode: null,
+      courseName: null,
       roles: [],
       inCourse: false,
       isTeamLead: false,
@@ -154,18 +288,21 @@ async function getUserCourseContextByEmail(emailRaw) {
   // 1) Lookup user by email
   const { rows: userRows } = await db.query(
     `
-    SELECT id, email, display_name
-    FROM users
-    WHERE LOWER(email) = $1
-    LIMIT 1
+      SELECT id, email, display_name
+      FROM users
+      WHERE LOWER(email) = $1
+      LIMIT 1
     `,
-    [email],
+    [email]
   );
 
   if (!userRows.length) {
+    // Email is totally unknown
     return {
       user: null,
       courseId,
+      courseCode: courseMeta.code,
+      courseName: courseMeta.title,
       roles: [],
       inCourse: false,
       isTeamLead: false,
@@ -176,44 +313,44 @@ async function getUserCourseContextByEmail(emailRaw) {
 
   const user = userRows[0];
 
-  // 2) Course roles (professor, ta, tutor, student, etc.)
+  // 2) Course roles (professor, ta, tutor, student, etc.) in THIS course
   const { rows: roleRows } = await db.query(
     `
-    SELECT r.key
-    FROM roles r
-    JOIN role_assignments ra ON ra.role_id = r.id
-    WHERE ra.user_id = $1
-      AND ra.scope_type = 'course'
-      AND ra.scope_id = $2
+      SELECT r.key
+      FROM roles r
+      JOIN role_assignments ra ON ra.role_id = r.id
+      WHERE ra.user_id = $1
+        AND ra.scope_type = 'course'
+        AND ra.scope_id = $2
     `,
-    [user.id, courseId],
+    [user.id, courseId]
   );
   const roles = roleRows.map((r) => r.key);
 
   // 3) Is this user actually in the course roster?
   const { rows: membershipRows } = await db.query(
     `
-    SELECT 1
-    FROM course_memberships
-    WHERE user_id = $1
-      AND course_id = $2
-    LIMIT 1
+      SELECT 1
+      FROM course_memberships
+      WHERE user_id = $1
+        AND course_id = $2
+      LIMIT 1
     `,
-    [user.id, courseId],
+    [user.id, courseId]
   );
   const inCourse = membershipRows.length > 0;
 
   // 4) Team lead? (team_members.is_leader = true)
   const { rows: tlRows } = await db.query(
     `
-    SELECT t.id, t.code, t.name
-    FROM team_members tm
-    JOIN teams t ON t.id = tm.team_id
-    WHERE tm.user_id = $1
-      AND t.course_id = $2
-      AND tm.is_leader = TRUE
+      SELECT t.id, t.code, t.name
+      FROM team_members tm
+      JOIN teams t ON t.id = tm.team_id
+      WHERE tm.user_id = $1
+        AND t.course_id = $2
+        AND tm.is_leader = TRUE
     `,
-    [user.id, courseId],
+    [user.id, courseId]
   );
   const isTeamLead = tlRows.length > 0;
 
@@ -228,10 +365,8 @@ async function getUserCourseContextByEmail(emailRaw) {
   } else if (roles.includes('tutor')) {
     primaryRole = 'tutor';
   } else if (isTeamLead) {
-    // student but also a team lead
     primaryRole = 'team_lead';
   } else if (!inCourse) {
-    // they exist in users but are not in this course roster
     primaryRole = null;
   }
 
@@ -242,6 +377,8 @@ async function getUserCourseContextByEmail(emailRaw) {
       displayName: user.display_name || user.email,
     },
     courseId,
+    courseCode: courseMeta.code,
+    courseName: courseMeta.title,
     roles,
     inCourse,
     isTeamLead,
@@ -258,4 +395,7 @@ module.exports = {
   getCourseTeams,
   getClassDirectory,
   getUserCourseContextByEmail,
+  // these helpers are exported in case you want them elsewhere later
+  normalizeCourseCode,
+  findCourseForLogin,
 };

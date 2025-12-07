@@ -2,8 +2,10 @@
 const db = require('./index');
 const { getCurrentCourseId } = require('./classDirectory');
 
-async function getEvents() {
-  const courseId = getCurrentCourseId();
+async function getEvents(courseIdOverride) {
+  const courseId = courseIdOverride || getCurrentCourseId();
+  if (!courseId) return [];
+
   const { rows } = await db.query(
     `
     SELECT id,
@@ -14,26 +16,38 @@ async function getEvents() {
            due_at AS "dueDate"
     FROM class_events
     WHERE course_id = $1
-    ORDER BY due_at NULLS LAST, created_at DESC
+    ORDER BY COALESCE(due_at, starts_at) ASC, created_at ASC
     `,
     [courseId],
   );
+
   return rows;
 }
 
-async function createEvent(eventData) {
-  const courseId = getCurrentCourseId();
+async function createEvent(courseIdOverride, payload) {
+  const courseId = courseIdOverride || getCurrentCourseId();
+  if (!courseId) {
+    throw new Error('courseId is required to create an event');
+  }
+
   const {
     title,
-    description = '',
+    description,
     type,
-    startsAt = null,
-    dueDate = null,
-  } = eventData;
+    startsAt,
+    dueDate,
+  } = payload || {};
 
   const { rows } = await db.query(
     `
-    INSERT INTO class_events (course_id, title, description, type, starts_at, due_at)
+    INSERT INTO class_events (
+      course_id,
+      title,
+      description,
+      type,
+      starts_at,
+      due_at
+    )
     VALUES ($1, $2, $3, $4, $5, $6)
     RETURNING id,
               title,
@@ -44,14 +58,14 @@ async function createEvent(eventData) {
     `,
     [courseId, title, description, type, startsAt, dueDate],
   );
+
   return rows[0];
 }
 
-async function updateEvent(id, updates) {
-  const courseId = getCurrentCourseId();
-  const currentEvents = await getEvents();
-  const existing = currentEvents.find(e => e.id === id);
-  if (!existing) return null;
+
+async function updateEvent(courseIdOverride, id, payload) {
+  const courseId = courseIdOverride || getCurrentCourseId();
+  if (!courseId) return null;
 
   const merged = { ...existing, ...updates };
 
@@ -77,14 +91,17 @@ async function updateEvent(id, updates) {
   return rows[0] || null;
 }
 
-async function deleteEvent(id) {
-  const courseId = getCurrentCourseId();
+async function deleteEvent(courseIdOverride, id) {
+  const courseId = courseIdOverride || getCurrentCourseId();
+  if (!courseId) return false;
+
   const { rowCount } = await db.query(
     `DELETE FROM class_events WHERE id = $1 AND course_id = $2`,
     [id, courseId],
   );
   return rowCount > 0;
 }
+
 
 module.exports = {
   getEvents,

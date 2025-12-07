@@ -41,7 +41,7 @@
     <section class="dashboard-header">
         <div>
             <h1>Staff Dashboard</h1>
-            <small>Teaching Assistant view · CSE 210</small>
+            <small>Teaching Assistant view · </small>
         </div>
     </section>
 
@@ -284,6 +284,38 @@ function loadAttendanceHistory() {
 }
 
 loadAttendanceHistory();
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    function getCurrentCourseLabel() {
+      let courseLabel = 'CSE 210';
+      try {
+        if (window.ConductorAuth && typeof ConductorAuth.getCurrentUser === 'function') {
+          const user = ConductorAuth.getCurrentUser();
+          if (user && (user.courseCode || user.courseName)) {
+            return user.courseCode || user.courseName;
+          }
+        }
+        const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (stored) {
+          if (stored.courseCode) return stored.courseCode;
+          if (stored.courseName) return stored.courseName;
+          if (stored.classId) return stored.classId;
+        }
+      } catch (e) {
+        console.warn('[ta] Could not read current course:', e);
+      }
+      return courseLabel;
+    }
+
+    const headerSmall = document.querySelector('.dashboard-header small');
+    if (headerSmall) {
+      const raw = headerSmall.textContent || 'Teaching Assistant view';
+      const roleText = raw.split('·')[0].trim() || 'Teaching Assistant view';
+      const courseLabel = getCurrentCourseLabel();
+      headerSmall.textContent = `${roleText} · ${courseLabel}`;
+    }
+  });
 </script>
 
 </body>

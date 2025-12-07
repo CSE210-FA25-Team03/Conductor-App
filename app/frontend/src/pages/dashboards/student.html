@@ -78,7 +78,7 @@
         <section class="dashboard-header">
             <div>
                 <h1>Student Dashboard</h1>
-                <small>Student view · CSE 210</small>
+                <small>Student view · </small>
             </div>
         </section>
 
@@ -262,7 +262,7 @@
     <!-- ============================================================
          MAIN DASHBOARD SCRIPT (existing behavior: open/close panels, etc.)
     ============================================================ -->
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
     <script src="../../shared/auth.js"></script>
     <!-- ============================================================
          STUDENT WEEKLY EVAL SCRIPT (calls /student/weekly-evaluation)
@@ -555,6 +555,38 @@
         }
       });
     </script>
+    <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    function getCurrentCourseLabel() {
+      let courseLabel = 'CSE 210';
+      try {
+        if (window.ConductorAuth && typeof ConductorAuth.getCurrentUser === 'function') {
+          const user = ConductorAuth.getCurrentUser();
+          if (user && (user.courseCode || user.courseName)) {
+            return user.courseCode || user.courseName;
+          }
+        }
+        const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (stored) {
+          if (stored.courseCode) return stored.courseCode;
+          if (stored.courseName) return stored.courseName;
+          if (stored.classId) return stored.classId;
+        }
+      } catch (e) {
+        console.warn('[student] Could not read current course:', e);
+      }
+      return courseLabel;
+    }
+
+    const headerSmall = document.querySelector('.dashboard-header small');
+    if (headerSmall) {
+      const raw = headerSmall.textContent || 'Student view';
+      const roleText = raw.split('·')[0].trim() || 'Student view';
+      const courseLabel = getCurrentCourseLabel();
+      headerSmall.textContent = `${roleText} · ${courseLabel}`;
+    }
+  });
+</script>
 
 </body>
 </html>

@@ -12,7 +12,7 @@ const DEFAULT_AVATAR = '/assets/logo/user.png';
 const STAFF_SECTIONS = {
   instructor: { listId: 'instructorsList' },
   ta: { listId: 'tasList' },
-  tutor: { listId: 'tutorsList' }
+  tutor: { listId: 'tutorsList' },
 };
 
 let calendarInstance = null;
@@ -55,10 +55,12 @@ function disableManagementUI() {
     '#team-form',
     '#event-form',
     '[data-open-form]',
-    '#addGoogleCalBtn'
+    '#addGoogleCalBtn',
   ];
-  selectors.forEach(sel => {
-    document.querySelectorAll(sel).forEach(el => (el.style.display = 'none'));
+  selectors.forEach((sel) => {
+    document.querySelectorAll(sel).forEach((el) => {
+      el.style.display = 'none';
+    });
   });
 }
 
@@ -103,7 +105,7 @@ function initCalendar() {
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: ''
+      right: '',
     },
     selectable: true,
     events: [],
@@ -120,7 +122,7 @@ function initCalendar() {
         due,
         desc,
       });
-    }
+    },
   });
 
   calendarInstance.render();
@@ -182,7 +184,9 @@ function ensureEventPopup() {
 function showEventPopup({ title, due, desc }) {
   const popup = ensureEventPopup();
   const content = document.getElementById('event-detail-content');
-  content.textContent = `Deadline: ${title}\nDue: ${due}` + (desc ? `\n\nDetails: ${desc}` : '');
+  content.textContent =
+    `Deadline: ${title}\nDue: ${due}` +
+    (desc ? `\n\nDetails: ${desc}` : '');
   const backdrop = document.getElementById('event-detail-backdrop');
   if (backdrop) backdrop.style.display = 'block';
   popup.style.display = 'block';
@@ -207,7 +211,7 @@ function bindTeamForm() {
 
     const payload = {
       team_id: getInputValue('teamNumberInput'),
-      team_name: getInputValue('teamNameInput')
+      team_name: getInputValue('teamNameInput'),
     };
 
     if (!payload.team_id || !payload.team_name) {
@@ -241,7 +245,7 @@ function bindEventForm() {
       title: getInputValue('eventTitle'),
       description: getInputValue('eventDescription'),
       dueDate: rawDate ? new Date(rawDate).toISOString() : '',
-      type: document.getElementById('eventType')?.value || 'Other'
+      type: document.getElementById('eventType')?.value || 'Other',
     };
 
     if (!payload.title || !payload.dueDate) {
@@ -278,7 +282,8 @@ function startEditEvent(evt) {
 
   editingEventId = evt.id;
   document.getElementById('eventTitle').value = evt.title || '';
-  document.getElementById('eventDescription').value = evt.description || '';
+  document.getElementById('eventDescription').value =
+    evt.description || '';
 
   document.getElementById('eventDueDate').value = evt.dueDate
     ? new Date(evt.dueDate).toISOString().slice(0, 16)
@@ -302,7 +307,7 @@ async function postJson(url, body) {
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -312,7 +317,7 @@ async function putJson(url, body) {
   const res = await fetch(url, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
+    body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(await res.text());
   return res.json();
@@ -324,9 +329,7 @@ async function deleteRequest(url) {
     const text = await res.text().catch(() => '');
     throw new Error(text || `HTTP ${res.status}`);
   }
-  // Some DELETE endpoints return 204 No Content
   if (res.status === 204) return true;
-  // Fallback: try to parse JSON if present
   const ct = res.headers.get('content-type') || '';
   if (ct.includes('application/json')) {
     return res.json();
@@ -370,9 +373,9 @@ async function loadEvents() {
 }
 
 function normalizeEvents(events = []) {
-  return events.map(evt => ({
+  return events.map((evt) => ({
     ...evt,
-    type: evt.type || 'Other'
+    type: evt.type || 'Other',
   }));
 }
 
@@ -384,7 +387,7 @@ function syncCalendarEvents() {
 
   calendarInstance.removeAllEvents();
 
-  cachedEvents.forEach(evt => {
+  cachedEvents.forEach((evt) => {
     calendarInstance.addEvent({
       id: evt.id,
       title: evt.title,
@@ -393,10 +396,10 @@ function syncCalendarEvents() {
       allDay: false,
       extendedProps: {
         description: evt.description || '',
-        type: evt.type
+        type: evt.type,
       },
       color: eventColor(evt.type),
-      textColor: '#0b132b'
+      textColor: '#0b132b',
     });
   });
 }
@@ -423,10 +426,10 @@ function renderEventsList() {
   }
 
   const sorted = [...cachedEvents].sort(
-    (a, b) => new Date(a.dueDate) - new Date(b.dueDate)
+    (a, b) => new Date(a.dueDate) - new Date(b.dueDate),
   );
 
-  sorted.forEach(evt => {
+  sorted.forEach((evt) => {
     const card = document.createElement('div');
     card.className = 'event-card';
 
@@ -504,9 +507,17 @@ function showToast(message, type = 'info') {
   t.textContent = message;
   const isError = type === 'error';
   const isSuccess = type === 'success';
-  t.style.background = isError ? '#fee2e2' : isSuccess ? '#dcfce7' : '#f3f4f6';
+  t.style.background = isError
+    ? '#fee2e2'
+    : isSuccess
+    ? '#dcfce7'
+    : '#f3f4f6';
   t.style.color = isError ? '#991b1b' : isSuccess ? '#065f46' : '#111827';
-  t.style.border = isError ? '1px solid #fca5a5' : isSuccess ? '1px solid #86efac' : '1px solid #e5e7eb';
+  t.style.border = isError
+    ? '1px solid #fca5a5'
+    : isSuccess
+    ? '1px solid #86efac'
+    : '1px solid #e5e7eb';
   t.style.display = 'block';
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => {
@@ -529,10 +540,12 @@ function renderStaffList(type, staff = []) {
     return;
   }
 
-  staff.forEach(person => {
+  staff.forEach((person) => {
     const row = document.createElement('div');
     row.className = 'staff-row';
-    const avatar = resolveStaffPicture(person.photo_url || person.staff_picture);
+    const avatar = resolveStaffPicture(
+      person.photo_url || person.staff_picture,
+    );
     const name = person.name || person.staff_name || 'Unnamed';
     const pronouns = person.pronouns || '';
     const email = person.email || '';
@@ -548,7 +561,11 @@ function renderStaffList(type, staff = []) {
         ${email ? `<span>Email: ${email}</span>` : ''}
         ${phone ? `<span>Phone: ${phone}</span>` : ''}
         ${availability ? `<span>Availability: ${availability}</span>` : ''}
-        ${publicLink ? `<span>Link: <a href="${publicLink}" target="_blank" rel="noopener">${publicLink}</a></span>` : ''}
+        ${
+          publicLink
+            ? `<span>Link: <a href="${publicLink}" target="_blank" rel="noopener">${publicLink}</a></span>`
+            : ''
+        }
       </div>
     `;
 
@@ -567,11 +584,16 @@ function renderTeams(teams = []) {
     return;
   }
 
-  teams.forEach(team => {
+  teams.forEach((team) => {
     const row = document.createElement('div');
     row.className = 'team-row';
 
-    const code = team.teamNumber || team.displayNumber || team.code || team.team_id || '--';
+    const code =
+      team.teamNumber ||
+      team.displayNumber ||
+      team.code ||
+      team.team_id ||
+      '--';
     const name = team.name || team.team_name || '';
     const status = team.status ? ` · ${team.status}` : '';
 
@@ -594,11 +616,17 @@ function updateCourseInfo(course) {
     course?.description ||
     'Use this space to summarize key goals or guidelines.';
 
-  document.getElementById('courseCode').textContent = code;
-  document.getElementById('courseTerm').textContent = term;
-  document.getElementById('summaryTerm').textContent = term;
-  document.getElementById('summaryTitle').textContent = `${code} · Directory`;
-  document.getElementById('courseDescription').textContent = desc;
+  const codeEl = document.getElementById('courseCode');
+  const termEl = document.getElementById('courseTerm');
+  const summaryTermEl = document.getElementById('summaryTerm');
+  const summaryTitleEl = document.getElementById('summaryTitle');
+  const descEl = document.getElementById('courseDescription');
+
+  if (codeEl) codeEl.textContent = code;
+  if (termEl) termEl.textContent = term;
+  if (summaryTermEl) summaryTermEl.textContent = term;
+  if (summaryTitleEl) summaryTitleEl.textContent = `${code} · Directory`;
+  if (descEl) descEl.textContent = desc;
 }
 
 function updateSummaryStats(entry) {
@@ -614,7 +642,9 @@ function updateSummaryStats(entry) {
 function toLocalInputValue(dateString) {
   const d = new Date(dateString);
   const offset = d.getTimezoneOffset();
-  return new Date(d.getTime() - offset * 60000).toISOString().slice(0, 16);
+  return new Date(d.getTime() - offset * 60000)
+    .toISOString()
+    .slice(0, 16);
 }
 
 function resolveStaffPicture(path = '') {
