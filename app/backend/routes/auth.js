@@ -55,30 +55,35 @@ async function findRoleForEmail(email) {
 
   // 3) find primary role for that course
   const roleRes = await db.query(
-    `SELECT role
-       FROM role_assignments
-      WHERE user_id = $1
-        AND course_id = $2
+    `SELECT r.key AS role
+      FROM role_assignments ra
+      JOIN roles r ON r.id = ra.role_id
+      WHERE ra.user_id = $1
+        AND ra.scope_type = 'course'
+        AND ra.scope_id = $2
       LIMIT 1`,
     [userId, courseId]
   );
+
 
   const role = roleRes.rowCount > 0 ? roleRes.rows[0].role : null;
 
   // 4) (optional but nice) get course code/label for UI
   const courseInfoRes = await db.query(
-    `SELECT c.id, c.code, c.name
-       FROM courses c
+    `SELECT c.id, c.code
+      FROM courses c
       WHERE c.id = $1`,
     [courseId]
   );
+
 
   const course =
     courseInfoRes.rowCount > 0
       ? {
           id: courseInfoRes.rows[0].id,
           code: courseInfoRes.rows[0].code, // e.g., 'CSE 210'
-          name: courseInfoRes.rows[0].name,
+          // we don't have a "name" column in the DB, so just set null or reuse code
+          name: null,
         }
       : { id: courseId, code: null, name: null };
 
