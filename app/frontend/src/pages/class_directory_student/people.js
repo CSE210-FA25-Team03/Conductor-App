@@ -122,7 +122,10 @@ function renderPeople() {
 
   const searchTerm = document.getElementById('peopleSearch')?.value.toLowerCase().trim() || '';
   const filtered = peopleData.filter((person) => {
-    const matchesRole = activeFilter === 'all' || person.role === activeFilter;
+    const matchesRole =
+      activeFilter === 'all' ||
+      person.role === activeFilter ||
+      (activeFilter === 'student' && person.role === 'team_lead');
     const matchesSearch = !searchTerm || person.name.toLowerCase().includes(searchTerm);
     return matchesRole && matchesSearch;
   });

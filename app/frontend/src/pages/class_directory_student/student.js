@@ -354,7 +354,9 @@ async function deleteRequest(url) {
     const message = await response.text();
     throw new Error(message || 'Request failed');
   }
-  return response.json();
+  if (response.status === 204) return null;
+  const contentType = response.headers.get('content-type') || '';
+  return contentType.includes('application/json') ? response.json() : null;
 }
 
 function updateCourseInfo(course) {
