@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (role === 'professor') {
                 window.location.href = '/dashboards/professor.html';
-            } else if (role === 'Teaching Assistant') {
+            } else if (role === 'ta') {
                 window.location.href = '/dashboards/ta.html';
             } else if (role === 'student') {
                 window.location.href = '/dashboards/student.html';
