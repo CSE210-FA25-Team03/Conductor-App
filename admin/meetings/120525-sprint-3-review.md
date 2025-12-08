@@ -4,7 +4,8 @@ Audria, Bobby, Abhishek, Peter
 CSE Building
 # Overview
 This sprint we mainly focused on UI improvements, accessibility checks, and backend login features. We also walked through the whole project again and identified new tasks for the next sprint.
-What We Completed
+
+# What We Completed
 ## Frontend
 - Finished all UI cohesion tasks from last time.
 - Shared updated screens during the meeting and split the new UI tasks discovered in the walkthrough.
