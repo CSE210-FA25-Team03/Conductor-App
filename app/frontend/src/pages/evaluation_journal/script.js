@@ -260,6 +260,10 @@ function updateScore() {
 
   let total = 0;
   scoreInputs.forEach((i) => {
+    i.value = i.value.replace(/\D/g, "");
+    i.value = i.value.replace(/[6789]/g, "");
+    i.value = i.value.slice(0, 1);
+
     total += Number(i.value) || 0;
   });
   if (total > 15) total = 15;
@@ -891,7 +895,7 @@ async function renderWorkJournalCards() {
       journalsTypeaheadMenu.style.display = 'none';
     });
   } catch (err) {
-    console.error('Failed to load work journals:', err);
+    console.error('No work journals yet.', err);
     (wjSections || workJournalBox).innerHTML =
       '<p style="font-size:0.9rem;color:#b00020;">Failed to load work journals.</p>';
   }
