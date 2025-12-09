@@ -5,11 +5,13 @@
   --card: #ffffff;
   --text: #151b35;
   --subtle: #6b7087;
-  --border: #e1e4f2;
+  --border: #e2e2e7;
   --accent: #f4c93f;
   --primary: #2f3bb5;
   --success: #57b894;
   --risk: #f16c6c;
+  --shadow: 0 6px 20px rgba(0,0,0,0.08);
+  --panel-bg: rgba(255,255,255,0.96)
 }
 
 * {
@@ -48,7 +50,12 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  background: var(--panel-bg);
+  padding: 0.8rem 1.5rem 1.5rem;
+  box-shadow: var(--shadow);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  margin-bottom: 2.2rem;
 }
 
 .nav-actions {
