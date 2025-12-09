@@ -77,7 +77,7 @@
       modalMembers.innerHTML = (data.members || []).map(m => `
         <li class="member-item">
           <span class="member-name">${m.name} <small style="color:#555;">${m.email || ''}</small>
-            ${m.isLeader ? '<span class="leader-badge">👑 Leader</span>' : ''}
+            ${m.isLeader ? '<span class="leader-badge">Leader</span>' : ''}
           </span>
         </li>
       `).join('') || '<li style="color:#777;">No members.</li>';

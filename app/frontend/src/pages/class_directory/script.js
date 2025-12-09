@@ -491,14 +491,20 @@ function ensureToast() {
   t.style.left = '50%';
   t.style.top = '24px';
   t.style.transform = 'translateX(-50%)';
-  t.style.maxWidth = '520px';
-  t.style.width = 'calc(100% - 32px)';
+  // t.style.maxWidth = '520px';
+  // t.style.width = 'calc(100% - 32px)';
   t.style.padding = '12px 16px';
   t.style.borderRadius = '8px';
   t.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
   t.style.fontWeight = '500';
   t.style.zIndex = '1000';
-  t.style.display = 'none';
+  // t.style.display = 'none';
+
+
+  t.style.display = 'flex';
+  t.style.flexDirection = 'column';
+  t.style.alignItems = 'center'; 
+  t.style.maxWidth = '100%'; 
   document.body.appendChild(t);
   return t;
 }

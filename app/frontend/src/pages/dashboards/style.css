@@ -5,11 +5,13 @@
   --card: #ffffff;
   --text: #151b35;
   --subtle: #6b7087;
-  --border: #e1e4f2;
+  --border: #e2e2e7;
   --accent: #f4c93f;
   --primary: #2f3bb5;
   --success: #57b894;
   --risk: #f16c6c;
+  --shadow: 0 6px 20px rgba(0,0,0,0.08);
+  --panel-bg: rgba(255,255,255,0.96)
 }
 
 * {
@@ -48,7 +50,12 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  background: var(--panel-bg);
+  padding: 0.8rem 1.5rem 1.5rem;
+  box-shadow: var(--shadow);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  margin-bottom: 2.2rem;
 }
 
 .nav-actions {
@@ -228,9 +235,9 @@ body {
   gap: 20px;
 }
 
-.team-card {
+/* .team-card {
   border: 1.6px solid #000;
-}
+} */
 
 .team-card.risk {
   border-left-color: var(--risk);
@@ -290,14 +297,19 @@ body {
   font-size: 0.85rem;
 }
 
-.card-actions button {
+.card-actions .card-info-btn {
+  background: #2563eb;
+  color: #fff;
   border: none;
-  background: rgba(47, 59, 181, 0.12);
-  color: var(--primary);
   padding: 8px 14px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.card-actions .card-info-btn:hover {
+  background: #1742b0;
 }
 
 .class-directory-card {
@@ -1289,5 +1301,24 @@ body {
   .faq-answer {
     font-size: 0.8rem;
   }
+.team-card {
+  justify-content: flex-start !important;
 }
 
+.team-card .info-btn {
+  background: #2563eb !important;
+  color: #fff !important;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s ease-in-out;
+  width: fit-content;
+}
+
+.team-card .info-btn:hover {
+  background: #1742b0 !important;
+}
+}

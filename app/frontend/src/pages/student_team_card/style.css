@@ -55,26 +55,6 @@ body {
     }
 }
 
-.logo-full {
-    display: block;
-    height: 6rem;
-}
-
-.logo-mini {
-    display: none;
-}
-
-
-@media (max-width: 500px) {
-    .logo-full {
-        display: none ;
-    }
-
-    .logo-mini {
-        display: block ;
-        height: 2rem;
-    }
-}
 
 .teams-grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); padding:16px; }
 .team-card { background:#fff; border:1px solid #ddd; border-radius:10px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 2px 6px rgba(0,0,0,0.06); }
