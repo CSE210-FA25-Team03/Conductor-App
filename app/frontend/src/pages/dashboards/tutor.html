@@ -10,63 +10,39 @@
   <link rel="stylesheet" href="/assets/css/i18n.css" />
     <title>Tutor Dashboard | Conductor</title>
     <link rel="stylesheet" href="style.css" />
-        <style>
-            /* Minimal modal styling scoped to this page */
-            .faq-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-            .faq-modal { background: #fff; border-radius: 10px; width: min(640px, 92vw); max-height: 85vh; overflow: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
-            .faq-modal header { padding: 14px 16px; font-weight: 600; border-bottom: 1px solid #eee; }
-            .faq-modal .body { padding: 16px; }
-            .faq-modal .field { margin-bottom: 12px; }
-            .faq-modal label { display: block; margin-bottom: 6px; font-size: 14px; color: #333; }
-            .faq-modal textarea { width: 100%; min-height: 54px; resize: vertical; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
-            .faq-modal .actions { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 16px; border-top: 1px solid #eee; }
-            .btn { padding: 8px 12px; border: 1px solid transparent; border-radius: 6px; cursor: pointer; font-size: 14px; }
-            .btn.primary { background: #1f6feb; color: #fff; }
-            .btn.ghost { background: #fff; border-color: #ddd; color: #333; }
-            .btn.danger { background: #fff5f5; border-color: #f2aaaa; color: #b00020; }
-
-            /* FAQ list items */
-            .faq-list-item { border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #fff; display: flex; justify-content: space-between; align-items: center; }
-            .faq-list-item .q { font-weight: 600; color: #222; margin-right: 8px; }
-            .faq-list-item .edit { color: #1f6feb; cursor: pointer; text-decoration: underline; font-size: 13px; }
-        </style>
 </head>
 
 <body>
-    <div class="page" data-role="team-lead">
-        <header class="top-nav">
-            <div class="brand">
-                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
-                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    <!-- <div class="page" data-role="team-lead"> -->
+    <header class="top-nav">
+        <div class="brand">
+            <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+            <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
 
-            </div>
-            <div class="nav-actions">
-                <!-- <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
-                    Teams Meetings and Tasks
-                </a>
-                <a href="/group_formation/student_group_form.html?role=team_lead" class="nav-btn eval-btn">
-                    Group Formation Form
-                </a> -->
+        </div>
+        <div class="nav-actions">
 
-                <div class="profile">
-                    <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboard-profile-img" src="/assets/logo/user.png" 
-                             alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-                        <div class="profile-dropdown" id="profileDropdown"
-                             style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
-                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
-                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
-                        </div>
+            <div class="profile">
+                <div class="profile-dropdown-container" style="position:relative;">
+                    <img id="dashboard-profile-img" src="/assets/logo/user.png" 
+                            alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                    <div class="profile-dropdown" id="profileDropdown"
+                            style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                        <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
+                        <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
                     </div>
                 </div>
             </div>
-        </header>
-
+        </div>
+    </header>
+    
+    <div class="page" data-role="tutor">
         <section class="dashboard-header">
-    <div>
-        <h1>Tutor Dashboard</h1>
-        <small id="tutorCourseLabel">Tutor view</small>
-    </div>
+            <div>
+                <h1>Tutor Dashboard</h1>
+                <small>Tutor view · </small>
+            </div>
+        </section>
 
         <section class="content-grid">
             <article class="dashboard-card">
@@ -296,14 +272,14 @@
       return courseLabel;
     }
 
-    const lbl = document.getElementById('teamLeadCourseLabel')
-      || document.querySelector('.dashboard-header small');
+        const lbl = document.getElementById('tutorCourseLabel')
+            || document.querySelector('.dashboard-header small');
 
-    if (lbl) {
-      const baseText = 'Team Lead view';
-      const courseLabel = getCurrentCourseLabel();
-      lbl.textContent = `${baseText} · ${courseLabel}`;
-    }
+        if (lbl) {
+            const baseText = 'Tutor view';
+            const courseLabel = getCurrentCourseLabel();
+            lbl.textContent = `${baseText} · ${courseLabel}`;
+        }
   });
 </script>
 

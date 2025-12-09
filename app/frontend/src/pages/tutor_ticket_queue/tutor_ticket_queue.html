@@ -8,7 +8,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="/assets/css/i18n.css" />
-  <title>Student Ticket | Conductor</title>
+  <title>Tutor Ticket Queue | Conductor</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -49,21 +49,44 @@
               <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
             </div>
           </div>
-        <!-- </a> -->
       </div>
     </div>
   </header>
-  <main class="queue-container">
-    <div class="queue-header">
-      <h2 style="margin:0;">Tutor Ticket Queue</h2>
-      <a href="/dashboards/tutor.html" class="nav-btn eval-btn">← Back to Tutor</a>
-    </div>
 
-    <div id="ticketsGrid" class="tickets-grid"></div>
+  <main class="queue-container">
+
+    <section>
+      <details id="openTicketsSection" open>
+        <summary style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <strong>Open Tickets</strong>
+          <span id="openCount" class="empty" style="font-weight:600;">(0)</span>
+        </summary>
+        <div id="openTicketsGrid" class="tickets-grid" style="margin-top:10px;"></div>
+      </details>
+    </section>
+    <section style="margin-top:16px;">
+      <details id="closedTicketsSection">
+        <summary style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <strong>Closed Tickets</strong>
+          <span id="closedCount" class="empty" style="font-weight:600;">(0)</span>
+        </summary>
+        <div id="closedTicketsGrid" class="tickets-grid" style="margin-top:10px;"></div>
+      </details>
+    </section>
   </main>
 
   <div id="answerModal" class="modal-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="answerTitle">
+      <style>
+        /* Scoped to modal to avoid layout changes elsewhere */
+        .modal .conversation-thread { display:flex; flex-direction:column; gap:8px; }
+        .modal .bubble { max-width:72%; padding:8px 12px; border-radius:16px; border:1px solid #e5e7eb; background:#f9fafb; }
+        .modal .bubble .bubble-text { white-space: pre-wrap; }
+        .modal .bubble .bubble-meta { font-size:12px; color:#6b7280; margin-top:4px; }
+        /* Alignment: tutor on left, student on right */
+        .modal .bubble.tutor { align-self:flex-start; background:#f5f5f5; border-color:#e5e7eb; }
+        .modal .bubble.student { align-self:flex-end; background:#e0f2fe; border-color:#bae6fd; }
+      </style>
       <header>
         <span id="answerTitle">Answer Ticket</span>
         <button id="answerClose" class="close-btn" aria-label="Close">✖</button>
@@ -78,28 +101,94 @@
           <div id="viewBody" class="textarea" style="background:#f9fafb; white-space:pre-wrap;"></div>
         </div>
         <div class="field">
-          <label>Answer</label>
-          <textarea id="answerInput" class="textarea" placeholder="Type your answer..."></textarea>
+          <label>Conversation</label>
+          <div id="conversationThread" class="conversation-thread" style="max-height:280px; overflow:auto; padding:8px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px;"></div>
+        </div>
+        <div class="field" style="display:flex; gap:8px; align-items:center;">
+          <input id="replyInput" class="input" placeholder="Write a reply..." style="flex:1;" />
+          <button id="answerSubmit" class="btn primary">Send</button>
         </div>
         <div id="answerError" class="empty" style="display:none;color:#b91c1c;"></div>
-        <div id="answerSuccess" class="empty" style="display:none;color:#065f46;">Answer submitted.</div>
-      </div>
-      <div class="actions">
-        <button id="answerSubmit" class="btn primary">Submit Answer</button>
+        <div id="answerSuccess" class="empty" style="display:none;color:#065f46;">Reply sent.</div>
       </div>
     </div>
   </div>
 
   <script>
+
+    // -------------------------------------------------------------
+    // Profile dropdown logic
+    // -------------------------------------------------------------
+    const profileImg = document.getElementById('dashboardProfileImg');
+    const dropdown = document.getElementById('profileDropdown');
+    if (profileImg && dropdown) {
+    profileImg.addEventListener('mouseenter', () => {
+        dropdown.style.display = 'block';
+    });
+    profileImg.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+        if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+        }, 150);
+    });
+    dropdown.addEventListener('mouseleave', () => {
+        dropdown.style.display = 'none';
+    });
+    dropdown.addEventListener('mouseenter', () => {
+        dropdown.style.display = 'block';
+    });
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = '/login';
+        });
+    }
+    }
+
+    // Saved profile image
+    const savedImg = localStorage.getItem('profileImg');
+    if (savedImg && profileImg) {
+    profileImg.src = savedImg;
+    }
+
+
+    // -------------------------------------------------------------
+    // Back-to-dashboard button
+    // -------------------------------------------------------------
+    const backBtn = document.getElementById('backDashboard');
+    if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const r = localStorage.getItem('role');
+        if (r === 'professor') {
+        window.location.href = '/dashboards/professor.html';
+        } else if (r === 'ta') {
+        window.location.href = '/dashboards/ta.html';
+        } else if (r === 'team_lead') {
+        window.location.href = '/dashboards/team_lead.html';
+        } else if (r === 'tutor') {
+        window.location.href = '/dashboards/tutor.html';
+        } else {
+        window.location.href = '/dashboards/student.html';
+        }
+    });
+    }
+    
     document.addEventListener('DOMContentLoaded', () => {
       const API = '/api';
-      const grid = document.getElementById('ticketsGrid');
+      const openGrid = document.getElementById('openTicketsGrid');
+      const closedGrid = document.getElementById('closedTicketsGrid');
+      const openCount = document.getElementById('openCount');
+      const closedCount = document.getElementById('closedCount');
       const modal = document.getElementById('answerModal');
       const modalClose = document.getElementById('answerClose');
       const viewTitle = document.getElementById('viewTitle');
       const viewBody = document.getElementById('viewBody');
-      const answerInput = document.getElementById('answerInput');
+      const replyInput = document.getElementById('replyInput');
       const answerSubmit = document.getElementById('answerSubmit');
+      const conversationThread = document.getElementById('conversationThread');
       const answerError = document.getElementById('answerError');
       const answerSuccess = document.getElementById('answerSuccess');
 
@@ -115,15 +204,16 @@
         return res.json();
       }
 
-      function openModal(ticket) {
+      async function openModal(ticket) {
         current = ticket;
         viewTitle.textContent = ticket.title || '';
         viewBody.textContent = ticket.body || '';
-        answerInput.value = '';
+        replyInput.value = '';
         answerError.style.display = 'none';
         answerSuccess.style.display = 'none';
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
+        await loadReplies(ticket.id);
       }
       function closeModal() {
         current = null;
@@ -135,15 +225,20 @@
       if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 
       async function loadTickets() {
-        grid.innerHTML = '<div class="empty">Loading...</div>';
+        openGrid.innerHTML = '<div class="empty">Loading...</div>';
+        closedGrid.innerHTML = '';
         try {
           const items = await fetchJSON(`${API}/tickets`);
-          if (!Array.isArray(items) || !items.length) {
-            grid.innerHTML = '<div class="empty">No tickets.</div>';
-            return;
-          }
-          grid.innerHTML = '';
-          items.forEach(t => {
+          const openItems = Array.isArray(items) ? items.filter(x => (x.status||'open') === 'open') : [];
+          const closedItems = Array.isArray(items) ? items.filter(x => (x.status||'open') === 'closed') : [];
+
+          openCount.textContent = `(${openItems.length})`;
+          closedCount.textContent = `(${closedItems.length})`;
+
+          openGrid.innerHTML = openItems.length ? '' : '<div class="empty">No open tickets.</div>';
+          closedGrid.innerHTML = closedItems.length ? '' : '<div class="empty">No closed tickets.</div>';
+
+          const renderCard = (t) => {
             const card = document.createElement('div');
             card.className = 'ticket-card';
             card.innerHTML = `
@@ -151,37 +246,89 @@
               <div class=\"ticket-meta\">By ${(t.createdByName||t.createdByEmail||'Unknown').replace(/</g,'&lt;')} • ${new Date(t.createdAt).toLocaleString()}</div>
             `;
             card.addEventListener('click', () => openModal(t));
-            grid.appendChild(card);
-          });
+            return card;
+          };
+
+          openItems.forEach(t => openGrid.appendChild(renderCard(t)));
+          closedItems.forEach(t => closedGrid.appendChild(renderCard(t)));
         } catch (err) {
           console.error('Failed to load tickets:', err);
-          grid.innerHTML = '<div class="empty" style="color:#b91c1c;">Failed to load tickets.</div>';
+          openGrid.innerHTML = '<div class="empty" style="color:#b91c1c;">Failed to load tickets.</div>';
+          closedGrid.innerHTML = '';
+        }
+      }
+
+      function renderReplies(items) {
+        if (!Array.isArray(items) || !items.length) {
+          conversationThread.innerHTML = '<div class="empty">No conversation yet.</div>';
+          return;
+        }
+        conversationThread.innerHTML = '';
+        const meId = localStorage.getItem('userId') || window.sessionUserId || null;
+        const meEmail = localStorage.getItem('email') || null;
+        const meRole = localStorage.getItem('role') || null;
+        items.forEach(r => {
+          const mine = (
+            (meId && r.userId && String(r.userId) === String(meId)) ||
+            (meEmail && r.userEmail && String(r.userEmail).toLowerCase() === String(meEmail).toLowerCase())
+          );
+          // Alignment: in tutor view, tutor (mine) on left, student on right
+          const alignmentClass = mine ? 'tutor' : 'student';
+          const nameFallback = r.author_name || r.userName || r.userEmail || '';
+          const displayName = 'mine' ? 'You' : nameFallback;
+
+          const bubble = document.createElement('div');
+          bubble.className = `bubble ${alignmentClass}`;
+          bubble.innerHTML = `
+            <div class=\"bubble-meta\">${displayName.replace(/</g,'&lt;')} • ${new Date(r.createdAt).toLocaleString()}</div>
+            <div class=\"bubble-text\">${(r.message||r.body||'').replace(/</g,'&lt;')}</div>
+          `;
+          conversationThread.appendChild(bubble);
+        });
+        conversationThread.scrollTop = conversationThread.scrollHeight;
+      }
+
+      async function loadReplies(ticketId) {
+        conversationThread.innerHTML = '<div class="empty">Loading conversation...</div>';
+        try {
+          const items = await fetchJSON(`${API}/tickets/${ticketId}/replies`);
+          renderReplies(items);
+        } catch (err) {
+          console.error('Failed to load replies:', err);
+          conversationThread.innerHTML = '<div class="empty" style="color:#b91c1c;">Failed to load conversation.</div>';
         }
       }
 
       async function submitAnswer() {
         if (!current) return;
-        const body = (answerInput.value || '').trim();
-        if (!body) {
-          answerError.textContent = 'Please enter an answer.';
+        const message = (replyInput.value || '').trim();
+        if (!message) {
+          answerError.textContent = 'Please enter a reply.';
           answerError.style.display = 'block';
           answerSuccess.style.display = 'none';
           return;
         }
         try {
-          await fetchJSON(`${API}/tickets/${current.id}/replies`, { method: 'POST', body: JSON.stringify({ body }) });
-          answerInput.value = '';
+          await fetchJSON(`${API}/tickets/${current.id}/replies`, { method: 'POST', body: JSON.stringify({ body: message }) });
+          replyInput.value = '';
           answerError.style.display = 'none';
           answerSuccess.style.display = 'block';
+          await loadReplies(current.id);
         } catch (err) {
-          console.error('Failed to submit answer:', err);
-          answerError.textContent = 'Failed to submit answer.';
+          console.error('Failed to send reply:', err);
+          answerError.textContent = 'Failed to send reply.';
           answerError.style.display = 'block';
           answerSuccess.style.display = 'none';
         }
       }
 
       if (answerSubmit) answerSubmit.addEventListener('click', submitAnswer);
+      if (replyInput) replyInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          submitAnswer();
+        }
+      });
 
       loadTickets();
     });

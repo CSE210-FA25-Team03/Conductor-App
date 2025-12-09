@@ -11,8 +11,8 @@ async function create(courseIdOverride, userId, { title, body }) {
   if (!t || !b) throw new Error('title and body are required');
 
   const { rows } = await db.query(
-    `INSERT INTO support_tickets (course_id, created_by, title, body)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO support_tickets (course_id, created_by, title, body, status)
+     VALUES ($1, $2, $3, $4, 'open')
      RETURNING id, title, body, status, created_at AS "createdAt"`,
     [courseId, userId, t, b]
   );
@@ -47,7 +47,7 @@ module.exports = {
                 SELECT 1 FROM support_ticket_replies r WHERE r.ticket_id = st.id
               ) AS responded
          FROM support_tickets st
-        WHERE st.course_id = $1 AND st.created_by = $2
+        WHERE st.course_id = $1 AND st.created_by = $2 AND st.status = 'open'
         ORDER BY st.created_at DESC`,
       [courseId, userId]
     );
@@ -57,7 +57,8 @@ module.exports = {
     const courseId = courseIdOverride || getCurrentCourseId();
     if (!courseId || !userId || !ticketId) return false;
     const { rowCount } = await db.query(
-      `DELETE FROM support_tickets WHERE id = $1 AND course_id = $2 AND created_by = $3`,
+      `UPDATE support_tickets SET status = 'closed'
+       WHERE id = $1 AND course_id = $2 AND created_by = $3`,
       [ticketId, courseId, userId]
     );
     return rowCount > 0;

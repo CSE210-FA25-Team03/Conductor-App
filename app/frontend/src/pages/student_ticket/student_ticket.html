@@ -114,7 +114,7 @@
 
   <!-- Tickets slide-out sidebar -->
   <aside id="ticketsSidebar" class="wj-past-sidebar" aria-hidden="true" style="right:-360px; transition:right .2s ease;">
-    <h3 class="wj-past-title">My Tickets</h3>
+    <h3 class="wj-past-title">Current Open Tickets</h3>
     <div id="ticketsList" class="wj-past-list"></div>
   </aside>
   <div id="ticketsOverlay" class="wj-overlay" style="display:none;"></div>
@@ -123,6 +123,14 @@
   <!-- Ticket detail modal -->
   <div id="ticketModalOverlay" class="faq-modal-overlay" aria-hidden="true">
     <div class="faq-modal" role="dialog" aria-modal="true" aria-labelledby="ticketModalTitle" style="max-width:800px; width:94vw;">
+      <style>
+        /* Scoped styles to this modal only */
+        .faq-modal .input { border:1px solid #ddd; border-radius:8px; padding:8px 10px; }
+        .faq-modal .input:focus { outline:none; border-color:#9ca3af; box-shadow:0 0 0 3px rgba(156,163,175,0.25); }
+        .faq-modal .btn.primary { background:#111827; color:#fff; border:none; border-radius:8px; padding:6px 12px; box-shadow:0 1px 2px rgba(0,0,0,0.08); transition:background .15s ease, transform .08s ease; }
+        .faq-modal .btn.primary:hover { background:#0b1220; }
+        .faq-modal .btn.primary:active { transform:translateY(1px); }
+      </style>
       <header>
         <span id="ticketModalTitle">Ticket</span>
         <button id="ticketCloseBtn" class="faq-close" aria-label="Close">✖</button>
@@ -145,13 +153,17 @@
           <label>Conversation</label>
           <div id="ticketChatThread" style="border:1px solid #eee; border-radius:8px; padding:10px; max-height:300px; overflow:auto; background:#f9fafb;"></div>
         </div>
-        <div class="field" style="display:flex; gap:8px; align-items:flex-start;">
-          <textarea id="ticketReplyInput" placeholder="Write a message..." style="flex:1; min-height:60px; padding:8px 10px; border:1px solid #ddd; border-radius:6px;"></textarea>
-          <button id="ticketReplySend" class="wj-btn" type="button">Send</button>
-        </div>
+
+        <div class="field" style="display:flex; gap:8px; align-items:center; margin-top:16px;">
+          <input id="ticketReplyInput" class="input" placeholder="Write a reply..." style="flex:1;" />
+          <button id="ticketReplySend" class="btn primary" type="button">Send</button>
+        <div id="ticketReplyError" class="empty" style="display:none;color:#b91c1c;"></div>
+        <div id="ticketReplySuccess" class="empty" style="display:none;color:#065f46;">Reply sent.</div>
       </div>
-      <div class="actions">
-        <button id="ticketResolveBtn" class="btn primary">Mark as Resolve</button>
+      <div class="actions" style="display:flex; justify-content:flex-end; margin-top:22px;">
+        <button id="ticketResolveBtn" class="wj-btn" title="Close this ticket" style="padding:8px 12px; font-size:0.95rem;">
+          Close Ticket
+        </button>
       </div>
     </div>
   </div>
@@ -223,6 +235,8 @@
       const ticketChatThread = document.getElementById('ticketChatThread');
       const ticketReplyInput = document.getElementById('ticketReplyInput');
       const ticketReplySend = document.getElementById('ticketReplySend');
+      const ticketReplyError = document.getElementById('ticketReplyError');
+      const ticketReplySuccess = document.getElementById('ticketReplySuccess');
       let currentTicket = null;
 
       function setEnabled(enabled) {
@@ -324,12 +338,16 @@
         ticketsSidebar.style.right = '0';
         ticketsSidebar.setAttribute('aria-hidden','false');
         ticketsOverlay.style.display = 'block';
+        const toggleBtn = document.getElementById('openTicketsBtn');
+        if (toggleBtn) toggleBtn.style.display = 'none';
         loadTickets();
       }
       function closeTickets() {
         ticketsSidebar.style.right = '-360px';
         ticketsSidebar.setAttribute('aria-hidden','true');
         ticketsOverlay.style.display = 'none';
+        const toggleBtn = document.getElementById('openTicketsBtn');
+        if (toggleBtn) toggleBtn.style.display = 'block';
       }
       if (ticketsBtn) ticketsBtn.addEventListener('click', openTickets);
       if (ticketsOverlay) ticketsOverlay.addEventListener('click', closeTickets);
@@ -346,7 +364,7 @@
           items.forEach((t) => {
             const el = document.createElement('div');
             el.className = 'wj-past-item';
-            el.textContent = t.title;
+            el.textContent = "Title: " + t.title;
             el.addEventListener('click', () => openTicketModal(t));
             ticketsList.appendChild(el);
           });
@@ -387,8 +405,8 @@
             closeTicketModal();
             if (!ticketsList.children.length) ticketsList.innerHTML = '<p style="font-size:0.9rem;color:#777;">No tickets yet.</p>';
           } catch (err) {
-            console.error('Failed to resolve ticket:', err);
-            alert('Failed to mark as resolved.');
+            console.error('Failed to close ticket:', err);
+            alert('Failed to close ticket. Please try again.');
           }
         });
       }
@@ -403,20 +421,35 @@
             return;
           }
           ticketChatThread.innerHTML = '';
+          const meName = (localStorage.getItem('fullName') || localStorage.getItem('name') || '').trim();
+          const meEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
           items.forEach(msg => {
+            const authorName = (msg.author_name || msg.userName || '').trim();
+            const authorEmail = String(msg.userEmail || '').trim().toLowerCase();
+            const isMine = (
+              (meName && authorName && authorName === meName) ||
+              (meEmail && authorEmail && authorEmail === meEmail)
+            );
+
             const bubble = document.createElement('div');
             bubble.style.margin = '8px 0';
-            bubble.style.maxWidth = '90%';
-            bubble.style.padding = '8px 10px';
-            bubble.style.borderRadius = '10px';
-            bubble.style.background = '#eef2ff';
+            bubble.style.maxWidth = '76%';
+            bubble.style.padding = '8px 12px';
+            bubble.style.borderRadius = '14px';
+            bubble.style.background = isMine ? '#e0f2fe' : '#f5f5f5';
+            bubble.style.border = '1px solid ' + (isMine ? '#bae6fd' : '#e5e7eb');
             bubble.style.display = 'inline-block';
-            const author = (msg.author_name || 'User');
+
+            const displayName = isMine ? 'You' : (authorName || authorEmail || 'User');
             const time = new Date(msg.createdAt).toLocaleString();
-            bubble.innerHTML = `<div style="font-size:0.8rem;color:#555;margin-bottom:4px;">${author} • ${time}</div><div style="white-space:pre-wrap;color:#222;">${(msg.body||'').replace(/</g,'&lt;')}</div>`;
+            bubble.innerHTML = `
+              <div style="font-size:0.78rem;color:#6b7280;margin-bottom:4px;">${displayName.replace(/</g,'&lt;')} • ${time}</div>
+              <div style="white-space:pre-wrap;color:#1f2937;">${(msg.body||'').replace(/</g,'&lt;')}</div>
+            `;
+
             const row = document.createElement('div');
             row.style.display = 'flex';
-            row.style.justifyContent = 'flex-start';
+            row.style.justifyContent = isMine ? 'flex-end' : 'flex-start';
             row.appendChild(bubble);
             ticketChatThread.appendChild(row);
           });
@@ -431,17 +464,32 @@
         ticketReplySend.addEventListener('click', async () => {
           if (!currentTicket) return;
           const body = (ticketReplyInput.value || '').trim();
-          if (!body) return;
+          if (!body) {
+            if (ticketReplyError) {
+              ticketReplyError.textContent = 'Please enter a reply.';
+              ticketReplyError.style.display = 'block';
+              if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
+            }
+            return;
+          }
           try {
             await fetchJSON(`${API_BASE}/tickets/${currentTicket.id}/replies`, {
               method: 'POST',
               body: JSON.stringify({ body })
             });
             ticketReplyInput.value = '';
+            if (ticketReplyError) ticketReplyError.style.display = 'none';
+            if (ticketReplySuccess) ticketReplySuccess.style.display = 'block';
             await loadReplies(currentTicket.id);
           } catch (err) {
             console.error('Failed to send reply:', err);
-            alert('Failed to send message.');
+            if (ticketReplyError) {
+              ticketReplyError.textContent = 'Failed to send reply.';
+              ticketReplyError.style.display = 'block';
+              if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
+            } else {
+              alert('Failed to send message.');
+            }
           }
         });
       }

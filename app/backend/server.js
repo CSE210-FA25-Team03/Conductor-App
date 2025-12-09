@@ -1002,7 +1002,7 @@ app.get(
     }
   });
 
-  // Delete a ticket (mark as resolved by removing)
+  // Close a ticket (mark as resolved by setting status)
   app.delete('/api/tickets/:id', requireAuth, requireCourseContext, async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true })) return;

@@ -315,6 +315,7 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+.btn.primary { background: #111827; color: #fff; }
 /* FAQ modal */
 .faq-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
 .faq-modal { background: #fff; border-radius: 10px; width: min(720px, 94vw); max-height: 85vh; overflow: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
