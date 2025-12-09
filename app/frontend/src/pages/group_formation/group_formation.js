@@ -86,8 +86,14 @@ function showToast(message, type = 'info') {
     toast.style.left = '50%';
     toast.style.transform = 'translateX(-50%)';
     toast.style.zIndex = '9999';
-    toast.style.maxWidth = '480px';
-    toast.style.width = 'calc(100% - 32px)';
+    // toast.style.maxWidth = '480px';
+    // toast.style.width = 'calc(100% - 32px)';
+    // toast.style.maxWidth = 'fit-content';
+    toast.style.display = 'flex';
+    toast.style.flexDirection = 'column';
+    toast.style.alignItems = 'center'; // ensures perfect centering
+    toast.style.maxWidth = '100%'; 
+
     toast.style.pointerEvents = 'none';
     toast.style.fontFamily = 'system-ui,-apple-system,Segoe UI,Roboto,Arial';
     document.body.appendChild(toast);
@@ -102,7 +108,7 @@ function showToast(message, type = 'info') {
   item.style.color = type === 'success' ? '#0F5132' : '#084298';
   item.style.background = type === 'success' ? '#D1E7DD' : '#CFE2FF';
   item.style.border = '1px solid ' + (type === 'success' ? '#BADBCC' : '#9EC5FE');
-  item.style.display = 'inline-block';
+  item.style.display = 'block';
   item.style.pointerEvents = 'auto';
 
   toast.appendChild(item);
@@ -438,7 +444,7 @@ async function handleAddSkillClick() {
 }
 
 function handleSaveSkillsClick() {
-  showToast('Skills auto-save as you add or delete.', 'success');
+  showToast('Skills Saved!', 'success');
 }
 
 /* =============================
@@ -768,7 +774,7 @@ async function handleSaveGroupsClick() {
     if (res && Array.isArray(res.groups)) {
       currentGroups = res.groups;
       renderGroupsTable(currentGroups);
-      showToast('Groups saved successfully.', 'success');
+      showToast('Groups saved successfully!', 'success');
     } else {
       showToast('Groups saved, but server returned an unexpected response.', 'info');
     }
