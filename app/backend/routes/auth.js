@@ -1,6 +1,6 @@
 // app/backend/routes/auth.js
 const express = require("express");
-const db = require("../db");
+// const db = require("../db");
 const classDirectoryDb = require("../db/classDirectory");  // ⬅️ add this line
 const router = express.Router();
 const { Issuer, generators } = require("openid-client");

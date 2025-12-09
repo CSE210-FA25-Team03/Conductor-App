@@ -55,26 +55,6 @@ body {
     }
 }
 
-.logo-full {
-    display: block;
-    height: 6rem;
-}
-
-.logo-mini {
-    display: none;
-}
-
-
-@media (max-width: 500px) {
-    .logo-full {
-        display: none ;
-    }
-
-    .logo-mini {
-        display: block ;
-        height: 2rem;
-    }
-}
 
 /* Task Tracker Section */
 .task-tracker-section {
@@ -339,7 +319,7 @@ body {
     border: 1px solid #f5c6cb;
 }
 
-.modal-content {
+/* .modal-content {
     animation: modalFadeIn 0.3s;
 }
 
@@ -352,7 +332,7 @@ body {
         opacity: 1;
         transform: translateY(0);
     }
-}
+} */
 
 
 @media (max-width: 500px) {
@@ -450,6 +430,8 @@ body {
 .modal-content {
     max-height: 85vh;
     overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.3) transparent;
 }
 
 .modal-content::-webkit-scrollbar {
@@ -469,14 +451,10 @@ body {
     background: transparent;
 }
 
-.modal-content {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(0,0,0,0.3) transparent;
-}
 
-.modal-content button#cancelGitHubConfig,
-.modal-content button#testGitHubConnection,
-.modal-content button#saveGitHubConfig {
+.modal-content button#cancel-github-config,
+.modal-content button#test-github-connection,
+.modal-content button#save-github-config {
     padding: 6px 12px;
     border-radius: 8px;
     font-size: 0.85rem;
@@ -486,13 +464,13 @@ body {
     transition: 0.15s ease;
 }
 
-.modal-content button#cancelGitHubConfig:hover,
-.modal-content button#testGitHubConnection:hover,
-.modal-content button#saveGitHubConfig:hover {
+.modal-content button#cancel-github-config:hover,
+.modal-content button#test-github-connection:hover,
+.modal-content button#save-github-config:hover {
     transform: translateY(-1px);
     opacity: 0.9;
 }
 
-#cancelGitHubConfig { background: #e0e0e0; color: #111; }
-#testGitHubConnection { background: #0366d6; color: #fff; }
-#saveGitHubConfig { background: #28a745; color: #fff; }
+#cancel-github-config { background: #e0e0e0; color: #111; }
+#test-github-connection { background: #0366d6; color: #fff; }
+#save-github-config { background: #28a745; color: #fff; }

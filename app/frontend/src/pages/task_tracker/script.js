@@ -131,9 +131,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const configBtn = document.getElementById('githubConfigBtn');
     const syncBtn = document.getElementById('githubSyncBtn');
     const closeBtn = document.querySelector('.modal-close');
-    const cancelBtn = document.getElementById('cancelGitHubConfig');
-    const saveBtn = document.getElementById('saveGitHubConfig');
-    const testBtn = document.getElementById('testGitHubConnection');
+    const cancelBtn = document.getElementById('cancel-github-config');
+    const saveBtn = document.getElementById('save-github-config');
+    const testBtn = document.getElementById('test-github-connection');
     const statusDiv = document.getElementById('githubConfigStatus');
     const pushBtn = document.getElementById('githubPushBtn'); // define pushBtn
 
@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     } else {
-        console.error('Test button not found! Button ID: testGitHubConnection');
+        console.error('Test button not found! Button ID: test-github-connection');
     }
 
     // Sync button

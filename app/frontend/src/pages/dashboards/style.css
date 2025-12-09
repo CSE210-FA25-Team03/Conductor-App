@@ -235,9 +235,9 @@ body {
   gap: 20px;
 }
 
-.team-card {
+/* .team-card {
   border: 1.6px solid #000;
-}
+} */
 
 .team-card.risk {
   border-left-color: var(--risk);
