@@ -276,7 +276,7 @@ body {
 /* Layout */
 .eval-container {
   max-width: 1200px;
-  margin: 30px auto 0;
+  margin: 10px auto 0;
   padding: 0 24px;
   width: 100%;
   box-sizing: border-box;
@@ -287,14 +287,17 @@ body {
 
 /* Page title */
 .eval-page-title {
-  margin-top: 100px;
-  margin-bottom: 20px;
+  margin-top: 0px;
+  margin-bottom: 5px;
 }
 
 .eval-page-title h1 {
   font-size: 2.2rem;
   font-weight: 700;
+  margin-top: 5px;
+  margin-bottom: 5px;;
 }
+
 
 /* Team tag */
 .eval-header {
@@ -753,7 +756,7 @@ body {
 @media (max-width: 768px) {
   .eval-container {
     padding: 0 0.75rem;
-    margin: 0.5rem auto;
+    margin: 0.25rem auto;
   }
 
   .top-nav {
@@ -801,7 +804,8 @@ body {
   }
 
   .eval-page-title h1 {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
+    
   }
 
   /* Show tab bar on mobile */
