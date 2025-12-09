@@ -69,6 +69,7 @@ function getDashboardUrl() {
   if (role === 'professor') return '/dashboards/professor.html';
   if (role === 'ta') return '/dashboards/ta.html';
   if (role === 'team_lead') return '/dashboards/team_lead.html';
+  if (role === 'tutor') return '/dashboards/tutor.html';
   return '/dashboards/student.html';
 }
 

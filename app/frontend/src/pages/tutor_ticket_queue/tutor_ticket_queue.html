@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+<head>
+  <link rel="stylesheet" href="../../../assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+  <script defer src="/assets/js/class-directory-nav.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
+  <title>Student Ticket | Conductor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="top-nav">
+    <div class="brand">
+        <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+        <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    </div>
+
+    <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+
+      <div class="profile">
+        <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
+          <div class="profile-dropdown-container" style="position:relative;">
+            <img
+              id="dashboardProfileImg"
+              src="/assets/logo/user.png"
+              style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;"
+            />
+            <div
+              id="profileDropdown"
+              class="profile-dropdown"
+              style="
+                display:none;
+                position:absolute;
+                top:48px;
+                right:0;
+                background:#fff;
+                border:1px solid #ddd;
+                border-radius:8px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                min-width:140px;
+              "
+            >
+              <a href="/profile_page/profile.html" style="padding:10px 16px; display:block;">Profile</a>
+              <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
+            </div>
+          </div>
+        <!-- </a> -->
+      </div>
+    </div>
+  </header>
+  <main class="queue-container">
+    <div class="queue-header">
+      <h2 style="margin:0;">Tutor Ticket Queue</h2>
+      <a href="/dashboards/tutor.html" class="nav-btn eval-btn">← Back to Tutor</a>
+    </div>
+
+    <div id="ticketsGrid" class="tickets-grid"></div>
+  </main>
+
+  <div id="answerModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="answerTitle">
+      <header>
+        <span id="answerTitle">Answer Ticket</span>
+        <button id="answerClose" class="close-btn" aria-label="Close">✖</button>
+      </header>
+      <div class="body">
+        <div class="field">
+          <label>Title</label>
+          <div id="viewTitle" class="input" style="background:#f9fafb;"></div>
+        </div>
+        <div class="field">
+          <label>Issue</label>
+          <div id="viewBody" class="textarea" style="background:#f9fafb; white-space:pre-wrap;"></div>
+        </div>
+        <div class="field">
+          <label>Answer</label>
+          <textarea id="answerInput" class="textarea" placeholder="Type your answer..."></textarea>
+        </div>
+        <div id="answerError" class="empty" style="display:none;color:#b91c1c;"></div>
+        <div id="answerSuccess" class="empty" style="display:none;color:#065f46;">Answer submitted.</div>
+      </div>
+      <div class="actions">
+        <button id="answerSubmit" class="btn primary">Submit Answer</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API = '/api';
+      const grid = document.getElementById('ticketsGrid');
+      const modal = document.getElementById('answerModal');
+      const modalClose = document.getElementById('answerClose');
+      const viewTitle = document.getElementById('viewTitle');
+      const viewBody = document.getElementById('viewBody');
+      const answerInput = document.getElementById('answerInput');
+      const answerSubmit = document.getElementById('answerSubmit');
+      const answerError = document.getElementById('answerError');
+      const answerSuccess = document.getElementById('answerSuccess');
+
+      let current = null;
+
+      async function fetchJSON(url, options = {}) {
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+        }
+        if (res.status === 204) return null;
+        return res.json();
+      }
+
+      function openModal(ticket) {
+        current = ticket;
+        viewTitle.textContent = ticket.title || '';
+        viewBody.textContent = ticket.body || '';
+        answerInput.value = '';
+        answerError.style.display = 'none';
+        answerSuccess.style.display = 'none';
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+      }
+      function closeModal() {
+        current = null;
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      if (modalClose) modalClose.addEventListener('click', closeModal);
+      if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+      async function loadTickets() {
+        grid.innerHTML = '<div class="empty">Loading...</div>';
+        try {
+          const items = await fetchJSON(`${API}/tickets`);
+          if (!Array.isArray(items) || !items.length) {
+            grid.innerHTML = '<div class="empty">No tickets.</div>';
+            return;
+          }
+          grid.innerHTML = '';
+          items.forEach(t => {
+            const card = document.createElement('div');
+            card.className = 'ticket-card';
+            card.innerHTML = `
+              <div class=\"ticket-title\">${(t.title||'').replace(/</g,'&lt;')}</div>
+              <div class=\"ticket-meta\">By ${(t.createdByName||t.createdByEmail||'Unknown').replace(/</g,'&lt;')} • ${new Date(t.createdAt).toLocaleString()}</div>
+            `;
+            card.addEventListener('click', () => openModal(t));
+            grid.appendChild(card);
+          });
+        } catch (err) {
+          console.error('Failed to load tickets:', err);
+          grid.innerHTML = '<div class="empty" style="color:#b91c1c;">Failed to load tickets.</div>';
+        }
+      }
+
+      async function submitAnswer() {
+        if (!current) return;
+        const body = (answerInput.value || '').trim();
+        if (!body) {
+          answerError.textContent = 'Please enter an answer.';
+          answerError.style.display = 'block';
+          answerSuccess.style.display = 'none';
+          return;
+        }
+        try {
+          await fetchJSON(`${API}/tickets/${current.id}/replies`, { method: 'POST', body: JSON.stringify({ body }) });
+          answerInput.value = '';
+          answerError.style.display = 'none';
+          answerSuccess.style.display = 'block';
+        } catch (err) {
+          console.error('Failed to submit answer:', err);
+          answerError.textContent = 'Failed to submit answer.';
+          answerError.style.display = 'block';
+          answerSuccess.style.display = 'none';
+        }
+      }
+
+      if (answerSubmit) answerSubmit.addEventListener('click', submitAnswer);
+
+      loadTickets();
+    });
+  </script>
+  
+  </body>
+  </html>
