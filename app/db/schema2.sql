@@ -466,7 +466,7 @@ VALUES
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'active', now()), -- student
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'active', now()), -- team lead (Linus, legacy derived)
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'active', now()), -- new explicit team lead (Alex Lee)
-  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', '99999999-9999-9999-9999-999999999999', 'active', now()); -- admin user
+  -- (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', '99999999-9999-9999-9999-999999999999', 'active', now()); -- admin user
 
 -- Role assignments scoped to this course
 INSERT INTO role_assignments (id, user_id, role_id, scope_type, scope_id, created_at)

@@ -67,7 +67,31 @@ async function updateEvent(courseIdOverride, id, payload) {
   const courseId = courseIdOverride || getCurrentCourseId();
   if (!courseId) return null;
 
-  const merged = { ...existing, ...updates };
+  // Fetch existing event to merge with incoming payload
+  const existingRes = await db.query(
+    `
+    SELECT id,
+           title,
+           description,
+           type,
+           starts_at AS "startsAt",
+           due_at AS "dueDate"
+    FROM class_events
+    WHERE id = $1 AND course_id = $2
+    `,
+    [id, courseId],
+  );
+  const existing = existingRes.rows[0];
+  if (!existing) return null;
+
+  const updates = payload || {};
+  const merged = {
+    title: updates.title ?? existing.title,
+    description: updates.description ?? existing.description,
+    type: updates.type ?? existing.type,
+    startsAt: updates.startsAt ?? existing.startsAt,
+    dueDate: updates.dueDate ?? existing.dueDate,
+  };
 
   const { rows } = await db.query(
     `
