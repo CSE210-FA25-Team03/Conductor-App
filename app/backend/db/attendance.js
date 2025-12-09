@@ -44,17 +44,20 @@ function mapSessionRow(row) {
 
 /**
  * Get all attendance sessions for a course, with present counts.
+ * @param {string} courseId - Course ID
+ * @param {string} typeFilter - Optional: filter by type ('class_meeting' or 'team_meeting')
+ * @param {string} teamIdFilter - Optional: filter by team_id (for team leads to see only their team's sessions)
  */
-async function getSessions(courseId) {
+async function getSessions(courseId, typeFilter = null, teamIdFilter = null) {
   if (!courseId) return [];
 
-  const { rows } = await db.query(
-    `
+  let query = `
     SELECT
       s.id,
       s.course_id,
       s.code,
       s.type,
+      s.team_id,
       s.live_minutes,
       s.created_at,
       s.expires_at,
@@ -62,11 +65,28 @@ async function getSessions(courseId) {
     FROM attendance_sessions s
     LEFT JOIN attendances a ON a.session_id = s.id
     WHERE s.course_id = $1
+  `;
+  const params = [courseId];
+  let paramIndex = 2;
+
+  if (typeFilter) {
+    query += ` AND s.type = $${paramIndex}`;
+    params.push(typeFilter);
+    paramIndex++;
+  }
+
+  if (teamIdFilter) {
+    query += ` AND s.team_id = $${paramIndex}`;
+    params.push(teamIdFilter);
+    paramIndex++;
+  }
+
+  query += `
     GROUP BY s.id
     ORDER BY s.created_at DESC
-    `,
-    [courseId],
-  );
+  `;
+
+  const { rows } = await db.query(query, params);
 
   return rows.map(mapSessionRow);
 }
@@ -231,8 +251,12 @@ async function getSessionWithAttendance(courseId, sessionId) {
  * Mark attendance for a student given a code + email.
  * Returns:
  *   { success, message?, reason?, session? }
+ * @param {string} courseId - Course ID
+ * @param {string} codeRaw - Attendance code
+ * @param {string} emailRaw - User email
+ * @param {string} expectedType - Expected session type ('class_meeting' or 'team_meeting')
  */
-async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
+async function markAttendanceByCode(courseId, codeRaw, emailRaw, expectedType = null) {
   if (!courseId) {
     return {
       success: false,
@@ -275,8 +299,8 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
   const userId = userRows[0].id;
 
   // 2) Find the most recent session with this code for this course
-  const { rows: sessionRows } = await db.query(
-    `
+  // If expectedType is provided, filter by type
+  let query = `
     SELECT
       s.id,
       s.course_id,
@@ -288,13 +312,26 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
     FROM attendance_sessions s
     WHERE s.course_id = $1
       AND UPPER(s.code) = $2
-    ORDER BY s.created_at DESC
-    LIMIT 1
-    `,
-    [courseId, code],
-  );
+  `;
+  const queryParams = [courseId, code];
+  
+  if (expectedType) {
+    query += ` AND s.type = $3`;
+    queryParams.push(expectedType);
+  }
+  
+  query += ` ORDER BY s.created_at DESC LIMIT 1`;
+
+  const { rows: sessionRows } = await db.query(query, queryParams);
 
   if (!sessionRows.length) {
+    if (expectedType) {
+      return {
+        success: false,
+        reason: 'code_type_mismatch',
+        message: `No ${expectedType === 'class_meeting' ? 'class meeting' : 'team meeting'} session found for that code. Make sure you're using the correct code type.`,
+      };
+    }
     return {
       success: false,
       reason: 'code_not_found',
@@ -304,7 +341,16 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
 
   const sessionRow = sessionRows[0];
 
-  // 3) Expiry check in JS (clearer errors)
+  // 3) Validate type matches expected type (if provided)
+  if (expectedType && sessionRow.type !== expectedType) {
+    return {
+      success: false,
+      reason: 'code_type_mismatch',
+      message: `This code is for a ${sessionRow.type === 'class_meeting' ? 'class meeting' : 'team meeting'}, not a ${expectedType === 'class_meeting' ? 'class meeting' : 'team meeting'}. Please use the correct code.`,
+    };
+  }
+
+  // 4) Expiry check in JS (clearer errors)
   const now = new Date();
   const expiresAt = new Date(sessionRow.expires_at);
   if (now > expiresAt) {
@@ -315,7 +361,7 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
     };
   }
 
-  // 4) Upsert attendance row
+  // 5) Upsert attendance row
   await db.query(
     `
     INSERT INTO attendances (session_id, user_id, marked_at, success, source)

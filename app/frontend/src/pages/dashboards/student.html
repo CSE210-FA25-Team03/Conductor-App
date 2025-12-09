@@ -588,7 +588,7 @@
             try {
               const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
                 method: 'POST',
-                body: JSON.stringify({ code, email }),
+                body: JSON.stringify({ code, email, type: 'class_meeting' }),
               });
 
               if (result && result.success) {
@@ -620,7 +620,7 @@
             try {
               const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
                 method: 'POST',
-                body: JSON.stringify({ code, email }),
+                body: JSON.stringify({ code, email, type: 'team_meeting' }),
               });
 
               if (result && result.success) {

@@ -2455,7 +2455,28 @@ app.get(
         return res.json([]);
       }
 
-      const sessions = await attendanceDb.getSessions(req.courseId);
+      const currentUser = req.currentUser;
+      let typeFilter = null;
+      let teamIdFilter = null;
+
+      // Filter sessions by type based on user role:
+      // - Professors/TAs: only see class_meeting sessions
+      // - Team leads: only see team_meeting sessions for their team
+      // - Students: see all (but this endpoint is typically not used by students)
+      if (currentUser && currentUser.role) {
+        if (currentUser.role === 'professor' || currentUser.role === 'ta') {
+          typeFilter = 'class_meeting';
+        } else if (currentUser.role === 'team_lead') {
+          typeFilter = 'team_meeting';
+          // Get team ID for this team lead to filter sessions
+          const teamId = await attendanceDb.getTeamIdForTeamLead(req.courseId, currentUser.id);
+          if (teamId) {
+            teamIdFilter = teamId;
+          }
+        }
+      }
+
+      const sessions = await attendanceDb.getSessions(req.courseId, typeFilter, teamIdFilter);
       res.json(sessions);
     } catch (error) {
       console.error('Error fetching attendance sessions:', error);
@@ -2557,11 +2578,21 @@ app.post(
         });
       }
 
-      const { code, email } = req.body || {};
+      const { code, email, type } = req.body || {};
+      
+      // Validate type if provided
+      if (type && type !== 'class_meeting' && type !== 'team_meeting') {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid type. Must be "class_meeting" or "team_meeting"',
+        });
+      }
+
       const result = await attendanceDb.markAttendanceByCode(
         req.courseId,
         code,
         email,
+        type, // Pass type to validate code matches expected type
       );
 
       res.json(result);
