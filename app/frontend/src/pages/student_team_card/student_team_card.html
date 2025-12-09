@@ -10,8 +10,48 @@
   <link rel="stylesheet" href="/dashboards/style.css" />
 </head>
 <body>
-  <div class="page" data-role="student">
     <header class="top-nav">
+    <div class="brand">
+        <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+        <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    </div>
+
+    <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+
+      <div class="profile">
+        <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
+          <div class="profile-dropdown-container" style="position:relative;">
+            <img
+              id="dashboardProfileImg"
+              src="/assets/logo/user.png"
+              style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;"
+            />
+            <div
+              id="profileDropdown"
+              class="profile-dropdown"
+              style="
+                display:none;
+                position:absolute;
+                top:48px;
+                right:0;
+                background:#fff;
+                border:1px solid #ddd;
+                border-radius:8px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                min-width:140px;
+              "
+            >
+              <a href="/profile_page/profile.html" style="padding:10px 16px; display:block;">Profile</a>
+              <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
+            </div>
+          </div>
+        <!-- </a> -->
+      </div>
+    </div>
+  </header>
+  <div class="page" data-role="student">
+    <!-- <header class="top-nav">
       <div class="brand">
                 <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
                 <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
@@ -23,7 +63,7 @@
           <img id="profileImg" src="/assets/logo/user.png" alt="Profile" style="width:40px;height:40px;border-radius:50%;object-fit:cover;cursor:pointer;" />
         </div>
       </div>
-    </header>
+    </header> -->
 
     <section class="dashboard-header">
       <h1>My Teams</h1>

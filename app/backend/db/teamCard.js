@@ -103,6 +103,7 @@ async function getTeamsForUser({ userId, email, courseId }) {
         t.display_number,
         t.status,
         t.description,
+        t.repo_url,
         EXISTS (
           SELECT 1
           FROM team_members tm2
@@ -127,6 +128,7 @@ async function getTeamsForUser({ userId, email, courseId }) {
     displayNumber: r.display_number,
     status: r.status,
     description: r.description,
+    repoUrl: r.repo_url || '',
     isLeader: r.is_leader,
   }));
 }

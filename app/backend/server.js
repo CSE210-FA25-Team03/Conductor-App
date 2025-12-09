@@ -298,6 +298,32 @@ const fetch =
         });
       }
 
+      // If the user is an admin, bypass any course/class code requirements entirely
+      if (ctx.primaryRole === 'admin') {
+        const canonicalSessionUser = {
+          id: ctx.user.id,
+          email: ctx.user.email,
+          name: ctx.user.displayName || ctx.user.email,
+          role: 'admin',
+          courseId: null,
+          courseCode: null,
+          courseName: null,
+          emailVerified: true,
+          picture: null,
+        };
+        req.session.user = canonicalSessionUser;
+        return res.json({
+          success: true,
+          user: canonicalSessionUser,
+          courseId: null,
+          primaryRole: 'admin',
+          redirectPath: '/admin/admin.html',
+          roles: ctx.roles && ctx.roles.length ? ctx.roles : ['admin'],
+          isTeamLead: !!ctx.isTeamLead,
+          teamLeadTeams: ctx.teamLeadTeams || [],
+        });
+      }
+
       // 2) If a class code was supplied but we couldn’t resolve a course
       if (rawClassCode && !ctx.courseId) {
         return res.status(404).json({
