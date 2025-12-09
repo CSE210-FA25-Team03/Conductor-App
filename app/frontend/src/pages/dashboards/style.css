@@ -297,7 +297,7 @@ body {
   font-size: 0.85rem;
 }
 
-.card-actions .button {
+.card-actions .card-info-btn {
   background: #2563eb;
   color: #fff;
   border: none;
@@ -308,7 +308,7 @@ body {
   transition: background 0.2s ease-in-out;
 }
 
-.card-actions .button:hover {
+.card-actions .card-info-btn:hover {
   background: #1742b0;
 }
 
