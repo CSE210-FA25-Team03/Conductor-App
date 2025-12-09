@@ -55,16 +55,6 @@ body {
     }
 }
 
-.logo-full {
-    display: block;
-    height: 6rem;
-}
-
-.logo-mini {
-    display: none;
-}
-
-
 @media (max-width: 500px) {
     .logo-full {
         display: none ;

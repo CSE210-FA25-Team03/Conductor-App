@@ -1,7 +1,8 @@
 // Shared attendance plot component
 // Usage: Include Chart.js CDN and call initAttendancePlot(teamId, role, courseId)
 
-function initAttendancePlot(teamId, role, courseId) {
+// eslint-disable-next-line no-unused-vars
+function initAttendancePlot(teamId, role, _courseId) {
   const API_BASE = '/api';
   const plotPanel = document.getElementById('attendancePlotPanel');
   const openBtn = document.getElementById('viewAttendanceBtn');
@@ -14,8 +15,11 @@ function initAttendancePlot(teamId, role, courseId) {
 
   if (!plotPanel || !openBtn) return;
 
-  let classChart = null;
-  let teamChart = null;
+  // Chart instances stored for potential cleanup (currently unused but kept for future use)
+  // eslint-disable-next-line no-unused-vars
+  let _classChart = null;
+  // eslint-disable-next-line no-unused-vars
+  let _teamChart = null;
 
   async function fetchJSON(url, options = {}) {
     const res = await fetch(url, {
@@ -87,7 +91,7 @@ function initAttendancePlot(teamId, role, courseId) {
     const rates = data.periods.map((p) => p.attendanceRate);
 
     if (window.Chart) {
-      new Chart(ctx, {
+      const chart = new window.Chart(ctx, {
         type: 'line',
         data: {
           labels,
@@ -116,6 +120,12 @@ function initAttendancePlot(teamId, role, courseId) {
           },
         },
       });
+      // Store chart instance for potential cleanup
+      if (container === classPlotContainer) {
+        _classChart = chart;
+      } else if (container === teamPlotContainer) {
+        _teamChart = chart;
+      }
     } else {
       container.innerHTML = '<p style="color:#b00020;">Chart.js not loaded. Please include Chart.js library.</p>';
     }

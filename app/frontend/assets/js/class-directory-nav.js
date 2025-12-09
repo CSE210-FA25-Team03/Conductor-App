@@ -19,25 +19,7 @@
     });
   }
 
-  async function fetchCourseMeta() {
-    try {
-      const res = await fetch('/api/class_directory');
-      if (!res.ok) throw new Error('failed');
-      const data = await res.json();
-      const entry = Array.isArray(data) ? data[0] : data;
-      return entry?.course || null;
-    } catch (error) {
-      console.error('Failed to load course meta for CTA', error);
-      return null;
-    }
-  }
-
-  function updateCtaContent(cta, course) {
-    if (!cta || !course) return;
-    const code = course.course_code || 'Class';
-    const term = course.term_year || '';
-    cta.innerHTML = `${code}<br>${term || 'Directory'}`;
-  }
+  // Removed unused functions: fetchCourseMeta and updateCtaContent
 
   document.addEventListener('DOMContentLoaded', async () => {
     removeCta();
