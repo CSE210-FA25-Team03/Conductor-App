@@ -33,6 +33,7 @@ function mapSessionRow(row) {
     courseId: row.course_id,
     code: row.code,
     type: row.type,
+    teamId: row.team_id || null,
     liveMinutes: row.live_minutes,
     createdAt: row.created_at,
     expiresAt: row.expires_at,
@@ -71,64 +72,46 @@ async function getSessions(courseId) {
 }
 
 /**
- * Pick a created_by user for an attendance session.
- *
- * For dev/testing we:
- * - Prefer a user who has a 'professor' role scoped to this course
- * - Fallback to the first course_memberships record
+ * Get team ID for a team lead user in a course.
  */
-async function pickCreatorUserId(courseId) {
-  // Try to find a professor for this course
-  const { rows: profRows } = await db.query(
+async function getTeamIdForTeamLead(courseId, userId) {
+  const { rows } = await db.query(
     `
-    SELECT u.id AS user_id
-    FROM users u
-    JOIN role_assignments ra ON ra.user_id = u.id
-    JOIN roles r ON r.id = ra.role_id
-    WHERE ra.scope_type = 'course'
-      AND ra.scope_id = $1
-      AND r.key = 'professor'
-    ORDER BY u.created_at ASC
+    SELECT t.id
+    FROM teams t
+    JOIN team_members tm ON tm.team_id = t.id
+    WHERE t.course_id = $1
+      AND tm.user_id = $2
+      AND tm.is_leader = TRUE
+    ORDER BY t.created_at ASC
     LIMIT 1
     `,
-    [courseId],
+    [courseId, userId],
   );
-
-  if (profRows.length) {
-    return profRows[0].user_id;
-  }
-
-  // Fallback: any course member
-  const { rows: memberRows } = await db.query(
-    `
-    SELECT user_id
-    FROM course_memberships
-    WHERE course_id = $1
-    ORDER BY created_at ASC
-    LIMIT 1
-    `,
-    [courseId],
-  );
-
-  if (!memberRows.length) {
-    throw new Error(
-      'No users found in this course to use as created_by for attendance_sessions',
-    );
-  }
-
-  return memberRows[0].user_id;
+  return rows.length ? rows[0].id : null;
 }
 
 /**
  * Create a new attendance session with a random code and expiration.
- * data: { durationMinutes }
+ * data: { durationMinutes, type, teamId, createdBy }
  */
 async function createSession(courseId, data = {}) {
   if (!courseId) {
     throw new Error('Course ID is required to create attendance sessions');
   }
 
-  const creatorUserId = await pickCreatorUserId(courseId);
+  const creatorUserId = data.createdBy || null;
+  if (!creatorUserId) {
+    throw new Error('createdBy user ID is required');
+  }
+
+  const sessionType = data.type || 'class_meeting';
+  const teamId = data.teamId || null;
+
+  // Validate: team_meeting requires teamId
+  if (sessionType === 'team_meeting' && !teamId) {
+    throw new Error('teamId is required for team_meeting sessions');
+  }
 
   const durationRaw = parseInt(data.durationMinutes, 10);
   const liveMinutes = Number.isFinite(durationRaw)
@@ -152,16 +135,18 @@ async function createSession(courseId, data = {}) {
       created_by,
       code,
       type,
+      team_id,
       live_minutes,
       created_at,
       expires_at
     )
-    VALUES ($1,$2,$3,$4,$5,$6,$7)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
     RETURNING
       id,
       course_id,
       code,
       type,
+      team_id,
       live_minutes,
       created_at,
       expires_at
@@ -170,7 +155,8 @@ async function createSession(courseId, data = {}) {
       courseId,
       creatorUserId,
       code,
-      'class_meeting', // valid type per your CHECK constraint
+      sessionType,
+      teamId,
       liveMinutes,
       now.toISOString(),
       expiresAt.toISOString(),
@@ -421,10 +407,150 @@ async function getHistoryByEmail(courseId, emailRaw) {
   };
 }
 
+/**
+ * Get attendance plot data for a team by 7-day periods.
+ * Returns: { periods: [...], averageRate, totalMembers, totalPeriods }
+ */
+async function getAttendancePlot(courseId, teamId, sessionType) {
+  if (!courseId || !teamId || !sessionType) {
+    return { periods: [], averageRate: 0, totalMembers: 0, totalPeriods: 0 };
+  }
+
+  // Get team members
+  const { rows: memberRows } = await db.query(
+    `
+    SELECT tm.user_id
+    FROM team_members tm
+    JOIN teams t ON t.id = tm.team_id
+    WHERE t.id = $1 AND t.course_id = $2
+    `,
+    [teamId, courseId],
+  );
+  const teamMemberIds = memberRows.map((r) => r.user_id);
+  const totalMembers = teamMemberIds.length;
+  if (totalMembers === 0) {
+    return { periods: [], averageRate: 0, totalMembers: 0, totalPeriods: 0 };
+  }
+
+  // Get all sessions of this type for this team/course
+  const { rows: sessionRows } = await db.query(
+    `
+    SELECT s.id, s.created_at
+    FROM attendance_sessions s
+    WHERE s.course_id = $1
+      AND s.type = $2
+      AND (s.team_id = $3 OR ($2 = 'class_meeting' AND s.team_id IS NULL))
+    ORDER BY s.created_at ASC
+    `,
+    [courseId, sessionType, teamId],
+  );
+
+  if (sessionRows.length === 0) {
+    return { periods: [], averageRate: 0, totalMembers, totalPeriods: 0 };
+  }
+
+  // Get all attendance records for these sessions and team members
+  const sessionIds = sessionRows.map((r) => r.id);
+  const { rows: attendanceRows } = await db.query(
+    `
+    SELECT a.session_id, a.user_id, s.created_at
+    FROM attendances a
+    JOIN attendance_sessions s ON s.id = a.session_id
+    WHERE a.session_id = ANY($1::uuid[])
+      AND a.user_id = ANY($2::uuid[])
+      AND a.success = TRUE
+    `,
+    [sessionIds, teamMemberIds],
+  );
+
+  // Group sessions by 7-day periods
+  const periodMap = new Map();
+  sessionRows.forEach((session) => {
+    const date = new Date(session.created_at);
+    const periodStart = new Date(date);
+    periodStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
+    periodStart.setHours(0, 0, 0, 0);
+    const periodKey = periodStart.toISOString().split('T')[0];
+
+    if (!periodMap.has(periodKey)) {
+      const periodEnd = new Date(periodStart);
+      periodEnd.setDate(periodStart.getDate() + 6);
+      periodMap.set(periodKey, {
+        startDate: periodKey,
+        endDate: periodEnd.toISOString().split('T')[0],
+        sessionIds: [],
+        presentMembers: new Set(),
+      });
+    }
+    periodMap.get(periodKey).sessionIds.push(session.id);
+  });
+
+  // Count present members per period
+  attendanceRows.forEach((row) => {
+    const sessionDate = new Date(row.created_at);
+    const periodStart = new Date(sessionDate);
+    periodStart.setDate(sessionDate.getDate() - sessionDate.getDay());
+    periodStart.setHours(0, 0, 0, 0);
+    const periodKey = periodStart.toISOString().split('T')[0];
+
+    const period = periodMap.get(periodKey);
+    if (period && period.sessionIds.includes(row.session_id)) {
+      period.presentMembers.add(row.user_id);
+    }
+  });
+
+  // Calculate rates and format periods
+  const periods = Array.from(periodMap.values())
+    .map((period) => {
+      const presentCount = period.presentMembers.size;
+      const attendanceRate = totalMembers > 0
+        ? Math.round((presentCount / totalMembers) * 100)
+        : 0;
+
+      const start = new Date(period.startDate);
+      const end = new Date(period.endDate);
+      const label = formatPeriodLabel(start, end);
+
+      return {
+        startDate: period.startDate,
+        endDate: period.endDate,
+        label,
+        attendanceRate,
+        presentCount,
+        totalMembers,
+      };
+    })
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+  const totalPeriods = periods.length;
+  const averageRate =
+    totalPeriods > 0
+      ? Math.round(
+          periods.reduce((sum, p) => sum + p.attendanceRate, 0) / totalPeriods,
+        )
+      : 0;
+
+  return { periods, averageRate, totalMembers, totalPeriods };
+}
+
+function formatPeriodLabel(start, end) {
+  const startMonth = start.toLocaleString('en-US', { month: 'short' });
+  const endMonth = end.toLocaleString('en-US', { month: 'short' });
+  const startDay = start.getDate();
+  const endDay = end.getDate();
+
+  if (startMonth === endMonth) {
+    return `${startMonth} ${startDay}-${endDay}`;
+  }
+  return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+}
+
 module.exports = {
   getSessions,
   createSession,
   getSessionWithAttendance,
   markAttendanceByCode,
   getHistoryByEmail,
+  getAttendancePlot,
+  getTeamIdForTeamLead,
 };

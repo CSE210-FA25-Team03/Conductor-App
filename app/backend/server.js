@@ -2464,7 +2464,7 @@ app.get(
   }
 );
 
-  // CREATE a new attendance session (professor)
+  // CREATE a new attendance session (professor or team lead)
 app.post(
   '/api/attendance/sessions',
   requireAuth,
@@ -2475,9 +2475,37 @@ app.post(
         return res.status(500).json({ error: 'Database not configured' });
       }
 
-      const { durationMinutes } = req.body || {};
+      const currentUser = req.currentUser;
+      if (!currentUser || !currentUser.id) {
+        return res.status(401).json({ error: 'Not authenticated' });
+      }
+
+      const { durationMinutes, type, teamId } = req.body || {};
+      const sessionType = type || 'class_meeting';
+      let finalTeamId = teamId || null;
+
+      // Authorization: professor creates class_meeting, team lead creates team_meeting
+      if (sessionType === 'team_meeting') {
+        if (currentUser.role !== 'team_lead') {
+          return res.status(403).json({ error: 'Only team leads can create team meeting codes' });
+        }
+        if (!finalTeamId) {
+          finalTeamId = await attendanceDb.getTeamIdForTeamLead(req.courseId, currentUser.id);
+          if (!finalTeamId) {
+            return res.status(400).json({ error: 'Team lead must be assigned to a team' });
+          }
+        }
+      } else if (sessionType === 'class_meeting') {
+        if (currentUser.role !== 'professor' && currentUser.role !== 'ta') {
+          return res.status(403).json({ error: 'Only professors/TAs can create class meeting codes' });
+        }
+      }
+
       const session = await attendanceDb.createSession(req.courseId, {
         durationMinutes,
+        type: sessionType,
+        teamId: finalTeamId,
+        createdBy: currentUser.id,
       });
 
       res.status(201).json(session);
@@ -2547,6 +2575,30 @@ app.post(
   }
 );
 
+  // Get attendance plot data for a team
+app.get(
+  '/api/attendance/plot',
+  requireAuth,
+  requireCourseContext,
+  async (req, res) => {
+    try {
+      if (!ensureDb(res)) {
+        return res.json({ periods: [], averageRate: 0, totalMembers: 0, totalPeriods: 0 });
+      }
+
+      const { teamId, type } = req.query;
+      if (!teamId || !type) {
+        return res.status(400).json({ error: 'teamId and type are required' });
+      }
+
+      const plotData = await attendanceDb.getAttendancePlot(req.courseId, teamId, type);
+      res.json(plotData);
+    } catch (error) {
+      console.error('Error fetching attendance plot:', error);
+      res.status(500).json({ error: 'Failed to fetch attendance plot' });
+    }
+  }
+);
 
   // Get attendance history for a student by email
 app.get(

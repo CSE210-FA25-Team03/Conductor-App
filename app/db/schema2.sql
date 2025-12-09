@@ -276,7 +276,8 @@ CREATE TABLE attendance_sessions (
   course_id   uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   created_by  uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   code        text NOT NULL,
-  type        text NOT NULL CHECK (type IN ('class','group_meeting','office_hours','class_meeting','code_created')),
+  type        text NOT NULL CHECK (type IN ('class','group_meeting','office_hours','class_meeting','team_meeting','code_created')),
+  team_id     uuid REFERENCES teams(id) ON DELETE SET NULL,
   live_minutes int NOT NULL DEFAULT 10,
   created_at  timestamptz NOT NULL DEFAULT now(),
   expires_at  timestamptz NOT NULL,
@@ -465,7 +466,7 @@ VALUES
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'active', now()), -- ta
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'active', now()), -- student
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'active', now()), -- team lead (Linus, legacy derived)
-  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'active', now()), -- new explicit team lead (Alex Lee)
+  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'active', now()); -- new explicit team lead (Alex Lee)
   -- (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', '99999999-9999-9999-9999-999999999999', 'active', now()); -- admin user
 
 -- Role assignments scoped to this course
