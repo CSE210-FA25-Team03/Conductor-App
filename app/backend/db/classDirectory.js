@@ -90,8 +90,10 @@ async function getStaffByRole(courseId, roleKey) {
       SELECT
         u.id,
         u.display_name,
+        u.email           AS user_email,
+        u.pronouns        AS user_pronouns,
         up.photo_url,
-        up.pronouns,
+        up.pronouns       AS profile_pronouns,
         up.phone,
         up.email          AS profile_email,
         up.availability_notes,
@@ -117,12 +119,12 @@ async function getStaffByRole(courseId, roleKey) {
     photo_url: r.photo_url || '',
     name: r.display_name || r.profile_email || '',
     role: roleKey,
-    pronouns: r.pronouns || '',
+    pronouns: r.profile_pronouns || r.user_pronouns || '',
     contact: r.phone || '',
     phone: r.phone || '',
     office_hours: r.availability_notes || '',
     public_link: r.public_link || '',
-    email: r.profile_email || '',
+    email: r.profile_email || r.user_email || '',
   }));
 }
 

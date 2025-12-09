@@ -290,14 +290,19 @@ body {
   font-size: 0.85rem;
 }
 
-.card-actions button {
+.card-actions .button {
+  background: #2563eb;
+  color: #fff;
   border: none;
-  background: rgba(47, 59, 181, 0.12);
-  color: var(--primary);
   padding: 8px 14px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.card-actions .button:hover {
+  background: #1742b0;
 }
 
 .class-directory-card {
@@ -1144,5 +1149,24 @@ body {
     font-size: 0.85rem;
 }
 
+.team-card {
+  justify-content: flex-start !important;
+}
 
+.team-card .info-btn {
+  background: #2563eb !important;
+  color: #fff !important;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background 0.2s ease-in-out;
+  width: fit-content;
+}
+
+.team-card .info-btn:hover {
+  background: #1742b0 !important;
+}
 
