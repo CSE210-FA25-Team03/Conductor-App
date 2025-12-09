@@ -104,6 +104,17 @@
                     <button class="card-btn" id="viewAttendanceBtn">Open Attendance</button>
                 </div>
             </article>
+
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="attendance_icon.PNG" alt="Attendance Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>View Attendance</h2>
+                    <p>View attendance plots and statistics</p>
+                    <button class="card-btn" id="viewAttendancePlotBtn">View Attendance</button>
+                </div>
+            </article>
         </section>
 
     </div>
@@ -286,5 +297,183 @@
   });
 </script>
     </section>
+
+    <!-- View Attendance Plot Panel -->
+    <section class="attendance-panel" id="attendancePlotPanel" aria-hidden="true">
+        <article class="attendance-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Attendance</p>
+                    <h2>View Attendance</h2>
+                    <p>View attendance plots and statistics for class meetings.</p>
+                </div>
+                <button class="close-attendance-plot" aria-label="Close">×</button>
+            </header>
+            <div style="margin-bottom:1rem;">
+                <label for="attendanceTeamSelect" style="display:block;margin-bottom:0.5rem;font-weight:500;">Select Team:</label>
+                <select id="attendanceTeamSelect" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;">
+                    <option value="">Select a team...</option>
+                </select>
+            </div>
+            <div id="classPlotSection" style="margin-top:1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <h3>Class Meeting Attendance</h3>
+                    <button id="toggleClassPlot" style="padding:0.25rem 0.5rem;font-size:0.85rem;">Hide</button>
+                </div>
+                <div id="classPlotContent">
+                    <div class="plot-stats" style="margin-bottom:0.5rem;font-size:0.9rem;color:#666;"></div>
+                    <div id="classAttendancePlot" style="height:300px;"></div>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+        // View Attendance Plot for Professor
+        document.addEventListener('DOMContentLoaded', async () => {
+            const API_BASE = '/api';
+            const plotPanel = document.getElementById('attendancePlotPanel');
+            const viewBtn = document.getElementById('viewAttendancePlotBtn');
+            const closeBtn = document.querySelector('.close-attendance-plot');
+            const teamSelect = document.getElementById('attendanceTeamSelect');
+            const classPlotContainer = document.getElementById('classAttendancePlot');
+            const classPlotSection = document.getElementById('classPlotSection');
+            
+            if (!plotPanel || !viewBtn) return;
+
+            let classChart = null;
+
+            async function fetchJSON(url) {
+                const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                return res.json();
+            }
+
+            async function loadTeams() {
+                try {
+                    const teams = await fetchJSON(`${API_BASE}/teams`);
+                    teamSelect.innerHTML = '<option value="">Select a team...</option>';
+                    teams.forEach((team) => {
+                        const option = document.createElement('option');
+                        option.value = team.id;
+                        option.textContent = team.name || team.code;
+                        teamSelect.appendChild(option);
+                    });
+                } catch (err) {
+                    console.error('Failed to load teams:', err);
+                }
+            }
+
+            async function loadPlots(selectedTeamId) {
+                if (!selectedTeamId) return;
+
+                try {
+                    const classData = await fetchJSON(`${API_BASE}/attendance/plot?teamId=${selectedTeamId}&type=class_meeting`);
+                    renderPlot(classPlotContainer, classData, 'Class Meeting Attendance', '#2196F3');
+                    updateStats(classPlotSection, classData, 'Students');
+                } catch (err) {
+                    console.error('Failed to load class plot:', err);
+                    classPlotContainer.innerHTML = '<p style="color:#b00020;">Failed to load class attendance plot.</p>';
+                }
+            }
+
+            function renderPlot(container, data, title, color) {
+                if (!container || !data.periods || data.periods.length === 0) {
+                    container.innerHTML = '<p style="color:#666;">No attendance data available.</p>';
+                    return;
+                }
+
+                const canvas = document.createElement('canvas');
+                container.innerHTML = '';
+                container.appendChild(canvas);
+
+                const ctx = canvas.getContext('2d');
+                const labels = data.periods.map((p) => p.label);
+                const rates = data.periods.map((p) => p.attendanceRate);
+
+                if (window.Chart) {
+                    if (classChart) classChart.destroy();
+                    classChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels,
+                            datasets: [{
+                                label: 'Attendance Rate (%)',
+                                data: rates,
+                                borderColor: color,
+                                backgroundColor: color + '20',
+                                fill: true,
+                                tension: 0.4,
+                            }],
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    ticks: { stepSize: 10 },
+                                },
+                            },
+                            plugins: {
+                                legend: { display: true },
+                                title: { display: true, text: title },
+                            },
+                        },
+                    });
+                } else {
+                    container.innerHTML = '<p style="color:#b00020;">Chart.js not loaded.</p>';
+                }
+            }
+
+            function updateStats(section, data, memberLabel) {
+                if (!section) return;
+                const statsEl = section.querySelector('.plot-stats');
+                if (statsEl) {
+                    statsEl.innerHTML = `
+                        <div><strong>Average Rate:</strong> ${data.averageRate}%</div>
+                        <div><strong>Total ${memberLabel}:</strong> ${data.totalMembers}</div>
+                        <div><strong>Total Periods:</strong> ${data.totalPeriods}</div>
+                    `;
+                }
+            }
+
+            function openPanel() {
+                plotPanel.setAttribute('aria-hidden', 'false');
+                loadTeams();
+            }
+
+            function closePanel() {
+                plotPanel.setAttribute('aria-hidden', 'true');
+            }
+
+            viewBtn.addEventListener('click', openPanel);
+            if (closeBtn) closeBtn.addEventListener('click', closePanel);
+            if (plotPanel) {
+                plotPanel.addEventListener('click', (e) => {
+                    if (e.target === plotPanel) closePanel();
+                });
+            }
+
+            if (teamSelect) {
+                teamSelect.addEventListener('change', (e) => {
+                    loadPlots(e.target.value);
+                });
+            }
+
+            // Toggle section
+            const classToggle = document.getElementById('toggleClassPlot');
+            if (classToggle && classPlotSection) {
+                classToggle.addEventListener('click', () => {
+                    const content = document.getElementById('classPlotContent');
+                    const isHidden = content.style.display === 'none';
+                    content.style.display = isHidden ? 'block' : 'none';
+                    classToggle.textContent = isHidden ? 'Hide' : 'Show';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
