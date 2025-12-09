@@ -405,3 +405,94 @@ body {
 
   
 }
+
+.accordion-header {
+    width: 100%;
+    text-align: left;
+    padding: 12px;
+    background: #f0f0f0;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: #111;
+    margin-bottom: 0; 
+    transition: background 0.2s;
+}
+
+.accordion-header:hover {
+    background: #e4e4e4;
+}
+
+.accordion-item.active .accordion-header {
+    background: #d8d8d8;
+}
+
+.accordion-body {
+    background: #f7f7f7;
+    border-radius: 0 0 8px 8px;
+    max-height: 0;
+    overflow: hidden;
+    padding: 0 10px;
+    transition: max-height .3s ease, padding .2s ease;
+}
+
+.accordion-item.active .accordion-body {
+    max-height: 300px;
+    padding: 12px 10px 14px;
+}
+
+.accordion-item + .accordion-item {
+    margin-top: 12px; 
+}
+
+.modal-content {
+    max-height: 85vh;
+    overflow-y: auto;
+}
+
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.23);
+    border-radius: 8px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.38);
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.modal-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0,0,0,0.3) transparent;
+}
+
+.modal-content button#cancelGitHubConfig,
+.modal-content button#testGitHubConnection,
+.modal-content button#saveGitHubConfig {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: 0.15s ease;
+}
+
+.modal-content button#cancelGitHubConfig:hover,
+.modal-content button#testGitHubConnection:hover,
+.modal-content button#saveGitHubConfig:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+}
+
+#cancelGitHubConfig { background: #e0e0e0; color: #111; }
+#testGitHubConnection { background: #0366d6; color: #fff; }
+#saveGitHubConfig { background: #28a745; color: #fff; }
