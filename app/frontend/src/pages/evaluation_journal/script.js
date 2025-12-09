@@ -897,7 +897,7 @@ async function renderWorkJournalCards() {
   } catch (err) {
     console.error('No work journals yet.', err);
     (wjSections || workJournalBox).innerHTML =
-      '<p style="font-size:0.9rem;color:#b00020;">Failed to load work journals.</p>';
+      '<p style="font-size:0.9rem;color:#b00020;">No work journals yet.</p>';
   }
 }
 
