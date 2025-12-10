@@ -120,8 +120,20 @@
         <!-- Attendance form -->
         <div class="attendance-form">
             <div style="margin-bottom:1rem;">
-                <label for="attendanceDate" style="display:block;margin-bottom:0.5rem;font-weight:500;">Date:</label>
-                <input type="date" id="attendanceDate" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;" required>
+                <label for="attendanceWeek" style="display:block;margin-bottom:0.5rem;font-weight:500;">Week:</label>
+                <select id="attendanceWeek" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;" required>
+                    <option value="">Select a week...</option>
+                    <option value="Week 1">Week 1</option>
+                    <option value="Week 2">Week 2</option>
+                    <option value="Week 3">Week 3</option>
+                    <option value="Week 4">Week 4</option>
+                    <option value="Week 5">Week 5</option>
+                    <option value="Week 6">Week 6</option>
+                    <option value="Week 7">Week 7</option>
+                    <option value="Week 8">Week 8</option>
+                    <option value="Week 9">Week 9</option>
+                    <option value="Week 10">Week 10</option>
+                </select>
             </div>
             <label class="att-row">
                 <input type="checkbox" id="attClass"> Class
@@ -256,24 +268,19 @@ if (closeBtn && drawer) {
     closeBtn.onclick = () => drawer.setAttribute("aria-hidden", "true");
 }
 
-// Set default date to today
-const dateInput = document.getElementById("attendanceDate");
-if (dateInput) {
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.value = today;
-}
+// Week dropdown is initialized in the HTML
 
 const saveBtn = document.getElementById("saveAttendanceBtn");
 const saveMessage = document.getElementById("saveAttendanceMessage");
 
 if (saveBtn) {
     saveBtn.onclick = () => {
-        const dateInput = document.getElementById("attendanceDate");
-        const dateValue = dateInput ? dateInput.value : null;
+        const weekSelect = document.getElementById("attendanceWeek");
+        const weekValue = weekSelect ? weekSelect.value : null;
         
-        if (!dateValue) {
+        if (!weekValue) {
             if (saveMessage) {
-                saveMessage.textContent = "Please select a date.";
+                saveMessage.textContent = "Please select a week.";
                 saveMessage.style.color = "#b00020";
             }
             return;
@@ -301,7 +308,7 @@ if (saveBtn) {
         }
 
         const attendance = {
-            date: dateValue,
+            week: weekValue,
             class: document.getElementById("attClass").checked,
             group: document.getElementById("attGroup").checked,
             office: document.getElementById("attOffice").checked,
@@ -312,14 +319,14 @@ if (saveBtn) {
 
         let history = JSON.parse(localStorage.getItem("taAttendanceHistory") || "[]");
         
-        // Check for duplicate entry for the same date
-        const existingIndex = history.findIndex(entry => entry.date === dateValue);
+        // Check for duplicate entry for the same week
+        const existingIndex = history.findIndex(entry => entry.week === weekValue);
         
         if (existingIndex !== -1) {
             // Update existing entry instead of creating duplicate
             history[existingIndex] = attendance;
             if (saveMessage) {
-                saveMessage.textContent = "Attendance updated for this date.";
+                saveMessage.textContent = "Attendance updated for this week.";
                 saveMessage.style.color = "#0a7a30";
             }
         } else {
@@ -357,11 +364,18 @@ function loadAttendanceHistory() {
 
     const history = JSON.parse(localStorage.getItem("taAttendanceHistory") || "[]");
 
-    // Sort by date (most recent first)
+    // Sort by week (most recent first, then by timestamp)
     const sortedHistory = history.slice().sort((a, b) => {
-        const dateA = a.date || a.timestamp || '';
-        const dateB = b.date || b.timestamp || '';
-        return dateB.localeCompare(dateA);
+        // First try to sort by week number if both have week
+        if (a.week && b.week) {
+            const weekNumA = parseInt(a.week.replace('Week ', '')) || 0;
+            const weekNumB = parseInt(b.week.replace('Week ', '')) || 0;
+            if (weekNumB !== weekNumA) return weekNumB - weekNumA;
+        }
+        // Fallback to timestamp for entries without week or same week
+        const timestampA = a.timestamp || '';
+        const timestampB = b.timestamp || '';
+        return timestampB.localeCompare(timestampA);
     });
 
     list.innerHTML = sortedHistory.map(entry => {
@@ -372,28 +386,26 @@ function loadAttendanceHistory() {
             entry.classMeeting ? "Class Meeting" : null,
         ].filter(Boolean).join(", ");
 
-        // Format date for display
-        let displayDate = entry.displayTimestamp || entry.timestamp || '';
-        if (entry.date) {
-            const dateObj = new Date(entry.date + 'T00:00:00');
-            const formattedDate = dateObj.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: '2-digit', 
-                day: '2-digit' 
-            });
+        // Format week and timestamp for display
+        let displayInfo = '';
+        if (entry.week) {
+            displayInfo = entry.week;
             if (entry.displayTimestamp) {
                 // Extract time from displayTimestamp if available
                 const timeMatch = entry.displayTimestamp.match(/\d{1,2}:\d{2}:\d{2}/);
-                displayDate = timeMatch ? `${formattedDate} ${timeMatch[0]}` : formattedDate;
-            } else {
-                displayDate = formattedDate;
+                if (timeMatch) {
+                    displayInfo += ` · ${timeMatch[0]}`;
+                }
             }
+        } else {
+            // Fallback for old entries that might still have date
+            displayInfo = entry.displayTimestamp || entry.timestamp || '';
         }
 
         return `
             <li>
                 <strong>${types}</strong><br>
-                <small>${displayDate}</small>
+                <small>${displayInfo}</small>
             </li>
         `;
     }).join("");
