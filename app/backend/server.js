@@ -31,6 +31,7 @@
   const authRoutes = require('./routes/auth');
   const app = express();
   const PORT = process.env.PORT || 3000;
+
 /**
  * Backend entry point for our Conductor App.
  * Defines health check routes and initializes the Express server.
