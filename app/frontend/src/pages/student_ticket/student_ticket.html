@@ -81,6 +81,13 @@
           </div>
           <small id="faqHint" class="hint">Please review the FAQ before filling in your ticket.</small>
         </div>
+        <div class="wj-field">
+          <label for="assigneeTutor">Which tutor do you want to reach out?</label>
+          <select id="assigneeTutor" class="disabled-field" disabled>
+            <option value="">Select a tutor…</option>
+          </select>
+          <small id="tutorHint" class="hint">Choose your tutor before submitting.</small>
+        </div>
 
         <div class="wj-field">
           <label for="ticketName">Ticket Name</label>
@@ -211,6 +218,7 @@
       const faqList = document.getElementById('faqList');
       const ticketName = document.getElementById('ticketName');
       const issueDescription = document.getElementById('issueDescription');
+      const assigneeTutor = document.getElementById('assigneeTutor');
       const submitBtn = document.getElementById('submitTicketBtn');
       const form = document.getElementById('ticketForm');
       const successEl = document.getElementById('wjSuccess');
@@ -233,7 +241,7 @@
       let currentTicket = null;
 
       function setEnabled(enabled) {
-        [ticketName, issueDescription, submitBtn].forEach((el) => {
+        [assigneeTutor, ticketName, issueDescription, submitBtn].forEach((el) => {
           if (!el) return;
           el.disabled = !enabled;
           if (enabled) el.classList.remove('disabled-field');
@@ -241,6 +249,8 @@
         });
         const hint = document.getElementById('faqHint');
         if (hint) hint.style.display = enabled ? 'none' : 'inline';
+        const tutorHint = document.getElementById('tutorHint');
+        if (tutorHint) tutorHint.style.display = enabled ? 'none' : 'inline';
       }
       setEnabled(false); // Gate initially
 
@@ -295,17 +305,64 @@
       if (openFaqBtn) openFaqBtn.addEventListener('click', openFaq);
       if (faqCloseBtn) faqCloseBtn.addEventListener('click', closeFaq);
       if (faqOverlay) faqOverlay.addEventListener('click', (e) => { if (e.target === faqOverlay) closeFaq(); });
+      
+      async function loadTutors() {
+        const candidates = [
+          `${API_BASE}/users?role=tutor`,
+          `${API_BASE}/tutors`,
+          `${API_BASE}/users/tutors`,
+          `${API_BASE}/class-directory/tutors`
+        ];
+        for (const url of candidates) {
+          try {
+            const data = await fetchJSON(url);
+            const list = Array.isArray(data)
+              ? data
+              : (Array.isArray(data.items)
+                  ? data.items
+                  : (Array.isArray(data.tutors) ? data.tutors : []));
+            const tutors = list.map(u => ({
+              id: u.id || u.user_id || u.uid,
+              name: u.fullName || u.name || u.displayName || u.username || u.email || 'Tutor',
+              email: u.email || u.userEmail || ''
+            })).filter(u => u.id || u.email);
+            if (assigneeTutor && tutors.length) {
+              assigneeTutor.innerHTML = '<option value="">Select a tutor…</option>' + tutors.map(t => {
+                const val = t.id ?? t.email;
+                const label = `${t.name}${t.email ? ` (${t.email})` : ''}`;
+                return `<option value="${String(val)}" data-email="${t.email ? String(t.email) : ''}">${label.replace(/</g,'&lt;')}</option>`;
+              }).join('');
+            }
+            return;
+          } catch (e) {
+            // try next candidate
+          }
+        }
+        if (assigneeTutor) {
+          assigneeTutor.innerHTML = '<option value="">No tutors found</option>';
+        }
+      }
+
+      // Load tutors list when page is ready
+      loadTutors();
 
       if (form) {
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
           const title = (ticketName.value || '').trim();
           const body = (issueDescription.value || '').trim();
+          const assigneeVal = assigneeTutor ? (assigneeTutor.value || '').trim() : '';
+          const assigneeEmail = assigneeTutor ? (assigneeTutor.selectedOptions[0]?.getAttribute('data-email') || '') : '';
           if (!title || !body) return;
           try {
             await fetchJSON(`${API_BASE}/tickets`, {
               method: 'POST',
-              body: JSON.stringify({ title, body })
+              body: JSON.stringify({
+                title,
+                body,
+                assigneeTutorId: assigneeVal || undefined,
+                assigneeTutorEmail: assigneeEmail || undefined
+              })
             });
             if (successEl) {
               successEl.style.display = 'block';
@@ -358,7 +415,13 @@
             const el = document.createElement('div');
             el.className = 'wj-past-item';
             el.dataset.ticketId = String(t.id);
-            el.textContent = "Title: " + t.title;
+            const seen = Number(localStorage.getItem(`ticketSeenCount:${t.id}`) || '0');
+            const replyCount = Number(t.replyCount || 0);
+            const unread = Math.max(0, replyCount - seen);
+            el.innerHTML = `
+              <span class="wj-item-title">Title: ${(t.title || '').replace(/</g,'&lt;')}</span>
+              ${unread > 0 ? `<span class="wj-unread" style="float:right;background:#ef4444;color:#fff;border-radius:12px;padding:0 8px;font-size:12px;line-height:20px;min-width:20px;text-align:center;">${unread}</span>` : ''}
+            `;
             el.addEventListener('click', () => openTicketModal(t));
             ticketsList.appendChild(el);
           });
@@ -374,6 +437,12 @@
         ticketTitleView.textContent = (t.title || '').trim();
         ticketBodyView.textContent = (t.body || '').trim();
         ticketRespondedView.textContent = responded;
+        // Mark unread replies as seen for this ticket
+        const replyCount = Number(t.replyCount || 0);
+        localStorage.setItem(`ticketSeenCount:${t.id}`, String(replyCount));
+        // Remove the unread badge in the sidebar, if present
+        const itemEl = ticketsList.querySelector(`[data-ticket-id="${String(t.id)}"] .wj-unread`);
+        if (itemEl) itemEl.remove();
         // Reset reply status messages when opening modal
         if (ticketReplyError) ticketReplyError.style.display = 'none';
         if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
@@ -488,6 +557,15 @@
             // Auto-hide success after a short delay
             setTimeout(() => { if (ticketReplySuccess) ticketReplySuccess.style.display = 'none'; }, 2500);
             await loadReplies(currentTicket.id);
+            // Since student replied, keep unread at zero by syncing seen count to current replies length
+            try {
+              const repliesNow = await fetchJSON(`${API_BASE}/tickets/${currentTicket.id}/replies`);
+              const countNow = Array.isArray(repliesNow) ? repliesNow.length : 0;
+              localStorage.setItem(`ticketSeenCount:${currentTicket.id}`, String(countNow));
+              // Ensure badge removed if any
+              const badge = ticketsList.querySelector(`[data-ticket-id="${String(currentTicket.id)}"] .wj-unread`);
+              if (badge) badge.remove();
+            } catch {}
           } catch (err) {
             console.error('Failed to send reply:', err);
             if (ticketReplyError) {

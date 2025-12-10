@@ -201,6 +201,17 @@
         replyInput.value = '';
         answerError.style.display = 'none';
         answerSuccess.style.display = 'none';
+        // Disable reply input/actions for closed tickets
+        const isClosed = (ticket.status || 'open') === 'closed';
+        if (replyInput) {
+          replyInput.disabled = isClosed;
+          replyInput.classList.toggle('disabled-field', isClosed);
+          replyInput.placeholder = isClosed ? 'Ticket is closed' : 'Write a reply...';
+        }
+        if (answerSubmit) {
+          answerSubmit.disabled = isClosed;
+          answerSubmit.classList.toggle('ghost-btn', isClosed);
+        }
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
         await loadReplies(ticket.id);
