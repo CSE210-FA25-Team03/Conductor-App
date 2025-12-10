@@ -1,6 +1,7 @@
   // backend/server.js
   require('dotenv').config();
 
+  // const db = require("../db");
   const path = require('path');
   const express = require('express');
 
@@ -22,6 +23,7 @@
   const evalNotesDb = require('./db/evalNotes');
   const journalRepliesDb = require('./db/journalReplies');
   const studentWeeklyDb = require('./db/studentWeekly');
+  const _studentWeeklyEvalDb = require('./db/studentWeeklyEval');
   const rostersDb = require('./db/rosters');
   const profileDb = require('./db/profile');
   const authRoutes = require('./routes/auth');
@@ -476,6 +478,39 @@ const fetch =
 //       }
 
 
+// Normalize a course code like "CSE 210" → "CSE210"
+function normalizeCourseCode(raw) {
+  return (raw || '').replace(/\s+/g, '').toUpperCase();
+}
+
+/**
+ * Find a course by code (e.g. 'CSE210').
+ * Returns { id, code, title } or null if not found.
+ */
+async function findCourseForLogin(rawCode) {
+  const key = normalizeCourseCode(rawCode);
+  if (!key) return null;
+
+  const { rows } = await db.query(
+    `
+      SELECT c.id, c.code, c.title
+      FROM courses c
+      WHERE REPLACE(UPPER(c.code), ' ', '') = $1
+      ORDER BY c.created_at DESC
+      LIMIT 1
+    `,
+    [key],
+  );
+
+  if (!rows.length) return null;
+
+  const row = rows[0];
+  return {
+    id: row.id,
+    code: row.code,
+    title: row.title,
+  };
+}
 
 //       const primaryRole = ctx.primaryRole;
 //       let redirectPath = '/dashboards/student.html';

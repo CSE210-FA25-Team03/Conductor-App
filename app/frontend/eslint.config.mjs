@@ -92,7 +92,21 @@ export default defineConfig([
     ],
     ...js.configs.recommended,
     languageOptions: {
-      sourceType: "script",   // loaded via <script src="...">
+      sourceType: "script",   // default: classic scripts
+      globals: sanitizeGlobals(globals.browser),
+    },
+  },
+
+  // 5) ES module frontend files loaded via <script type="module">
+  {
+    files: [
+      "src/pages/common/**/*.{js,mjs}",
+      "src/pages/dashboards/**/*.{js,mjs}"
+    ],
+    plugins: { js },
+    extends: ["js/recommended"],
+    languageOptions: {
+      sourceType: "module",
       globals: sanitizeGlobals(globals.browser),
     },
   },
