@@ -12,11 +12,16 @@ dotenv.config();
 const connectionString =
   process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/conductor';
 
+const isProd = process.env.NODE_ENV === 'production'
+const ssl =
+  process.env.DB_SSL === 'true' || isProd
+    ? { require: true, rejectUnauthorized: false }
+    : false;
+
+
 const pool = new Pool({
   connectionString,
-  // You can add more config here later if needed:
-  // max: 10,
-  // idleTimeoutMillis: 30000,
+  ssl,
 });
 
 /**
