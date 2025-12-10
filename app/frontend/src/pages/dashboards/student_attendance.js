@@ -68,50 +68,92 @@ document.addEventListener('DOMContentLoaded', () => {
         `${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`,
       );
 
-      const sessions = Array.isArray(data.sessions) ? data.sessions : [];
-      const presentCount =
-        typeof data.presentCount === 'number' ? data.presentCount : 0;
-      const total =
-        typeof data.totalSessions === 'number'
-          ? data.totalSessions
-          : sessions.length;
+      // Get separated class and team meeting data
+      const classData = data.classMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
+      const teamData = data.teamMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
 
-      if (!sessions.length) {
+      const classSessions = Array.isArray(classData.sessions) ? classData.sessions : [];
+      const teamSessions = Array.isArray(teamData.sessions) ? teamData.sessions : [];
+
+      const classPresentCount = typeof classData.presentCount === 'number' ? classData.presentCount : 0;
+      const classTotal = typeof classData.totalSessions === 'number' ? classData.totalSessions : classSessions.length;
+      const teamPresentCount = typeof teamData.presentCount === 'number' ? teamData.presentCount : 0;
+      const teamTotal = typeof teamData.totalSessions === 'number' ? teamData.totalSessions : teamSessions.length;
+
+      if (!classSessions.length && !teamSessions.length) {
         historyContainer.innerHTML =
           '<p style="font-size:0.9rem;color:#777;">No attendance sessions have been created yet.</p>';
         return;
       }
 
-      const pct = total ? Math.round((presentCount / total) * 100) : 0;
+      // Build class meeting rows
+      let classRows = '';
+      if (classSessions.length > 0) {
+        const sortedClass = classSessions
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          );
 
-      const sorted = sessions
-        .slice()
-        .sort(
-          (a, b) =>
-            new Date(a.createdAt).getTime() -
-            new Date(b.createdAt).getTime(),
-        );
+        sortedClass.forEach((s) => {
+          const when = new Date(s.createdAt).toLocaleString();
+          const status =
+            (s.status || '').toLowerCase() === 'present'
+              ? 'Present'
+              : 'Absent';
 
-      let rows = '';
-      sorted.forEach((s) => {
-        const when = new Date(s.createdAt).toLocaleString();
-        const status =
-          (s.status || '').toLowerCase() === 'present'
-            ? 'Present'
-            : 'Absent';
-
-        rows += `
+          classRows += `
           <tr>
-            <td style="border:1px solid #eee;padding:4px 6px;">${when}</td>
+            <td style="border:1px solid #eee;padding:4px 6px;">Class: ${when}</td>
             <td style="border:1px solid #eee;padding:4px 6px;">${status}</td>
           </tr>
         `;
-      });
+        });
+      }
+
+      // Build team meeting rows
+      let teamRows = '';
+      if (teamSessions.length > 0) {
+        const sortedTeam = teamSessions
+          .slice()
+          .sort(
+            (a, b) =>
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+          );
+
+        sortedTeam.forEach((s) => {
+          const when = new Date(s.createdAt).toLocaleString();
+          const status =
+            (s.status || '').toLowerCase() === 'present'
+              ? 'Present'
+              : 'Absent';
+
+          teamRows += `
+          <tr>
+            <td style="border:1px solid #eee;padding:4px 6px;">Team: ${when}</td>
+            <td style="border:1px solid #eee;padding:4px 6px;">${status}</td>
+          </tr>
+        `;
+        });
+      }
+
+      const classPct = classTotal ? Math.round((classPresentCount / classTotal) * 100) : 0;
+      const teamPct = teamTotal ? Math.round((teamPresentCount / teamTotal) * 100) : 0;
 
       historyContainer.innerHTML = `
-        <p style="font-size:0.9rem;">
-          Overall: <strong>${presentCount}/${total}</strong> (${pct}%)
-        </p>
+        <div style="margin-bottom: 1rem;">
+          <p style="font-size:0.9rem;font-weight:600;margin-bottom:0.25rem;">Class Meeting Attendance:</p>
+          <p style="font-size:0.9rem;">
+            <strong>${classPresentCount}/${classTotal}</strong> (${classPct}%)
+          </p>
+        </div>
+        <div style="margin-bottom: 1rem;">
+          <p style="font-size:0.9rem;font-weight:600;margin-bottom:0.25rem;">Team Meeting Attendance:</p>
+          <p style="font-size:0.9rem;">
+            <strong>${teamPresentCount}/${teamTotal}</strong> (${teamPct}%)
+          </p>
+        </div>
         <table style="width:100%;border-collapse:collapse;">
           <thead>
             <tr>
@@ -120,7 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </tr>
           </thead>
           <tbody>
-            ${rows}
+            ${classRows}
+            ${teamRows}
           </tbody>
         </table>
       `;

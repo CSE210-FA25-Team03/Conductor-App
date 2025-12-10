@@ -386,16 +386,30 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw, expectedType = 
 /**
  * Get attendance history for a student by email.
  * Returns:
- *   { sessions: [{ sessionId, createdAt, status }], presentCount, totalSessions }
+ *   { 
+ *     sessions: [{ sessionId, createdAt, status, type }], 
+ *     presentCount, 
+ *     totalSessions,
+ *     classMeetings: { sessions, presentCount, totalSessions },
+ *     teamMeetings: { sessions, presentCount, totalSessions }
+ *   }
  */
 async function getHistoryByEmail(courseId, emailRaw) {
+  const emptyResponse = {
+    sessions: [],
+    presentCount: 0,
+    totalSessions: 0,
+    classMeetings: { sessions: [], presentCount: 0, totalSessions: 0 },
+    teamMeetings: { sessions: [], presentCount: 0, totalSessions: 0 },
+  };
+
   if (!courseId) {
-    return { sessions: [], presentCount: 0, totalSessions: 0 };
+    return emptyResponse;
   }
 
   const email = (emailRaw || '').trim().toLowerCase();
   if (!email) {
-    return { sessions: [], presentCount: 0, totalSessions: 0 };
+    return emptyResponse;
   }
 
   // 1) Lookup user
@@ -410,7 +424,7 @@ async function getHistoryByEmail(courseId, emailRaw) {
   );
 
   if (!userRows.length) {
-    return { sessions: [], presentCount: 0, totalSessions: 0 };
+    return emptyResponse;
   }
 
   const userId = userRows[0].id;
@@ -439,10 +453,33 @@ async function getHistoryByEmail(courseId, emailRaw) {
     sessionId: row.session_id,
     createdAt: row.session_created_at,
     status: row.success ? 'present' : 'absent',
+    type: row.type || 'class_meeting', // Include session type
   }));
 
+  // Separate sessions by type
+  // Handle both 'class' and 'class_meeting' for backward compatibility
+  const classSessions = sessions.filter((s) => 
+    s.type === 'class_meeting' || s.type === 'class'
+  );
+  const teamSessions = sessions.filter((s) => 
+    s.type === 'team_meeting' || s.type === 'group_meeting'
+  );
+
+  // Calculate statistics for all sessions
   const totalSessions = sessions.length;
   const presentCount = sessions.filter(
+    (s) => (s.status || '').toLowerCase() === 'present',
+  ).length;
+
+  // Calculate statistics for class meetings
+  const classTotalSessions = classSessions.length;
+  const classPresentCount = classSessions.filter(
+    (s) => (s.status || '').toLowerCase() === 'present',
+  ).length;
+
+  // Calculate statistics for team meetings
+  const teamTotalSessions = teamSessions.length;
+  const teamPresentCount = teamSessions.filter(
     (s) => (s.status || '').toLowerCase() === 'present',
   ).length;
 
@@ -450,6 +487,17 @@ async function getHistoryByEmail(courseId, emailRaw) {
     sessions,
     presentCount,
     totalSessions,
+    // Separated statistics
+    classMeetings: {
+      sessions: classSessions,
+      presentCount: classPresentCount,
+      totalSessions: classTotalSessions,
+    },
+    teamMeetings: {
+      sessions: teamSessions,
+      presentCount: teamPresentCount,
+      totalSessions: teamTotalSessions,
+    },
   };
 }
 

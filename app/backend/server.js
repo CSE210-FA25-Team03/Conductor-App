@@ -2609,6 +2609,8 @@ app.get(
           sessions: [],
           presentCount: 0,
           totalSessions: 0,
+          classMeetings: { sessions: [], presentCount: 0, totalSessions: 0 },
+          teamMeetings: { sessions: [], presentCount: 0, totalSessions: 0 },
         });
       }
 
@@ -2625,6 +2627,8 @@ app.get(
         sessions: [],
         presentCount: 0,
         totalSessions: 0,
+        classMeetings: { sessions: [], presentCount: 0, totalSessions: 0 },
+        teamMeetings: { sessions: [], presentCount: 0, totalSessions: 0 },
         error: 'Failed to fetch attendance history',
       });
     }

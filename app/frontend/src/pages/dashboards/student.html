@@ -223,17 +223,36 @@
             <!-- Attendance Record -->
             <div class="attendance-record-box">
                 <h3>Your Attendance Record</h3>
-                <p id="attendanceOverall" class="attendance-overall"></p>
+                
+                <!-- Class Meeting Attendance Section -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Class Meeting Attendance</h4>
+                    <p id="classAttendanceOverall" class="attendance-overall" style="margin-bottom: 0.75rem;"></p>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classAttendanceRecordBody"></tbody>
+                    </table>
+                </div>
 
-                <table class="attendance-table">
-                    <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceRecordBody"></tbody>
-                </table>
+                <!-- Team Meeting Attendance Section -->
+                <div>
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Team Meeting Attendance</h4>
+                    <p id="teamAttendanceOverall" class="attendance-overall" style="margin-bottom: 0.75rem;"></p>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamAttendanceRecordBody"></tbody>
+                    </table>
+                </div>
             </div>
         </article>
     </section>
@@ -442,8 +461,10 @@
         const openBtn = document.getElementById('openAttendanceDrawer');
         const closeBtn = document.querySelector('.close-attendance');
 
-        const recordBody = document.getElementById('attendanceRecordBody');
-        const overallEl = document.getElementById('attendanceOverall');
+        const classRecordBody = document.getElementById('classAttendanceRecordBody');
+        const classOverallEl = document.getElementById('classAttendanceOverall');
+        const teamRecordBody = document.getElementById('teamAttendanceRecordBody');
+        const teamOverallEl = document.getElementById('teamAttendanceOverall');
 
         const currentUser = getCurrentUser();
         const email =
@@ -472,8 +493,10 @@
           teamInput &&
           teamSubmitBtn &&
           teamMessageEl &&
-          recordBody &&
-          overallEl &&
+          classRecordBody &&
+          classOverallEl &&
+          teamRecordBody &&
+          teamOverallEl &&
           email
         ) {
           // ----------------------------
@@ -485,63 +508,111 @@
                 `${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`,
               );
 
-              const sessions = Array.isArray(data.sessions) ? data.sessions : [];
-              const presentCount =
-                typeof data.presentCount === 'number' ? data.presentCount : 0;
-              const total =
-                typeof data.totalSessions === 'number'
-                  ? data.totalSessions
-                  : sessions.length;
+              // Get separated class and team meeting data
+              const classData = data.classMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
+              const teamData = data.teamMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
 
-              recordBody.innerHTML = '';
+              const classSessions = Array.isArray(classData.sessions) ? classData.sessions : [];
+              const teamSessions = Array.isArray(teamData.sessions) ? teamData.sessions : [];
 
-              if (!sessions.length) {
-                recordBody.innerHTML = `
+              const classPresentCount = typeof classData.presentCount === 'number' ? classData.presentCount : 0;
+              const classTotal = typeof classData.totalSessions === 'number' ? classData.totalSessions : classSessions.length;
+              const teamPresentCount = typeof teamData.presentCount === 'number' ? teamData.presentCount : 0;
+              const teamTotal = typeof teamData.totalSessions === 'number' ? teamData.totalSessions : teamSessions.length;
+
+              // Render class meeting attendance
+              classRecordBody.innerHTML = '';
+              if (!classSessions.length) {
+                classRecordBody.innerHTML = `
                   <tr>
-                    <td colspan="2">No attendance sessions have been created yet.</td>
+                    <td colspan="2">No class meeting sessions have been created yet.</td>
                   </tr>
                 `;
-                overallEl.textContent = '';
-                return;
+                classOverallEl.textContent = '';
+              } else {
+                const classPct = classTotal ? Math.round((classPresentCount / classTotal) * 100) : 0;
+                const sortedClass = classSessions
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime(),
+                  );
+
+                const classRowsHtml = sortedClass
+                  .map((s) => {
+                    const when = new Date(s.createdAt).toLocaleString();
+                    const status =
+                      (s.status || '').toLowerCase() === 'present'
+                        ? 'Present'
+                        : 'Absent';
+
+                    return `
+                      <tr>
+                        <td>Session on ${when}</td>
+                        <td>${status}</td>
+                      </tr>
+                    `;
+                  })
+                  .join('');
+
+                classRecordBody.innerHTML = classRowsHtml;
+                classOverallEl.textContent = `Present ${classPresentCount} out of ${classTotal} sessions (${classPct}%)`;
               }
 
-              const pct = total ? Math.round((presentCount / total) * 100) : 0;
+              // Render team meeting attendance
+              teamRecordBody.innerHTML = '';
+              if (!teamSessions.length) {
+                teamRecordBody.innerHTML = `
+                  <tr>
+                    <td colspan="2">No team meeting sessions have been created yet.</td>
+                  </tr>
+                `;
+                teamOverallEl.textContent = '';
+              } else {
+                const teamPct = teamTotal ? Math.round((teamPresentCount / teamTotal) * 100) : 0;
+                const sortedTeam = teamSessions
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime(),
+                  );
 
-              const sorted = sessions
-                .slice()
-                .sort(
-                  (a, b) =>
-                    new Date(a.createdAt).getTime() -
-                    new Date(b.createdAt).getTime(),
-                );
+                const teamRowsHtml = sortedTeam
+                  .map((s) => {
+                    const when = new Date(s.createdAt).toLocaleString();
+                    const status =
+                      (s.status || '').toLowerCase() === 'present'
+                        ? 'Present'
+                        : 'Absent';
 
-              const rowsHtml = sorted
-                .map((s) => {
-                  const when = new Date(s.createdAt).toLocaleString();
-                  const status =
-                    (s.status || '').toLowerCase() === 'present'
-                      ? 'Present'
-                      : 'Absent';
+                    return `
+                      <tr>
+                        <td>Session on ${when}</td>
+                        <td>${status}</td>
+                      </tr>
+                    `;
+                  })
+                  .join('');
 
-                  return `
-                    <tr>
-                      <td>Session on ${when}</td>
-                      <td>${status}</td>
-                    </tr>
-                  `;
-                })
-                .join('');
-
-              recordBody.innerHTML = rowsHtml;
-              overallEl.textContent = `Present ${presentCount} out of ${total} sessions (${pct}%)`;
+                teamRecordBody.innerHTML = teamRowsHtml;
+                teamOverallEl.textContent = `Present ${teamPresentCount} out of ${teamTotal} sessions (${teamPct}%)`;
+              }
             } catch (err) {
               console.error('[student] Failed to load attendance history:', err);
-              recordBody.innerHTML = `
+              classRecordBody.innerHTML = `
                 <tr>
                   <td colspan="2" style="color:#b00020;">Failed to load attendance history.</td>
                 </tr>
               `;
-              overallEl.textContent = '';
+              teamRecordBody.innerHTML = `
+                <tr>
+                  <td colspan="2" style="color:#b00020;">Failed to load attendance history.</td>
+                </tr>
+              `;
+              classOverallEl.textContent = '';
+              teamOverallEl.textContent = '';
             }
           }
 
