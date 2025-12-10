@@ -350,6 +350,7 @@ CREATE TABLE IF NOT EXISTS support_tickets (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   course_id   uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   created_by  uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  assignee_tutor_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
   title       text NOT NULL,
   body        text NOT NULL,
   status      text NOT NULL DEFAULT 'open' CHECK (status IN ('open','in_progress','closed')),
@@ -363,6 +364,15 @@ CREATE TABLE IF NOT EXISTS support_ticket_replies (
   author_id  uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   body       text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
+);
+
+-- Track per-user read state for tickets (so unread survives logout/login)
+CREATE TABLE IF NOT EXISTS support_ticket_reads (
+  ticket_id        uuid NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+  user_id          uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  last_seen_at     timestamptz NOT NULL DEFAULT now(),
+  last_seen_count  integer NOT NULL DEFAULT 0,
+  PRIMARY KEY (ticket_id, user_id)
 );
 
 

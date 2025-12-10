@@ -967,11 +967,11 @@ app.get(
   app.post('/api/tickets', requireAuth, requireCourseContext, async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true })) return;
-      const { title, body } = req.body || {};
+      const { title, body, assigneeTutorId, assigneeTutorEmail } = req.body || {};
       if (!title || !body) {
         return res.status(400).json({ error: 'title and body are required' });
       }
-      const created = await ticketsDb.create(req.courseId, req.currentUser.id, { title, body });
+      const created = await ticketsDb.create(req.courseId, req.currentUser.id, { title, body, assigneeTutorId, assigneeTutorEmail });
       return res.status(201).json(created);
     } catch (err) {
       console.error('Error creating ticket:', err);
@@ -997,7 +997,7 @@ app.get(
   app.get('/api/tickets', requireAuth, requireCourseContext, async (req, res) => {
     try {
       if (!ensureDb(res, { requireCourse: true })) return;
-      const items = await ticketsDb.listByCourse(req.courseId);
+      const items = await ticketsDb.listByCourse(req.courseId, req.currentUser);
       return res.json(items);
     } catch (err) {
       console.error('Error loading all tickets:', err);

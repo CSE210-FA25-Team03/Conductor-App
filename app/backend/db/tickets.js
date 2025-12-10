@@ -2,7 +2,7 @@
 const db = require('./index');
 const { getCurrentCourseId } = require('./classDirectory');
 
-async function create(courseIdOverride, userId, { title, body }) {
+async function create(courseIdOverride, userId, { title, body, assigneeTutorId, assigneeTutorEmail }) {
   const courseId = courseIdOverride || getCurrentCourseId();
   if (!courseId) throw new Error('courseId is required');
   if (!userId) throw new Error('userId is required');
@@ -10,27 +10,37 @@ async function create(courseIdOverride, userId, { title, body }) {
   const b = String(body || '').trim();
   if (!t || !b) throw new Error('title and body are required');
 
+  // Resolve assignee tutor id if only email was provided
+  let assigneeId = assigneeTutorId || null;
+  if (!assigneeId && assigneeTutorEmail) {
+    const { rows: urows } = await db.query(`SELECT id FROM users WHERE lower(email) = lower($1) LIMIT 1`, [assigneeTutorEmail]);
+    if (urows.length) assigneeId = urows[0].id;
+  }
   const { rows } = await db.query(
-    `INSERT INTO support_tickets (course_id, created_by, title, body, status)
-     VALUES ($1, $2, $3, $4, 'open')
+    `INSERT INTO support_tickets (course_id, created_by, assignee_tutor_id, title, body, status)
+     VALUES ($1, $2, $3, $4, $5, 'open')
      RETURNING id, title, body, status, created_at AS "createdAt"`,
-    [courseId, userId, t, b]
+    [courseId, userId, assigneeId, t, b]
   );
   return rows[0];
 }
 
-async function listByCourse(courseIdOverride) {
+async function listByCourse(courseIdOverride, viewer) {
   const courseId = courseIdOverride || getCurrentCourseId();
   if (!courseId) return [];
-  const { rows } = await db.query(
-    `SELECT st.id, st.title, st.body, st.status, st.created_at AS "createdAt",
-            u.display_name AS "createdByName", u.email AS "createdByEmail"
-       FROM support_tickets st
-       JOIN users u ON u.id = st.created_by
-      WHERE st.course_id = $1
-      ORDER BY st.created_at ASC`,
-    [courseId]
-  );
+  const isTutor = viewer && (viewer.role === 'tutor');
+  let query = `SELECT st.id, st.title, st.body, st.status, st.created_at AS "createdAt",
+                      u.display_name AS "createdByName", u.email AS "createdByEmail"
+                 FROM support_tickets st
+                 JOIN users u ON u.id = st.created_by
+                WHERE st.course_id = $1`;
+  const params = [courseId];
+  if (isTutor) {
+    query += ` AND st.assignee_tutor_id = $2`;
+    params.push(viewer.id);
+  }
+  query += ` ORDER BY st.created_at ASC`;
+  const { rows } = await db.query(query, params);
   return rows;
 }
 
@@ -41,13 +51,18 @@ module.exports = {
     const courseId = courseIdOverride || getCurrentCourseId();
     if (!courseId || !userId) return [];
     const { rows } = await db.query(
-      `SELECT st.id, st.title, st.body, st.status,
+      `SELECT st.id,
+              st.title,
+              st.body,
+              st.status,
               st.created_at AS "createdAt",
               u.display_name AS "createdByName",
               u.email AS "createdByEmail",
               EXISTS (
                 SELECT 1 FROM support_ticket_replies r WHERE r.ticket_id = st.id
-              ) AS responded
+              ) AS responded,
+              COALESCE((SELECT COUNT(1) FROM support_ticket_replies r2 WHERE r2.ticket_id = st.id), 0) AS "replyCount",
+              (SELECT MAX(r3.created_at) FROM support_ticket_replies r3 WHERE r3.ticket_id = st.id) AS "lastReplyAt"
          FROM support_tickets st
          JOIN users u ON u.id = st.created_by
         WHERE st.course_id = $1 AND st.created_by = $2 AND st.status = 'open'
