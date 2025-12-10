@@ -1,6 +1,5 @@
 // app/backend/routes/auth.js
 const express = require("express");
-// const db = require("../db");
 const classDirectoryDb = require("../db/classDirectory");  // ⬅️ add this line
 const router = express.Router();
 const { Issuer, generators } = require("openid-client");
@@ -107,14 +106,14 @@ router.get("/google/start", async (req, res) => {
     req.session.oauthState = state;
     req.session.codeVerifier = codeVerifier;
 
-    // ✅ Save chosen class in session
+
     if (classCode) {
       req.session.pendingClassCode = classCode;
     } else {
       req.session.pendingClassCode = null;
     }
 
-    // ✅ THIS is the missing line
+
     const client = await getGoogleClient();
 
     const authUrl = client.authorizationUrl({
