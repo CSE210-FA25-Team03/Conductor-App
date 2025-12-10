@@ -202,6 +202,8 @@ req.session.user = safeUser;
       return res.redirect("/dashboards/ta.html");
     } else if (role === "team_lead") {
       return res.redirect("/dashboards/team_lead.html");
+    } else if (role === "tutor") {
+      return res.redirect("/dashboards/tutor.html");
     } else {
       // should rarely happen if DB roles are consistent
       console.warn("Login blocked: unknown role", role, "for", claims.email);
