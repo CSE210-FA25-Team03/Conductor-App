@@ -251,8 +251,17 @@
     backBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const role = (currentUser.role || '').toLowerCase();
-      if (role === 'team_lead') window.location.href = '/dashboards/team_lead.html';
-      else window.location.href = '/dashboards/student.html';
+      if (role === 'team_lead') {
+        window.location.href = '/dashboards/team_lead.html';
+      } else if (role === 'professor') {
+        window.location.href = '/dashboards/professor.html';
+      } else if (role === 'ta') {
+        window.location.href = '/dashboards/ta.html';
+      } else if (role === 'tutor') {
+        window.location.href = '/dashboards/tutor.html';
+      } else {
+        window.location.href = '/dashboards/student.html';
+      }
     });
   }
 

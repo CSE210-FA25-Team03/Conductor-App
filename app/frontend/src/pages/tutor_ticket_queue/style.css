@@ -1,0 +1,148 @@
+:root {
+    --bg: #f5f5f7;
+    --panel-bg: rgba(255,255,255,0.96);
+    --border: #e2e2e7;
+    --radius: 14px;
+    --shadow: 0 6px 20px rgba(0,0,0,0.08);
+    --text-muted: #6b7280;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --table-header: #eaf1fb;
+    --table-row: #f9fafb;
+}
+
+body {
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    margin: 0;
+    color: #111;
+}
+
+/* ============================================================
+   TOP NAV
+   ============================================================ */
+
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel-bg);
+    padding: 0.8rem 1.5rem 1.5rem;
+    box-shadow: var(--shadow);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    margin-bottom: 2.2rem;
+}
+
+.logo-full {
+    display: block;
+    height: 6rem;
+}
+
+.logo-mini {
+    display: none;
+}
+
+
+@media (max-width: 500px) {
+    .logo-full {
+        display: none ;
+    }
+
+    .logo-mini {
+        display: block ;
+        height: 2rem;
+    }
+}
+
+.eval-btn {
+    display: inline-block;
+    padding: 8px 20px;
+    background-color: rgba(100, 100, 100, 0.15); /* transparent grey button */
+    color: black;
+    font-weight: 600;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.eval-btn:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* ============================================================
+   Ticket Queue Grid
+   ============================================================ */
+.queue-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 12px 40px;
+}
+
+.queue-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 12px 0 16px;
+}
+
+.tickets-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.ticket-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    background: #fff;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+
+.ticket-card:hover {
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+}
+
+.ticket-title { font-weight: 600; color: #111827; margin-bottom: 4px; }
+.ticket-meta  { font-size: 0.9rem; color: var(--text-muted); }
+
+.empty { color: var(--text-muted); }
+
+/* ============================================================
+   Modal for Answer
+   ============================================================ */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 2500;
+}
+
+.modal {
+    width: min(720px, 94vw);
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal header {
+    padding: 14px 16px; font-weight: 600; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-between;
+}
+
+.modal .body { padding: 14px 16px; overflow: auto; }
+.modal .actions { padding: 12px 16px; border-top: 1px solid #eee; display: flex; justify-content: flex-end; gap: 8px; }
+
+.close-btn { background: none; border: none; font-size: 18px; cursor: pointer; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-weight: 600; margin-bottom: 6px; color: #374151; }
+.input, .textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.textarea { min-height: 100px; resize: vertical; }
+.btn { border: none; border-radius: 8px; padding: 10px 14px; cursor: pointer; }
+.btn.primary { background: #111827; color: #fff; }

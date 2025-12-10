@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+<head>
+  <link rel="stylesheet" href="../../../assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+  <script defer src="/assets/js/class-directory-nav.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
+  <title>Tutor Ticket Queue | Conductor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="top-nav">
+    <div class="brand">
+        <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+        <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    </div>
+
+    <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+
+      <div class="profile">
+        <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
+          <div class="profile-dropdown-container" style="position:relative;">
+            <img
+              id="dashboardProfileImg"
+              src="/assets/logo/user.png"
+              style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;"
+            />
+            <div
+              id="profileDropdown"
+              class="profile-dropdown"
+              style="
+                display:none;
+                position:absolute;
+                top:48px;
+                right:0;
+                background:#fff;
+                border:1px solid #ddd;
+                border-radius:8px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                min-width:140px;
+              "
+            >
+              <a href="/profile_page/profile.html" style="padding:10px 16px; display:block;">Profile</a>
+              <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
+            </div>
+          </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="queue-container">
+
+    <section>
+      <details id="openTicketsSection" open>
+        <summary style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <strong>Open Tickets</strong>
+          <span id="openCount" class="empty" style="font-weight:600;">(0)</span>
+        </summary>
+        <div id="openTicketsGrid" class="tickets-grid" style="margin-top:10px;"></div>
+      </details>
+    </section>
+    <section style="margin-top:16px;">
+      <details id="closedTicketsSection">
+        <summary style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+          <strong>Closed Tickets</strong>
+          <span id="closedCount" class="empty" style="font-weight:600;">(0)</span>
+        </summary>
+        <div id="closedTicketsGrid" class="tickets-grid" style="margin-top:10px;"></div>
+      </details>
+    </section>
+  </main>
+
+  <div id="answerModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="answerTitle">
+      <style>
+        /* Scoped to modal to avoid layout changes elsewhere */
+        .modal .conversation-thread { display:flex; flex-direction:column; gap:8px; }
+        .modal .bubble { max-width:72%; padding:8px 12px; border-radius:16px; border:1px solid #e5e7eb; background:#f9fafb; }
+        .modal .bubble .bubble-text { white-space: pre-wrap; }
+        .modal .bubble .bubble-meta { font-size:12px; color:#6b7280; margin-top:4px; }
+        /* Alignment: tutor on left, student on right */
+        .modal .bubble.tutor { align-self:flex-start; background:#f5f5f5; border-color:#e5e7eb; }
+        .modal .bubble.student { align-self:flex-end; background:#e0f2fe; border-color:#bae6fd; }
+      </style>
+      <header>
+        <span id="answerTitle">Answer Ticket</span>
+        <button id="answerClose" class="close-btn" aria-label="Close">✖</button>
+      </header>
+      <div class="body">
+        <div class="field">
+          <label>Title</label>
+          <div id="viewTitle" class="input" style="background:#f9fafb;"></div>
+        </div>
+        <div class="field">
+          <label>Issue</label>
+          <div id="viewBody" class="textarea" style="background:#f9fafb; white-space:pre-wrap;"></div>
+        </div>
+        <div class="field">
+          <label>Conversation</label>
+          <div id="conversationThread" class="conversation-thread" style="max-height:280px; overflow:auto; padding:8px; background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px;"></div>
+        </div>
+        <div class="field" style="display:flex; gap:8px; align-items:center;">
+          <input id="replyInput" class="input" placeholder="Write a reply..." style="flex:1;" />
+          <button id="answerSubmit" class="btn primary">Send</button>
+        </div>
+        <div id="answerError" class="empty" style="display:none;color:#b91c1c;"></div>
+        <div id="answerSuccess" class="empty" style="display:none;color:#065f46;">Reply sent.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    // -------------------------------------------------------------
+    // Profile dropdown logic
+    // -------------------------------------------------------------
+    const profileImg = document.getElementById('dashboardProfileImg');
+    const dropdown = document.getElementById('profileDropdown');
+    if (profileImg && dropdown) {
+    profileImg.addEventListener('mouseenter', () => {
+        dropdown.style.display = 'block';
+    });
+    profileImg.addEventListener('mouseleave', () => {
+        setTimeout(() => {
+        if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+        }, 150);
+    });
+    dropdown.addEventListener('mouseleave', () => {
+        dropdown.style.display = 'none';
+    });
+    dropdown.addEventListener('mouseenter', () => {
+        dropdown.style.display = 'block';
+    });
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = '/login';
+        });
+    }
+    }
+
+    // Saved profile image
+    const savedImg = localStorage.getItem('profileImg');
+    if (savedImg && profileImg) {
+    profileImg.src = savedImg;
+    }
+
+
+    // -------------------------------------------------------------
+    // Back-to-dashboard button
+    // -------------------------------------------------------------
+    const backBtn = document.getElementById('backDashboard');
+    if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const r = localStorage.getItem('role');
+        if (r === 'professor') {
+        window.location.href = '/dashboards/professor.html';
+        } else if (r === 'ta') {
+        window.location.href = '/dashboards/ta.html';
+        } else if (r === 'team_lead') {
+        window.location.href = '/dashboards/team_lead.html';
+        } else if (r === 'tutor') {
+        window.location.href = '/dashboards/tutor.html';
+        } else {
+        window.location.href = '/dashboards/student.html';
+        }
+    });
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      const API = '/api';
+      const openGrid = document.getElementById('openTicketsGrid');
+      const closedGrid = document.getElementById('closedTicketsGrid');
+      const openCount = document.getElementById('openCount');
+      const closedCount = document.getElementById('closedCount');
+      const modal = document.getElementById('answerModal');
+      const modalClose = document.getElementById('answerClose');
+      const viewTitle = document.getElementById('viewTitle');
+      const viewBody = document.getElementById('viewBody');
+      const replyInput = document.getElementById('replyInput');
+      const answerSubmit = document.getElementById('answerSubmit');
+      const conversationThread = document.getElementById('conversationThread');
+      const answerError = document.getElementById('answerError');
+      const answerSuccess = document.getElementById('answerSuccess');
+
+      let current = null;
+
+      async function fetchJSON(url, options = {}) {
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+        }
+        if (res.status === 204) return null;
+        return res.json();
+      }
+
+      async function openModal(ticket) {
+        current = ticket;
+        viewTitle.textContent = ticket.title || '';
+        viewBody.textContent = ticket.body || '';
+        replyInput.value = '';
+        answerError.style.display = 'none';
+        answerSuccess.style.display = 'none';
+        modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
+        await loadReplies(ticket.id);
+      }
+      function closeModal() {
+        current = null;
+        modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      if (modalClose) modalClose.addEventListener('click', closeModal);
+      if (modal) modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+      async function loadTickets() {
+        openGrid.innerHTML = '<div class="empty">Loading...</div>';
+        closedGrid.innerHTML = '';
+        try {
+          const items = await fetchJSON(`${API}/tickets`);
+          const openItems = Array.isArray(items) ? items.filter(x => (x.status||'open') === 'open') : [];
+          const closedItems = Array.isArray(items) ? items.filter(x => (x.status||'open') === 'closed') : [];
+
+          openCount.textContent = `(${openItems.length})`;
+          closedCount.textContent = `(${closedItems.length})`;
+
+          openGrid.innerHTML = openItems.length ? '' : '<div class="empty">No open tickets.</div>';
+          closedGrid.innerHTML = closedItems.length ? '' : '<div class="empty">No closed tickets.</div>';
+
+          const renderCard = (t) => {
+            const card = document.createElement('div');
+            card.className = 'ticket-card';
+            card.innerHTML = `
+              <div class=\"ticket-title\">${(t.title||'').replace(/</g,'&lt;')}</div>
+              <div class=\"ticket-meta\">By ${(t.createdByName||t.createdByEmail||'Unknown').replace(/</g,'&lt;')} • ${new Date(t.createdAt).toLocaleString()}</div>
+            `;
+            card.addEventListener('click', () => openModal(t));
+            return card;
+          };
+
+          openItems.forEach(t => openGrid.appendChild(renderCard(t)));
+          closedItems.forEach(t => closedGrid.appendChild(renderCard(t)));
+        } catch (err) {
+          console.error('Failed to load tickets:', err);
+          openGrid.innerHTML = '<div class="empty" style="color:#b91c1c;">Failed to load tickets.</div>';
+          closedGrid.innerHTML = '';
+        }
+      }
+
+      function renderReplies(items) {
+        if (!Array.isArray(items) || !items.length) {
+          conversationThread.innerHTML = '<div class="empty">No conversation yet.</div>';
+          return;
+        }
+        conversationThread.innerHTML = '';
+        const meId = localStorage.getItem('userId') || window.sessionUserId || null;
+        items.forEach(r => {
+          const mine = (meId && r.author_id && String(r.author_id) === String(meId));
+
+          const authorName = (r.author_name || '').trim();
+          const ticketOwnerName = (current && current.createdByName ? String(current.createdByName).trim() : '');
+          const ticketOwnerEmail = (current && current.createdByEmail ? String(current.createdByEmail).trim() : '');
+          const isStudentAuthor = (
+            (authorName && ticketOwnerName && authorName.toLowerCase() === ticketOwnerName.toLowerCase()) ||
+            (authorName && ticketOwnerEmail && authorName.toLowerCase() === ticketOwnerEmail.toLowerCase())
+          );
+
+          // Tutor bubbles on left, Student bubbles on right
+          const alignmentClass = isStudentAuthor ? 'student' : 'tutor';
+
+          const nameFallback = authorName || (isStudentAuthor
+            ? (ticketOwnerName || ticketOwnerEmail || 'Student')
+            : 'Tutor');
+          const displayName = mine ? 'You' : nameFallback;
+
+          const bubble = document.createElement('div');
+          bubble.className = `bubble ${alignmentClass}`;
+          bubble.innerHTML = `
+            <div class=\"bubble-meta\">${displayName.replace(/</g,'&lt;')} • ${new Date(r.createdAt).toLocaleString()}</div>
+            <div class=\"bubble-text\">${(r.message||r.body||'').replace(/</g,'&lt;')}</div>
+          `;
+          conversationThread.appendChild(bubble);
+        });
+        conversationThread.scrollTop = conversationThread.scrollHeight;
+      }
+
+      async function loadReplies(ticketId) {
+        conversationThread.innerHTML = '<div class="empty">Loading conversation...</div>';
+        try {
+          const items = await fetchJSON(`${API}/tickets/${ticketId}/replies`);
+          renderReplies(items);
+        } catch (err) {
+          console.error('Failed to load replies:', err);
+          conversationThread.innerHTML = '<div class="empty" style="color:#b91c1c;">Failed to load conversation.</div>';
+        }
+      }
+
+      async function submitAnswer() {
+        if (!current) return;
+        const message = (replyInput.value || '').trim();
+        if (!message) {
+          answerError.textContent = 'Please enter a reply.';
+          answerError.style.display = 'block';
+          answerSuccess.style.display = 'none';
+          return;
+        }
+        try {
+          await fetchJSON(`${API}/tickets/${current.id}/replies`, { method: 'POST', body: JSON.stringify({ body: message }) });
+          replyInput.value = '';
+          answerError.style.display = 'none';
+          answerSuccess.style.display = 'block';
+          await loadReplies(current.id);
+        } catch (err) {
+          console.error('Failed to send reply:', err);
+          answerError.textContent = 'Failed to send reply.';
+          answerError.style.display = 'block';
+          answerSuccess.style.display = 'none';
+        }
+      }
+
+      if (answerSubmit) answerSubmit.addEventListener('click', submitAnswer);
+      if (replyInput) replyInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          submitAnswer();
+        }
+      });
+
+      loadTickets();
+    });
+  </script>
+  
+  </body>
+  </html>

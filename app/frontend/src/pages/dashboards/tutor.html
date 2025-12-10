@@ -8,11 +8,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="/assets/css/i18n.css" />
-    <title>Team Lead Dashboard | Conductor</title>
+    <title>Tutor Dashboard | Conductor</title>
     <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+    <!-- <div class="page" data-role="team-lead"> -->
     <header class="top-nav">
         <div class="brand">
             <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
@@ -20,15 +21,7 @@
 
         </div>
         <div class="nav-actions">
-            <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
-                Teams Meetings and Tasks
-            </a>
-            <a href="/group_formation/student_group_form.html?role=team_lead" class="nav-btn eval-btn">
-                Group Formation Form
-            </a>
-            <a href="/student_ticket/student_ticket.html" class="nav-btn eval-btn">
-              Submit Tutor Ticket
-            </a>
+
             <div class="profile">
                 <div class="profile-dropdown-container" style="position:relative;">
                     <img id="dashboard-profile-img" src="/assets/logo/user.png" 
@@ -42,15 +35,14 @@
             </div>
         </div>
     </header>
-    <div class="page" data-role="team-lead">
-        
-
+    
+    <div class="page" data-role="tutor">
         <section class="dashboard-header">
-    <div>
-        <h1>Team Lead Dashboard</h1>
-        <small id="teamLeadCourseLabel">Team Lead view</small>
-    </div>
-</section>
+            <div>
+                <h1>Tutor Dashboard</h1>
+                <small>Tutor view · </small>
+            </div>
+        </section>
 
         <section class="content-grid">
             <article class="dashboard-card">
@@ -66,146 +58,28 @@
 
             <article class="dashboard-card">
                  <div class="card-icon">
-                    <img src="team_icon.png" alt="Team Icon">
+                    <img src="help_ticket.png" alt="Team Icon">
                 </div> 
                 <div class="card-content">
-                    <h2>My Teams</h2>
-                    <p>View insights of your team's tasks, progress, and collaboration</p>
-                    <button class="card-btn" id="viewTeamsBtn">View Teams</button>
+                    <h2>Ticket Queue</h2>
+                    <p>Report issues, request assistance, or submit feedback to course staff.</p>
+                    <button class="card-btn" id="viewTicketsBtn">View Tickets</button>
                 </div>
             </article>
 
-            <article class="dashboard-card">
-                 <div class="card-icon">
-                    <img src="task_tracker_icon.png" alt="Task Tracker Icon">
-                </div> 
-                <div class="card-content">
-                    <h2>Team Task Tracker</h2>
-                    <p>Highlight priority tasks and keep owners aligned.</p>
-                    <button id="viewTasksBtn" class="card-btn">View Tasks</button>
-                </div>
-            </article>
+            <!-- RIGHT COLUMN: FAQ Section (dynamic, backed by DB) -->
+            <aside class="tutor-right-column">
+                <section class="faq-section">
+                    <h3>Frequently Asked Questions</h3>
+                    <div class="faq-controls" style="margin:8px 0 12px;">
+                        <button id="addFaqBtn" class="card-btn">Click to add Q&A</button>
+                    </div>
+                    <div id="faqList" class="faq-container"></div>
+                </section>
+            </aside>
 
-            <article class="dashboard-card">
-                 <div class="card-icon">
-                    <img src="work_journal_icon.png" alt="Work Journal Icon">
-                </div> 
-                <div class="card-content">
-                    <h2>Work Journal</h2>
-                    <p>Create, organize, or review your meeting notes and class discussions.</p>
-                    <button id="viewWorkJournalBtn" class="card-btn">Open Notes</button>
-                </div>
-            </article>
-
-            <article class="dashboard-card">
-                 <div class="card-icon">
-                    <img src="eval_journal_icon.PNG" alt="Eval Journal Icon">
-                </div> 
-                <div class="card-content">
-                    <h2>Evaluation Journal</h2>
-                    <p>Review performance metrics and grading insights of your team</p>
-                    <button id="viewEvalJournalBtn" class="card-btn">Open Journal</button>
-                </div>
-            </article>
-
-            <article class="dashboard-card">
-                 <div class="card-icon">
-                    <img src="weekly_eval_icon.png" alt="Weekly Eval Feedback Icon">
-                </div> 
-                <div class="card-content">
-                    <h2>Weekly Evaluation</h2>
-                    <p>Set the mood score and collect direct quotes for each week.</p>
-                    <button class="card-btn evaluation-trigger" data-member-id="1" aria-expanded="false">View Evaluation</button>
-                </div>
-            </article>
-
-            <article class="dashboard-card">
-                 <div class="card-icon">
-                    <img src="attendance_icon.PNG" alt="Attendance Icon">
-                </div> 
-                <div class="card-content">
-                    <h2>Submit Attendance</h2>
-                    <p>Enter your weekly attendance code.</p>
-                    <button id="openAttendanceDrawer" class="card-btn">Submit Attendance</button>
-                </div>
-            </article>
         </section>
     </div>
-
-
-    <!-- ============================================================
-         NEW ATTENDANCE DRAWER (REPLACED CONTENT)
-         ============================================================ -->
-    <section class="attendance-panel" id="attendancePanel" aria-hidden="true">
-        <article class="attendance-drawer">
-            <header>
-                <div>
-                    <p class="meta-label">Attendance</p>
-                    <h2>Enter Attendance Code</h2>
-                    <p>Enter the code announced during class.</p>
-                </div>
-                <button class="close-attendance" aria-label="Close attendance drawer">×</button>
-            </header>
-
-            <!-- Attendance Input -->
-            <div class="attendance-input-box">
-                <input id="attendanceInput" type="text" placeholder="Enter code…" />
-                <button id="attendanceSubmitBtn" class="submit-btn">Submit</button>
-            </div>
-
-            <!-- Success/Error Message -->
-            <p id="attendanceMessage" class="attendance-message"></p>
-
-            <!-- Attendance Record -->
-            <div class="attendance-record-box">
-                <h3>Your Attendance Record</h3>
-                <p id="attendanceOverall" class="attendance-overall"></p>
-
-                <table class="attendance-table">
-                    <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceRecordBody"></tbody>
-                </table>
-            </div>
-        </article>
-    </section>
-
-
-    <!-- Evaluation Drawer (unchanged) -->
-    <section class="evaluation-panel" aria-hidden="true">
-        <article class="evaluation-drawer">
-            <header>
-                <div>
-                    <p class="meta-label">Weekly evaluation</p>
-                    <h2 data-eval-context>Beacon AR · Team Lead</h2>
-                    <p>Use the week selector to swap notes and mood scores.</p>
-                </div>
-                <button class="close-evaluation" aria-label="Close weekly evaluation">×</button>
-            </header>
-
-            <div class="evaluation-filter">
-                <label for="lead-week">Filter by week</label>
-                <select id="lead-week" data-week-filter></select>
-            </div>
-
-            <!-- <div class="mood-display">
-                <div class="evaluation-face" data-mood-face>🙂</div>
-                <div>
-                    <p class="mood-status" data-mood-status>Making progress</p>
-                    <p class="mood-meta" data-mood-meta>Captured for Week 6</p>
-                </div>
-            </div> -->
-
-            <div class="notes-panel">
-                <label>Evaluation notes</label>
-                <p data-eval-notes>Notes for the selected week will appear here.</p>
-            </div>
-        </article>
-    </section>
 
 
     <!-- ============================================================
@@ -220,9 +94,7 @@
         const nav = {
             viewTasksBtn: '/task_tracker/task_tracker.html',
             viewClassDirectoryBtn: '/class_directory_student/class_directory_student.html',
-            viewWorkJournalBtn: '/work_journal/work_journal.html',
-            viewTeamsBtn: '/student_team_card/student_team_card.html',
-            viewEvalJournalBtn: '/evaluation_journal/evaluation_journal.html'
+            viewTicketsBtn: '/tutor_ticket_queue/tutor_ticket_queue.html',
         };
 
         Object.entries(nav).forEach(([id, link]) => {
@@ -400,16 +272,193 @@
       return courseLabel;
     }
 
-    const lbl = document.getElementById('teamLeadCourseLabel')
-      || document.querySelector('.dashboard-header small');
+        const lbl = document.getElementById('tutorCourseLabel')
+            || document.querySelector('.dashboard-header small');
 
-    if (lbl) {
-      const baseText = 'Team Lead view';
-      const courseLabel = getCurrentCourseLabel();
-      lbl.textContent = `${baseText} · ${courseLabel}`;
-    }
+        if (lbl) {
+            const baseText = 'Tutor view';
+            const courseLabel = getCurrentCourseLabel();
+            lbl.textContent = `${baseText} · ${courseLabel}`;
+        }
   });
 </script>
+
+        <!-- FAQ Modal -->
+        <div id="faqModalOverlay" class="faq-modal-overlay" aria-hidden="true">
+            <div class="faq-modal" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
+                <header id="faqModalTitle">Add Q&A</header>
+                <div class="body">
+                    <div class="field">
+                        <label for="faqQuestion">Question</label>
+                        <textarea id="faqQuestion" placeholder="Enter the question..."></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="faqAnswer">Answer</label>
+                        <textarea id="faqAnswer" placeholder="Enter the answer..."></textarea>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button id="faqDeleteBtn" class="btn danger" style="display:none;">Delete</button>
+                    <button id="faqCancelBtn" class="btn ghost">Cancel</button>
+                    <button id="faqSaveBtn" class="btn primary">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Simple JSON helper
+            function fetchJSON(url, options = {}) {
+                return fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options })
+                    .then(async (res) => {
+                        if (!res.ok) {
+                            const t = await res.text().catch(() => '');
+                            throw new Error(`HTTP ${res.status}: ${t || res.statusText}`);
+                        }
+                        // DELETE returns 204
+                        if (res.status === 204) return null;
+                        return res.json();
+                    });
+            }
+
+            (function initFaqUI(){
+                const listEl = document.getElementById('faqList');
+                const addBtn = document.getElementById('addFaqBtn');
+                const overlay = document.getElementById('faqModalOverlay');
+                const titleEl = document.getElementById('faqModalTitle');
+                const qEl = document.getElementById('faqQuestion');
+                const aEl = document.getElementById('faqAnswer');
+                const saveBtn = document.getElementById('faqSaveBtn');
+                const delBtn = document.getElementById('faqDeleteBtn');
+                const cancelBtn = document.getElementById('faqCancelBtn');
+
+                let items = [];
+                let editingId = null;
+
+                function openModal(mode, data){
+                    titleEl.textContent = mode === 'edit' ? 'Edit Q&A' : 'Add Q&A';
+                    qEl.value = (data && data.question) || '';
+                    aEl.value = (data && data.answer) || '';
+                    editingId = mode === 'edit' && data ? data.id : null;
+                    delBtn.style.display = editingId ? 'inline-block' : 'none';
+                    overlay.style.display = 'flex';
+                    overlay.setAttribute('aria-hidden','false');
+                    setTimeout(()=>{ qEl.focus(); }, 0);
+                }
+                function closeModal(){
+                    overlay.style.display = 'none';
+                    overlay.setAttribute('aria-hidden','true');
+                    qEl.value = '';
+                    aEl.value = '';
+                    editingId = null;
+                }
+                overlay.addEventListener('click', (e)=>{ if (e.target === overlay) closeModal(); });
+                cancelBtn.addEventListener('click', (e)=>{ e.preventDefault(); closeModal(); });
+
+                function render(){
+                    if (!items.length) {
+                        listEl.innerHTML = '<div style="color:#666; font-size:14px;">No FAQs yet. Click "Click to add Q&A" to create one.</div>';
+                        return;
+                    }
+                    listEl.innerHTML = items.map((it) => {
+                        const qSafe = it.question.replace(/</g,'&lt;');
+                        const aSafe = (it.answer || '').replace(/</g,'&lt;');
+                        return `
+                          <div class="faq-list-item" data-id="${it.id}">
+                            <button class="faq-toggle" aria-expanded="false" style="all:unset; cursor:pointer; flex:1;">
+                              <span class="q">${qSafe}</span>
+                            </button>
+                            <div class="edit" data-action="edit" title="Edit">Edit</div>
+                          </div>
+                          <div class="faq-answer" data-id="${it.id}" style="display:none; border:1px solid #eee; border-radius:8px; padding:10px 12px; margin:-8px 0 10px 0; background:#fafafa; color:#333;">${aSafe}</div>
+                        `;
+                    }).join('');
+
+                    // Hook up edit handlers
+                    listEl.querySelectorAll('.faq-list-item .edit').forEach((el) => {
+                        el.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            const root = el.closest('.faq-list-item');
+                            const id = root && root.getAttribute('data-id');
+                            const found = items.find((x) => x.id === id);
+                            if (found) openModal('edit', found);
+                        });
+                    });
+
+                    // Hook up toggle handlers
+                    listEl.querySelectorAll('.faq-list-item .faq-toggle').forEach((btn) => {
+                        btn.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            const parent = btn.closest('.faq-list-item');
+                            const id = parent && parent.getAttribute('data-id');
+                            const ans = listEl.querySelector(`.faq-answer[data-id="${id}"]`);
+                            const expanded = btn.getAttribute('aria-expanded') === 'true';
+                            btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                            if (ans) ans.style.display = expanded ? 'none' : 'block';
+                        });
+                    });
+                }
+
+                async function load(){
+                    try {
+                        const data = await fetchJSON('/api/faq');
+                        items = (data && Array.isArray(data.items)) ? data.items : [];
+                        render();
+                    } catch(err){
+                        console.error('Failed to load FAQ:', err);
+                        listEl.innerHTML = '<div style="color:#b00020;">Failed to load FAQ.</div>';
+                    }
+                }
+
+                async function handleSave(){
+                    const question = (qEl.value || '').trim();
+                    const answer = (aEl.value || '').trim();
+                    if (!question || !answer) return alert('Please fill in both question and answer.');
+
+                    try {
+                        if (!editingId) {
+                            const created = await fetchJSON('/api/faq', {
+                                method: 'POST',
+                                body: JSON.stringify({ question, answer })
+                            });
+                            items.push(created);
+                        } else {
+                            const updated = await fetchJSON(`/api/faq/${editingId}`, {
+                                method: 'PUT',
+                                body: JSON.stringify({ question, answer })
+                            });
+                            const idx = items.findIndex((x) => x.id === editingId);
+                            if (idx >= 0) items[idx] = updated;
+                        }
+                        render();
+                        closeModal();
+                    } catch(err){
+                        console.error('Failed to save FAQ:', err);
+                        alert('Failed to save FAQ.');
+                    }
+                }
+
+                async function handleDelete(){
+                    if (!editingId) return closeModal();
+                    if (!confirm('Delete this FAQ?')) return;
+                    try {
+                        await fetchJSON(`/api/faq/${editingId}`, { method: 'DELETE' });
+                        items = items.filter((x) => x.id !== editingId);
+                        render();
+                        closeModal();
+                    } catch(err){
+                        console.error('Failed to delete FAQ:', err);
+                        alert('Failed to delete FAQ.');
+                    }
+                }
+
+                addBtn.addEventListener('click', () => openModal('add'));
+                saveBtn.addEventListener('click', (e) => { e.preventDefault(); handleSave(); });
+                delBtn.addEventListener('click', (e) => { e.preventDefault(); handleDelete(); });
+
+                // initial load
+                window.addEventListener('DOMContentLoaded', load);
+            })();
+        </script>
 
 </body>
 </html>

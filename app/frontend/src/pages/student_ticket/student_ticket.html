@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+<head>
+  <link rel="stylesheet" href="../../../assets/css/global.css">
+  <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+  <script defer src="/assets/js/class-directory-nav.js"></script>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
+  <title>Student Ticket | Conductor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <header class="top-nav">
+    <div class="brand">
+        <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+        <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    </div>
+
+    <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+      <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+
+      <div class="profile">
+        <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
+          <div class="profile-dropdown-container" style="position:relative;">
+            <img
+              id="dashboardProfileImg"
+              src="/assets/logo/user.png"
+              style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;"
+            />
+            <div
+              id="profileDropdown"
+              class="profile-dropdown"
+              style="
+                display:none;
+                position:absolute;
+                top:48px;
+                right:0;
+                background:#fff;
+                border:1px solid #ddd;
+                border-radius:8px;
+                box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                min-width:140px;
+              "
+            >
+              <a href="/profile_page/profile.html" style="padding:10px 16px; display:block;">Profile</a>
+              <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
+            </div>
+          </div>
+        <!-- </a> -->
+      </div>
+    </div>
+  </header>
+
+  <!-- Optional error banner -->
+  <div
+    id="wjError"
+    style="
+      max-width:960px;
+      margin:0.75rem auto 0;
+      padding:0.5rem 0.75rem;
+      background:#fee2e2;
+      color:#b91c1c;
+      border-radius:4px;
+      font-size:0.9rem;
+      display:none;
+    "
+  ></div>
+
+  <div class="page-layout">
+    <section class="work-journal-container">
+      <h2 class="wj-title">Tutor Ticket Submit Form</h2>
+
+      <form id="ticketForm">
+        <div class="wj-field">
+          <label>FAQ</label>
+          <div>
+            <button id="openFaqBtn" type="button" class="wj-btn">Browse FAQ</button>
+          </div>
+          <small id="faqHint" class="hint">Please review the FAQ before filling in your ticket.</small>
+        </div>
+
+        <div class="wj-field">
+          <label for="ticketName">Ticket Name</label>
+          <input id="ticketName" type="text" required class="disabled-field" disabled />
+        </div>
+
+        <div class="wj-field">
+          <label for="issueDescription">What is your question?</label>
+          <textarea id="issueDescription" required class="disabled-field" disabled></textarea>
+        </div>
+
+        <button id="submitTicketBtn" class="wj-btn" type="submit" disabled>Submit Ticket</button>
+      </form>
+
+      <div id="wjSuccess" class="wj-success">✔ Ticket submitted!</div>
+    </section>
+  </div>
+
+  <!-- FAQ Modal -->
+  <div id="faqModalOverlay" class="faq-modal-overlay" aria-hidden="true">
+    <div class="faq-modal" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
+      <header>
+        <span id="faqModalTitle">Course FAQ</span>
+        <button id="faqCloseBtn" class="faq-close" aria-label="Close">✖</button>
+      </header>
+      <div class="body">
+        <div id="faqList"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tickets slide-out sidebar -->
+  <aside id="ticketsSidebar" class="wj-past-sidebar" aria-hidden="true" style="right:-360px; transition:right .2s ease;">
+    <h3 class="wj-past-title">Current Open Tickets</h3>
+    <div id="ticketsList" class="wj-past-list"></div>
+  </aside>
+  <div id="ticketsOverlay" class="wj-overlay" style="display:none;"></div>
+  <button id="openTicketsBtn" class="wj-toggle-btn" style="bottom:88px;">Tickets</button>
+
+  <!-- Ticket detail modal -->
+  <div id="ticketModalOverlay" class="faq-modal-overlay" aria-hidden="true">
+    <div class="faq-modal" role="dialog" aria-modal="true" aria-labelledby="ticketModalTitle" style="max-width:800px; width:94vw;">
+      <header>
+        <span id="ticketModalTitle">Ticket</span>
+        <button id="ticketCloseBtn" class="faq-close" aria-label="Close">✖</button>
+      </header>
+      <div class="body">
+        <div class="field">
+          <label>Title</label>
+          <div id="ticketTitleView" style="padding:8px 10px; border:1px solid #eee; border-radius:6px; background:#fafafa;"></div>
+        </div>
+        <div class="field">
+          <label>Issue Description</label>
+          <div id="ticketBodyView" style="padding:8px 10px; border:1px solid #eee; border-radius:6px; background:#fafafa; white-space:pre-wrap;"></div>
+        </div>
+        <div class="field">
+          <label>Tutor responded</label>
+          <div id="ticketRespondedView" style="padding:8px 10px; border:1px solid #eee; border-radius:6px; background:#fafafa;"></div>
+        </div>
+        <hr style="margin:12px 0;" />
+        <div class="field">
+          <label>Conversation</label>
+          <div id="ticketChatThread" class="conversation-thread" style="border:1px solid #eee; border-radius:8px; padding:10px; max-height:300px; overflow:auto; background:#f9fafb;"></div>
+        </div>
+
+        <div class="field" style="display:flex; gap:8px; align-items:center; margin-top:16px;">
+          <input id="ticketReplyInput" class="input" placeholder="Write a reply..." style="flex:1;" />
+          <button id="ticketReplySend" class="btn primary" type="button">Send</button>
+        </div>
+        <div id="ticketReplyError" class="empty" style="display:none;color:#b91c1c;"></div>
+        <div id="ticketReplySuccess" class="empty" style="display:none;color:#065f46;">Reply sent.</div>
+      </div>
+      <div class="actions" style="display:flex; justify-content:flex-end; margin-top:22px;">
+        <button id="ticketResolveBtn" class="wj-btn" title="Close this ticket" style="padding:8px 12px; font-size:0.95rem;">
+          Close Ticket
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Ticket logic -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const API_BASE = '/api';
+
+      async function fetchJSON(url, options = {}) {
+        const res = await fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options });
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+        }
+        if (res.status === 204) return null;
+        return res.json();
+      }
+
+      // Back-to-dashboard
+      const backBtn = document.getElementById('backDashboard');
+      if (backBtn) {
+        backBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const r = localStorage.getItem('role');
+          if (r === 'professor') window.location.href = '/dashboards/professor.html';
+          else if (r === 'ta') window.location.href = '/dashboards/ta.html';
+          else if (r === 'team_lead') window.location.href = '/dashboards/team_lead.html';
+          else if (r === 'tutor') window.location.href = '/dashboards/tutor.html';
+          else window.location.href = '/dashboards/student.html';
+        });
+      }
+
+      // Profile dropdown
+      const profileImg = document.getElementById('dashboardProfileImg');
+      const dropdown = document.getElementById('profileDropdown');
+      if (profileImg && dropdown) {
+        profileImg.addEventListener('mouseenter', () => dropdown.style.display = 'block');
+        profileImg.addEventListener('mouseleave', () => setTimeout(() => { if (!dropdown.matches(':hover')) dropdown.style.display = 'none'; }, 150));
+        dropdown.addEventListener('mouseenter', () => dropdown.style.display = 'block');
+        dropdown.addEventListener('mouseleave', () => dropdown.style.display = 'none');
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) logoutBtn.addEventListener('click', (e) => { e.preventDefault(); localStorage.clear(); window.location.href = '/login'; });
+      }
+      const savedImg = localStorage.getItem('profileImg');
+      if (savedImg && profileImg) profileImg.src = savedImg;
+
+      // Elements
+      const openFaqBtn = document.getElementById('openFaqBtn');
+      const faqOverlay = document.getElementById('faqModalOverlay');
+      const faqCloseBtn = document.getElementById('faqCloseBtn');
+      const faqList = document.getElementById('faqList');
+      const ticketName = document.getElementById('ticketName');
+      const issueDescription = document.getElementById('issueDescription');
+      const submitBtn = document.getElementById('submitTicketBtn');
+      const form = document.getElementById('ticketForm');
+      const successEl = document.getElementById('wjSuccess');
+      const errorEl = document.getElementById('wjError');
+      const ticketsBtn = document.getElementById('openTicketsBtn');
+      const ticketsSidebar = document.getElementById('ticketsSidebar');
+      const ticketsOverlay = document.getElementById('ticketsOverlay');
+      const ticketsList = document.getElementById('ticketsList');
+      const ticketModal = document.getElementById('ticketModalOverlay');
+      const ticketCloseBtn = document.getElementById('ticketCloseBtn');
+      const ticketTitleView = document.getElementById('ticketTitleView');
+      const ticketBodyView = document.getElementById('ticketBodyView');
+      const ticketRespondedView = document.getElementById('ticketRespondedView');
+      const ticketResolveBtn = document.getElementById('ticketResolveBtn');
+      const ticketChatThread = document.getElementById('ticketChatThread');
+      const ticketReplyInput = document.getElementById('ticketReplyInput');
+      const ticketReplySend = document.getElementById('ticketReplySend');
+      const ticketReplyError = document.getElementById('ticketReplyError');
+      const ticketReplySuccess = document.getElementById('ticketReplySuccess');
+      let currentTicket = null;
+
+      function setEnabled(enabled) {
+        [ticketName, issueDescription, submitBtn].forEach((el) => {
+          if (!el) return;
+          el.disabled = !enabled;
+          if (enabled) el.classList.remove('disabled-field');
+          else el.classList.add('disabled-field');
+        });
+        const hint = document.getElementById('faqHint');
+        if (hint) hint.style.display = enabled ? 'none' : 'inline';
+      }
+      setEnabled(false); // Gate initially
+
+      function renderFaq(items) {
+        if (!items.length) {
+          faqList.innerHTML = '<div style="color:#666;">No FAQs yet.</div>';
+          return;
+        }
+        faqList.innerHTML = items.map((it) => {
+          const qSafe = String(it.question || '').replace(/</g,'&lt;');
+          const aSafe = String(it.answer || '').replace(/</g,'&lt;');
+          return `
+            <div class="faq-list-item" data-id="${it.id}">
+              <button class="faq-toggle" aria-expanded="false"><span class="q">${qSafe}</span></button>
+            </div>
+            <div class="faq-answer" data-id="${it.id}">${aSafe}</div>
+          `;
+        }).join('');
+
+        faqList.querySelectorAll('.faq-toggle').forEach((btn) => {
+          btn.addEventListener('click', (ev) => {
+            ev.preventDefault();
+            const root = btn.closest('.faq-list-item');
+            const id = root && root.getAttribute('data-id');
+            const ans = faqList.querySelector(`.faq-answer[data-id="${id}"]`);
+            const expanded = btn.getAttribute('aria-expanded') === 'true';
+            btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            if (ans) ans.style.display = expanded ? 'none' : 'block';
+          });
+        });
+      }
+
+      async function openFaq() {
+        faqOverlay.style.display = 'flex';
+        faqOverlay.setAttribute('aria-hidden', 'false');
+        try {
+          const data = await fetchJSON(`${API_BASE}/faq`);
+          const items = (data && Array.isArray(data.items)) ? data.items : [];
+          renderFaq(items);
+        } catch (err) {
+          console.error('Failed to load FAQ:', err);
+          faqList.innerHTML = '<div style="color:#b00020;">Failed to load FAQ.</div>';
+        }
+      }
+      function closeFaq() {
+        faqOverlay.style.display = 'none';
+        faqOverlay.setAttribute('aria-hidden', 'true');
+        // Unlock fields after the first FAQ view
+        setEnabled(true);
+      }
+
+      if (openFaqBtn) openFaqBtn.addEventListener('click', openFaq);
+      if (faqCloseBtn) faqCloseBtn.addEventListener('click', closeFaq);
+      if (faqOverlay) faqOverlay.addEventListener('click', (e) => { if (e.target === faqOverlay) closeFaq(); });
+
+      if (form) {
+        form.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const title = (ticketName.value || '').trim();
+          const body = (issueDescription.value || '').trim();
+          if (!title || !body) return;
+          try {
+            await fetchJSON(`${API_BASE}/tickets`, {
+              method: 'POST',
+              body: JSON.stringify({ title, body })
+            });
+            if (successEl) {
+              successEl.style.display = 'block';
+              setTimeout(() => successEl.style.display = 'none', 3000);
+            }
+            form.reset();
+            setEnabled(true);
+          } catch (err) {
+            console.error('Failed to submit ticket:', err);
+            if (errorEl) {
+              errorEl.textContent = 'Failed to submit ticket.';
+              errorEl.style.display = 'block';
+              setTimeout(() => errorEl.style.display = 'none', 4000);
+            }
+          }
+        });
+      }
+
+      // -------------------------
+      // Tickets sidebar logic
+      // -------------------------
+      function openTickets() {
+        ticketsSidebar.style.right = '0';
+        ticketsSidebar.setAttribute('aria-hidden','false');
+        ticketsOverlay.style.display = 'block';
+        const toggleBtn = document.getElementById('openTicketsBtn');
+        if (toggleBtn) toggleBtn.style.display = 'none';
+        loadTickets();
+      }
+      function closeTickets() {
+        ticketsSidebar.style.right = '-360px';
+        ticketsSidebar.setAttribute('aria-hidden','true');
+        ticketsOverlay.style.display = 'none';
+        const toggleBtn = document.getElementById('openTicketsBtn');
+        if (toggleBtn) toggleBtn.style.display = 'block';
+      }
+      if (ticketsBtn) ticketsBtn.addEventListener('click', openTickets);
+      if (ticketsOverlay) ticketsOverlay.addEventListener('click', closeTickets);
+
+      async function loadTickets() {
+        ticketsList.innerHTML = '<p style="font-size:0.9rem;color:#777;">Loading...</p>';
+        try {
+          const items = await fetchJSON(`${API_BASE}/tickets/mine`);
+          if (!Array.isArray(items) || !items.length) {
+            ticketsList.innerHTML = '<p style="font-size:0.9rem;color:#777;">No tickets yet.</p>';
+            return;
+          }
+          ticketsList.innerHTML = '';
+          items.forEach((t) => {
+            const el = document.createElement('div');
+            el.className = 'wj-past-item';
+            el.textContent = "Title: " + t.title;
+            el.addEventListener('click', () => openTicketModal(t));
+            ticketsList.appendChild(el);
+          });
+        } catch (err) {
+          console.error('Failed to load tickets:', err);
+          ticketsList.innerHTML = '<p style="font-size:0.9rem;color:#b91c1c;">Failed to load tickets.</p>';
+        }
+      }
+
+      function openTicketModal(t) {
+        currentTicket = t;
+        const responded = t.responded ? 'Yes' : 'No';
+        ticketTitleView.textContent = (t.title || '').trim();
+        ticketBodyView.textContent = (t.body || '').trim();
+        ticketRespondedView.textContent = responded;
+        // Reset reply status messages when opening modal
+        if (ticketReplyError) ticketReplyError.style.display = 'none';
+        if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
+        if (ticketReplyInput) ticketReplyInput.value = '';
+        ticketModal.style.display = 'flex';
+        ticketModal.setAttribute('aria-hidden','false');
+        loadReplies(t.id);
+      }
+
+      function closeTicketModal() {
+        currentTicket = null;
+        ticketModal.style.display = 'none';
+        ticketModal.setAttribute('aria-hidden','true');
+      }
+
+      if (ticketCloseBtn) ticketCloseBtn.addEventListener('click', closeTicketModal);
+      if (ticketModal) ticketModal.addEventListener('click', (e) => { if (e.target === ticketModal) closeTicketModal(); });
+
+      if (ticketResolveBtn) {
+        ticketResolveBtn.addEventListener('click', async () => {
+          if (!currentTicket) return;
+          try {
+            await fetchJSON(`${API_BASE}/tickets/${currentTicket.id}`, { method: 'DELETE' });
+            // remove from list
+            const toRemove = Array.from(ticketsList.children).find(c => c.textContent === currentTicket.title);
+            if (toRemove) ticketsList.removeChild(toRemove);
+            closeTicketModal();
+            if (!ticketsList.children.length) ticketsList.innerHTML = '<p style="font-size:0.9rem;color:#777;">No tickets yet.</p>';
+          } catch (err) {
+            console.error('Failed to close ticket:', err);
+            alert('Failed to close ticket. Please try again.');
+          }
+        });
+      }
+
+      function renderReplies(items) {
+        if (!Array.isArray(items) || !items.length) {
+          ticketChatThread.innerHTML = '<div class="empty">No conversation yet.</div>';
+          return;
+        }
+        ticketChatThread.innerHTML = '';
+        const meId = localStorage.getItem('userId') || window.sessionUserId || null;
+        const meName = (localStorage.getItem('fullName') || localStorage.getItem('name') || '').trim().toLowerCase();
+        const meEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
+        items.forEach(r => {
+          const authorNameRaw = (r.author_name || '').trim();
+          const authorNameLc = authorNameRaw.toLowerCase();
+          const authorEmailLc = (r.userEmail || '').trim().toLowerCase();
+          const mine = (
+            (meId && r.author_id && String(r.author_id) === String(meId)) ||
+            (meName && authorNameLc && authorNameLc === meName) ||
+            (meEmail && authorEmailLc && authorEmailLc === meEmail)
+          );
+
+          // Student (mine) on right, Tutor on left
+          const alignmentClass = mine ? 'student' : 'tutor';
+          const displayName = mine ? 'You' : (authorNameRaw || 'Tutor');
+
+          const bubble = document.createElement('div');
+          bubble.className = `bubble ${alignmentClass}`;
+          bubble.innerHTML = `
+            <div class=\"bubble-meta\">${displayName.replace(/</g,'&lt;')} • ${new Date(r.createdAt).toLocaleString()}</div>
+            <div class=\"bubble-text\">${(r.message||r.body||'').replace(/</g,'&lt;')}</div>
+          `;
+          ticketChatThread.appendChild(bubble);
+        });
+        ticketChatThread.scrollTop = ticketChatThread.scrollHeight;
+      }
+
+      async function loadReplies(ticketId) {
+        ticketChatThread.innerHTML = '<div class="empty">Loading conversation...</div>';
+        try {
+          const items = await fetchJSON(`${API_BASE}/tickets/${ticketId}/replies`);
+          renderReplies(items);
+        } catch (err) {
+          console.error('Failed to load replies:', err);
+          ticketChatThread.innerHTML = '<div class="empty" style="color:#b91c1c;">Failed to load conversation.</div>';
+        }
+      }
+
+      if (ticketReplySend) {
+        ticketReplySend.addEventListener('click', async () => {
+          if (!currentTicket) return;
+          const body = (ticketReplyInput.value || '').trim();
+          if (!body) {
+            if (ticketReplyError) {
+              ticketReplyError.textContent = 'Please enter a reply.';
+              ticketReplyError.style.display = 'block';
+              if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
+            }
+            return;
+          }
+          try {
+            await fetchJSON(`${API_BASE}/tickets/${currentTicket.id}/replies`, {
+              method: 'POST',
+              body: JSON.stringify({ body })
+            });
+            ticketReplyInput.value = '';
+            if (ticketReplyError) ticketReplyError.style.display = 'none';
+            if (ticketReplySuccess) ticketReplySuccess.style.display = 'block';
+            // Auto-hide success after a short delay
+            setTimeout(() => { if (ticketReplySuccess) ticketReplySuccess.style.display = 'none'; }, 2500);
+            await loadReplies(currentTicket.id);
+          } catch (err) {
+            console.error('Failed to send reply:', err);
+            if (ticketReplyError) {
+              ticketReplyError.textContent = 'Failed to send reply.';
+              ticketReplyError.style.display = 'block';
+              if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
+            } else {
+              alert('Failed to send message.');
+            }
+          }
+        });
+
+        // Hide status messages when user starts typing again
+        if (ticketReplyInput) {
+          ticketReplyInput.addEventListener('input', () => {
+            if (ticketReplyError) ticketReplyError.style.display = 'none';
+            // Do not show success on input; ensure it's hidden
+            if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
+          });
+        }
+      }
+    });
+  </script>
+</body>
+</html>

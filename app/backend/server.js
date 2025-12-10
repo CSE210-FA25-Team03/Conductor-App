@@ -25,6 +25,8 @@
   const studentWeeklyDb = require('./db/studentWeekly');
   const _studentWeeklyEvalDb = require('./db/studentWeeklyEval');
   const rostersDb = require('./db/rosters');
+  const ticketsDb = require('./db/tickets');
+  const faqDb = require('./db/faq');
   const profileDb = require('./db/profile');
   const authRoutes = require('./routes/auth');
   const app = express();
@@ -100,8 +102,10 @@ const fetch =
   app.use('/task_tracker', express.static(path.join(__dirname, '../frontend/src/pages/task_tracker')));
   app.use('/tutor', express.static(path.join(__dirname, '../frontend/src/pages/tutor')));
   app.use('/dashboards', express.static(path.join(__dirname, '../frontend/src/pages/dashboards')));
+  app.use('/tutor_ticket_queue', express.static(path.join(__dirname, '../frontend/src/pages/tutor_ticket_queue')));
   app.use('/profile_page', express.static(path.join(__dirname, '../frontend/src/pages/profile_page')));
   app.use('/work_journal', express.static(path.join(__dirname, '../frontend/src/pages/work_journal')));
+  app.use('/student_ticket', express.static(path.join(__dirname, '../frontend/src/pages/student_ticket')));
   app.use('/admin', express.static(path.join(__dirname, '../frontend/src/pages/admin')));
   app.use(
     '/group_formation',
@@ -356,6 +360,8 @@ const fetch =
         redirectPath = '/dashboards/ta.html';
       } else if (primaryRole === 'team_lead') {
         redirectPath = '/dashboards/team_lead.html';
+      } else if (primaryRole === 'tutor') {
+        redirectPath = '/dashboards/tutor.html';
       }
 
       // Canonical session user: this is what *all* pages should read
@@ -893,6 +899,150 @@ app.get(
   // ------------------------------------------------------------
   // Group Formation – Groups (teams, members, TA assignments)
   // ------------------------------------------------------------
+  
+  // ------------------------------------------------------------
+  // FAQ API
+  // ------------------------------------------------------------
+  app.get('/api/faq', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
+        return res.json({ items: [] });
+      }
+      const items = await faqDb.listByCourse(req.courseId);
+      return res.json({ items });
+    } catch (err) {
+      console.error('Error loading FAQ:', err);
+      return res.status(500).json({ error: 'Failed to load FAQ' });
+    }
+  });
+
+  app.post('/api/faq', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true })) return;
+      const { question, answer } = req.body || {};
+      if (!question || !answer) {
+        return res.status(400).json({ error: 'question and answer are required' });
+      }
+      const item = await faqDb.create(req.courseId, { question, answer });
+      return res.status(201).json(item);
+    } catch (err) {
+      console.error('Error creating FAQ:', err);
+      return res.status(500).json({ error: 'Failed to create FAQ' });
+    }
+  });
+
+  app.put('/api/faq/:id', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true })) return;
+      const { id } = req.params;
+      const { question, answer } = req.body || {};
+      const updated = await faqDb.update(id, req.courseId, { question, answer });
+      if (!updated) return res.status(404).json({ error: 'FAQ not found' });
+      return res.json(updated);
+    } catch (err) {
+      console.error('Error updating FAQ:', err);
+      return res.status(500).json({ error: 'Failed to update FAQ' });
+    }
+  });
+
+  app.delete('/api/faq/:id', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true })) return;
+      const { id } = req.params;
+      const ok = await faqDb.remove(id, req.courseId);
+      if (!ok) return res.status(404).json({ error: 'FAQ not found' });
+      return res.status(204).send();
+    } catch (err) {
+      console.error('Error deleting FAQ:', err);
+      return res.status(500).json({ error: 'Failed to delete FAQ' });
+    }
+  });
+
+  // ------------------------------------------------------------
+  // Tickets API (student submit)
+  // ------------------------------------------------------------
+  app.post('/api/tickets', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true })) return;
+      const { title, body } = req.body || {};
+      if (!title || !body) {
+        return res.status(400).json({ error: 'title and body are required' });
+      }
+      const created = await ticketsDb.create(req.courseId, req.currentUser.id, { title, body });
+      return res.status(201).json(created);
+    } catch (err) {
+      console.error('Error creating ticket:', err);
+      return res.status(500).json({ error: 'Failed to create ticket' });
+    }
+  });
+
+  // List current user's tickets
+  app.get('/api/tickets/mine', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true, errorOnMissingCourse: false })) {
+        return res.json([]);
+      }
+      const items = await ticketsDb.listMine(req.courseId, req.currentUser.id);
+      return res.json(items);
+    } catch (err) {
+      console.error('Error loading my tickets:', err);
+      return res.status(500).json({ error: 'Failed to load tickets' });
+    }
+  });
+
+  // List all course tickets (tutor queue)
+  app.get('/api/tickets', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true })) return;
+      const items = await ticketsDb.listByCourse(req.courseId);
+      return res.json(items);
+    } catch (err) {
+      console.error('Error loading all tickets:', err);
+      return res.status(500).json({ error: 'Failed to load tickets' });
+    }
+  });
+
+  // Close a ticket (mark as resolved by setting status)
+  app.delete('/api/tickets/:id', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true })) return;
+      const { id } = req.params;
+      const ok = await ticketsDb.remove(req.courseId, req.currentUser.id, id);
+      if (!ok) return res.status(404).json({ error: 'Ticket not found' });
+      return res.status(204).send();
+    } catch (err) {
+      console.error('Error deleting ticket:', err);
+      return res.status(500).json({ error: 'Failed to delete ticket' });
+    }
+  });
+
+  // Ticket replies: list
+  app.get('/api/tickets/:id/replies', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true })) return;
+      const { id } = req.params;
+      const items = await ticketsDb.listReplies(req.courseId, req.currentUser.id, id);
+      return res.json(items);
+    } catch (err) {
+      console.error('Error loading ticket replies:', err);
+      return res.status(500).json({ error: 'Failed to load replies' });
+    }
+  });
+
+  // Ticket replies: add
+  app.post('/api/tickets/:id/replies', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      if (!ensureDb(res, { requireCourse: true })) return;
+      const { id } = req.params;
+      const { body } = req.body || {};
+      if (!body) return res.status(400).json({ error: 'body is required' });
+      const created = await ticketsDb.addReply(req.courseId, req.currentUser.id, id, body);
+      return res.status(201).json(created);
+    } catch (err) {
+      console.error('Error adding ticket reply:', err);
+      return res.status(500).json({ error: 'Failed to add reply' });
+    }
+  });
 
   // GET existing groups for current course
 app.get(
