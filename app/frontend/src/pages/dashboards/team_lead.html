@@ -225,16 +225,36 @@
             <!-- Attendance Record -->
             <div class="attendance-record-box" style="margin-top:1.5rem;">
                 <h3>Your Attendance Record</h3>
-                <p id="attendanceOverall" class="attendance-overall"></p>
-                <table class="attendance-table">
-                    <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceRecordBody"></tbody>
-                </table>
+
+                <!-- Class Meeting Attendance Section -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Class Meeting Attendance</h4>
+                    <p id="classAttendanceOverall" class="attendance-overall" style="margin-bottom: 0.75rem;"></p>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classAttendanceRecordBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Team Meeting Attendance Section -->
+                <div>
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Team Meeting Attendance</h4>
+                    <p id="teamAttendanceOverall" class="attendance-overall" style="margin-bottom: 0.75rem;"></p>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamAttendanceRecordBody"></tbody>
+                    </table>
+                </div>
             </div>
         </article>
     </section>
@@ -383,8 +403,10 @@
                 const teamInput = document.getElementById('teamAttendanceInput');
                 const teamSubmitBtn = document.getElementById('teamAttendanceSubmitBtn');
                 const teamMessageEl = document.getElementById('teamAttendanceMessage');
-                const recordBody = document.getElementById('attendanceRecordBody');
-                const overallEl = document.getElementById('attendanceOverall');
+                const classRecordBody = document.getElementById('classAttendanceRecordBody');
+                const classOverallEl = document.getElementById('classAttendanceOverall');
+                const teamRecordBody = document.getElementById('teamAttendanceRecordBody');
+                const teamOverallEl = document.getElementById('teamAttendanceOverall');
 
                 function fetchJSON(url, options = {}) {
                     return fetch(url, {
@@ -561,36 +583,62 @@
 
                 generateCodeBtn.addEventListener('click', handleGenerateCode);
 
-                // Attendance submission (same as student)
-                function loadAttendanceHistory() {
-                    fetchJSON(`${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`)
-                        .then((data) => {
-                            const sessions = Array.isArray(data.sessions) ? data.sessions : [];
-                            const presentCount = data.presentCount || 0;
-                            const total = data.totalSessions || sessions.length;
-                            const pct = total ? Math.round((presentCount / total) * 100) : 0;
-                            if (!sessions.length) {
-                                recordBody.innerHTML = '<tr><td colspan="2">No attendance sessions created yet.</td></tr>';
-                                overallEl.textContent = '';
-                                return;
-                            }
-                            const rowsHtml = sessions
-                                .slice()
-                                .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-                                .map((s) => {
-                                    const when = new Date(s.createdAt).toLocaleString();
-                                    const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
-                                    return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
-                                })
-                                .join('');
-                            recordBody.innerHTML = rowsHtml;
-                            overallEl.textContent = `Present ${presentCount} out of ${total} sessions (${pct}%)`;
-                        })
-                        .catch((err) => {
-                            console.error('[team_lead] Attendance history error:', err);
-                            recordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
-                            overallEl.textContent = '';
-                        });
+                // Attendance submission (separated class/team, mirroring student)
+                async function loadAttendanceHistory() {
+                    try {
+                        const data = await fetchJSON(`${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`);
+
+                        const classData = data.classMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
+                        const teamData = data.teamMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
+
+                        const classSessions = Array.isArray(classData.sessions) ? classData.sessions : [];
+                        const teamSessions = Array.isArray(teamData.sessions) ? teamData.sessions : [];
+
+                        const classPresentCount = typeof classData.presentCount === 'number' ? classData.presentCount : 0;
+                        const classTotal = typeof classData.totalSessions === 'number' ? classData.totalSessions : classSessions.length;
+                        const teamPresentCount = typeof teamData.presentCount === 'number' ? teamData.presentCount : 0;
+                        const teamTotal = typeof teamData.totalSessions === 'number' ? teamData.totalSessions : teamSessions.length;
+
+                        // Render class meeting attendance
+                        classRecordBody.innerHTML = '';
+                        if (!classSessions.length) {
+                            classRecordBody.innerHTML = '<tr><td colspan="2">No class meeting sessions have been created yet.</td></tr>';
+                            classOverallEl.textContent = '';
+                        } else {
+                            const classPct = classTotal ? Math.round((classPresentCount / classTotal) * 100) : 0;
+                            const sortedClass = classSessions.slice().sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                            const classRowsHtml = sortedClass.map((s) => {
+                                const when = new Date(s.createdAt).toLocaleString();
+                                const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
+                                return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
+                            }).join('');
+                            classRecordBody.innerHTML = classRowsHtml;
+                            classOverallEl.textContent = `Present ${classPresentCount} out of ${classTotal} sessions (${classPct}%)`;
+                        }
+
+                        // Render team meeting attendance
+                        teamRecordBody.innerHTML = '';
+                        if (!teamSessions.length) {
+                            teamRecordBody.innerHTML = '<tr><td colspan="2">No team meeting sessions have been created yet.</td></tr>';
+                            teamOverallEl.textContent = '';
+                        } else {
+                            const teamPct = teamTotal ? Math.round((teamPresentCount / teamTotal) * 100) : 0;
+                            const sortedTeam = teamSessions.slice().sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                            const teamRowsHtml = sortedTeam.map((s) => {
+                                const when = new Date(s.createdAt).toLocaleString();
+                                const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
+                                return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
+                            }).join('');
+                            teamRecordBody.innerHTML = teamRowsHtml;
+                            teamOverallEl.textContent = `Present ${teamPresentCount} out of ${teamTotal} sessions (${teamPct}%)`;
+                        }
+                    } catch (err) {
+                        console.error('[team_lead] Attendance history error:', err);
+                        classRecordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
+                        teamRecordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
+                        classOverallEl.textContent = '';
+                        teamOverallEl.textContent = '';
+                    }
                 }
 
                 async function handleClassSubmit() {

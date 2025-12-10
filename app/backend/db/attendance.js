@@ -148,39 +148,44 @@ async function createSession(courseId, data = {}) {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + liveMinutes * 60 * 1000);
 
+  // Build INSERT dynamically to avoid referencing team_id for class meetings or when absent in schema
+  const hasTeam = sessionType === 'team_meeting';
+  const columns = [
+    'course_id',
+    'created_by',
+    'code',
+    'type',
+    ...(hasTeam ? ['team_id'] : []),
+    'live_minutes',
+    'created_at',
+    'expires_at',
+  ];
+  const values = [
+    courseId,
+    creatorUserId,
+    code,
+    sessionType,
+    ...(hasTeam ? [teamId] : []),
+    liveMinutes,
+    now.toISOString(),
+    expiresAt.toISOString(),
+  ];
+  const placeholders = values.map((_, i) => `$${i + 1}`).join(',');
   const { rows } = await db.query(
     `
-    INSERT INTO attendance_sessions (
-      course_id,
-      created_by,
-      code,
-      type,
-      team_id,
-      live_minutes,
-      created_at,
-      expires_at
-    )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+    INSERT INTO attendance_sessions (${columns.join(',')})
+    VALUES (${placeholders})
     RETURNING
       id,
       course_id,
       code,
       type,
-      team_id,
+      ${hasTeam ? 'team_id,' : ''}
       live_minutes,
       created_at,
       expires_at
     `,
-    [
-      courseId,
-      creatorUserId,
-      code,
-      sessionType,
-      teamId,
-      liveMinutes,
-      now.toISOString(),
-      expiresAt.toISOString(),
-    ],
+    values,
   );
 
   return mapSessionRow({ ...rows[0], present_count: 0 });
@@ -306,6 +311,7 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw, expectedType = 
       s.course_id,
       s.code,
       s.type,
+      s.team_id,
       s.live_minutes,
       s.created_at,
       s.expires_at
@@ -348,6 +354,35 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw, expectedType = 
       reason: 'code_type_mismatch',
       message: `This code is for a ${sessionRow.type === 'class_meeting' ? 'class meeting' : 'team meeting'}, not a ${expectedType === 'class_meeting' ? 'class meeting' : 'team meeting'}. Please use the correct code.`,
     };
+  }
+
+  // 3b) If team meeting, ensure user is a member of that team
+  if (sessionRow.type === 'team_meeting') {
+    const teamId = sessionRow.team_id || null;
+    if (!teamId) {
+      return {
+        success: false,
+        reason: 'invalid_team_session',
+        message: 'This team meeting session is missing a team association.',
+      };
+    }
+    const { rows: memberRows } = await db.query(
+      `
+      SELECT 1
+      FROM team_members tm
+      JOIN teams t ON t.id = tm.team_id
+      WHERE tm.team_id = $1 AND t.course_id = $2 AND tm.user_id = $3
+      LIMIT 1
+      `,
+      [teamId, courseId, userId],
+    );
+    if (!memberRows.length) {
+      return {
+        success: false,
+        reason: 'not_team_member',
+        message: 'This team meeting code is restricted to members of another team.',
+      };
+    }
   }
 
   // 4) Expiry check in JS (clearer errors)
@@ -444,6 +479,19 @@ async function getHistoryByEmail(courseId, emailRaw) {
       ON a.session_id = s.id
       AND a.user_id = $2
     WHERE s.course_id = $1
+      AND (
+        s.type = 'class_meeting'
+        OR (
+          s.type = 'team_meeting'
+          AND s.team_id IS NOT NULL
+          AND EXISTS (
+            SELECT 1
+            FROM team_members tm
+            JOIN teams t ON t.id = tm.team_id
+            WHERE tm.team_id = s.team_id AND t.course_id = $1 AND tm.user_id = $2
+          )
+        )
+      )
     ORDER BY s.created_at ASC
     `,
     [courseId, userId],
