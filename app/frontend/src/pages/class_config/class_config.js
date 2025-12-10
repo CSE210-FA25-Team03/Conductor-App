@@ -138,6 +138,8 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/dashboards/ta.html';
       } else if (role === 'team_lead' || role === 'team lead') {
         window.location.href = '/dashboards/team_lead.html';
+      } else if (role === 'tutor') {
+        window.location.href = '/dashboards/tutor.html';
       } else {
         window.location.href = '/dashboards/student.html';
       }
