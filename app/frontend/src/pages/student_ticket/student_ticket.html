@@ -123,14 +123,6 @@
   <!-- Ticket detail modal -->
   <div id="ticketModalOverlay" class="faq-modal-overlay" aria-hidden="true">
     <div class="faq-modal" role="dialog" aria-modal="true" aria-labelledby="ticketModalTitle" style="max-width:800px; width:94vw;">
-      <style>
-        /* Scoped styles to this modal only */
-        .faq-modal .input { border:1px solid #ddd; border-radius:8px; padding:8px 10px; }
-        .faq-modal .input:focus { outline:none; border-color:#9ca3af; box-shadow:0 0 0 3px rgba(156,163,175,0.25); }
-        .faq-modal .btn.primary { background:#111827; color:#fff; border:none; border-radius:8px; padding:6px 12px; box-shadow:0 1px 2px rgba(0,0,0,0.08); transition:background .15s ease, transform .08s ease; }
-        .faq-modal .btn.primary:hover { background:#0b1220; }
-        .faq-modal .btn.primary:active { transform:translateY(1px); }
-      </style>
       <header>
         <span id="ticketModalTitle">Ticket</span>
         <button id="ticketCloseBtn" class="faq-close" aria-label="Close">✖</button>
@@ -151,12 +143,13 @@
         <hr style="margin:12px 0;" />
         <div class="field">
           <label>Conversation</label>
-          <div id="ticketChatThread" style="border:1px solid #eee; border-radius:8px; padding:10px; max-height:300px; overflow:auto; background:#f9fafb;"></div>
+          <div id="ticketChatThread" class="conversation-thread" style="border:1px solid #eee; border-radius:8px; padding:10px; max-height:300px; overflow:auto; background:#f9fafb;"></div>
         </div>
 
         <div class="field" style="display:flex; gap:8px; align-items:center; margin-top:16px;">
           <input id="ticketReplyInput" class="input" placeholder="Write a reply..." style="flex:1;" />
           <button id="ticketReplySend" class="btn primary" type="button">Send</button>
+        </div>
         <div id="ticketReplyError" class="empty" style="display:none;color:#b91c1c;"></div>
         <div id="ticketReplySuccess" class="empty" style="display:none;color:#065f46;">Reply sent.</div>
       </div>
@@ -380,6 +373,10 @@
         ticketTitleView.textContent = (t.title || '').trim();
         ticketBodyView.textContent = (t.body || '').trim();
         ticketRespondedView.textContent = responded;
+        // Reset reply status messages when opening modal
+        if (ticketReplyError) ticketReplyError.style.display = 'none';
+        if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
+        if (ticketReplyInput) ticketReplyInput.value = '';
         ticketModal.style.display = 'flex';
         ticketModal.setAttribute('aria-hidden','false');
         loadReplies(t.id);
@@ -411,52 +408,48 @@
         });
       }
 
+      function renderReplies(items) {
+        if (!Array.isArray(items) || !items.length) {
+          ticketChatThread.innerHTML = '<div class="empty">No conversation yet.</div>';
+          return;
+        }
+        ticketChatThread.innerHTML = '';
+        const meId = localStorage.getItem('userId') || window.sessionUserId || null;
+        const meName = (localStorage.getItem('fullName') || localStorage.getItem('name') || '').trim().toLowerCase();
+        const meEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
+        items.forEach(r => {
+          const authorNameRaw = (r.author_name || '').trim();
+          const authorNameLc = authorNameRaw.toLowerCase();
+          const authorEmailLc = (r.userEmail || '').trim().toLowerCase();
+          const mine = (
+            (meId && r.author_id && String(r.author_id) === String(meId)) ||
+            (meName && authorNameLc && authorNameLc === meName) ||
+            (meEmail && authorEmailLc && authorEmailLc === meEmail)
+          );
+
+          // Student (mine) on right, Tutor on left
+          const alignmentClass = mine ? 'student' : 'tutor';
+          const displayName = mine ? 'You' : (authorNameRaw || 'Tutor');
+
+          const bubble = document.createElement('div');
+          bubble.className = `bubble ${alignmentClass}`;
+          bubble.innerHTML = `
+            <div class=\"bubble-meta\">${displayName.replace(/</g,'&lt;')} • ${new Date(r.createdAt).toLocaleString()}</div>
+            <div class=\"bubble-text\">${(r.message||r.body||'').replace(/</g,'&lt;')}</div>
+          `;
+          ticketChatThread.appendChild(bubble);
+        });
+        ticketChatThread.scrollTop = ticketChatThread.scrollHeight;
+      }
+
       async function loadReplies(ticketId) {
-        if (!ticketChatThread) return;
-        ticketChatThread.innerHTML = '<div style="color:#777;">Loading conversation...</div>';
+        ticketChatThread.innerHTML = '<div class="empty">Loading conversation...</div>';
         try {
           const items = await fetchJSON(`${API_BASE}/tickets/${ticketId}/replies`);
-          if (!Array.isArray(items) || !items.length) {
-            ticketChatThread.innerHTML = '<div style="color:#888;">No messages yet.</div>';
-            return;
-          }
-          ticketChatThread.innerHTML = '';
-          const meName = (localStorage.getItem('fullName') || localStorage.getItem('name') || '').trim();
-          const meEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
-          items.forEach(msg => {
-            const authorName = (msg.author_name || msg.userName || '').trim();
-            const authorEmail = String(msg.userEmail || '').trim().toLowerCase();
-            const isMine = (
-              (meName && authorName && authorName === meName) ||
-              (meEmail && authorEmail && authorEmail === meEmail)
-            );
-
-            const bubble = document.createElement('div');
-            bubble.style.margin = '8px 0';
-            bubble.style.maxWidth = '76%';
-            bubble.style.padding = '8px 12px';
-            bubble.style.borderRadius = '14px';
-            bubble.style.background = isMine ? '#e0f2fe' : '#f5f5f5';
-            bubble.style.border = '1px solid ' + (isMine ? '#bae6fd' : '#e5e7eb');
-            bubble.style.display = 'inline-block';
-
-            const displayName = isMine ? 'You' : (authorName || authorEmail || 'User');
-            const time = new Date(msg.createdAt).toLocaleString();
-            bubble.innerHTML = `
-              <div style="font-size:0.78rem;color:#6b7280;margin-bottom:4px;">${displayName.replace(/</g,'&lt;')} • ${time}</div>
-              <div style="white-space:pre-wrap;color:#1f2937;">${(msg.body||'').replace(/</g,'&lt;')}</div>
-            `;
-
-            const row = document.createElement('div');
-            row.style.display = 'flex';
-            row.style.justifyContent = isMine ? 'flex-end' : 'flex-start';
-            row.appendChild(bubble);
-            ticketChatThread.appendChild(row);
-          });
-          ticketChatThread.scrollTop = ticketChatThread.scrollHeight;
+          renderReplies(items);
         } catch (err) {
           console.error('Failed to load replies:', err);
-          ticketChatThread.innerHTML = '<div style="color:#b91c1c;">Failed to load conversation.</div>';
+          ticketChatThread.innerHTML = '<div class="empty" style="color:#b91c1c;">Failed to load conversation.</div>';
         }
       }
 
@@ -480,6 +473,8 @@
             ticketReplyInput.value = '';
             if (ticketReplyError) ticketReplyError.style.display = 'none';
             if (ticketReplySuccess) ticketReplySuccess.style.display = 'block';
+            // Auto-hide success after a short delay
+            setTimeout(() => { if (ticketReplySuccess) ticketReplySuccess.style.display = 'none'; }, 2500);
             await loadReplies(currentTicket.id);
           } catch (err) {
             console.error('Failed to send reply:', err);
@@ -492,6 +487,15 @@
             }
           }
         });
+
+        // Hide status messages when user starts typing again
+        if (ticketReplyInput) {
+          ticketReplyInput.addEventListener('input', () => {
+            if (ticketReplyError) ticketReplyError.style.display = 'none';
+            // Do not show success on input; ensure it's hidden
+            if (ticketReplySuccess) ticketReplySuccess.style.display = 'none';
+          });
+        }
       }
     });
   </script>

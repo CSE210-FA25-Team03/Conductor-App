@@ -265,17 +265,24 @@
         }
         conversationThread.innerHTML = '';
         const meId = localStorage.getItem('userId') || window.sessionUserId || null;
-        const meEmail = localStorage.getItem('email') || null;
-        const meRole = localStorage.getItem('role') || null;
         items.forEach(r => {
-          const mine = (
-            (meId && r.userId && String(r.userId) === String(meId)) ||
-            (meEmail && r.userEmail && String(r.userEmail).toLowerCase() === String(meEmail).toLowerCase())
+          const mine = (meId && r.author_id && String(r.author_id) === String(meId));
+
+          const authorName = (r.author_name || '').trim();
+          const ticketOwnerName = (current && current.createdByName ? String(current.createdByName).trim() : '');
+          const ticketOwnerEmail = (current && current.createdByEmail ? String(current.createdByEmail).trim() : '');
+          const isStudentAuthor = (
+            (authorName && ticketOwnerName && authorName.toLowerCase() === ticketOwnerName.toLowerCase()) ||
+            (authorName && ticketOwnerEmail && authorName.toLowerCase() === ticketOwnerEmail.toLowerCase())
           );
-          // Alignment: in tutor view, tutor (mine) on left, student on right
-          const alignmentClass = mine ? 'tutor' : 'student';
-          const nameFallback = r.author_name || r.userName || r.userEmail || '';
-          const displayName = 'mine' ? 'You' : nameFallback;
+
+          // Tutor bubbles on left, Student bubbles on right
+          const alignmentClass = isStudentAuthor ? 'student' : 'tutor';
+
+          const nameFallback = authorName || (isStudentAuthor
+            ? (ticketOwnerName || ticketOwnerEmail || 'Student')
+            : 'Tutor');
+          const displayName = mine ? 'You' : nameFallback;
 
           const bubble = document.createElement('div');
           bubble.className = `bubble ${alignmentClass}`;

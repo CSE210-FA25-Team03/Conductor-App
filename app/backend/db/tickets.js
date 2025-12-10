@@ -43,10 +43,13 @@ module.exports = {
     const { rows } = await db.query(
       `SELECT st.id, st.title, st.body, st.status,
               st.created_at AS "createdAt",
+              u.display_name AS "createdByName",
+              u.email AS "createdByEmail",
               EXISTS (
                 SELECT 1 FROM support_ticket_replies r WHERE r.ticket_id = st.id
               ) AS responded
          FROM support_tickets st
+         JOIN users u ON u.id = st.created_by
         WHERE st.course_id = $1 AND st.created_by = $2 AND st.status = 'open'
         ORDER BY st.created_at DESC`,
       [courseId, userId]

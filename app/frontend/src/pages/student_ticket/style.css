@@ -315,6 +315,39 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+
+.conversation-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.conversation-thread .bubble {
+    max-width: 72%;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.conversation-thread .bubble.tutor {
+    align-self: flex-start;
+    background: #ffffff;
+}
+.conversation-thread .bubble.student {
+    align-self: flex-end;
+    background: #e6fffa;
+    border-color: #99f6e4;
+}
+.conversation-thread .bubble-meta {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+.conversation-thread .bubble-text {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
 .btn.primary { background: #111827; color: #fff; }
 /* FAQ modal */
 .faq-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
@@ -325,8 +358,14 @@ body {
 .faq-list-item { border: 1px solid #eee; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #fff; display: flex; justify-content: space-between; align-items: center; }
 .faq-list-item .q { font-weight: 600; color: #222; margin-right: 8px; }
 .faq-list-item .faq-toggle { all: unset; cursor: pointer; flex: 1; }
-.faq-answer { display:none; border:1px solid #eee; border-radius:8px; padding:10px 12px; margin:-8px 0 10px 0; background:#fafafa; color:#333; }
+.faq-answer { display:none; border:1px solid #eee; border-radius:8px; padding:10px 12px; margin:-8px 0 10px; background:#fafafa; color:#333; }
 
 /* Disabled gating */
 .disabled-field, .disabled-field:disabled { background: #f5f5f5 !important; color: #777 !important; cursor: not-allowed; }
 .hint { color:#666; font-size: 12px; }
+
+.faq-modal .input { border:1px solid #ddd; border-radius:8px; padding:8px 10px; }
+.faq-modal .input:focus { outline:none; border-color:#9ca3af; box-shadow:0 0 0 3px rgba(156,163,175,0.25); }
+.faq-modal .btn.primary { background:#111827; color:#fff; border:none; border-radius:8px; padding:6px 12px; box-shadow:0 1px 2px rgba(0,0,0,0.08); transition:background .15s ease, transform .08s ease; }
+.faq-modal .btn.primary:hover { background:#0b1220; }
+.faq-modal .btn.primary:active { transform:translateY(1px); }
