@@ -366,15 +366,6 @@ CREATE TABLE IF NOT EXISTS support_ticket_replies (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Track per-user read state for tickets (so unread survives logout/login)
-CREATE TABLE IF NOT EXISTS support_ticket_reads (
-  ticket_id        uuid NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
-  user_id          uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  last_seen_at     timestamptz NOT NULL DEFAULT now(),
-  last_seen_count  integer NOT NULL DEFAULT 0,
-  PRIMARY KEY (ticket_id, user_id)
-);
-
 
 -- Frequently Asked Questions for a course
 CREATE TABLE faq (

@@ -418,9 +418,23 @@
             const seen = Number(localStorage.getItem(`ticketSeenCount:${t.id}`) || '0');
             const replyCount = Number(t.replyCount || 0);
             const unread = Math.max(0, replyCount - seen);
+
+
+            const assigneeRaw =
+              (t.assigneeTutorName ||
+              t.assignee_name ||
+              t.assigneeName ||
+              t.assigneeTutorEmail ||
+              t.assignee_email ||
+              '').toString().trim();
+            const assigneeSafe = (assigneeRaw || 'Unassigned').replace(/</g, '&lt;');
+
             el.innerHTML = `
               <span class="wj-item-title">Title: ${(t.title || '').replace(/</g,'&lt;')}</span>
               ${unread > 0 ? `<span class="wj-unread" style="float:right;background:#ef4444;color:#fff;border-radius:12px;padding:0 8px;font-size:12px;line-height:20px;min-width:20px;text-align:center;">${unread}</span>` : ''}
+              <div class="wj-item-meta" style="font-size:12px;color:#6b7280;margin-top:2px;">
+                Tutor Assign: ${assigneeSafe}
+              </div>
             `;
             el.addEventListener('click', () => openTicketModal(t));
             ticketsList.appendChild(el);

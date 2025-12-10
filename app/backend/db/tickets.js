@@ -58,6 +58,9 @@ module.exports = {
               st.created_at AS "createdAt",
               u.display_name AS "createdByName",
               u.email AS "createdByEmail",
+              st.assignee_tutor_id AS "assigneeTutorId",
+              u2.display_name AS "assigneeTutorName",
+              u2.email AS "assigneeTutorEmail",
               EXISTS (
                 SELECT 1 FROM support_ticket_replies r WHERE r.ticket_id = st.id
               ) AS responded,
@@ -65,6 +68,7 @@ module.exports = {
               (SELECT MAX(r3.created_at) FROM support_ticket_replies r3 WHERE r3.ticket_id = st.id) AS "lastReplyAt"
          FROM support_tickets st
          JOIN users u ON u.id = st.created_by
+    LEFT JOIN users u2 ON u2.id = st.assignee_tutor_id
         WHERE st.course_id = $1 AND st.created_by = $2 AND st.status = 'open'
         ORDER BY st.created_at DESC`,
       [courseId, userId]
