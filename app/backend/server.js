@@ -1,6 +1,7 @@
   // backend/server.js
   require('dotenv').config();
 
+  // const db = require("../db");
   const path = require('path');
   const express = require('express');
 
@@ -22,7 +23,7 @@
   const evalNotesDb = require('./db/evalNotes');
   const journalRepliesDb = require('./db/journalReplies');
   const studentWeeklyDb = require('./db/studentWeekly');
-  // const studentWeeklyEvalDb = require('./db/studentWeeklyEval');
+  const _studentWeeklyEvalDb = require('./db/studentWeeklyEval');
   const rostersDb = require('./db/rosters');
   const profileDb = require('./db/profile');
   const authRoutes = require('./routes/auth');
@@ -489,7 +490,6 @@ const fetch =
 // async function findCourseForLogin(rawCode) {
 //   const key = normalizeCourseCode(rawCode);
 //   if (!key) return null;
-
 //   const { rows } = await db.query(
 //     `
 //       SELECT c.id, c.code, c.title
@@ -500,9 +500,7 @@ const fetch =
 //     `,
 //     [key],
 //   );
-
 //   if (!rows.length) return null;
-
 //   const row = rows[0];
 //   return {
 //     id: row.id,
