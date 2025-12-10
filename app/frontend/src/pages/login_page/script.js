@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const googleLoginButton = document.getElementById('googleLoginButton');
   const emailInput = document.getElementById('email');
   const classCodeInput = document.getElementById('classCode');
-  // const classCodeRow = classCodeInput ? classCodeInput.closest('.input_box') : null;
 
   if (googleLoginButton) {
     googleLoginButton.addEventListener('click', (event) => {

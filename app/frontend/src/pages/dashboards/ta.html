@@ -92,6 +92,17 @@
             </div>
         </article>
 
+        <article class="dashboard-card">
+             <div class="card-icon">
+                    <img src="attendance_icon.PNG" alt="Attendance Icon">
+                </div> 
+            <div class="card-content">
+                <h2>View Attendance</h2>
+                <p>View attendance plots and statistics</p>
+                <button id="viewAttendancePlotBtn" class="card-btn">View Attendance</button>
+            </div>
+        </article>
+
     </section>
 </div>
 
@@ -109,6 +120,22 @@
 
         <!-- Attendance form -->
         <div class="attendance-form">
+            <div style="margin-bottom:1rem;">
+                <label for="attendanceWeek" style="display:block;margin-bottom:0.5rem;font-weight:500;">Week:</label>
+                <select id="attendanceWeek" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;" required>
+                    <option value="">Select a week...</option>
+                    <option value="Week 1">Week 1</option>
+                    <option value="Week 2">Week 2</option>
+                    <option value="Week 3">Week 3</option>
+                    <option value="Week 4">Week 4</option>
+                    <option value="Week 5">Week 5</option>
+                    <option value="Week 6">Week 6</option>
+                    <option value="Week 7">Week 7</option>
+                    <option value="Week 8">Week 8</option>
+                    <option value="Week 9">Week 9</option>
+                    <option value="Week 10">Week 10</option>
+                </select>
+            </div>
             <label class="att-row">
                 <input type="checkbox" id="attClass"> Class
             </label>
@@ -123,6 +150,7 @@
             </label>
 
             <button id="saveAttendanceBtn" class="save-btn">Save Attendance</button>
+            <p id="saveAttendanceMessage" style="margin-top:0.5rem;color:#b00020;font-size:0.9rem;"></p>
         </div>
 
         <!-- Past Submissions -->
@@ -241,21 +269,91 @@ if (closeBtn && drawer) {
     closeBtn.onclick = () => drawer.setAttribute("aria-hidden", "true");
 }
 
-document.getElementById("saveAttendanceBtn").onclick = () => {
-    const attendance = {
-        class: document.getElementById("attClass").checked,
-        group: document.getElementById("attGroup").checked,
-        office: document.getElementById("attOffice").checked,
-        classMeeting: document.getElementById("attClassMeeting").checked,
-        timestamp: new Date().toLocaleString()
+// Week dropdown is initialized in the HTML
+
+const saveBtn = document.getElementById("saveAttendanceBtn");
+const saveMessage = document.getElementById("saveAttendanceMessage");
+
+if (saveBtn) {
+    saveBtn.onclick = () => {
+        const weekSelect = document.getElementById("attendanceWeek");
+        const weekValue = weekSelect ? weekSelect.value : null;
+        
+        if (!weekValue) {
+            if (saveMessage) {
+                saveMessage.textContent = "Please select a week.";
+                saveMessage.style.color = "#b00020";
+            }
+            return;
+        }
+
+        // Check if at least one checkbox is selected
+        const hasSelection = document.getElementById("attClass").checked ||
+                            document.getElementById("attGroup").checked ||
+                            document.getElementById("attOffice").checked ||
+                            document.getElementById("attClassMeeting").checked;
+        
+        if (!hasSelection) {
+            if (saveMessage) {
+                saveMessage.textContent = "Please select at least one attendance type.";
+                saveMessage.style.color = "#b00020";
+            }
+            return;
+        }
+
+        // Disable button to prevent multiple clicks
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+        if (saveMessage) {
+            saveMessage.textContent = "";
+        }
+
+        const attendance = {
+            week: weekValue,
+            class: document.getElementById("attClass").checked,
+            group: document.getElementById("attGroup").checked,
+            office: document.getElementById("attOffice").checked,
+            classMeeting: document.getElementById("attClassMeeting").checked,
+            timestamp: new Date().toISOString(),
+            displayTimestamp: new Date().toLocaleString()
+        };
+
+        let history = JSON.parse(localStorage.getItem("taAttendanceHistory") || "[]");
+        
+        // Check for duplicate entry for the same week
+        const existingIndex = history.findIndex(entry => entry.week === weekValue);
+        
+        if (existingIndex !== -1) {
+            // Update existing entry instead of creating duplicate
+            history[existingIndex] = attendance;
+            if (saveMessage) {
+                saveMessage.textContent = "Attendance updated for this week.";
+                saveMessage.style.color = "#0a7a30";
+            }
+        } else {
+            // Add new entry
+            history.unshift(attendance);
+            if (saveMessage) {
+                saveMessage.textContent = "Attendance saved successfully.";
+                saveMessage.style.color = "#0a7a30";
+            }
+        }
+        
+        localStorage.setItem("taAttendanceHistory", JSON.stringify(history));
+        loadAttendanceHistory();
+
+        // Re-enable button after a short delay
+        setTimeout(() => {
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Save Attendance";
+            if (saveMessage) {
+                setTimeout(() => {
+                    saveMessage.textContent = "";
+                }, 3000);
+            }
+        }, 500);
     };
-
-    let history = JSON.parse(localStorage.getItem("taAttendanceHistory") || "[]");
-    history.unshift(attendance);
-    localStorage.setItem("taAttendanceHistory", JSON.stringify(history));
-
-    loadAttendanceHistory();
-};
+}
 
 
 // ---------------------------
@@ -267,7 +365,21 @@ function loadAttendanceHistory() {
 
     const history = JSON.parse(localStorage.getItem("taAttendanceHistory") || "[]");
 
-    list.innerHTML = history.map(entry => {
+    // Sort by week (most recent first, then by timestamp)
+    const sortedHistory = history.slice().sort((a, b) => {
+        // First try to sort by week number if both have week
+        if (a.week && b.week) {
+            const weekNumA = parseInt(a.week.replace('Week ', '')) || 0;
+            const weekNumB = parseInt(b.week.replace('Week ', '')) || 0;
+            if (weekNumB !== weekNumA) return weekNumB - weekNumA;
+        }
+        // Fallback to timestamp for entries without week or same week
+        const timestampA = a.timestamp || '';
+        const timestampB = b.timestamp || '';
+        return timestampB.localeCompare(timestampA);
+    });
+
+    list.innerHTML = sortedHistory.map(entry => {
         const types = [
             entry.class ? "Class" : null,
             entry.group ? "Group Meeting" : null,
@@ -275,10 +387,26 @@ function loadAttendanceHistory() {
             entry.classMeeting ? "Class Meeting" : null,
         ].filter(Boolean).join(", ");
 
+        // Format week and timestamp for display
+        let displayInfo = '';
+        if (entry.week) {
+            displayInfo = entry.week;
+            if (entry.displayTimestamp) {
+                // Extract time from displayTimestamp if available
+                const timeMatch = entry.displayTimestamp.match(/\d{1,2}:\d{2}:\d{2}/);
+                if (timeMatch) {
+                    displayInfo += ` · ${timeMatch[0]}`;
+                }
+            }
+        } else {
+            // Fallback for old entries that might still have date
+            displayInfo = entry.displayTimestamp || entry.timestamp || '';
+        }
+
         return `
             <li>
                 <strong>${types}</strong><br>
-                <small>${entry.timestamp}</small>
+                <small>${displayInfo}</small>
             </li>
         `;
     }).join("");
@@ -317,6 +445,184 @@ loadAttendanceHistory();
       headerSmall.textContent = `${roleText} · ${courseLabel}`;
     }
   });
+</script>
+
+<!-- View Attendance Plot Panel -->
+<section class="attendance-panel" id="attendancePlotPanel" aria-hidden="true">
+    <article class="attendance-drawer">
+        <header>
+            <div>
+                <p class="meta-label">Attendance</p>
+                <h2>View Attendance</h2>
+                <p>View attendance plots and statistics for class meetings.</p>
+            </div>
+            <button class="close-attendance-plot" aria-label="Close">×</button>
+        </header>
+        <div style="margin-bottom:1rem;">
+            <label for="attendanceTeamSelect" style="display:block;margin-bottom:0.5rem;font-weight:500;">Select Team:</label>
+            <select id="attendanceTeamSelect" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;">
+                <option value="">Select a team...</option>
+            </select>
+        </div>
+        <div id="classPlotSection" style="margin-top:1.5rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                <h3>Class Meeting Attendance</h3>
+                <button id="toggleClassPlot" style="padding:0.25rem 0.5rem;font-size:0.85rem;">Hide</button>
+            </div>
+            <div id="classPlotContent">
+                <div class="plot-stats" style="margin-bottom:0.5rem;font-size:0.9rem;color:#666;"></div>
+                <div id="classAttendancePlot" style="height:300px;"></div>
+            </div>
+        </div>
+    </article>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // View Attendance Plot for TA
+    document.addEventListener('DOMContentLoaded', async () => {
+        const API_BASE = '/api';
+        const plotPanel = document.getElementById('attendancePlotPanel');
+        const viewBtn = document.getElementById('viewAttendancePlotBtn');
+        const closeBtn = document.querySelector('.close-attendance-plot');
+        const teamSelect = document.getElementById('attendanceTeamSelect');
+        const classPlotContainer = document.getElementById('classAttendancePlot');
+        const classPlotSection = document.getElementById('classPlotSection');
+        
+        if (!plotPanel || !viewBtn) return;
+
+        let classChart = null;
+
+        async function fetchJSON(url) {
+            const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        }
+
+        async function loadTeams() {
+            try {
+                const teams = await fetchJSON(`${API_BASE}/teams`);
+                teamSelect.innerHTML = '<option value="">Select a team...</option>';
+                teams.forEach((team) => {
+                    const option = document.createElement('option');
+                    option.value = team.id;
+                    option.textContent = team.name || team.code;
+                    teamSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Failed to load teams:', err);
+            }
+        }
+
+        async function loadPlots(selectedTeamId) {
+            if (!selectedTeamId) return;
+
+            try {
+                const classData = await fetchJSON(`${API_BASE}/attendance/plot?teamId=${selectedTeamId}&type=class_meeting`);
+                renderPlot(classPlotContainer, classData, 'Class Meeting Attendance', '#2196F3');
+                updateStats(classPlotSection, classData, 'Students');
+            } catch (err) {
+                console.error('Failed to load class plot:', err);
+                classPlotContainer.innerHTML = '<p style="color:#b00020;">Failed to load class attendance plot.</p>';
+            }
+        }
+
+        function renderPlot(container, data, title, color) {
+            if (!container || !data.periods || data.periods.length === 0) {
+                container.innerHTML = '<p style="color:#666;">No attendance data available.</p>';
+                return;
+            }
+
+            const canvas = document.createElement('canvas');
+            container.innerHTML = '';
+            container.appendChild(canvas);
+
+            const ctx = canvas.getContext('2d');
+            const labels = data.periods.map((p) => p.label);
+            const rates = data.periods.map((p) => p.attendanceRate);
+
+            if (window.Chart) {
+                if (classChart) classChart.destroy();
+                classChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Attendance Rate (%)',
+                            data: rates,
+                            borderColor: color,
+                            backgroundColor: color + '20',
+                            fill: true,
+                            tension: 0.4,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: { stepSize: 10 },
+                            },
+                        },
+                        plugins: {
+                            legend: { display: true },
+                            title: { display: true, text: title },
+                        },
+                    },
+                });
+            } else {
+                container.innerHTML = '<p style="color:#b00020;">Chart.js not loaded.</p>';
+            }
+        }
+
+        function updateStats(section, data, memberLabel) {
+            if (!section) return;
+            const statsEl = section.querySelector('.plot-stats');
+            if (statsEl) {
+                statsEl.innerHTML = `
+                    <div><strong>Average Rate:</strong> ${data.averageRate}%</div>
+                    <div><strong>Total ${memberLabel}:</strong> ${data.totalMembers}</div>
+                    <div><strong>Total Periods:</strong> ${data.totalPeriods}</div>
+                `;
+            }
+        }
+
+        function openPanel() {
+            plotPanel.setAttribute('aria-hidden', 'false');
+            loadTeams();
+        }
+
+        function closePanel() {
+            plotPanel.setAttribute('aria-hidden', 'true');
+        }
+
+        viewBtn.addEventListener('click', openPanel);
+        if (closeBtn) closeBtn.addEventListener('click', closePanel);
+        if (plotPanel) {
+            plotPanel.addEventListener('click', (e) => {
+                if (e.target === plotPanel) closePanel();
+            });
+        }
+
+        if (teamSelect) {
+            teamSelect.addEventListener('change', (e) => {
+                loadPlots(e.target.value);
+            });
+        }
+
+        // Toggle section
+        const classToggle = document.getElementById('toggleClassPlot');
+        if (classToggle && classPlotSection) {
+            classToggle.addEventListener('click', () => {
+                const content = document.getElementById('classPlotContent');
+                const isHidden = content.style.display === 'none';
+                content.style.display = isHidden ? 'block' : 'none';
+                classToggle.textContent = isHidden ? 'Hide' : 'Show';
+            });
+        }
+    });
 </script>
 
 </body>

@@ -65,6 +65,25 @@ npm start
 
 The server will run on `http://localhost:3000` (or the port specified in your `.env` file).
 
+## Insert Test Attendance Data
+
+To insert test attendance data for testing the attendance system:
+
+```bash
+# On Windows (PowerShell)
+.\scripts\insert-test-attendance.ps1
+
+# On macOS/Linux
+chmod +x scripts/insert-test-attendance.sh
+./scripts/insert-test-attendance.sh
+```
+
+This script will:
+- Run the migration to add `team_id` column to attendance_sessions
+- Insert test attendance data (class meetings and team meetings)
+- Create sessions across 5 weeks (Nov 1 - Dec 5, 2024)
+- Generate realistic attendance patterns (45% to 98% attendance rates)
+
 ## Docker Commands Reference
 
 - **Start database:** `docker-compose up -d`
