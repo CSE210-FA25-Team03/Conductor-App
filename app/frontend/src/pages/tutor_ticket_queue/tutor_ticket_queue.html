@@ -77,16 +77,6 @@
 
   <div id="answerModal" class="modal-overlay" aria-hidden="true">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="answerTitle">
-      <style>
-        /* Scoped to modal to avoid layout changes elsewhere */
-        .modal .conversation-thread { display:flex; flex-direction:column; gap:8px; }
-        .modal .bubble { max-width:72%; padding:8px 12px; border-radius:16px; border:1px solid #e5e7eb; background:#f9fafb; }
-        .modal .bubble .bubble-text { white-space: pre-wrap; }
-        .modal .bubble .bubble-meta { font-size:12px; color:#6b7280; margin-top:4px; }
-        /* Alignment: tutor on left, student on right */
-        .modal .bubble.tutor { align-self:flex-start; background:#f5f5f5; border-color:#e5e7eb; }
-        .modal .bubble.student { align-self:flex-end; background:#e0f2fe; border-color:#bae6fd; }
-      </style>
       <header>
         <span id="answerTitle">Answer Ticket</span>
         <button id="answerClose" class="close-btn" aria-label="Close">✖</button>
@@ -264,11 +254,28 @@
           return;
         }
         conversationThread.innerHTML = '';
-        const meId = localStorage.getItem('userId') || window.sessionUserId || null;
+        // Be tolerant of different localStorage/session keys
+        const meId = (
+          localStorage.getItem('userId') ||
+          localStorage.getItem('id') ||
+          window.sessionUserId ||
+          null
+        );
+        const meNameLc = (
+          (localStorage.getItem('fullName') || localStorage.getItem('name') || localStorage.getItem('displayName') || '')
+        ).trim().toLowerCase();
+        const meEmailLc = (
+          (localStorage.getItem('email') || localStorage.getItem('userEmail') || '')
+        ).trim().toLowerCase();
         items.forEach(r => {
-          const mine = (meId && r.author_id && String(r.author_id) === String(meId));
-
           const authorName = (r.author_name || '').trim();
+          const authorNameLc = authorName.toLowerCase();
+          const authorEmailLc = (r.author_email ? String(r.author_email).trim().toLowerCase() : '');
+          const mine = (
+            (meId && r.author_id && String(r.author_id) === String(meId)) ||
+            (meNameLc && authorNameLc && authorNameLc === meNameLc) ||
+            (meEmailLc && (authorEmailLc ? authorEmailLc === meEmailLc : authorNameLc === meEmailLc))
+          );
           const ticketOwnerName = (current && current.createdByName ? String(current.createdByName).trim() : '');
           const ticketOwnerEmail = (current && current.createdByEmail ? String(current.createdByEmail).trim() : '');
           const isStudentAuthor = (

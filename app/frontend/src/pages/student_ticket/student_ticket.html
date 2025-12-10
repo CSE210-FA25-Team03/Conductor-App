@@ -155,7 +155,7 @@
       </div>
       <div class="actions" style="display:flex; justify-content:flex-end; margin-top:22px;">
         <button id="ticketResolveBtn" class="wj-btn" title="Close this ticket" style="padding:8px 12px; font-size:0.95rem;">
-          Close Ticket
+          Mark as Resolve
         </button>
       </div>
     </div>
@@ -357,6 +357,7 @@
           items.forEach((t) => {
             const el = document.createElement('div');
             el.className = 'wj-past-item';
+            el.dataset.ticketId = String(t.id);
             el.textContent = "Title: " + t.title;
             el.addEventListener('click', () => openTicketModal(t));
             ticketsList.appendChild(el);
@@ -396,11 +397,14 @@
           if (!currentTicket) return;
           try {
             await fetchJSON(`${API_BASE}/tickets/${currentTicket.id}`, { method: 'DELETE' });
-            // remove from list
-            const toRemove = Array.from(ticketsList.children).find(c => c.textContent === currentTicket.title);
-            if (toRemove) ticketsList.removeChild(toRemove);
+            // Remove the resolved ticket immediately by id
+            const toRemove = ticketsList.querySelector(`[data-ticket-id="${String(currentTicket.id)}"]`);
+            if (toRemove) toRemove.remove();
+            // If list is empty, show placeholder
+            if (!ticketsList.children.length) {
+              ticketsList.innerHTML = '<p style="font-size:0.9rem;color:#777;">No tickets yet.</p>';
+            }
             closeTicketModal();
-            if (!ticketsList.children.length) ticketsList.innerHTML = '<p style="font-size:0.9rem;color:#777;">No tickets yet.</p>';
           } catch (err) {
             console.error('Failed to close ticket:', err);
             alert('Failed to close ticket. Please try again.');
@@ -414,17 +418,25 @@
           return;
         }
         ticketChatThread.innerHTML = '';
-        const meId = localStorage.getItem('userId') || window.sessionUserId || null;
-        const meName = (localStorage.getItem('fullName') || localStorage.getItem('name') || '').trim().toLowerCase();
-        const meEmail = (localStorage.getItem('email') || '').trim().toLowerCase();
+        // Robust student vs tutor detection: prefer ticket owner (student) name/email
+        const studentNameLc = (
+          (currentTicket && currentTicket.createdByName) ||
+          localStorage.getItem('fullName') ||
+          localStorage.getItem('name') ||
+          ''
+        ).trim().toLowerCase();
+        const studentEmailLc = (
+          (currentTicket && currentTicket.createdByEmail) ||
+          localStorage.getItem('email') ||
+          ''
+        ).trim().toLowerCase();
         items.forEach(r => {
           const authorNameRaw = (r.author_name || '').trim();
           const authorNameLc = authorNameRaw.toLowerCase();
-          const authorEmailLc = (r.userEmail || '').trim().toLowerCase();
+          // Replies API does not return author email; match by display name against ticket owner
           const mine = (
-            (meId && r.author_id && String(r.author_id) === String(meId)) ||
-            (meName && authorNameLc && authorNameLc === meName) ||
-            (meEmail && authorEmailLc && authorEmailLc === meEmail)
+            (studentNameLc && authorNameLc && authorNameLc === studentNameLc) ||
+            false
           );
 
           // Student (mine) on right, Tutor on left
@@ -435,7 +447,7 @@
           bubble.className = `bubble ${alignmentClass}`;
           bubble.innerHTML = `
             <div class=\"bubble-meta\">${displayName.replace(/</g,'&lt;')} • ${new Date(r.createdAt).toLocaleString()}</div>
-            <div class=\"bubble-text\">${(r.message||r.body||'').replace(/</g,'&lt;')}</div>
+            <div class=\"bubble-text\">${(r.body||r.message||'').replace(/</g,'&lt;')}</div>
           `;
           ticketChatThread.appendChild(bubble);
         });

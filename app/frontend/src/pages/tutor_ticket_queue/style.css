@@ -112,6 +112,39 @@ body {
 
 .empty { color: var(--text-muted); }
 
+
+.conversation-thread {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.conversation-thread .bubble {
+    max-width: 72%;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.conversation-thread .bubble.tutor {
+    align-self: flex-start;
+    background: #ffffff;
+}
+.conversation-thread .bubble.student {
+    align-self: flex-end;
+    background: #e6fffa;
+    border-color: #99f6e4;
+}
+.conversation-thread .bubble-meta {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+.conversation-thread .bubble-text {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+
 /* ============================================================
    Modal for Answer
    ============================================================ */
