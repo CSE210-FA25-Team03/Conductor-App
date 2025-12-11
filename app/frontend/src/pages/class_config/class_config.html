@@ -47,13 +47,20 @@
         Student roster (CSV:
         <span class="muted">email,pid,name[,skills]</span>)
       </label>
-      <input type="file" id="classRosterFile" accept=".csv,text/csv" />
-
+      <div class="file-row">
+        <img src="File_Upload.png" alt="Upload CSV File Icon" class="file-icon" />
+        <input type="file" id="classRosterFile" accept=".csv,text/csv" />
+      </div>      
+   
       <label class="file-label">
         Staff roster (CSV:
         <span class="muted">email,pid,name,role</span>)
       </label>
-      <input type="file" id="staffRosterFile" accept=".csv,text/csv" />
+
+      <div class="file-row">
+        <img src="File_Upload.png" alt="Upload CSV File Icon" class="file-icon" />
+        <input type="file" id="staffRosterFile" accept=".csv,text/csv" />
+      </div>   
 
       <div class="row">
         <button class="primary-btn" id="uploadRostersBtn">Upload Rosters</button>
