@@ -61,6 +61,7 @@ body {
   display: block;
   object-fit: contain;
 }
+
 @media (max-width: 500px) {
   .file-icon {
     display: none;
