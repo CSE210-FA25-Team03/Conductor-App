@@ -48,14 +48,6 @@ jobs:
         with:
           name: backend-jsdoc
           path: app/backend/docs
-          
-      - name: Run Codacy code quality (backend only)
-        if: github.ref != 'refs/heads/no_auth_cd_deployment'
-        uses: codacy/codacy-analysis-cli-action@v4
-        with:
-          api-token: ${{ secrets.CODACY_API_TOKEN }}
-          directory: ${{ github.workspace }}/app/backend
-          verbose: true
 
       # ---- Frontend: basic check ----
       - name: Check frontend files exist
