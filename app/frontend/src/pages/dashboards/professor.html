@@ -267,6 +267,15 @@
         </script>
         <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // Helper to detect UUID-like strings
+    function isUuidLike(str) {
+      if (!str || typeof str !== 'string') return false;
+      // Match UUID pattern or long strings of digits with dashes
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str) || 
+             /^\d{6,}/.test(str) ||
+             (str.includes('-') && str.replace(/-/g, '').length > 20);
+    }
+
     function getCurrentCourseLabel() {
       let courseLabel = 'CSE 210';
       try {
@@ -278,9 +287,10 @@
         }
         const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
         if (stored) {
-          if (stored.courseCode) return stored.courseCode;
-          if (stored.courseName) return stored.courseName;
-          if (stored.classId) return stored.classId;
+          // Prefer courseName over courseCode
+          if (stored.courseName && !isUuidLike(stored.courseName)) return stored.courseName;
+          if (stored.courseCode && !isUuidLike(stored.courseCode)) return stored.courseCode;
+          // Skip classId as it's usually a UUID
         }
       } catch (e) {
         console.warn('[professor] Could not read current course:', e);
