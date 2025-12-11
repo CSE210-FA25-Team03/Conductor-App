@@ -503,6 +503,23 @@ body {
   margin-bottom: 16px;
 }
 
+.new-eval-header img{
+  width: 5rem;   
+  height: auto;    
+  display: block;
+}
+
+.animation_title{
+  display: flex;
+}
+
+@media (max-width: 500px) {
+  .new-eval-header img{
+    display: none;
+}
+}
+
+
 .add-plus-btn {
   width: 36px;
   height: 36px;

@@ -226,6 +226,15 @@ input {
   border-collapse: collapse;
   margin-top: 1rem;
 }
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;  
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; 
+}
+
+
+
 
 
 .data-table th {
