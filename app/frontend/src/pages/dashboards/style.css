@@ -1320,6 +1320,8 @@ body {
   .faq-answer {
     font-size: 0.8rem;
   }
+}
+
 .team-card {
   justify-content: flex-start !important;
 }
@@ -1339,5 +1341,4 @@ body {
 
 .team-card .info-btn:hover {
   background: #1742b0 !important;
-}
 }
