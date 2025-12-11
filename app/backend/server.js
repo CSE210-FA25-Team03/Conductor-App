@@ -3688,18 +3688,6 @@ app.get(
     }
   });
 
-  if (process.env.NODE_ENV === 'test') {
-    app.post('/test/fake-login', (req, res) => {
-      req.session.user = {
-        id: 'test-user-id',
-        email: 'student@school.edu',
-        name: 'Test Student',
-        role: 'student',
-        courseId: '22222222-2222-2222-2222-222222222222',
-      };
-      return res.status(204).end();
-    });
-  }
 
   // ------------------------------------------------------------
   // Root route
