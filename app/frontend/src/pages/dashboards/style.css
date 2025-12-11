@@ -1020,6 +1020,13 @@ body {
     transform: translateX(0);
 }
 
+.close-attendance-plot{
+  border-color: black;
+  background-color: rgb(16, 93, 181);
+  color:white;
+  border-radius: 5px;
+  padding: 5px;
+}
 /* Header */
 
 .attendance-drawer header {
