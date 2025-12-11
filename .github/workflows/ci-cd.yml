@@ -37,6 +37,8 @@ jobs:
 
       - name: Run backend tests (Jest)
         working-directory: app/backend
+        env:
+          NODE_ENV: test
         run: npm test
 
       - name: Generate backend docs (JSDoc)
