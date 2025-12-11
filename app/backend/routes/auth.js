@@ -1,8 +1,9 @@
 // app/backend/routes/auth.js
 const express = require("express");
-const db = require("../db");
+const classDirectoryDb = require("../db/classDirectory");  // ⬅️ add this line
 const router = express.Router();
 const { Issuer, generators } = require("openid-client");
+
 
 const {
   GOOGLE_CLIENT_ID,
@@ -18,45 +19,60 @@ const DEFAULT_COURSE_ID =
 // ------------------------------------------------------------
 // Helper: find role for a user email from the database
 // ------------------------------------------------------------
-async function findRoleForEmail(email) {
-  // 1) check user exists
-  const userRes = await db.query(
-    `SELECT id FROM users WHERE email = $1`,
-    [email]
-  );
-  if (userRes.rowCount === 0) {
-    return { enrolled: false, role: null };
+// ------------------------------------------------------------
+// Helper: find role + core identity for a user email
+// ------------------------------------------------------------
+async function findRoleForEmail(email, options = {}) {
+  // Reuse the same logic as the email-based login flow, so we stay in sync
+  // with the current schema (courses.title, role_assignments, etc).
+  const ctx = await classDirectoryDb.getUserCourseContextByEmail(email, options);
+
+  // ctx shape (from db/classDirectory.js):
+  // {
+  //   user: { id, email, displayName } | null,
+  //   courseId,
+  //   courseCode,
+  //   courseName,
+  //   roles: [...],
+  //   inCourse: boolean,
+  //   isTeamLead: boolean,
+  //   teamLeadTeams: [...],
+  //   primaryRole: string | null,
+  // }
+
+  if (!ctx || !ctx.user) {
+    return { enrolled: false, role: null, user: null, course: null };
   }
 
-  const userId = userRes.rows[0].id;
-
-  // 2) check enrollment in the default course
-  const courseRes = await db.query(
-    `SELECT id FROM course_memberships 
-     WHERE user_id = $1 AND course_id = $2`,
-    [userId, DEFAULT_COURSE_ID]       
-  );
-  if (courseRes.rowCount === 0) {
-    return { enrolled: false, role: null };
+  // Match /api/auth/resolve-login behavior:
+  // user must be in the course unless they are an admin.
+  if (!ctx.inCourse && ctx.primaryRole !== "admin") {
+    return { enrolled: false, role: null, user: ctx.user, course: null };
   }
 
-  // 3) check role assignments
-  const roleRes = await db.query(
-    `SELECT r.key AS role
-     FROM role_assignments ra
-     JOIN roles r ON r.id = ra.role_id
-     WHERE ra.user_id = $1 
-       AND ra.scope_type = 'course'
-       AND ra.scope_id = $2`,
-    [userId, DEFAULT_COURSE_ID]        
-  );
+  const role =
+    ctx.primaryRole ||
+    (Array.isArray(ctx.roles) && ctx.roles.length ? ctx.roles[0] : null);
 
-  if (roleRes.rowCount === 0) {
-    // enrolled in course, but no course-scoped role
-    return { enrolled: true, role: null };
-  }
-
-  return { enrolled: true, role: roleRes.rows[0].role };  // e.g. 'admin', 'professor'
+  return {
+    enrolled: true,
+    role,
+    user: {
+      id: ctx.user.id,
+      email: ctx.user.email,
+      // Google callback currently expects "display_name" when building safeUser.name,
+      // so we expose it here as well as displayName.
+      display_name: ctx.user.displayName || ctx.user.email,
+      displayName: ctx.user.displayName || ctx.user.email,
+    },
+    course: ctx.courseId
+      ? {
+          id: ctx.courseId,
+          code: ctx.courseCode || null,
+          name: ctx.courseName || null,
+        }
+      : null,
+  };
 }
 
 // Cache the Google OIDC client (discover once)
@@ -80,36 +96,41 @@ async function getGoogleClient() {
 
 router.get("/google/start", async (req, res) => {
   try {
-    const client = await getGoogleClient();
+    const classCode = (req.query.classCode || "").trim();
 
     const state = generators.state();
     const codeVerifier = generators.codeVerifier();
     const codeChallenge = generators.codeChallenge(codeVerifier);
 
+    // Save OAuth-related values in session
     req.session.oauthState = state;
     req.session.codeVerifier = codeVerifier;
 
-    console.log("START /auth/google/start session:", req.session);
 
-    const url = client.authorizationUrl({
+    if (classCode) {
+      req.session.pendingClassCode = classCode;
+    } else {
+      req.session.pendingClassCode = null;
+    }
+
+
+    const client = await getGoogleClient();
+
+    const authUrl = client.authorizationUrl({
       scope: "openid email profile",
       state,
       code_challenge: codeChallenge,
       code_challenge_method: "S256",
-      prompt: "select_account"
+      prompt: "select_account",
     });
 
-    if (!url.startsWith("https://accounts.google.com/")) {
-      console.error("Unexpected Google auth URL:", url);
-      return res.status(500).send("Auth start error");
-    }
-
-    res.redirect(url);
+    return res.redirect(authUrl);
   } catch (e) {
     console.error("Auth start error:", e);
     res.status(500).send("Auth start error");
   }
 });
+
 
 // --- OAuth callback ---
 router.get("/google/callback", async (req, res) => {
@@ -134,34 +155,41 @@ router.get("/google/callback", async (req, res) => {
     const claims = tokenSet.claims();
 
     // Look up enrollment + role in DB
-    const { enrolled, role } = await findRoleForEmail(claims.email);
+const classCode = (req.session.pendingClassCode || "").trim();
 
-    // Not enrolled in this course → refuse login
-    if (!enrolled) {
-      console.warn("Login blocked: email not enrolled in course", claims.email);
-      req.session = null;
-      return res.redirect("/login/?error=not_enrolled");
-    }
+const { enrolled, role, user, course } = await findRoleForEmail(
+  claims.email,
+  classCode ? { classCode } : {}
+);
 
-    // Enrolled but no role mapping → separate error
-    if (!role) {
-      console.warn("Login blocked: enrolled but no role", claims.email);
-      req.session = null;
-      return res.redirect("/login/?error=no_role");
-    }
+// Not enrolled in this course →
+if (!enrolled) {
+  console.warn("Login blocked: email not enrolled in course", claims.email);
+  req.session = null;
+  return res.redirect("/login/?error=not_enrolled");
+}
 
-    // Only keep what we actually need in the session
-    const safeUser = {
-      sub: claims.sub,
-      email: claims.email,
-      emailVerified: Boolean(claims.email_verified),
-      name: claims.name || "",
-      picture: typeof claims.picture === "string" ? claims.picture : null,
-      role,  // e.g. 'admin', 'professor', 'student', 'ta', 'team_lead'
-    };
+// Enrolled but no role mapping →
+if (!role) {
+  console.warn("Login blocked: enrolled but no role", claims.email);
+  req.session = null;
+  return res.redirect("/login/?error=no_role");
+}
 
-    // Store on session for later use
-    req.session.user = safeUser;
+// Build canonical session user
+const safeUser = {
+  id: user.id,
+  email: user.email,
+  name: user.display_name || claims.name || "",
+  role, // 'admin', 'professor', 'student', ...
+  courseId: course?.id || DEFAULT_COURSE_ID,
+  courseCode: course?.code || classCode || null,
+  courseName: course?.name || null,
+  emailVerified: Boolean(claims.email_verified),
+  picture: typeof claims.picture === "string" ? claims.picture : null,
+};
+
+req.session.user = safeUser;
 
     // Redirect back to frontend (e.g. dashboard or home)
     if (role === "admin") {
@@ -174,6 +202,8 @@ router.get("/google/callback", async (req, res) => {
       return res.redirect("/dashboards/ta.html");
     } else if (role === "team_lead") {
       return res.redirect("/dashboards/team_lead.html");
+    } else if (role === "tutor") {
+      return res.redirect("/dashboards/tutor.html");
     } else {
       // should rarely happen if DB roles are consistent
       console.warn("Login blocked: unknown role", role, "for", claims.email);
@@ -209,4 +239,8 @@ router.get("/me", (req, res) => {
   });
 });
 
-module.exports = router;
+module.exports = {
+  router,
+  findRoleForEmail,
+};
+

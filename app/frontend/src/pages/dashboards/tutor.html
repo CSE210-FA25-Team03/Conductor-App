@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+<head>
+    <link rel="stylesheet" href="../../../assets/css/global.css">
+    <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
+    <script defer src="/assets/js/class-directory-nav.js"></script>
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/assets/css/i18n.css" />
+    <title>Tutor Dashboard | Conductor</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+    <!-- <div class="page" data-role="team-lead"> -->
+    <header class="top-nav">
+        <div class="brand">
+            <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+            <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+
+        </div>
+        <div class="nav-actions">
+
+            <div class="profile">
+                <div class="profile-dropdown-container" style="position:relative;">
+                    <img id="dashboard-profile-img" src="/assets/logo/user.png" 
+                            alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                    <div class="profile-dropdown" id="profileDropdown"
+                            style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                        <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
+                        <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="page" data-role="tutor">
+        <section class="dashboard-header">
+            <div>
+                <h1>Tutor Dashboard</h1>
+                <small>Tutor view · </small>
+            </div>
+        </section>
+
+        <section class="content-grid">
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="directory_icon.png" alt="Directory Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Class Directory</h2>
+                    <p>Browse your course overview, roster, and assignments</p>
+                    <button id="viewClassDirectoryBtn" class="card-btn">Go to Class Hub</button>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="help_ticket.png" alt="Team Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Ticket Queue</h2>
+                    <p>Report issues, request assistance, or submit feedback to course staff.</p>
+                    <button class="card-btn" id="viewTicketsBtn">View Tickets</button>
+                </div>
+            </article>
+
+            <!-- RIGHT COLUMN: FAQ Section (dynamic, backed by DB) -->
+            <aside class="tutor-right-column">
+                <section class="faq-section">
+                    <h3>Frequently Asked Questions</h3>
+                    <div class="faq-controls" style="margin:8px 0 12px;">
+                        <button id="addFaqBtn" class="card-btn">Click to add Q&A</button>
+                    </div>
+                    <div id="faqList" class="faq-container"></div>
+                </section>
+            </aside>
+
+        </section>
+    </div>
+
+
+    <!-- ============================================================
+         NAV, PROFILE, & ATTENDANCE LOGIC JS
+         ============================================================ -->
+
+    <script type="module" src="script.js"></script>
+    <script src="student_weekly_eval.js"></script>
+    <script src="../../shared/auth.js"></script>
+    <script>
+        // Navigation buttons (consistent with TA/professor)
+        const nav = {
+            viewTasksBtn: '/task_tracker/task_tracker.html',
+            viewClassDirectoryBtn: '/class_directory_student/class_directory_student.html',
+            viewTicketsBtn: '/tutor_ticket_queue/tutor_ticket_queue.html',
+        };
+
+        Object.entries(nav).forEach(([id, link]) => {
+            const btn = document.getElementById(id);
+            if (btn) btn.onclick = () => (window.location.href = link);
+        });
+    </script>
+
+    <script>
+        // PROFILE DROPDOWN
+        const profileImg = document.getElementById('dashboard-profile-img');
+        const dropdown = document.getElementById('profileDropdown');
+        const logoutBtn = document.getElementById('logoutBtn');
+        profileImg.addEventListener('mouseenter', () => dropdown.style.display = 'block');
+        profileImg.addEventListener('mouseleave', () =>
+            setTimeout(() => { if (!dropdown.matches(':hover')) dropdown.style.display = 'none'; }, 150)
+        );
+        dropdown.addEventListener('mouseenter', () => dropdown.style.display = 'block');
+        dropdown.addEventListener('mouseleave', () => dropdown.style.display = 'none');
+
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // stop outer <a> from hijacking click
+            ConductorAuth.logout();
+          });
+        }
+        
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedImg = localStorage.getItem('profileImg');
+            if (savedImg) {
+                const img1 = document.getElementById('dashboard-profile-img');
+                if (img1) img1.src = savedImg;
+            }
+        });
+    </script>
+
+        <script>
+            // Backend-integrated attendance (mirrors student dashboard logic)
+            document.addEventListener('DOMContentLoaded', () => {
+                const API_BASE = '/api';
+
+                const drawer = document.getElementById('attendancePanel');
+                const openBtn = document.getElementById('openAttendanceDrawer');
+                const closeBtn = document.querySelector('.close-attendance');
+                const input = document.getElementById('attendanceInput');
+                const submitBtn = document.getElementById('attendanceSubmitBtn');
+                const messageEl = document.getElementById('attendanceMessage');
+                const recordBody = document.getElementById('attendanceRecordBody');
+                const overallEl = document.getElementById('attendanceOverall');
+
+                function fetchJSON(url, options = {}) {
+                    return fetch(url, {
+                        headers: { 'Content-Type': 'application/json' },
+                        ...options,
+                    }).then(async (res) => {
+                        if (!res.ok) {
+                            const text = await res.text().catch(() => '');
+                            throw new Error(`HTTP ${res.status}: ${text || res.statusText}`);
+                        }
+                        return res.json();
+                    });
+                }
+
+                function getCurrentUserEmail() {
+                    try {
+                        const stored = JSON.parse(localStorage.getItem('currentUser'));
+                        if (stored && stored.email) return String(stored.email).toLowerCase();
+                    } catch {}
+                    return (localStorage.getItem('email') || 'teamlead@school.edu').toLowerCase();
+                }
+
+                const email = getCurrentUserEmail();
+
+                function loadAttendanceHistory() {
+                    fetchJSON(`${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`)
+                        .then((data) => {
+                            const sessions = Array.isArray(data.sessions) ? data.sessions : [];
+                            const presentCount = data.presentCount || 0;
+                            const total = data.totalSessions || sessions.length;
+                            const pct = total ? Math.round((presentCount / total) * 100) : 0;
+
+                            if (!sessions.length) {
+                                recordBody.innerHTML = '<tr><td colspan="2">No attendance sessions created yet.</td></tr>';
+                                overallEl.textContent = '';
+                                return;
+                            }
+
+                            const rowsHtml = sessions
+                                .slice()
+                                .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+                                .map((s) => {
+                                    const when = new Date(s.createdAt).toLocaleString();
+                                    const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
+                                    return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
+                                })
+                                .join('');
+
+                            recordBody.innerHTML = rowsHtml;
+                            overallEl.textContent = `Present ${presentCount} out of ${total} sessions (${pct}%)`;
+                        })
+                        .catch((err) => {
+                            console.error('[team_lead] Attendance history error:', err);
+                            recordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
+                            overallEl.textContent = '';
+                        });
+                }
+
+                function openDrawer() {
+                    drawer.setAttribute('aria-hidden', 'false');
+                    input.value = '';
+                    messageEl.textContent = '';
+                    messageEl.style.color = '#333';
+                    loadAttendanceHistory();
+                }
+                function closeDrawer() {
+                    drawer.setAttribute('aria-hidden', 'true');
+                }
+                openBtn.addEventListener('click', openDrawer);
+                closeBtn.addEventListener('click', closeDrawer);
+                drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
+
+                async function handleSubmit() {
+                    const code = (input.value || '').trim().toUpperCase();
+                    if (!code) {
+                        messageEl.textContent = 'Please enter a code.';
+                        messageEl.style.color = '#b00020';
+                        return;
+                    }
+                    try {
+                        const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
+                            method: 'POST',
+                            body: JSON.stringify({ code, email }),
+                        });
+                        if (result && result.success) {
+                            messageEl.textContent = '✔ You are marked present for this session.';
+                            messageEl.style.color = '#0a7a30';
+                            loadAttendanceHistory();
+                        } else {
+                            messageEl.textContent = (result && result.message) || 'Invalid or expired code.';
+                            messageEl.style.color = '#b00020';
+                        }
+                    } catch (err) {
+                        console.error('[team_lead] Failed to mark attendance:', err);
+                        messageEl.textContent = 'Could not submit attendance. Please retry.';
+                        messageEl.style.color = '#b00020';
+                    }
+                }
+
+                submitBtn.addEventListener('click', handleSubmit);
+                input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } });
+            });
+        </script>
+        <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    function getCurrentCourseLabel() {
+      let courseLabel = 'CSE 210';
+      try {
+        if (window.ConductorAuth && typeof ConductorAuth.getCurrentUser === 'function') {
+          const user = ConductorAuth.getCurrentUser();
+          if (user && (user.courseCode || user.courseName)) {
+            return user.courseCode || user.courseName;
+          }
+        }
+        const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (stored) {
+          if (stored.courseCode) return stored.courseCode;
+          if (stored.courseName) return stored.courseName;
+          if (stored.classId) return stored.classId;
+        }
+      } catch (e) {
+        console.warn('[team_lead] Could not read current course:', e);
+      }
+      return courseLabel;
+    }
+
+        const lbl = document.getElementById('tutorCourseLabel')
+            || document.querySelector('.dashboard-header small');
+
+        if (lbl) {
+            const baseText = 'Tutor view';
+            const courseLabel = getCurrentCourseLabel();
+            lbl.textContent = `${baseText} · ${courseLabel}`;
+        }
+  });
+</script>
+
+        <!-- FAQ Modal -->
+        <div id="faqModalOverlay" class="faq-modal-overlay" aria-hidden="true">
+            <div class="faq-modal" role="dialog" aria-modal="true" aria-labelledby="faqModalTitle">
+                <header id="faqModalTitle">Add Q&A</header>
+                <div class="body">
+                    <div class="field">
+                        <label for="faqQuestion">Question</label>
+                        <textarea id="faqQuestion" placeholder="Enter the question..."></textarea>
+                    </div>
+                    <div class="field">
+                        <label for="faqAnswer">Answer</label>
+                        <textarea id="faqAnswer" placeholder="Enter the answer..."></textarea>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button id="faqDeleteBtn" class="btn danger" style="display:none;">Delete</button>
+                    <button id="faqCancelBtn" class="btn ghost">Cancel</button>
+                    <button id="faqSaveBtn" class="btn primary">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Simple JSON helper
+            function fetchJSON(url, options = {}) {
+                return fetch(url, { headers: { 'Content-Type': 'application/json' }, ...options })
+                    .then(async (res) => {
+                        if (!res.ok) {
+                            const t = await res.text().catch(() => '');
+                            throw new Error(`HTTP ${res.status}: ${t || res.statusText}`);
+                        }
+                        // DELETE returns 204
+                        if (res.status === 204) return null;
+                        return res.json();
+                    });
+            }
+
+            (function initFaqUI(){
+                const listEl = document.getElementById('faqList');
+                const addBtn = document.getElementById('addFaqBtn');
+                const overlay = document.getElementById('faqModalOverlay');
+                const titleEl = document.getElementById('faqModalTitle');
+                const qEl = document.getElementById('faqQuestion');
+                const aEl = document.getElementById('faqAnswer');
+                const saveBtn = document.getElementById('faqSaveBtn');
+                const delBtn = document.getElementById('faqDeleteBtn');
+                const cancelBtn = document.getElementById('faqCancelBtn');
+
+                let items = [];
+                let editingId = null;
+
+                function openModal(mode, data){
+                    titleEl.textContent = mode === 'edit' ? 'Edit Q&A' : 'Add Q&A';
+                    qEl.value = (data && data.question) || '';
+                    aEl.value = (data && data.answer) || '';
+                    editingId = mode === 'edit' && data ? data.id : null;
+                    delBtn.style.display = editingId ? 'inline-block' : 'none';
+                    overlay.style.display = 'flex';
+                    overlay.setAttribute('aria-hidden','false');
+                    setTimeout(()=>{ qEl.focus(); }, 0);
+                }
+                function closeModal(){
+                    overlay.style.display = 'none';
+                    overlay.setAttribute('aria-hidden','true');
+                    qEl.value = '';
+                    aEl.value = '';
+                    editingId = null;
+                }
+                overlay.addEventListener('click', (e)=>{ if (e.target === overlay) closeModal(); });
+                cancelBtn.addEventListener('click', (e)=>{ e.preventDefault(); closeModal(); });
+
+                function render(){
+                    if (!items.length) {
+                        listEl.innerHTML = '<div style="color:#666; font-size:14px;">No FAQs yet. Click "Click to add Q&A" to create one.</div>';
+                        return;
+                    }
+                    listEl.innerHTML = items.map((it) => {
+                        const qSafe = it.question.replace(/</g,'&lt;');
+                        const aSafe = (it.answer || '').replace(/</g,'&lt;');
+                        return `
+                          <div class="faq-list-item" data-id="${it.id}">
+                            <button class="faq-toggle" aria-expanded="false" style="all:unset; cursor:pointer; flex:1;">
+                              <span class="q">${qSafe}</span>
+                            </button>
+                            <div class="edit" data-action="edit" title="Edit">Edit</div>
+                          </div>
+                          <div class="faq-answer" data-id="${it.id}" style="display:none; border:1px solid #eee; border-radius:8px; padding:10px 12px; margin:-8px 0 10px 0; background:#fafafa; color:#333;">${aSafe}</div>
+                        `;
+                    }).join('');
+
+                    // Hook up edit handlers
+                    listEl.querySelectorAll('.faq-list-item .edit').forEach((el) => {
+                        el.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            const root = el.closest('.faq-list-item');
+                            const id = root && root.getAttribute('data-id');
+                            const found = items.find((x) => x.id === id);
+                            if (found) openModal('edit', found);
+                        });
+                    });
+
+                    // Hook up toggle handlers
+                    listEl.querySelectorAll('.faq-list-item .faq-toggle').forEach((btn) => {
+                        btn.addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            const parent = btn.closest('.faq-list-item');
+                            const id = parent && parent.getAttribute('data-id');
+                            const ans = listEl.querySelector(`.faq-answer[data-id="${id}"]`);
+                            const expanded = btn.getAttribute('aria-expanded') === 'true';
+                            btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+                            if (ans) ans.style.display = expanded ? 'none' : 'block';
+                        });
+                    });
+                }
+
+                async function load(){
+                    try {
+                        const data = await fetchJSON('/api/faq');
+                        items = (data && Array.isArray(data.items)) ? data.items : [];
+                        render();
+                    } catch(err){
+                        console.error('Failed to load FAQ:', err);
+                        listEl.innerHTML = '<div style="color:#b00020;">Failed to load FAQ.</div>';
+                    }
+                }
+
+                async function handleSave(){
+                    const question = (qEl.value || '').trim();
+                    const answer = (aEl.value || '').trim();
+                    if (!question || !answer) return alert('Please fill in both question and answer.');
+
+                    try {
+                        if (!editingId) {
+                            const created = await fetchJSON('/api/faq', {
+                                method: 'POST',
+                                body: JSON.stringify({ question, answer })
+                            });
+                            items.push(created);
+                        } else {
+                            const updated = await fetchJSON(`/api/faq/${editingId}`, {
+                                method: 'PUT',
+                                body: JSON.stringify({ question, answer })
+                            });
+                            const idx = items.findIndex((x) => x.id === editingId);
+                            if (idx >= 0) items[idx] = updated;
+                        }
+                        render();
+                        closeModal();
+                    } catch(err){
+                        console.error('Failed to save FAQ:', err);
+                        alert('Failed to save FAQ.');
+                    }
+                }
+
+                async function handleDelete(){
+                    if (!editingId) return closeModal();
+                    if (!confirm('Delete this FAQ?')) return;
+                    try {
+                        await fetchJSON(`/api/faq/${editingId}`, { method: 'DELETE' });
+                        items = items.filter((x) => x.id !== editingId);
+                        render();
+                        closeModal();
+                    } catch(err){
+                        console.error('Failed to delete FAQ:', err);
+                        alert('Failed to delete FAQ.');
+                    }
+                }
+
+                addBtn.addEventListener('click', () => openModal('add'));
+                saveBtn.addEventListener('click', (e) => { e.preventDefault(); handleSave(); });
+                delBtn.addEventListener('click', (e) => { e.preventDefault(); handleDelete(); });
+
+                // initial load
+                window.addEventListener('DOMContentLoaded', load);
+            })();
+        </script>
+
+</body>
+</html>

@@ -8,48 +8,58 @@
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/assets/css/i18n.css" />
+    <link rel="stylesheet" href="/assets/css/i18n.css" />
     <title>Team Task Tracker | Conductor</title>
     <link rel="stylesheet" href="/dashboards/style.css" />
     <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-    <div class="page">
-        
-        <!-- Header -->
-        <header class="top-nav">
-            <!-- <div class="brand">Conductor <span>App</span></div> -->
-        
+    <header class="top-nav">
+        <div class="brand">
+            <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+            <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+        </div>
 
-            <div class="nav-actions">
-                <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
-                <div class="profile">
-                    <div class="profile-dropdown-container" style="position:relative;">
-                        
-                        <img id="dashboardProfileImg"
-                             src="/assets/logo/user.png"
-                             style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+        <div class="nav-actions" style="display:flex;align-items:center;gap:1.2rem;">
+            <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
 
-                        <div class="profile-dropdown" id="profileDropdown"
-                            style="display:none; position:absolute; top:40px; right:0;
-                                   background:#fff; border:1px solid #ddd; border-radius:8px;
-                                   box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
-                            
-                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; text-decoration:none;">Profile</a>
-                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
-                        </div>
+            <div class="profile">
+                <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
+                <div class="profile-dropdown-container" style="position:relative;">
+                    <img id="dashboardProfileImg" src="/assets/logo/user.png"
+                        style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                    <div id="profileDropdown" class="profile-dropdown" style="
+                    display:none;
+                    position:absolute;
+                    top:48px;
+                    right:0;
+                    background:#fff;
+                    border:1px solid #ddd;
+                    border-radius:8px;
+                    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                    min-width:140px;
+                ">
+                        <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
+                        <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
                     </div>
                 </div>
+                <!-- </a> -->
             </div>
-        </header>
+        </div>
+    </header>
 
+    <div class="page">
 
         <div style="display:flex; gap:12px; align-items:center;">
-            <button id="githubConfigBtn" class="github-btn" style="padding:8px 16px; background:#24292e; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">GitHub Config</button>
-            <button id="githubSyncBtn" class="github-btn" style="padding:8px 16px; background:#28a745; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">Sync GitHub</button>
-            <!-- NEW -->
-            <button id="githubPushBtn" class="github-btn" style="padding:8px 16px; background:#0366d6; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">🔄 Update</button>
+            <button id="githubConfigBtn" class="github-btn"
+                style="padding:8px 16px; background:#24292e; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">GitHub
+                Config</button>
+            <button id="githubSyncBtn" class="github-btn"
+                style="padding:8px 16px; background:#28a745; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">Sync
+                GitHub</button>
+            <button id="githubPushBtn" class="github-btn"
+                style="padding:8px 16px; background:#0366d6; color:white; border:none; border-radius:6px; cursor:pointer; font-size:0.9rem;">Update</button>
         </div>
 
 
@@ -69,7 +79,7 @@
                 <div class="story-list">
                     <div class="story-item active">Sprint Board Feature</div> <!---dummy--->
                     <div class="story-item">Implement form validation</div>
-        
+
 
                     <button class="story-add-btn">+ New Story Point</button>
                 </div>
@@ -103,59 +113,84 @@
     </div>
 
     <!-- GitHub Config Modal -->
-    <div id="githubConfigModal" class="modal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
-        <div class="modal-content" style="background:white; margin:5% auto; padding:24px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+    <div id="githubConfigModal" class="modal"
+        style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5);">
+        <div class="modal-content"
+            style="background:white; margin:5% auto; padding:24px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2 style="margin:0;">GitHub Repository Configuration</h2>
                 <span class="modal-close" style="cursor:pointer; font-size:24px; color:#999;">&times;</span>
             </div>
-            
+
             <div style="margin-bottom:16px;">
                 <label style="display:block; margin-bottom:6px; font-weight:600;">Personal Access Token:</label>
-                <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-                <small style="color:#666; font-size:12px;">Required for Projects API. Create one at: github.com/settings/tokens (needs 'repo' and 'read:project' scopes)</small>
+                <input type="password" id="githubToken" placeholder="ghp_xxxxxxxxxxxx"
+                    style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                <small style="color:#666; font-size:12px;">
+                    Required for Projects API. Create one at: github.com/settings/tokens (needs 'repo' and
+                    'read:project' scopes)
+                </small>
             </div>
 
-            <div style="margin-bottom:20px; padding:12px; background:#f5f5f5; border-radius:6px;">
-                <strong style="display:block; margin-bottom:8px;">Option 1: GitHub Organization Project (Recommended)</strong>
-                <div style="margin-bottom:12px;">
-                    <label style="display:block; margin-bottom:6px; font-weight:600;">Organization Name:</label>
-                    <input type="text" id="githubOrgName" placeholder="e.g., CSE210-FA25-Team03" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+            <div class="accordion">
+                <!-- Option 1 -->
+                <div class="accordion-item active">
+                    <button class="accordion-header">Option 1: GitHub Organization Project (Recommended)</button>
+                    <div class="accordion-body">
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:600;">Organization Name:</label>
+                            <input type="text" id="githubOrgName" placeholder="e.g., CSE210-FA25-Team03"
+                                style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                        </div>
+                        <div style="margin-bottom:8px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:600;">Project Number:</label>
+                            <input type="number" id="githubProjectNumber" placeholder="e.g., 1"
+                                style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                            <small style="color:#666; font-size:12px;">Found in project URL:
+                                github.com/orgs/ORG_NAME/projects/NUMBER</small>
+                        </div>
+                    </div>
                 </div>
-                <div style="margin-bottom:8px;">
-                    <label style="display:block; margin-bottom:6px; font-weight:600;">Project Number:</label>
-                    <input type="number" id="githubProjectNumber" placeholder="e.g., 1" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-                    <small style="color:#666; font-size:12px;">Found in project URL: github.com/orgs/ORG_NAME/projects/NUMBER</small>
+
+                <!-- Option 2 -->
+                <div class="accordion-item">
+                    <button class="accordion-header">Option 2: Direct Project ID</button>
+                    <div class="accordion-body">
+                        <label style="display:block; margin-bottom:6px; font-weight:600;">GitHub Project ID:</label>
+                        <input type="text" id="githubProjectId" placeholder="PVT_kwHOA..."
+                            style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                        <small style="color:#666; font-size:12px;">Direct Project ID (alternative to org/project
+                            number)</small>
+                    </div>
+                </div>
+
+                <!-- Option 3 -->
+                <div class="accordion-item">
+                    <button class="accordion-header">Option 3: Repository Issues (Fallback)</button>
+                    <div class="accordion-body">
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Owner:</label>
+                            <input type="text" id="githubOwner" placeholder="e.g., octocat"
+                                style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                        </div>
+                        <div style="margin-bottom:8px;">
+                            <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Name:</label>
+                            <input type="text" id="githubRepo" placeholder="e.g., Hello-World"
+                                style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div style="margin-bottom:20px; padding:12px; background:#f5f5f5; border-radius:6px;">
-                <strong style="display:block; margin-bottom:8px;">Option 2: Direct Project ID</strong>
-                <div style="margin-bottom:8px;">
-                    <label style="display:block; margin-bottom:6px; font-weight:600;">GitHub Project ID:</label>
-                    <input type="text" id="githubProjectId" placeholder="PVT_kwHOA..." style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-                    <small style="color:#666; font-size:12px;">Direct Project ID (alternative to org/project number)</small>
-                </div>
-            </div>
+            <div id="githubConfigStatus" class="status-message"
+                style="display:none; padding:12px; border-radius:6px; margin:16px 0;"></div>
 
-            <div style="margin-bottom:20px; padding:12px; background:#f5f5f5; border-radius:6px;">
-                <strong style="display:block; margin-bottom:8px;">Option 3: Repository Issues (Fallback)</strong>
-                <div style="margin-bottom:12px;">
-                    <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Owner:</label>
-                    <input type="text" id="githubOwner" placeholder="e.g., octocat" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-                </div>
-                <div style="margin-bottom:8px;">
-                    <label style="display:block; margin-bottom:6px; font-weight:600;">Repository Name:</label>
-                    <input type="text" id="githubRepo" placeholder="e.g., Hello-World" style="width:100%; padding:8px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
-                </div>
-            </div>
-            
-            <div id="githubConfigStatus" class="status-message" style="display:none; padding:12px; border-radius:6px; margin-bottom:16px;"></div>
-            
-            <div style="display:flex; gap:12px; justify-content:flex-end;">
-                <button id="cancelGitHubConfig" style="padding:10px 20px; background:#f0f0f0; border:none; border-radius:6px; cursor:pointer;">Cancel</button>
-                <button id="testGitHubConnection" style="padding:10px 20px; background:#0366d6; color:white; border:none; border-radius:6px; cursor:pointer;">Test Connection</button>
-                <button id="saveGitHubConfig" style="padding:10px 20px; background:#28a745; color:white; border:none; border-radius:6px; cursor:pointer;">Save</button>
+            <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:10px;">
+                <button id="cancel-github-config" class="github-btn">Cancel</button>
+                <button id="test-github-connection" class="github-btn">Test
+                    Connection</button>
+                <button id="save-github-config" class="github-btn">Save</button>
             </div>
         </div>
     </div>
@@ -183,7 +218,7 @@
             dropdown.style.display = 'none';
         });
 
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
+        document.getElementById('logoutBtn').addEventListener('click', function (e) {
             e.preventDefault();
             localStorage.clear();
             window.location.href = '/login';
@@ -194,4 +229,5 @@
     <script src="script.js"></script>
 
 </body>
+
 </html>

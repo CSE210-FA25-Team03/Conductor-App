@@ -100,17 +100,19 @@
         These are all students in the course. Each has a default skill rating of 2 unless they update it.
       </p>
 
-      <table class="data-table" id="studentsTable">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Ratings</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+      <div class="table-wrapper">
+        <table class="data-table" id="studentsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Ratings</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- TA OVERVIEW -->
@@ -248,7 +250,7 @@
         var role = localStorage.getItem('role');
         if (role === 'professor') {
           window.location.href = '/dashboards/professor.html';
-        } else if (role === 'Teaching Assistant') {
+        } else if (role === 'ta') {
           window.location.href = '/dashboards/ta.html';
         } else if (role === 'team_lead') {
           window.location.href = '/dashboards/team_lead.html';

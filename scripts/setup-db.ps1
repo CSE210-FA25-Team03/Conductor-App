@@ -89,28 +89,119 @@ try {
     $schema2Path = Join-Path $projectRoot "app\db\schema2.sql"
     
     # Prefer schema2.sql if it exists (includes seed data), otherwise fall back to schema.sql
+    $schemaLoaded = $false
     if (Test-Path $schema2Path) {
         Write-Host "Loading schema with seed data (schema2.sql)..." -ForegroundColor Yellow
-        Get-Content $schema2Path | docker exec -i conductor-postgres psql -U postgres
+        # Schema file creates database, so connect to postgres first (it will \connect to conductor)
+        # Use -v ON_ERROR_STOP=1 to stop on first error and capture it
+        $schemaOutput = Get-Content $schema2Path | docker exec -i conductor-postgres psql -U postgres -v ON_ERROR_STOP=1 2>&1
+        $schemaExitCode = $LASTEXITCODE
         
-        if ($LASTEXITCODE -ne 0) {
+        # Check for errors in output
+        $hasErrors = $schemaOutput -match "ERROR:" -or $schemaExitCode -ne 0
+        
+        if ($hasErrors) {
             Write-Host "Error: Failed to load schema with seed data (schema2.sql)." -ForegroundColor Red
-            Write-Host "Check the output above for SQL errors." -ForegroundColor Yellow
+            Write-Host "Exit code: $schemaExitCode" -ForegroundColor Yellow
+            Write-Host "`nSQL Errors and relevant output:" -ForegroundColor Yellow
+            # Show last 50 lines of output to see what happened
+            $schemaOutput | Select-Object -Last 50 | ForEach-Object {
+                if ($_ -match "ERROR:") {
+                    Write-Host $_ -ForegroundColor Red
+                } elseif ($_ -match "LINE|syntax|relation") {
+                    Write-Host $_ -ForegroundColor Yellow
+                } else {
+                    Write-Host $_ -ForegroundColor Gray
+                }
+            }
+            Write-Host "`nCheck the full output above for details." -ForegroundColor Yellow
             exit 1
         }
+        $schemaLoaded = $true
     } elseif (Test-Path $schemaPath) {
         Write-Host "Loading base schema (schema.sql)..." -ForegroundColor Yellow
         Write-Host "Note: schema2.sql not found, using schema.sql (no seed data)" -ForegroundColor Yellow
-        Get-Content $schemaPath | docker exec -i conductor-postgres psql -U postgres
+        # For schema.sql, we need to check if it has database creation commands
+        # If it does, connect to postgres first, otherwise connect to conductor
+        $schemaContent = Get-Content $schemaPath -Raw
+        if ($schemaContent -match "CREATE DATABASE|DROP DATABASE") {
+            $schemaOutput = Get-Content $schemaPath | docker exec -i conductor-postgres psql -U postgres -v ON_ERROR_STOP=1 2>&1
+        } else {
+            $schemaOutput = Get-Content $schemaPath | docker exec -i conductor-postgres psql -U postgres -d conductor -v ON_ERROR_STOP=1 2>&1
+        }
+        $schemaExitCode = $LASTEXITCODE
         
-        if ($LASTEXITCODE -ne 0) {
+        $hasErrors = $schemaOutput -match "ERROR:" -or $schemaExitCode -ne 0
+        
+        if ($hasErrors) {
             Write-Host "Error: Failed to load base schema (schema.sql)." -ForegroundColor Red
-            Write-Host "Check the output above for SQL errors." -ForegroundColor Yellow
+            Write-Host "Exit code: $schemaExitCode" -ForegroundColor Yellow
+            Write-Host "`nSQL Errors and relevant output:" -ForegroundColor Yellow
+            $schemaOutput | Select-Object -Last 50 | ForEach-Object {
+                if ($_ -match "ERROR:") {
+                    Write-Host $_ -ForegroundColor Red
+                } elseif ($_ -match "LINE|syntax|relation") {
+                    Write-Host $_ -ForegroundColor Yellow
+                } else {
+                    Write-Host $_ -ForegroundColor Gray
+                }
+            }
+            Write-Host "`nCheck the full output above for details." -ForegroundColor Yellow
             exit 1
         }
+        $schemaLoaded = $true
     } else {
         Write-Host "Error: Neither schema.sql nor schema2.sql found in app\db\" -ForegroundColor Red
         exit 1
+    }
+    
+    # Verify schema loaded by checking if a key table exists
+    if ($schemaLoaded) {
+        Write-Host "Verifying schema was loaded correctly..." -ForegroundColor Yellow
+        $tableCheck = docker exec conductor-postgres psql -U postgres -d conductor -t -A -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'attendance_sessions');" 2>&1
+        $tableExists = ($tableCheck -match "^t$" -or $tableCheck.Trim() -eq "t")
+        
+        if (-not $tableExists) {
+            Write-Host "Error: attendance_sessions table not found after schema load." -ForegroundColor Red
+            Write-Host "The schema file may have errors or failed to load completely." -ForegroundColor Yellow
+            Write-Host "Table check result: '$tableCheck'" -ForegroundColor Gray
+            Write-Host "Please check the schema file for errors and try again." -ForegroundColor Yellow
+            exit 1
+        } else {
+            Write-Host "Schema verification passed." -ForegroundColor Green
+        }
+    }
+    
+    # Run migrations if any exist (only if schema loaded and verified successfully)
+    if ($schemaLoaded) {
+        Write-Host "Running database migrations..." -ForegroundColor Yellow
+        $migrationsPath = Join-Path $projectRoot "app\db\migrations"
+        if (Test-Path $migrationsPath) {
+            $migrationFiles = Get-ChildItem -Path $migrationsPath -Filter "*.sql" | Sort-Object Name
+            foreach ($migrationFile in $migrationFiles) {
+                Write-Host "  Running migration: $($migrationFile.Name)..." -ForegroundColor Gray
+                # Run migration in conductor database
+                $migrationOutput = Get-Content $migrationFile.FullName | docker exec -i conductor-postgres psql -U postgres -d conductor -v ON_ERROR_STOP=1 2>&1
+                $migrationExitCode = $LASTEXITCODE
+                
+                # Filter out NOTICE messages (they're informational, not errors)
+                $actualErrors = $migrationOutput | Where-Object { $_ -match "ERROR:" -and $_ -notmatch "NOTICE:" }
+                
+                if ($actualErrors -or ($migrationExitCode -ne 0 -and $migrationOutput -match "ERROR:")) {
+                    Write-Host "Warning: Migration $($migrationFile.Name) may have failed." -ForegroundColor Yellow
+                    $actualErrors | ForEach-Object { Write-Host $_ -ForegroundColor Red }
+                } elseif ($migrationOutput -match "NOTICE:") {
+                    # Show NOTICE messages as info (not errors)
+                    $migrationOutput | Where-Object { $_ -match "NOTICE:" } | ForEach-Object { 
+                        Write-Host "  $_" -ForegroundColor Cyan 
+                    }
+                }
+            }
+        } else {
+            Write-Host "  No migrations directory found, skipping migrations." -ForegroundColor Gray
+        }
+    } else {
+        Write-Host "Skipping migrations because schema did not load successfully." -ForegroundColor Yellow
     }
     
     Write-Host "Database setup complete!" -ForegroundColor Green

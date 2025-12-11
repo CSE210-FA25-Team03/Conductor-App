@@ -77,7 +77,7 @@
       modalMembers.innerHTML = (data.members || []).map(m => `
         <li class="member-item">
           <span class="member-name">${m.name} <small style="color:#555;">${m.email || ''}</small>
-            ${m.isLeader ? '<span class="leader-badge">👑 Leader</span>' : ''}
+            ${m.isLeader ? '<span class="leader-badge">Leader</span>' : ''}
           </span>
         </li>
       `).join('') || '<li style="color:#777;">No members.</li>';
@@ -199,19 +199,30 @@
         });
         if (!resp.ok) throw new Error('Failed to save');
         const json = await resp.json();
-        if (json && json.team) {
-          if (fieldKey === 'description') {
-            node.textContent = json.team.description || 'No description available.';
-          } else if (fieldKey === 'statusDescription') {
-            node.textContent = json.team.statusDescription || 'No status details.';
-          } else if (fieldKey === 'repoUrl') {
-            const repo = json.team.repoUrl || '';
-            node.innerHTML = repo
-              ? `<a href="${repo}" target="_blank" rel="noopener noreferrer">${repo}</a>`
-              : 'Repo not set.';
+
+        // Normalize response shape from server: some endpoints return the team object directly
+        const updatedTeam = (json && json.team) ? json.team : json;
+
+        const updatedDescription = (updatedTeam && (updatedTeam.description ?? null)) ?? newValue;
+        const updatedStatusDesc = (updatedTeam && (updatedTeam.statusDescription ?? null)) ?? newValue;
+        const updatedRepo = (updatedTeam && (updatedTeam.repoUrl ?? null)) ?? newValue;
+
+        if (fieldKey === 'description') {
+          node.textContent = updatedDescription || 'No description available.';
+          // Also update the grid card preview so the change is visible immediately
+          const btnInGrid = document.querySelector(`.info-btn[data-team-id="${teamId}"]`);
+          if (btnInGrid) {
+            const card = btnInGrid.closest('.team-card');
+            const descP = card ? card.querySelector('p') : null;
+            if (descP) descP.textContent = updatedDescription || 'No description.';
           }
-        } else {
-          node.textContent = newValue || (fieldKey === 'description' ? 'No description available.' : 'No status details.');
+        } else if (fieldKey === 'statusDescription') {
+          node.textContent = updatedStatusDesc || 'No status details.';
+        } else if (fieldKey === 'repoUrl') {
+          const repo = updatedRepo || '';
+          node.innerHTML = repo
+            ? `<a href="${repo}" target="_blank" rel="noopener noreferrer">${repo}</a>`
+            : 'Repo not set.';
         }
         wrapper.remove();
         node.style.display = '';
@@ -240,8 +251,17 @@
     backBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const role = (currentUser.role || '').toLowerCase();
-      if (role === 'team_lead') window.location.href = '/dashboards/team_lead.html';
-      else window.location.href = '/dashboards/student.html';
+      if (role === 'team_lead') {
+        window.location.href = '/dashboards/team_lead.html';
+      } else if (role === 'professor') {
+        window.location.href = '/dashboards/professor.html';
+      } else if (role === 'ta') {
+        window.location.href = '/dashboards/ta.html';
+      } else if (role === 'tutor') {
+        window.location.href = '/dashboards/tutor.html';
+      } else {
+        window.location.href = '/dashboards/student.html';
+      }
     });
   }
 
@@ -250,6 +270,41 @@
   if (savedImg) {
     const img = document.getElementById('profileImg');
     if (img) img.src = savedImg;
+  }
+
+  // Profile dropdown logic
+  const profileImg = document.getElementById('dashboardProfileImg');
+  const dropdown = document.getElementById('profileDropdown');
+  if (profileImg && dropdown) {
+    profileImg.addEventListener('mouseenter', () => {
+      dropdown.style.display = 'block';
+    });
+    profileImg.addEventListener('mouseleave', () => {
+      setTimeout(() => {
+        if (!dropdown.matches(':hover')) dropdown.style.display = 'none';
+      }, 150);
+    });
+    dropdown.addEventListener('mouseleave', () => {
+      dropdown.style.display = 'none';
+    });
+    dropdown.addEventListener('mouseenter', () => {
+      dropdown.style.display = 'block';
+    });
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        localStorage.clear();
+        window.location.href = '/login';
+      });
+    }
+  }
+
+  // Saved profile image for dashboard avatar
+  const savedDashboardImg = localStorage.getItem('profileImg');
+  if (savedDashboardImg && profileImg) {
+    profileImg.src = savedDashboardImg;
   }
 
   loadMyTeams();

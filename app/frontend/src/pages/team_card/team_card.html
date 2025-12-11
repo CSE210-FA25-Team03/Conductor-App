@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
+
 <head>
     <link rel="stylesheet" href="../../../assets/css/global.css">
     <link rel="stylesheet" href="/assets/css/class-directory-nav.css">
@@ -7,30 +8,40 @@
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/assets/css/i18n.css" />
+    <link rel="stylesheet" href="/assets/css/i18n.css" />
     <title>Team Group Dashboard | Conductor</title>
     <link rel="stylesheet" href="/dashboards/style.css" />
 </head>
+
 <body>
-    <div class="page" data-role="student">
-        <header class="top-nav">
-            <div class="brand">Conductor <span>App</span></div>
-            <div class="nav-actions">
-                 <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
-                <div class="profile">
-                    <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
-                        <div class="profile-dropdown-container" style="position:relative;">
-                            <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-        <!-- Use style.css for consistent dashboard styling -->
-                            <div class="profile-dropdown" id="profileDropdown" style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
-                                <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
-                                <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
-                            </div>
-                        </div>
-                    <!-- </a> -->
+    <header class="top-nav">
+        <div class="brand">
+            <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+            <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+
+        </div>
+        <div class="nav-actions">
+            <a href="#" id="backDashboard" class="nav-btn eval-btn">← Back to Dashboard</a>
+            <div class="profile">
+                <!-- <a href="/profile_page/profile.html" class="profile-link"> -->
+                <div class="profile-dropdown-container" style="position:relative;">
+                    <img id="dashboardProfileImg" src="/assets/logo/user.png" alt="Profile"
+                        style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                    <!-- Use style.css for consistent dashboard styling -->
+                    <div class="profile-dropdown" id="profileDropdown"
+                        style="display:none; position:absolute; top:40px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                        <a href="/profile_page/profile.html"
+                            style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
+                        <a href="#" id="logoutBtn"
+                            style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
+                    </div>
                 </div>
+                <!-- </a> -->
             </div>
-        </header>
+        </div>
+    </header>
+    <div class="page" data-role="student">
+
 
         <section class="dashboard-header">
             <div style="display:flex; align-items:center; justify-content:space-between; width:100%;">
@@ -47,18 +58,18 @@
     <div id="teamModal" class="team-modal" style="display: none;">
         <div class="team-modal-content">
             <span class="team-modal-close">&times;</span>
-            
+
             <div class="team-modal-header">
                 <h2 id="modalTeamName">Team Name</h2>
                 <span id="modalTeamStatus" class="badge">Status</span>
             </div>
-            
+
             <div class="team-modal-body">
                 <div class="modal-section">
                     <h3>Description</h3>
                     <p id="modalDescription">Team description goes here...</p>
                 </div>
-                
+
                 <div class="modal-section">
                     <h3>Status Description</h3>
                     <p id="modalStatusDesc">What the team is currently working on...</p>
@@ -67,14 +78,14 @@
                     <h3>Repo Link</h3>
                     <p id="modalRepoLink">Repo not set.</p>
                 </div>
-                
+
                 <!-- Progress section removed from modal -->
-                
+
                 <div class="modal-section">
                     <h3>Teaching Assistant</h3>
                     <p id="modalTA" class="ta-name">TA Name</p>
                 </div>
-                
+
                 <div class="modal-section">
                     <h3>Team Members</h3>
                     <ul id="modalMembers" class="members-list">
@@ -86,9 +97,9 @@
     </div>
 
     <section class="profile-panel" id="profile-panel" aria-hidden="true">
-    <!-- Profile panel removed, navigation now goes to profile page -->
+        <!-- Profile panel removed, navigation now goes to profile page -->
 
-    <script src="script.js"></script>
+        <script src="script.js"></script>
 
         <script>
             // Define showTeamInfo function first and make it globally accessible
@@ -118,24 +129,24 @@
                         statusBadge.style.display = '';
                     }
                     modalDesc.textContent = data.description || 'No description available.';
-                                        modalStatusDesc.textContent = data.statusDescription || 'No status details.';
-                                        const repoNode = document.getElementById('modalRepoLink');
-                                        if (repoNode) {
-                                            if (data.repoUrl) {
-                                                const safe = data.repoUrl.trim();
-                                                repoNode.innerHTML = `<a href="${safe}" target="_blank" rel="noopener noreferrer">${safe}</a>`;
-                                            } else {
-                                                repoNode.textContent = 'Repo not set.';
-                                            }
-                                        }
+                    modalStatusDesc.textContent = data.statusDescription || 'No status details.';
+                    const repoNode = document.getElementById('modalRepoLink');
+                    if (repoNode) {
+                        if (data.repoUrl) {
+                            const safe = data.repoUrl.trim();
+                            repoNode.innerHTML = `<a href="${safe}" target="_blank" rel="noopener noreferrer">${safe}</a>`;
+                        } else {
+                            repoNode.textContent = 'Repo not set.';
+                        }
+                    }
                     modalTA.textContent = data.ta ? `${data.ta.name} (${data.ta.email})` : 'None assigned';
 
                     membersList.innerHTML = (data.members || [])
-                      .map(m => `
+                        .map(m => `
                         <li class="member-item">
                           <span class="member-name">
                             ${m.name} <small style="color:#555;">${m.email || ''}</small>
-                            ${m.isLeader ? '<span class="leader-badge">👑 Leader</span>' : ''}
+                            ${m.isLeader ? '<span class="leader-badge">Leader</span>' : ''}
                           </span>
                         </li>
                       `).join('') || '<li style="color:#777;">No members.</li>';
@@ -147,33 +158,33 @@
                     alert('Failed to load team details.');
                 }
             }
-            
+
             // Make function globally accessible
             window.showTeamInfo = showTeamInfo;
-            
+
             // Fetch teams from API
             async function loadTeams() {
-            try {
-                const response = await fetch('/api/teams');
-                const teams = await response.json();
-                
-                const teamsGrid = document.querySelector('.teams-grid');
-                teamsGrid.innerHTML = ''; // Clear hardcoded cards
-                
-                teams.forEach(team => {
-                const card = createTeamCard(team);
-                teamsGrid.appendChild(card);
-                });
-            } catch (error) {
-                console.error('Error loading teams:', error);
-            }
-            }
-            
-            function createTeamCard(team) {
-            const card = document.createElement('div');
-            card.className = `team-card`;
+                try {
+                    const response = await fetch('/api/teams');
+                    const teams = await response.json();
 
-            card.innerHTML = `
+                    const teamsGrid = document.querySelector('.teams-grid');
+                    teamsGrid.innerHTML = ''; // Clear hardcoded cards
+
+                    teams.forEach(team => {
+                        const card = createTeamCard(team);
+                        teamsGrid.appendChild(card);
+                    });
+                } catch (error) {
+                    console.error('Error loading teams:', error);
+                }
+            }
+
+            function createTeamCard(team) {
+                const card = document.createElement('div');
+                card.className = `team-card`;
+
+                card.innerHTML = `
                 <header>
                 <div>
                     <small>${team.teamNumber}</small>
@@ -186,42 +197,42 @@
                 <button class="card-info-btn" data-team-id="${team.id}">Card info</button>
                 </div>
             `;
-            
-            // Add event listener to the button - pass the entire team object
-            const button = card.querySelector('.card-info-btn');
-            if (button) {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Button clicked for team:', team);
-                    showTeamInfo(team); // Pass the entire team object instead of just ID
-                });
-            } else {
-                console.error('Button not found in card');
+
+                // Add event listener to the button - pass the entire team object
+                const button = card.querySelector('.card-info-btn');
+                if (button) {
+                    button.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('Button clicked for team:', team);
+                        showTeamInfo(team); // Pass the entire team object instead of just ID
+                    });
+                } else {
+                    console.error('Button not found in card');
+                }
+
+                return card;
             }
-            
-            return card;
-            }
-            
+
             // Close modal functionality
-            window.addEventListener('DOMContentLoaded', function() {
+            window.addEventListener('DOMContentLoaded', function () {
                 const modal = document.getElementById('teamModal');
                 const closeBtn = document.querySelector('.team-modal-close');
-                
+
                 if (closeBtn && modal) {
-                    closeBtn.addEventListener('click', function() {
+                    closeBtn.addEventListener('click', function () {
                         modal.style.display = 'none';
                     });
                 }
-                
-                window.addEventListener('click', function(event) {
+
+                window.addEventListener('click', function (event) {
                     if (event.target === modal) {
                         modal.style.display = 'none';
                     }
                 });
-                
+
                 // Close on Escape key
-                document.addEventListener('keydown', function(event) {
+                document.addEventListener('keydown', function (event) {
                     if (event.key === 'Escape' && modal && modal.style.display === 'flex') {
                         modal.style.display = 'none';
                     }
@@ -234,21 +245,52 @@
         </script>
 
         <script>
-        // Dynamic dashboard link based on role
-        document.getElementById('backDashboard').addEventListener('click', function(e) {
-            e.preventDefault();
-            var role = localStorage.getItem('role');
-            if (role === 'professor') {
-                window.location.href = '/dashboards/professor.html';
-            } else if (role === 'Teaching Assistant') {
-                window.location.href = '/dashboards/ta.html';
-            } else if (role === 'team_lead') {
-                window.location.href = '/dashboards/team_lead.html';
-            } else {
-                window.location.href = '/dashboards/student.html';
-            }
-        });
+            // Dynamic dashboard link based on role
+            document.getElementById('backDashboard').addEventListener('click', function (e) {
+                e.preventDefault();
+                var role = localStorage.getItem('role');
+                if (role === 'professor') {
+                    window.location.href = '/dashboards/professor.html';
+                } else if (role === 'ta') {
+                    window.location.href = '/dashboards/ta.html';
+                } else if (role === 'team_lead') {
+                    window.location.href = '/dashboards/team_lead.html';
+                } else {
+                    window.location.href = '/dashboards/student.html';
+                }
+            });
         </script>
-    </section> 
+    </section>
+    <script>
+        const profileImg = document.getElementById('dashboardProfileImg');
+        const dropdown = document.getElementById('profileDropdown');
+        if (profileImg && dropdown) {
+            profileImg.addEventListener('mouseenter', () => {
+                dropdown.style.display = 'block';
+            });
+            profileImg.addEventListener('mouseleave', () => {
+                setTimeout(() => {
+                    if (!dropdown.matches(':hover')) {
+                        dropdown.style.display = 'none';
+                    }
+                }, 150);
+            });
+            dropdown.addEventListener('mouseenter', () => {
+                dropdown.style.display = 'block';
+            });
+            dropdown.addEventListener('mouseleave', () => {
+                dropdown.style.display = 'none';
+            });
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    localStorage.clear();
+                    window.location.href = '/login';
+                });
+            }
+        }
+    </script>
 </body>
+
 </html>

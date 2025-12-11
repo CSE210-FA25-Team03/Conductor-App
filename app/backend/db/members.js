@@ -2,8 +2,10 @@
 const db = require('./index');
 const { getCurrentCourseId } = require('./classDirectory');
 
-async function getMembers() {
-  const courseId = getCurrentCourseId();
+async function getMembers(courseIdOverride) {
+  const courseId = courseIdOverride || getCurrentCourseId();
+  if (!courseId) return [];
+
   const { rows } = await db.query(
     `
     SELECT
@@ -14,18 +16,17 @@ async function getMembers() {
       r.key AS role,
       CASE WHEN tm.is_leader THEN true ELSE false END AS is_leader
     FROM course_memberships cm
-    JOIN users u ON cm.user_id = u.id
+    JOIN users u
+      ON cm.user_id = u.id
     LEFT JOIN role_assignments ra
       ON ra.user_id = u.id
      AND ra.scope_type = 'course'
      AND ra.scope_id = cm.course_id
-    LEFT JOIN roles r ON ra.role_id = r.id
+    LEFT JOIN roles r
+      ON r.id = ra.role_id
     LEFT JOIN team_members tm
       ON tm.user_id = u.id
-    LEFT JOIN teams t
-      ON t.id = tm.team_id AND t.course_id = cm.course_id
     WHERE cm.course_id = $1
-    GROUP BY u.id, u.display_name, u.email, initials, r.key, is_leader
     ORDER BY u.display_name
     `,
     [courseId],
@@ -33,9 +34,12 @@ async function getMembers() {
 
   return rows.map((r) => {
     let finalRole = r.role || 'student';
-    if (r.is_leader && !['professor', 'ta', 'tutor'].includes(finalRole)) {
+    if (finalRole === 'team_lead') {
+      // already explicit
+    } else if (r.is_leader && finalRole === 'student') {
       finalRole = 'team_lead';
     }
+
     return {
       id: r.id,
       name: r.name,

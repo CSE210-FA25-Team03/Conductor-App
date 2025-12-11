@@ -26,15 +26,27 @@
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="name@conductor.edu" required />
             </div>
+            <div class="input_box">
+                <label for="classCode">Class Number</label>
+                <input
+                    type="text"
+                    id="classCode"
+                    name="classCode"
+                    placeholder="CSE 210"
+                    required
+                />
+                </div>
+
 
             <button type="submit">Login</button>
 
             <p class="separator"><span>or</span></p>
             <div class="login_option">
                 <div class="option">
-                    <a href="/auth/google/start">
-                        <img src="/assets/logo/icons8-google.svg" alt="Google" /> Login with Google
-                    </a>
+<a href="#" id="googleLoginButton" class="google-btn">
+  <img src="/assets/logo/icons8-google.svg" alt="Google" />
+  <span>Login with Google</span>
+</a>
                 </div>
             </div>
 

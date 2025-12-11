@@ -5,6 +5,55 @@ document.addEventListener('DOMContentLoaded', () => {
   const passwordToggle = document.getElementById('passwordToggle');
   const successMessage = document.getElementById('successMessage');
   const errorBox = document.getElementById('loginError');
+  const googleLoginButton = document.getElementById('googleLoginButton');
+  const emailInput = document.getElementById('email');
+  const classCodeInput = document.getElementById('classCode');
+
+  if (googleLoginButton) {
+    googleLoginButton.addEventListener('click', (event) => {
+      event.preventDefault();
+
+      const email = (emailInput?.value || '').trim().toLowerCase();
+      const isAdmin = email === 'admin@school.edu';
+      const classCode = (classCodeInput?.value || '').trim();
+
+      if (!isAdmin && !classCode) {
+        alert('Please enter a class number before using Google login.');
+        return;
+      }
+
+      const url = isAdmin
+        ? `/auth/google/start`
+        : `/auth/google/start?classCode=${encodeURIComponent(classCode)}`;
+
+      window.location.href = url;
+    });
+  }
+  // Hide class code field when admin email is entered
+  function toggleClassCodeVisibility() {
+    const email = (emailInput?.value || '').trim().toLowerCase();
+    const isAdmin = email === 'admin@school.edu';
+    if (classCodeInput) {
+      // Remove required for admin to prevent HTML5 validation prompt
+      if (isAdmin) {
+        classCodeInput.removeAttribute('required');
+        classCodeInput.disabled = true;
+        classCodeInput.style.backgroundColor = '#f3f4f6'; // light grey
+        classCodeInput.style.color = '#6b7280';
+        classCodeInput.placeholder = 'Class number not required for admin';
+      } else {
+        classCodeInput.setAttribute('required', '');
+        classCodeInput.disabled = false;
+        classCodeInput.style.backgroundColor = '';
+        classCodeInput.style.color = '';
+        classCodeInput.placeholder = 'CSE 210';
+      }
+    }
+  }
+  emailInput?.addEventListener('input', toggleClassCodeVisibility);
+  emailInput?.addEventListener('blur', toggleClassCodeVisibility);
+  // Initialize state on load
+  toggleClassCodeVisibility();
 
   function showError(message) {
     if (!errorBox) {
@@ -51,10 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function resolveLogin(email) {
+    const classCode = (classCodeInput?.value || '').trim();
+    const isAdmin = (email || '').trim().toLowerCase() === 'admin@school.edu';
+
     const res = await fetch('/api/auth/resolve-login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, classCode: isAdmin ? '' : classCode }),
     });
 
     const text = await res.text().catch(() => '');

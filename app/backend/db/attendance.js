@@ -33,6 +33,7 @@ function mapSessionRow(row) {
     courseId: row.course_id,
     code: row.code,
     type: row.type,
+    teamId: row.team_id || null,
     liveMinutes: row.live_minutes,
     createdAt: row.created_at,
     expiresAt: row.expires_at,
@@ -43,17 +44,20 @@ function mapSessionRow(row) {
 
 /**
  * Get all attendance sessions for a course, with present counts.
+ * @param {string} courseId - Course ID
+ * @param {string} typeFilter - Optional: filter by type ('class_meeting' or 'team_meeting')
+ * @param {string} teamIdFilter - Optional: filter by team_id (for team leads to see only their team's sessions)
  */
-async function getSessions(courseId) {
+async function getSessions(courseId, typeFilter = null, teamIdFilter = null) {
   if (!courseId) return [];
 
-  const { rows } = await db.query(
-    `
+  let query = `
     SELECT
       s.id,
       s.course_id,
       s.code,
       s.type,
+      s.team_id,
       s.live_minutes,
       s.created_at,
       s.expires_at,
@@ -61,74 +65,73 @@ async function getSessions(courseId) {
     FROM attendance_sessions s
     LEFT JOIN attendances a ON a.session_id = s.id
     WHERE s.course_id = $1
+  `;
+  const params = [courseId];
+  let paramIndex = 2;
+
+  if (typeFilter) {
+    query += ` AND s.type = $${paramIndex}`;
+    params.push(typeFilter);
+    paramIndex++;
+  }
+
+  if (teamIdFilter) {
+    query += ` AND s.team_id = $${paramIndex}`;
+    params.push(teamIdFilter);
+    paramIndex++;
+  }
+
+  query += `
     GROUP BY s.id
     ORDER BY s.created_at DESC
-    `,
-    [courseId],
-  );
+  `;
+
+  const { rows } = await db.query(query, params);
 
   return rows.map(mapSessionRow);
 }
 
 /**
- * Pick a created_by user for an attendance session.
- *
- * For dev/testing we:
- * - Prefer a user who has a 'professor' role scoped to this course
- * - Fallback to the first course_memberships record
+ * Get team ID for a team lead user in a course.
  */
-async function pickCreatorUserId(courseId) {
-  // Try to find a professor for this course
-  const { rows: profRows } = await db.query(
+async function getTeamIdForTeamLead(courseId, userId) {
+  const { rows } = await db.query(
     `
-    SELECT u.id AS user_id
-    FROM users u
-    JOIN role_assignments ra ON ra.user_id = u.id
-    JOIN roles r ON r.id = ra.role_id
-    WHERE ra.scope_type = 'course'
-      AND ra.scope_id = $1
-      AND r.key = 'professor'
-    ORDER BY u.created_at ASC
+    SELECT t.id
+    FROM teams t
+    JOIN team_members tm ON tm.team_id = t.id
+    WHERE t.course_id = $1
+      AND tm.user_id = $2
+      AND tm.is_leader = TRUE
+    ORDER BY t.created_at ASC
     LIMIT 1
     `,
-    [courseId],
+    [courseId, userId],
   );
-
-  if (profRows.length) {
-    return profRows[0].user_id;
-  }
-
-  // Fallback: any course member
-  const { rows: memberRows } = await db.query(
-    `
-    SELECT user_id
-    FROM course_memberships
-    WHERE course_id = $1
-    ORDER BY created_at ASC
-    LIMIT 1
-    `,
-    [courseId],
-  );
-
-  if (!memberRows.length) {
-    throw new Error(
-      'No users found in this course to use as created_by for attendance_sessions',
-    );
-  }
-
-  return memberRows[0].user_id;
+  return rows.length ? rows[0].id : null;
 }
 
 /**
  * Create a new attendance session with a random code and expiration.
- * data: { durationMinutes }
+ * data: { durationMinutes, type, teamId, createdBy }
  */
 async function createSession(courseId, data = {}) {
   if (!courseId) {
     throw new Error('Course ID is required to create attendance sessions');
   }
 
-  const creatorUserId = await pickCreatorUserId(courseId);
+  const creatorUserId = data.createdBy || null;
+  if (!creatorUserId) {
+    throw new Error('createdBy user ID is required');
+  }
+
+  const sessionType = data.type || 'class_meeting';
+  const teamId = data.teamId || null;
+
+  // Validate: team_meeting requires teamId
+  if (sessionType === 'team_meeting' && !teamId) {
+    throw new Error('teamId is required for team_meeting sessions');
+  }
 
   const durationRaw = parseInt(data.durationMinutes, 10);
   const liveMinutes = Number.isFinite(durationRaw)
@@ -145,36 +148,44 @@ async function createSession(courseId, data = {}) {
   const now = new Date();
   const expiresAt = new Date(now.getTime() + liveMinutes * 60 * 1000);
 
+  // Build INSERT dynamically to avoid referencing team_id for class meetings or when absent in schema
+  const hasTeam = sessionType === 'team_meeting';
+  const columns = [
+    'course_id',
+    'created_by',
+    'code',
+    'type',
+    ...(hasTeam ? ['team_id'] : []),
+    'live_minutes',
+    'created_at',
+    'expires_at',
+  ];
+  const values = [
+    courseId,
+    creatorUserId,
+    code,
+    sessionType,
+    ...(hasTeam ? [teamId] : []),
+    liveMinutes,
+    now.toISOString(),
+    expiresAt.toISOString(),
+  ];
+  const placeholders = values.map((_, i) => `$${i + 1}`).join(',');
   const { rows } = await db.query(
     `
-    INSERT INTO attendance_sessions (
-      course_id,
-      created_by,
-      code,
-      type,
-      live_minutes,
-      created_at,
-      expires_at
-    )
-    VALUES ($1,$2,$3,$4,$5,$6,$7)
+    INSERT INTO attendance_sessions (${columns.join(',')})
+    VALUES (${placeholders})
     RETURNING
       id,
       course_id,
       code,
       type,
+      ${hasTeam ? 'team_id,' : ''}
       live_minutes,
       created_at,
       expires_at
     `,
-    [
-      courseId,
-      creatorUserId,
-      code,
-      'class_meeting', // valid type per your CHECK constraint
-      liveMinutes,
-      now.toISOString(),
-      expiresAt.toISOString(),
-    ],
+    values,
   );
 
   return mapSessionRow({ ...rows[0], present_count: 0 });
@@ -245,8 +256,12 @@ async function getSessionWithAttendance(courseId, sessionId) {
  * Mark attendance for a student given a code + email.
  * Returns:
  *   { success, message?, reason?, session? }
+ * @param {string} courseId - Course ID
+ * @param {string} codeRaw - Attendance code
+ * @param {string} emailRaw - User email
+ * @param {string} expectedType - Expected session type ('class_meeting' or 'team_meeting')
  */
-async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
+async function markAttendanceByCode(courseId, codeRaw, emailRaw, expectedType = null) {
   if (!courseId) {
     return {
       success: false,
@@ -289,26 +304,40 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
   const userId = userRows[0].id;
 
   // 2) Find the most recent session with this code for this course
-  const { rows: sessionRows } = await db.query(
-    `
+  // If expectedType is provided, filter by type
+  let query = `
     SELECT
       s.id,
       s.course_id,
       s.code,
       s.type,
+      s.team_id,
       s.live_minutes,
       s.created_at,
       s.expires_at
     FROM attendance_sessions s
     WHERE s.course_id = $1
       AND UPPER(s.code) = $2
-    ORDER BY s.created_at DESC
-    LIMIT 1
-    `,
-    [courseId, code],
-  );
+  `;
+  const queryParams = [courseId, code];
+  
+  if (expectedType) {
+    query += ` AND s.type = $3`;
+    queryParams.push(expectedType);
+  }
+  
+  query += ` ORDER BY s.created_at DESC LIMIT 1`;
+
+  const { rows: sessionRows } = await db.query(query, queryParams);
 
   if (!sessionRows.length) {
+    if (expectedType) {
+      return {
+        success: false,
+        reason: 'code_type_mismatch',
+        message: `No ${expectedType === 'class_meeting' ? 'class meeting' : 'team meeting'} session found for that code. Make sure you're using the correct code type.`,
+      };
+    }
     return {
       success: false,
       reason: 'code_not_found',
@@ -318,7 +347,45 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
 
   const sessionRow = sessionRows[0];
 
-  // 3) Expiry check in JS (clearer errors)
+  // 3) Validate type matches expected type (if provided)
+  if (expectedType && sessionRow.type !== expectedType) {
+    return {
+      success: false,
+      reason: 'code_type_mismatch',
+      message: `This code is for a ${sessionRow.type === 'class_meeting' ? 'class meeting' : 'team meeting'}, not a ${expectedType === 'class_meeting' ? 'class meeting' : 'team meeting'}. Please use the correct code.`,
+    };
+  }
+
+  // 3b) If team meeting, ensure user is a member of that team
+  if (sessionRow.type === 'team_meeting') {
+    const teamId = sessionRow.team_id || null;
+    if (!teamId) {
+      return {
+        success: false,
+        reason: 'invalid_team_session',
+        message: 'This team meeting session is missing a team association.',
+      };
+    }
+    const { rows: memberRows } = await db.query(
+      `
+      SELECT 1
+      FROM team_members tm
+      JOIN teams t ON t.id = tm.team_id
+      WHERE tm.team_id = $1 AND t.course_id = $2 AND tm.user_id = $3
+      LIMIT 1
+      `,
+      [teamId, courseId, userId],
+    );
+    if (!memberRows.length) {
+      return {
+        success: false,
+        reason: 'not_team_member',
+        message: 'This team meeting code is restricted to members of another team.',
+      };
+    }
+  }
+
+  // 4) Expiry check in JS (clearer errors)
   const now = new Date();
   const expiresAt = new Date(sessionRow.expires_at);
   if (now > expiresAt) {
@@ -329,7 +396,7 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
     };
   }
 
-  // 4) Upsert attendance row
+  // 5) Upsert attendance row
   await db.query(
     `
     INSERT INTO attendances (session_id, user_id, marked_at, success, source)
@@ -354,16 +421,30 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw) {
 /**
  * Get attendance history for a student by email.
  * Returns:
- *   { sessions: [{ sessionId, createdAt, status }], presentCount, totalSessions }
+ *   { 
+ *     sessions: [{ sessionId, createdAt, status, type }], 
+ *     presentCount, 
+ *     totalSessions,
+ *     classMeetings: { sessions, presentCount, totalSessions },
+ *     teamMeetings: { sessions, presentCount, totalSessions }
+ *   }
  */
 async function getHistoryByEmail(courseId, emailRaw) {
+  const emptyResponse = {
+    sessions: [],
+    presentCount: 0,
+    totalSessions: 0,
+    classMeetings: { sessions: [], presentCount: 0, totalSessions: 0 },
+    teamMeetings: { sessions: [], presentCount: 0, totalSessions: 0 },
+  };
+
   if (!courseId) {
-    return { sessions: [], presentCount: 0, totalSessions: 0 };
+    return emptyResponse;
   }
 
   const email = (emailRaw || '').trim().toLowerCase();
   if (!email) {
-    return { sessions: [], presentCount: 0, totalSessions: 0 };
+    return emptyResponse;
   }
 
   // 1) Lookup user
@@ -378,7 +459,7 @@ async function getHistoryByEmail(courseId, emailRaw) {
   );
 
   if (!userRows.length) {
-    return { sessions: [], presentCount: 0, totalSessions: 0 };
+    return emptyResponse;
   }
 
   const userId = userRows[0].id;
@@ -398,6 +479,19 @@ async function getHistoryByEmail(courseId, emailRaw) {
       ON a.session_id = s.id
       AND a.user_id = $2
     WHERE s.course_id = $1
+      AND (
+        s.type = 'class_meeting'
+        OR (
+          s.type = 'team_meeting'
+          AND s.team_id IS NOT NULL
+          AND EXISTS (
+            SELECT 1
+            FROM team_members tm
+            JOIN teams t ON t.id = tm.team_id
+            WHERE tm.team_id = s.team_id AND t.course_id = $1 AND tm.user_id = $2
+          )
+        )
+      )
     ORDER BY s.created_at ASC
     `,
     [courseId, userId],
@@ -407,10 +501,33 @@ async function getHistoryByEmail(courseId, emailRaw) {
     sessionId: row.session_id,
     createdAt: row.session_created_at,
     status: row.success ? 'present' : 'absent',
+    type: row.type || 'class_meeting', // Include session type
   }));
 
+  // Separate sessions by type
+  // Handle both 'class' and 'class_meeting' for backward compatibility
+  const classSessions = sessions.filter((s) => 
+    s.type === 'class_meeting' || s.type === 'class'
+  );
+  const teamSessions = sessions.filter((s) => 
+    s.type === 'team_meeting' || s.type === 'group_meeting'
+  );
+
+  // Calculate statistics for all sessions
   const totalSessions = sessions.length;
   const presentCount = sessions.filter(
+    (s) => (s.status || '').toLowerCase() === 'present',
+  ).length;
+
+  // Calculate statistics for class meetings
+  const classTotalSessions = classSessions.length;
+  const classPresentCount = classSessions.filter(
+    (s) => (s.status || '').toLowerCase() === 'present',
+  ).length;
+
+  // Calculate statistics for team meetings
+  const teamTotalSessions = teamSessions.length;
+  const teamPresentCount = teamSessions.filter(
     (s) => (s.status || '').toLowerCase() === 'present',
   ).length;
 
@@ -418,7 +535,156 @@ async function getHistoryByEmail(courseId, emailRaw) {
     sessions,
     presentCount,
     totalSessions,
+    // Separated statistics
+    classMeetings: {
+      sessions: classSessions,
+      presentCount: classPresentCount,
+      totalSessions: classTotalSessions,
+    },
+    teamMeetings: {
+      sessions: teamSessions,
+      presentCount: teamPresentCount,
+      totalSessions: teamTotalSessions,
+    },
   };
+}
+
+/**
+ * Get attendance plot data for a team by 7-day periods.
+ * Returns: { periods: [...], averageRate, totalMembers, totalPeriods }
+ */
+async function getAttendancePlot(courseId, teamId, sessionType) {
+  if (!courseId || !teamId || !sessionType) {
+    return { periods: [], averageRate: 0, totalMembers: 0, totalPeriods: 0 };
+  }
+
+  // Get team members
+  const { rows: memberRows } = await db.query(
+    `
+    SELECT tm.user_id
+    FROM team_members tm
+    JOIN teams t ON t.id = tm.team_id
+    WHERE t.id = $1 AND t.course_id = $2
+    `,
+    [teamId, courseId],
+  );
+  const teamMemberIds = memberRows.map((r) => r.user_id);
+  const totalMembers = teamMemberIds.length;
+  if (totalMembers === 0) {
+    return { periods: [], averageRate: 0, totalMembers: 0, totalPeriods: 0 };
+  }
+
+  // Get all sessions of this type for this team/course
+  const { rows: sessionRows } = await db.query(
+    `
+    SELECT s.id, s.created_at
+    FROM attendance_sessions s
+    WHERE s.course_id = $1
+      AND s.type = $2
+      AND (s.team_id = $3 OR ($2 = 'class_meeting' AND s.team_id IS NULL))
+    ORDER BY s.created_at ASC
+    `,
+    [courseId, sessionType, teamId],
+  );
+
+  if (sessionRows.length === 0) {
+    return { periods: [], averageRate: 0, totalMembers, totalPeriods: 0 };
+  }
+
+  // Get all attendance records for these sessions and team members
+  const sessionIds = sessionRows.map((r) => r.id);
+  const { rows: attendanceRows } = await db.query(
+    `
+    SELECT a.session_id, a.user_id, s.created_at
+    FROM attendances a
+    JOIN attendance_sessions s ON s.id = a.session_id
+    WHERE a.session_id = ANY($1::uuid[])
+      AND a.user_id = ANY($2::uuid[])
+      AND a.success = TRUE
+    `,
+    [sessionIds, teamMemberIds],
+  );
+
+  // Group sessions by 7-day periods
+  const periodMap = new Map();
+  sessionRows.forEach((session) => {
+    const date = new Date(session.created_at);
+    const periodStart = new Date(date);
+    periodStart.setDate(date.getDate() - date.getDay()); // Start of week (Sunday)
+    periodStart.setHours(0, 0, 0, 0);
+    const periodKey = periodStart.toISOString().split('T')[0];
+
+    if (!periodMap.has(periodKey)) {
+      const periodEnd = new Date(periodStart);
+      periodEnd.setDate(periodStart.getDate() + 6);
+      periodMap.set(periodKey, {
+        startDate: periodKey,
+        endDate: periodEnd.toISOString().split('T')[0],
+        sessionIds: [],
+        presentMembers: new Set(),
+      });
+    }
+    periodMap.get(periodKey).sessionIds.push(session.id);
+  });
+
+  // Count present members per period
+  attendanceRows.forEach((row) => {
+    const sessionDate = new Date(row.created_at);
+    const periodStart = new Date(sessionDate);
+    periodStart.setDate(sessionDate.getDate() - sessionDate.getDay());
+    periodStart.setHours(0, 0, 0, 0);
+    const periodKey = periodStart.toISOString().split('T')[0];
+
+    const period = periodMap.get(periodKey);
+    if (period && period.sessionIds.includes(row.session_id)) {
+      period.presentMembers.add(row.user_id);
+    }
+  });
+
+  // Calculate rates and format periods
+  const periods = Array.from(periodMap.values())
+    .map((period) => {
+      const presentCount = period.presentMembers.size;
+      const attendanceRate = totalMembers > 0
+        ? Math.round((presentCount / totalMembers) * 100)
+        : 0;
+
+      const start = new Date(period.startDate);
+      const end = new Date(period.endDate);
+      const label = formatPeriodLabel(start, end);
+
+      return {
+        startDate: period.startDate,
+        endDate: period.endDate,
+        label,
+        attendanceRate,
+        presentCount,
+        totalMembers,
+      };
+    })
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+  const totalPeriods = periods.length;
+  const averageRate =
+    totalPeriods > 0
+      ? Math.round(
+          periods.reduce((sum, p) => sum + p.attendanceRate, 0) / totalPeriods,
+        )
+      : 0;
+
+  return { periods, averageRate, totalMembers, totalPeriods };
+}
+
+function formatPeriodLabel(start, end) {
+  const startMonth = start.toLocaleString('en-US', { month: 'short' });
+  const endMonth = end.toLocaleString('en-US', { month: 'short' });
+  const startDay = start.getDate();
+  const endDay = end.getDate();
+
+  if (startMonth === endMonth) {
+    return `${startMonth} ${startDay}-${endDay}`;
+  }
+  return `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
 }
 
 module.exports = {
@@ -427,4 +693,6 @@ module.exports = {
   getSessionWithAttendance,
   markAttendanceByCode,
   getHistoryByEmail,
+  getAttendancePlot,
+  getTeamIdForTeamLead,
 };

@@ -260,6 +260,10 @@ function updateScore() {
 
   let total = 0;
   scoreInputs.forEach((i) => {
+    i.value = i.value.replace(/\D/g, "");
+    i.value = i.value.replace(/[6789]/g, "");
+    i.value = i.value.slice(0, 1);
+
     total += Number(i.value) || 0;
   });
   if (total > 15) total = 15;
@@ -497,6 +501,15 @@ if (toInput) {
     typeaheadMenu.style.display = 'none';
   });
 }
+
+// Keeps the typeahead dropdown attached to the "To:" field on scroll
+document.addEventListener('scroll', () => {
+  if (!typeaheadMenu || !toInput || typeaheadMenu.style.display === 'none') return;
+  const rect = toInput.getBoundingClientRect();
+  typeaheadMenu.style.left = `${rect.left + window.scrollX}px`;
+  typeaheadMenu.style.top = `${rect.bottom + window.scrollY + 4}px`;
+  typeaheadMenu.style.minWidth = `${rect.width}px`;
+}, true);
 
 /* Add Eval Note (DB-backed) */
 if (addBtn) {
@@ -891,9 +904,9 @@ async function renderWorkJournalCards() {
       journalsTypeaheadMenu.style.display = 'none';
     });
   } catch (err) {
-    console.error('Failed to load work journals:', err);
+    console.error('No work journals yet.', err);
     (wjSections || workJournalBox).innerHTML =
-      '<p style="font-size:0.9rem;color:#b00020;">Failed to load work journals.</p>';
+      '<p style="font-size:0.9rem;color:#b00020;">No work journals yet.</p>';
   }
 }
 

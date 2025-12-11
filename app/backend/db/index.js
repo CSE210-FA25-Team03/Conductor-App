@@ -24,17 +24,7 @@
 // };
 // backend/db/index.js
 
-
-
-const { Pool } = require('pg');
-
-const connectionString = process.env.DATABASE_URL || 'postgres://abhishekdhaka@localhost/conductor';
-
-const pool = new Pool({ connectionString });
-
-async function query(text, params) {
-  return pool.query(text, params);
-}
+const { query, pool } = require('../db');
 
 async function getClient() {
   return pool.connect();
@@ -43,4 +33,5 @@ async function getClient() {
 module.exports = {
   query,
   getClient,
+  pool,
 };

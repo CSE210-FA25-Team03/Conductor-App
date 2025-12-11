@@ -26,8 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function getDashboardUrl() {
   const role = getUserRole();
   if (role === 'professor') return '/dashboards/professor.html';
-  if (role === 'teaching assistant') return '/dashboards/ta.html';
+  if (role === 'ta') return '/dashboards/ta.html';
   if (role === 'team_lead') return '/dashboards/team_lead.html';
+  if (role === 'tutor') return '/dashboards/tutor.html';
   return '/dashboards/student.html';
 }
 
@@ -87,14 +88,87 @@ function initCalendar() {
     selectable: false,
     events: [],
     eventClick(info) {
-      const due = new Date(info.event.start).toLocaleString();
-      const details = info.event.extendedProps?.description;
-      const type = info.event.extendedProps?.type ? `Type: ${info.event.extendedProps.type}\n` : '';
-      alert(`Deadline: ${info.event.title}\n${type}Due: ${due}${details ? `\n\nDetails: ${details}` : ''}`);
+      const evt = info.event;
+      const due = new Date(evt.start).toLocaleString();
+      const desc = evt.extendedProps?.description || '';
+      const type = evt.extendedProps?.type || '';
+      showEventPopup({
+        title: evt.title + (type ? ` \u2013 ${type}` : ''),
+        due,
+        desc
+      });
     }
   });
 
   calendarInstance.render();
+}
+
+// Lightweight popup card for event details (student view)
+function ensureEventPopup() {
+  let popup = document.getElementById('event-detail-popup');
+  if (popup) return popup;
+
+  let backdrop = document.getElementById('event-detail-backdrop');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'event-detail-backdrop';
+    backdrop.style.position = 'fixed';
+    backdrop.style.inset = '0';
+    backdrop.style.background = 'rgba(0, 0, 0, 0.35)';
+    backdrop.style.zIndex = '999';
+    backdrop.style.display = 'none';
+    backdrop.addEventListener('click', () => hideEventPopup());
+    document.body.appendChild(backdrop);
+  }
+
+  popup = document.createElement('div');
+  popup.id = 'event-detail-popup';
+  popup.style.position = 'fixed';
+  popup.style.top = '50%';
+  popup.style.left = '50%';
+  popup.style.transform = 'translate(-50%, -50%)';
+  popup.style.maxWidth = '480px';
+  popup.style.width = 'calc(100% - 32px)';
+  popup.style.background = '#ffffff';
+  popup.style.border = '1px solid #e5e7eb';
+  popup.style.borderRadius = '8px';
+  popup.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+  popup.style.padding = '16px';
+  popup.style.zIndex = '1000';
+  popup.style.display = 'none';
+
+  const closeBtn = document.createElement('button');
+  closeBtn.textContent = 'Close';
+  closeBtn.className = 'ghost-btn';
+  closeBtn.style.float = 'right';
+  closeBtn.addEventListener('click', () => hideEventPopup());
+
+  const content = document.createElement('pre');
+  content.id = 'event-detail-content';
+  content.style.whiteSpace = 'pre-wrap';
+  content.style.margin = '0';
+  content.style.fontFamily = 'inherit';
+
+  popup.appendChild(closeBtn);
+  popup.appendChild(content);
+  document.body.appendChild(popup);
+  return popup;
+}
+
+function showEventPopup({ title, due, desc }) {
+  const popup = ensureEventPopup();
+  const content = document.getElementById('event-detail-content');
+  content.textContent = `Deadline: ${title}\nDue: ${due}` + (desc ? `\n\nDetails: ${desc}` : '');
+  const backdrop = document.getElementById('event-detail-backdrop');
+  if (backdrop) backdrop.style.display = 'block';
+  popup.style.display = 'block';
+}
+
+function hideEventPopup() {
+  const popup = document.getElementById('event-detail-popup');
+  if (popup) popup.style.display = 'none';
+  const backdrop = document.getElementById('event-detail-backdrop');
+  if (backdrop) backdrop.style.display = 'none';
 }
 
 async function loadClassDirectory() {
@@ -316,9 +390,10 @@ async function deleteEvent(id) {
     await deleteRequest(`${EVENTS_ENDPOINT}/${id}`);
     resetEventForm();
     await loadEvents();
+    showToast('Event deleted', 'success');
   } catch (error) {
     console.error('Failed to delete event', error);
-    alert('Failed to delete event. Please try again.');
+    showToast('Failed to delete event', 'error');
   }
 }
 
@@ -351,10 +426,15 @@ async function putJson(url, body) {
 async function deleteRequest(url) {
   const response = await fetch(url, { method: 'DELETE' });
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Request failed');
+    const message = await response.text().catch(() => '');
+    throw new Error(message || `HTTP ${response.status}`);
   }
-  return response.json();
+  if (response.status === 204) return true;
+  const ct = response.headers.get('content-type') || '';
+  if (ct.includes('application/json')) {
+    return response.json();
+  }
+  return true;
 }
 
 function updateCourseInfo(course) {
@@ -453,4 +533,55 @@ function resolveStaffPicture(path = '') {
   if (path.startsWith('/assets')) return path;
   if (path.startsWith('assets')) return `/${path}`;
   return path.replace(/^app\/frontend\/assets/, '/assets').replace(/^frontend\/assets/, '/assets');
+}
+
+// Simple toast utility (top-center)
+function ensureToast() {
+  let t = document.getElementById('cd-toast');
+  if (t) return t;
+  t = document.createElement('div');
+  t.id = 'cd-toast';
+  t.style.position = 'fixed';
+  t.style.left = '50%';
+  t.style.top = '24px';
+  t.style.transform = 'translateX(-50%)';
+  // t.style.maxWidth = '520px';
+  // t.style.width = 'calc(100% - 32px)';
+  t.style.padding = '12px 16px';
+  t.style.borderRadius = '8px';
+  t.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+  t.style.fontWeight = '500';
+  t.style.zIndex = '1000';
+  // t.style.display = 'none';
+
+
+  t.style.display = 'flex';
+  t.style.flexDirection = 'column';
+  t.style.alignItems = 'center'; 
+  t.style.maxWidth = '100%'; 
+  document.body.appendChild(t);
+  return t;
+}
+
+function showToast(message, type = 'info') {
+  const t = ensureToast();
+  t.textContent = message;
+  const isError = type === 'error';
+  const isSuccess = type === 'success';
+  t.style.background = isError
+    ? '#fee2e2'
+    : isSuccess
+    ? '#dcfce7'
+    : '#f3f4f6';
+  t.style.color = isError ? '#991b1b' : isSuccess ? '#065f46' : '#111827';
+  t.style.border = isError
+    ? '1px solid #fca5a5'
+    : isSuccess
+    ? '1px solid #86efac'
+    : '1px solid #e5e7eb';
+  t.style.display = 'block';
+  clearTimeout(showToast._timer);
+  showToast._timer = setTimeout(() => {
+    t.style.display = 'none';
+  }, 2500);
 }

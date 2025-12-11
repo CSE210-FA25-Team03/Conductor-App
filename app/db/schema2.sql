@@ -276,7 +276,8 @@ CREATE TABLE attendance_sessions (
   course_id   uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
   created_by  uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   code        text NOT NULL,
-  type        text NOT NULL CHECK (type IN ('class','group_meeting','office_hours','class_meeting','code_created')),
+  type        text NOT NULL CHECK (type IN ('class','group_meeting','office_hours','class_meeting','team_meeting','code_created')),
+  team_id     uuid REFERENCES teams(id) ON DELETE SET NULL,
   live_minutes int NOT NULL DEFAULT 10,
   created_at  timestamptz NOT NULL DEFAULT now(),
   expires_at  timestamptz NOT NULL,
@@ -338,6 +339,49 @@ CREATE TABLE github_configs (
   CONSTRAINT github_configs_course_unique UNIQUE (course_id)
 );
 
+
+------------------------------------------------------------
+-- 8. FAQ + Submit Ticket Queue
+------------------------------------------------------------
+
+
+-- Course Support Tickets
+CREATE TABLE IF NOT EXISTS support_tickets (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id   uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  created_by  uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  assignee_tutor_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
+  title       text NOT NULL,
+  body        text NOT NULL,
+  status      text NOT NULL DEFAULT 'open' CHECK (status IN ('open','in_progress','closed')),
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
+-- Optional: Ticket replies (used to detect tutor responses)
+CREATE TABLE IF NOT EXISTS support_ticket_replies (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  ticket_id  uuid NOT NULL REFERENCES support_tickets(id) ON DELETE CASCADE,
+  author_id  uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body       text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+
+-- Frequently Asked Questions for a course
+CREATE TABLE faq (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  course_id  uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  question   text NOT NULL,
+  answer     text NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+
+
+
+
+
 ------------------------------------------------------------
 -- 9. Helpful indexes
 ------------------------------------------------------------
@@ -396,6 +440,14 @@ CREATE INDEX idx_project_tasks_story
 CREATE INDEX idx_project_tasks_course_status
   ON project_tasks (course_id, status);
 
+CREATE INDEX idx_faq_course_created
+  ON faq (course_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_support_tickets_course_status
+  ON support_tickets (course_id, status, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_support_ticket_replies_ticket
+  ON support_ticket_replies (ticket_id, created_at DESC);
 ------------------------------------------------------------
 -- 10. SEED DATA (users, roles, course, team, skills)
 ------------------------------------------------------------
@@ -465,8 +517,8 @@ VALUES
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'active', now()), -- ta
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'cccccccc-cccc-cccc-cccc-cccccccccccc', 'active', now()), -- student
   (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'dddddddd-dddd-dddd-dddd-dddddddddddd', 'active', now()), -- team lead (Linus, legacy derived)
-  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'active', now()), -- new explicit team lead (Alex Lee)
-  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', '99999999-9999-9999-9999-999999999999', 'active', now()); -- admin user
+  (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee', 'active', now()); -- new explicit team lead (Alex Lee)
+  -- (gen_random_uuid(), '22222222-2222-2222-2222-222222222222', '99999999-9999-9999-9999-999999999999', 'active', now()); -- admin user
 
 -- Role assignments scoped to this course
 INSERT INTO role_assignments (id, user_id, role_id, scope_type, scope_id, created_at)

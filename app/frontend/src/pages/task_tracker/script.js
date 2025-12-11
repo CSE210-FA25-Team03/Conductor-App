@@ -116,7 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
             if (role === 'professor') {
                 window.location.href = '/dashboards/professor.html';
-            } else if (role === 'Teaching Assistant') {
+            } else if (role === 'ta') {
                 window.location.href = '/dashboards/ta.html';
             } else if (role === 'student') {
                 window.location.href = '/dashboards/student.html';
@@ -131,9 +131,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     const configBtn = document.getElementById('githubConfigBtn');
     const syncBtn = document.getElementById('githubSyncBtn');
     const closeBtn = document.querySelector('.modal-close');
-    const cancelBtn = document.getElementById('cancelGitHubConfig');
-    const saveBtn = document.getElementById('saveGitHubConfig');
-    const testBtn = document.getElementById('testGitHubConnection');
+    const cancelBtn = document.getElementById('cancel-github-config');
+    const saveBtn = document.getElementById('save-github-config');
+    const testBtn = document.getElementById('test-github-connection');
     const statusDiv = document.getElementById('githubConfigStatus');
     const pushBtn = document.getElementById('githubPushBtn'); // define pushBtn
 
@@ -324,7 +324,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         });
     } else {
-        console.error('Test button not found! Button ID: testGitHubConnection');
+        console.error('Test button not found! Button ID: test-github-connection');
     }
 
     // Sync button
@@ -822,3 +822,13 @@ async function testGitHubConnection() {
         };
     }
 }
+
+document.querySelectorAll('.accordion-header').forEach(header => {
+    header.addEventListener('click', () => {
+        const item = header.parentElement;
+        const all = document.querySelectorAll('.accordion-item');
+
+        all.forEach(i => i !== item && i.classList.remove('active'));
+        item.classList.toggle('active');
+    });
+});

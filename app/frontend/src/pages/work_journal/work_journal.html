@@ -45,7 +45,7 @@
                 min-width:140px;
               "
             >
-              <a href="/profile_page/profile.html" style="padding:10px 16px; display:block;">Profile</a>
+              <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
               <a id="logoutBtn" style="padding:10px 16px; display:block; color:#d00;">Log Out</a>
             </div>
           </div>
@@ -324,10 +324,12 @@
           const r = localStorage.getItem('role');
           if (r === 'professor') {
             window.location.href = '/dashboards/professor.html';
-          } else if (r === 'Teaching Assistant') {
+          } else if (r === 'ta') {
             window.location.href = '/dashboards/ta.html';
           } else if (r === 'team_lead') {
             window.location.href = '/dashboards/team_lead.html';
+          } else if (r === 'tutor') {
+            window.location.href = '/dashboards/tutor.html';
           } else {
             window.location.href = '/dashboards/student.html';
           }

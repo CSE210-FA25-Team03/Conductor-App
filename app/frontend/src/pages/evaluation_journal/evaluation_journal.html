@@ -66,6 +66,7 @@
     <!-- Page Title -->
     <section class="eval-page-title">
       <h1>Notes</h1>
+      
     </section>
 
     <!-- Team Header -->
@@ -98,7 +99,12 @@
       <!-- RIGHT: New Eval -->
       <aside class="new-eval mobile-tab-content" data-tab="new-eval">
         <div class="new-eval-header">
-          <h3>New Eval Note</h3>
+          <div class= "animation_title"> 
+            <img src="animation_eval.gif" alt="Pencil drawing a yellow star">
+            <h3>New Eval Note</h3>
+          </div>
+          
+
           <button id="addEvalBtn" class="add-plus-btn">+</button>
         </div>
 
@@ -120,23 +126,66 @@
         <!-- Sentiment -->
         <div class="sentiment-section">
           <h4>Sentiment Score</h4>
+          <p class="guide-users"> Each score must be between 0 and 5</p>
           <!-- Simplified: rubric-only UI -->
 
           <div class="rubric-panel" id="rubricPanel">
-            <div class="rubric-row">
-              <label>Independence & Leadership</label>
-              <input type="number" min="0" max="5" class="score-input"/>
-            </div>
+            <details>
+              <summary>
+                <div class="rubric-row">
+                  <label>Independence & Leadership</label>
+                  <input type="number" min="0" max="5" class="score-input">
+                </div>
+              </summary>
 
-            <div class="rubric-row">
-              <label>Technical Contributions</label>
-              <input type="number" min="0" max="5" class="score-input"/>
-            </div>
+              <p><i>How much do they show initiative or independent judgment?</i></p>
+              <p><strong>5 – Highly helpful</strong><br>
+              Stepped up to lead; exercised clear independent judgment and guided team direction.</p>
 
-            <div class="rubric-row">
-              <label>Teamwork</label>
-              <input type="number" min="0" max="5" class="score-input"/>
-            </div>
+              <p><strong>3 – Somewhat helpful</strong><br>
+              Completed assigned tasks; showed some initiative but limited independent judgment.</p>
+
+              <p><strong>0 – Not helpful</strong><br>
+              No evidence of independent contributions; required direction or micromanagement.</p>
+            </details>
+
+            <details>
+              <summary>
+                <div class="rubric-row">
+                  <label>Technical Contributions</label>
+                  <input type="number" min="0" max="5" class="score-input">
+                </div>
+              </summary>
+
+              <p><i>How much do they contribute technically, considering their skill level?</i></p>
+              <p><strong>5 – Highly helpful</strong><br>
+              Made significant technical contributions or showed strong progress in learning new tools/tech.</p>
+
+              <p><strong>3 – Somewhat helpful</strong><br>
+              Made moderate contributions, but overall output felt low for their experience level.</p>
+
+              <p><strong>0 – Not helpful</strong><br>
+              No meaningful technical contributions (code, documentation, reviews, etc.).</p>
+            </details>
+
+            <details>
+              <summary>
+                <div class="rubric-row">
+                  <label>Teamwork</label>
+                  <input type="number" min="0" max="5" class="score-input">
+                </div>
+              </summary>
+
+              <p><i>How effectively do they collaborate and support the team?</i></p>
+              <p><strong>5 – Highly helpful</strong><br>
+              Reliable team member; meets deadlines, communicates proactively, and contributes positively to team climate.</p>
+
+              <p><strong>3 – Somewhat helpful</strong><br>
+              Sometimes unreliable or creates minor tension; occasionally misses deadlines or disregards team needs.</p>
+
+              <p><strong>0 – Not helpful</strong><br>
+              Disruptive or uncooperative; causes challenges, misses commitments, or creates an unhelpful environment.</p>
+            </details>
 
             <div class="sentiment-bar">
               <div class="sentiment-fill" id="sentimentFill"></div>
@@ -226,7 +275,7 @@
       var role = localStorage.getItem('role');
       if (role === 'professor') {
         window.location.href = '/dashboards/professor.html';
-      } else if (role === 'Teaching Assistant') {
+      } else if (role === 'ta') {
         window.location.href = '/dashboards/ta.html';
       } else if (role === 'team_lead') {
         window.location.href = '/dashboards/team_lead.html';

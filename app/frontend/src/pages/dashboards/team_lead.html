@@ -13,40 +13,44 @@
 </head>
 
 <body>
-    <div class="page" data-role="team-lead">
-        <header class="top-nav">
-            <div class="brand">
-                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
-                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+    <header class="top-nav">
+        <div class="brand">
+            <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+            <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
 
-            </div>
-            <div class="nav-actions">
-                <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
-                    Teams Meetings and Tasks
-                </a>
-                <a href="/group_formation/student_group_form.html?role=team_lead" class="nav-btn eval-btn">
-                    Group Formation Form
-                </a>
-
-                <div class="profile">
-                    <div class="profile-dropdown-container" style="position:relative;">
-                        <img id="dashboard-profile-img" src="/assets/logo/user.png" 
-                             alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
-                        <div class="profile-dropdown" id="profileDropdown"
-                             style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
-                            <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
-                            <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
-                        </div>
+        </div>
+        <div class="nav-actions">
+            <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
+                Teams Meetings and Tasks
+            </a>
+            <a href="/group_formation/student_group_form.html?role=team_lead" class="nav-btn eval-btn">
+                Group Formation Form
+            </a>
+            <a href="/student_ticket/student_ticket.html" class="nav-btn eval-btn">
+              Submit Tutor Ticket
+            </a>
+            <div class="profile">
+                <div class="profile-dropdown-container" style="position:relative;">
+                    <img id="dashboard-profile-img" src="/assets/logo/user.png" 
+                            alt="Profile" style="width:44px;height:44px;border-radius:50%;object-fit:cover;cursor:pointer;" />
+                    <div class="profile-dropdown" id="profileDropdown"
+                            style="display:none; position:absolute; top:48px; right:0; background:#fff; border:1px solid #ddd; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); min-width:140px; z-index:10;">
+                        <a href="/profile_page/profile.html" style="display:block; padding:10px 16px; color:#222; text-decoration:none;">Profile</a>
+                        <a href="#" id="logoutBtn" style="display:block; padding:10px 16px; color:#d00; text-decoration:none;">Log Out</a>
                     </div>
                 </div>
             </div>
-        </header>
+        </div>
+    </header>
+    <div class="page" data-role="team-lead">
+        
 
         <section class="dashboard-header">
-            <div>
-                <h1>Team Lead Dashboard</h1>
-            </div>
-        </section>
+    <div>
+        <h1>Team Lead Dashboard</h1>
+        <small id="teamLeadCourseLabel">Team Lead view</small>
+    </div>
+</section>
 
         <section class="content-grid">
             <article class="dashboard-card">
@@ -84,7 +88,7 @@
 
             <article class="dashboard-card">
                  <div class="card-icon">
-                    <img src="Work Journal.png" alt="Work Journal Icon">
+                    <img src="work_journal_icon.png" alt="Work Journal Icon">
                 </div> 
                 <div class="card-content">
                     <h2>Work Journal</h2>
@@ -117,6 +121,17 @@
 
             <article class="dashboard-card">
                  <div class="card-icon">
+                    <img src="pin.png" alt="Generate Pin Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>Generate Team Meeting Code</h2>
+                    <p>Generate attendance codes for team meetings.</p>
+                    <button id="openGenerateCodeDrawer" class="card-btn">Generate Code</button>
+                </div>
+            </article>
+
+            <article class="dashboard-card">
+                 <div class="card-icon">
                     <img src="attendance_icon.PNG" alt="Attendance Icon">
                 </div> 
                 <div class="card-content">
@@ -125,51 +140,160 @@
                     <button id="openAttendanceDrawer" class="card-btn">Submit Attendance</button>
                 </div>
             </article>
+
+            <article class="dashboard-card">
+                 <div class="card-icon">
+                    <img src="view.png" alt="Person Looking at Clock Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>View Attendance</h2>
+                    <p>View attendance plots and statistics.</p>
+                    <button id="viewAttendanceBtn" class="card-btn">View Attendance</button>
+                </div>
+            </article>
         </section>
     </div>
 
 
     <!-- ============================================================
-         NEW ATTENDANCE DRAWER (REPLACED CONTENT)
+         GENERATE CODE DRAWER
+         ============================================================ -->
+    <section class="attendance-panel" id="generateCodePanel" aria-hidden="true">
+        <article class="attendance-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Attendance</p>
+                    <h2>Generate Team Meeting Code</h2>
+                    <p>Generate a code for each team meeting. Team members entering the code within the active window will be marked present.</p>
+                </div>
+                <button class="close-generate-code" aria-label="Close generate code drawer">×</button>
+            </header>
+
+            <!-- Generate Code Section -->
+            <div id="generateCodeSection">
+                <div style="margin-bottom:1rem;">
+                    <label style="display:block;margin-bottom:0.25rem;font-size:0.9rem;font-weight:500;">Active for (minutes)</label>
+                    <input id="codeDuration" type="number" min="1" max="60" value="10" style="width:100px;padding:0.5rem;border:1px solid #ddd;border-radius:4px;">
+                </div>
+                <button id="generateCodeBtn" class="submit-btn" style="margin-bottom:1rem;">Generate Team Meeting Code</button>
+                <div id="currentCodeDisplay" style="padding:1rem;background:#f5f5f5;border-radius:4px;margin-bottom:1rem;"></div>
+                <p id="codeMessage" class="attendance-message"></p>
+            </div>
+
+            <!-- Team Meeting Sessions List -->
+            <div style="margin-top:2rem;">
+                <h3 style="margin-bottom:1rem;">Team Meeting Sessions</h3>
+                <div id="teamSessionsContainer"></div>
+            </div>
+        </article>
+    </section>
+
+    <!-- ============================================================
+         SUBMIT ATTENDANCE DRAWER
          ============================================================ -->
     <section class="attendance-panel" id="attendancePanel" aria-hidden="true">
         <article class="attendance-drawer">
             <header>
                 <div>
                     <p class="meta-label">Attendance</p>
-                    <h2>Enter Attendance Code</h2>
-                    <p>Enter the code announced during class.</p>
+                    <h2>Submit Attendance</h2>
+                    <p>Enter attendance codes for class and team meetings.</p>
                 </div>
                 <button class="close-attendance" aria-label="Close attendance drawer">×</button>
             </header>
 
-            <!-- Attendance Input -->
-            <div class="attendance-input-box">
-                <input id="attendanceInput" type="text" placeholder="Enter code…" />
-                <button id="attendanceSubmitBtn" class="submit-btn">Submit</button>
+            <!-- Class Meeting Attendance -->
+            <div class="attendance-section">
+                <h3 style="margin-bottom:0.5rem;">Class Meeting Attendance</h3>
+                <p style="font-size:0.85rem;color:#666;margin-bottom:0.75rem;">Enter code from professor</p>
+                <div class="attendance-input-box">
+                    <input id="classAttendanceInput" type="text" placeholder="Enter class code…" />
+                    <button id="classAttendanceSubmitBtn" class="submit-btn">Submit</button>
+                </div>
+                <p id="classAttendanceMessage" class="attendance-message"></p>
             </div>
 
-            <!-- Success/Error Message -->
-            <p id="attendanceMessage" class="attendance-message"></p>
+            <!-- Team Meeting Attendance -->
+            <div class="attendance-section" style="margin-top:1.5rem;">
+                <h3 style="margin-bottom:0.5rem;">Team Meeting Attendance</h3>
+                <p style="font-size:0.85rem;color:#666;margin-bottom:0.75rem;">Enter code from team lead</p>
+                <div class="attendance-input-box">
+                    <input id="teamAttendanceInput" type="text" placeholder="Enter team code…" />
+                    <button id="teamAttendanceSubmitBtn" class="submit-btn">Submit</button>
+                </div>
+                <p id="teamAttendanceMessage" class="attendance-message"></p>
+            </div>
 
             <!-- Attendance Record -->
-            <div class="attendance-record-box">
+            <div class="attendance-record-box" style="margin-top:1.5rem;">
                 <h3>Your Attendance Record</h3>
-                <p id="attendanceOverall" class="attendance-overall"></p>
 
-                <table class="attendance-table">
-                    <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceRecordBody"></tbody>
-                </table>
+                <!-- Class Meeting Attendance Section -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Class Meeting Attendance</h4>
+                    <p id="classAttendanceOverall" class="attendance-overall" style="margin-bottom: 0.75rem;"></p>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classAttendanceRecordBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Team Meeting Attendance Section -->
+                <div>
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Team Meeting Attendance</h4>
+                    <p id="teamAttendanceOverall" class="attendance-overall" style="margin-bottom: 0.75rem;"></p>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamAttendanceRecordBody"></tbody>
+                    </table>
+                </div>
             </div>
         </article>
     </section>
 
+    <!-- View Attendance Plot Panel -->
+    <section class="attendance-panel" id="attendancePlotPanel" aria-hidden="true">
+        <article class="attendance-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Attendance</p>
+                    <h2>View Attendance</h2>
+                    <p>View attendance plots and statistics for your team.</p>
+                </div>
+                <button class="close-attendance-plot" aria-label="Close">×</button>
+            </header>
+            <div id="teamPlotSection">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <h3>Team Meeting Attendance</h3>
+                    <button id="toggleTeamPlot" style="padding:0.25rem 0.5rem;font-size:0.85rem;">Hide</button>
+                </div>
+                <div id="teamPlotContent">
+                    <div class="plot-stats" style="margin-bottom:0.5rem;font-size:0.9rem;color:#666;"></div>
+                    <div id="teamAttendancePlot" style="height:300px;"></div>
+                </div>
+            </div>
+            <div id="classPlotSection" style="margin-top:1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <h3>Class Meeting Attendance</h3>
+                    <button id="toggleClassPlot" style="padding:0.25rem 0.5rem;font-size:0.85rem;">Hide</button>
+                </div>
+                <div id="classPlotContent">
+                    <div class="plot-stats" style="margin-bottom:0.5rem;font-size:0.9rem;color:#666;"></div>
+                    <div id="classAttendancePlot" style="height:300px;"></div>
+                </div>
+            </div>
+        </article>
+    </section>
 
     <!-- Evaluation Drawer (unchanged) -->
     <section class="evaluation-panel" aria-hidden="true">
@@ -208,7 +332,7 @@
          NAV, PROFILE, & ATTENDANCE LOGIC JS
          ============================================================ -->
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
     <script src="student_weekly_eval.js"></script>
     <script src="../../shared/auth.js"></script>
     <script>
@@ -258,18 +382,33 @@
     </script>
 
         <script>
-            // Backend-integrated attendance (mirrors student dashboard logic)
             document.addEventListener('DOMContentLoaded', () => {
                 const API_BASE = '/api';
-
+                
+                // Generate Code Drawer
+                const generateCodePanel = document.getElementById('generateCodePanel');
+                const openGenerateCodeBtn = document.getElementById('openGenerateCodeDrawer');
+                const closeGenerateCodeBtn = document.querySelector('.close-generate-code');
+                const codeDuration = document.getElementById('codeDuration');
+                const generateCodeBtn = document.getElementById('generateCodeBtn');
+                const currentCodeDisplay = document.getElementById('currentCodeDisplay');
+                const codeMessage = document.getElementById('codeMessage');
+                const teamSessionsContainer = document.getElementById('teamSessionsContainer');
+                
+                // Submit Attendance Drawer
                 const drawer = document.getElementById('attendancePanel');
                 const openBtn = document.getElementById('openAttendanceDrawer');
                 const closeBtn = document.querySelector('.close-attendance');
-                const input = document.getElementById('attendanceInput');
-                const submitBtn = document.getElementById('attendanceSubmitBtn');
-                const messageEl = document.getElementById('attendanceMessage');
-                const recordBody = document.getElementById('attendanceRecordBody');
-                const overallEl = document.getElementById('attendanceOverall');
+                const classInput = document.getElementById('classAttendanceInput');
+                const classSubmitBtn = document.getElementById('classAttendanceSubmitBtn');
+                const classMessageEl = document.getElementById('classAttendanceMessage');
+                const teamInput = document.getElementById('teamAttendanceInput');
+                const teamSubmitBtn = document.getElementById('teamAttendanceSubmitBtn');
+                const teamMessageEl = document.getElementById('teamAttendanceMessage');
+                const classRecordBody = document.getElementById('classAttendanceRecordBody');
+                const classOverallEl = document.getElementById('classAttendanceOverall');
+                const teamRecordBody = document.getElementById('teamAttendanceRecordBody');
+                const teamOverallEl = document.getElementById('teamAttendanceOverall');
 
                 function fetchJSON(url, options = {}) {
                     return fetch(url, {
@@ -293,86 +432,453 @@
                 }
 
                 const email = getCurrentUserEmail();
+                let currentTimerId = null;
 
-                function loadAttendanceHistory() {
-                    fetchJSON(`${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`)
-                        .then((data) => {
-                            const sessions = Array.isArray(data.sessions) ? data.sessions : [];
-                            const presentCount = data.presentCount || 0;
-                            const total = data.totalSessions || sessions.length;
-                            const pct = total ? Math.round((presentCount / total) * 100) : 0;
+                // Generate Code Drawer handlers
+                function openGenerateCodeDrawer() {
+                    generateCodePanel.setAttribute('aria-hidden', 'false');
+                    loadTeamSessions();
+                    loadCurrentCode();
+                }
+                function closeGenerateCodeDrawer() {
+                    generateCodePanel.setAttribute('aria-hidden', 'true');
+                }
+                if (openGenerateCodeBtn) openGenerateCodeBtn.addEventListener('click', openGenerateCodeDrawer);
+                if (closeGenerateCodeBtn) closeGenerateCodeBtn.addEventListener('click', closeGenerateCodeDrawer);
+                generateCodePanel.addEventListener('click', (e) => { if (e.target === generateCodePanel) closeGenerateCodeDrawer(); });
 
-                            if (!sessions.length) {
-                                recordBody.innerHTML = '<tr><td colspan="2">No attendance sessions created yet.</td></tr>';
-                                overallEl.textContent = '';
-                                return;
-                            }
-
-                            const rowsHtml = sessions
-                                .slice()
-                                .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
-                                .map((s) => {
-                                    const when = new Date(s.createdAt).toLocaleString();
-                                    const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
-                                    return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
-                                })
-                                .join('');
-
-                            recordBody.innerHTML = rowsHtml;
-                            overallEl.textContent = `Present ${presentCount} out of ${total} sessions (${pct}%)`;
-                        })
-                        .catch((err) => {
-                            console.error('[team_lead] Attendance history error:', err);
-                            recordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
-                            overallEl.textContent = '';
+                // Generate code
+                async function handleGenerateCode() {
+                    const duration = parseInt(codeDuration.value, 10) || 10;
+                    try {
+                        const session = await fetchJSON(`${API_BASE}/attendance/sessions`, {
+                            method: 'POST',
+                            body: JSON.stringify({ durationMinutes: duration, type: 'team_meeting' }),
                         });
+                        renderCurrentCode(session);
+                        codeMessage.textContent = 'Code generated successfully!';
+                        codeMessage.style.color = '#0a7a30';
+                    } catch (err) {
+                        console.error('[team_lead] Failed to generate code:', err);
+                        codeMessage.textContent = 'Failed to generate code. Please try again.';
+                        codeMessage.style.color = '#b00020';
+                    }
                 }
 
-                function openDrawer() {
-                    drawer.setAttribute('aria-hidden', 'false');
-                    input.value = '';
-                    messageEl.textContent = '';
-                    messageEl.style.color = '#333';
-                    loadAttendanceHistory();
+                async function loadCurrentCode() {
+                    try {
+                        const sessions = await fetchJSON(`${API_BASE}/attendance/sessions`);
+                        const active = (sessions || []).filter(s => {
+                            const expiresAt = new Date(s.expiresAt);
+                            return expiresAt > new Date();
+                        });
+                        if (active.length) {
+                            const current = active.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+                            renderCurrentCode(current);
+                        } else if (sessions && sessions.length) {
+                            const current = sessions.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+                            renderCurrentCode(current);
+                        } else {
+                            renderCurrentCode(null);
+                        }
+                    } catch (err) {
+                        console.error('[team_lead] Failed to load current code:', err);
+                        renderCurrentCode(null);
+                    }
                 }
-                function closeDrawer() {
-                    drawer.setAttribute('aria-hidden', 'true');
-                }
-                openBtn.addEventListener('click', openDrawer);
-                closeBtn.addEventListener('click', closeDrawer);
-                drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
 
-                async function handleSubmit() {
-                    const code = (input.value || '').trim().toUpperCase();
+                async function loadTeamSessions() {
+                    try {
+                        const sessions = await fetchJSON(`${API_BASE}/attendance/sessions`);
+                        renderTeamSessions(sessions || []);
+                    } catch (err) {
+                        console.error('[team_lead] Failed to load team sessions:', err);
+                        teamSessionsContainer.innerHTML = '<p style="color:#b00020;">Failed to load sessions.</p>';
+                    }
+                }
+
+                function renderTeamSessions(sessions) {
+                    if (!sessions.length) {
+                        teamSessionsContainer.innerHTML = '<p style="color:#666;">No team meeting sessions yet.</p>';
+                        return;
+                    }
+                    const sorted = sessions.slice().sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    const html = sorted.map(s => {
+                        const createdAt = new Date(s.createdAt).toLocaleString();
+                        const expiresAt = new Date(s.expiresAt).toLocaleString();
+                        const isActive = new Date(s.expiresAt) > new Date();
+                        return `
+                            <div style="padding:1rem;border:1px solid #ddd;border-radius:4px;margin-bottom:0.5rem;">
+                                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;">
+                                    <div>
+                                        <div style="font-weight:600;margin-bottom:0.25rem;">Code: ${s.code}</div>
+                                        <div style="font-size:0.85rem;color:#666;">Created: ${createdAt}</div>
+                                        <div style="font-size:0.85rem;color:#666;">Expires: ${expiresAt}</div>
+                                        <div style="font-size:0.85rem;color:#666;margin-top:0.25rem;">Present: ${s.presentCount || 0}</div>
+                                    </div>
+                                    <span style="padding:0.25rem 0.5rem;border-radius:12px;font-size:0.75rem;background:${isActive ? '#d1fae5' : '#fee2e2'};color:${isActive ? '#065f46' : '#991b1b'};">${isActive ? 'Active' : 'Expired'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                    teamSessionsContainer.innerHTML = html;
+                }
+
+                function renderCurrentCode(session) {
+                    currentCodeDisplay.innerHTML = '';
+                    if (currentTimerId) {
+                        clearInterval(currentTimerId);
+                        currentTimerId = null;
+                    }
+                    if (!session) {
+                        currentCodeDisplay.textContent = 'No active code.';
+                        return;
+                    }
+                    const expiresAt = new Date(session.expiresAt);
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = `
+                        <div style="font-size:1.2rem;font-weight:700;margin-bottom:0.5rem;">Current code: <strong>${session.code}</strong></div>
+                        <div style="font-size:0.85rem;color:#666;">Created at ${new Date(session.createdAt).toLocaleString()}</div>
+                        <div style="font-size:0.85rem;color:#666;">Expires at ${expiresAt.toLocaleString()}</div>
+                        <div id="codeStatus" style="font-size:0.85rem;margin-top:0.25rem;"></div>
+                    `;
+                    currentCodeDisplay.appendChild(wrapper);
+                    const statusEl = document.getElementById('codeStatus');
+                    function updateStatus() {
+                        const now = new Date();
+                        const remaining = expiresAt.getTime() - now.getTime();
+                        if (remaining <= 0) {
+                            statusEl.textContent = 'Status: expired';
+                            statusEl.style.color = '#b00020';
+                            if (currentTimerId) {
+                                clearInterval(currentTimerId);
+                                currentTimerId = null;
+                            }
+                            return;
+                        }
+                        const minutes = Math.floor(remaining / 60000);
+                        const seconds = Math.floor((remaining % 60000) / 1000);
+                        statusEl.textContent = `Status: active · ${minutes}m ${seconds}s remaining`;
+                        statusEl.style.color = '#0a7a30';
+                    }
+                    updateStatus();
+                    currentTimerId = setInterval(updateStatus, 1000);
+                }
+
+                async function handleGenerateCode() {
+                    const duration = parseInt(codeDuration.value, 10) || 10;
+                    try {
+                        const session = await fetchJSON(`${API_BASE}/attendance/sessions`, {
+                            method: 'POST',
+                            body: JSON.stringify({ durationMinutes: duration, type: 'team_meeting' }),
+                        });
+                        renderCurrentCode(session);
+                        codeMessage.textContent = 'Code generated successfully!';
+                        codeMessage.style.color = '#0a7a30';
+                        loadTeamSessions();
+                    } catch (err) {
+                        console.error('[team_lead] Failed to generate code:', err);
+                        codeMessage.textContent = 'Failed to generate code. Please try again.';
+                        codeMessage.style.color = '#b00020';
+                    }
+                }
+
+                generateCodeBtn.addEventListener('click', handleGenerateCode);
+
+                // Attendance submission (separated class/team, mirroring student)
+                async function loadAttendanceHistory() {
+                    try {
+                        const data = await fetchJSON(`${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`);
+
+                        const classData = data.classMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
+                        const teamData = data.teamMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
+
+                        const classSessions = Array.isArray(classData.sessions) ? classData.sessions : [];
+                        const teamSessions = Array.isArray(teamData.sessions) ? teamData.sessions : [];
+
+                        const classPresentCount = typeof classData.presentCount === 'number' ? classData.presentCount : 0;
+                        const classTotal = typeof classData.totalSessions === 'number' ? classData.totalSessions : classSessions.length;
+                        const teamPresentCount = typeof teamData.presentCount === 'number' ? teamData.presentCount : 0;
+                        const teamTotal = typeof teamData.totalSessions === 'number' ? teamData.totalSessions : teamSessions.length;
+
+                        // Render class meeting attendance
+                        classRecordBody.innerHTML = '';
+                        if (!classSessions.length) {
+                            classRecordBody.innerHTML = '<tr><td colspan="2">No class meeting sessions have been created yet.</td></tr>';
+                            classOverallEl.textContent = '';
+                        } else {
+                            const classPct = classTotal ? Math.round((classPresentCount / classTotal) * 100) : 0;
+                            const sortedClass = classSessions.slice().sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                            const classRowsHtml = sortedClass.map((s) => {
+                                const when = new Date(s.createdAt).toLocaleString();
+                                const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
+                                return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
+                            }).join('');
+                            classRecordBody.innerHTML = classRowsHtml;
+                            classOverallEl.textContent = `Present ${classPresentCount} out of ${classTotal} sessions (${classPct}%)`;
+                        }
+
+                        // Render team meeting attendance
+                        teamRecordBody.innerHTML = '';
+                        if (!teamSessions.length) {
+                            teamRecordBody.innerHTML = '<tr><td colspan="2">No team meeting sessions have been created yet.</td></tr>';
+                            teamOverallEl.textContent = '';
+                        } else {
+                            const teamPct = teamTotal ? Math.round((teamPresentCount / teamTotal) * 100) : 0;
+                            const sortedTeam = teamSessions.slice().sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+                            const teamRowsHtml = sortedTeam.map((s) => {
+                                const when = new Date(s.createdAt).toLocaleString();
+                                const status = (s.status || '').toLowerCase() === 'present' ? 'Present' : 'Absent';
+                                return `<tr><td>Session on ${when}</td><td>${status}</td></tr>`;
+                            }).join('');
+                            teamRecordBody.innerHTML = teamRowsHtml;
+                            teamOverallEl.textContent = `Present ${teamPresentCount} out of ${teamTotal} sessions (${teamPct}%)`;
+                        }
+                    } catch (err) {
+                        console.error('[team_lead] Attendance history error:', err);
+                        classRecordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
+                        teamRecordBody.innerHTML = '<tr><td colspan="2" style="color:#b00020;">Failed to load attendance history.</td></tr>';
+                        classOverallEl.textContent = '';
+                        teamOverallEl.textContent = '';
+                    }
+                }
+
+                async function handleClassSubmit() {
+                    const code = (classInput.value || '').trim().toUpperCase();
                     if (!code) {
-                        messageEl.textContent = 'Please enter a code.';
-                        messageEl.style.color = '#b00020';
+                        classMessageEl.textContent = 'Please enter a code.';
+                        classMessageEl.style.color = '#b00020';
                         return;
                     }
                     try {
                         const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
                             method: 'POST',
-                            body: JSON.stringify({ code, email }),
+                            body: JSON.stringify({ code, email, type: 'class_meeting' }),
                         });
                         if (result && result.success) {
-                            messageEl.textContent = '✔ You are marked present for this session.';
-                            messageEl.style.color = '#0a7a30';
+                            classMessageEl.textContent = '✔ You are marked present for this class session.';
+                            classMessageEl.style.color = '#0a7a30';
+                            classInput.value = '';
                             loadAttendanceHistory();
                         } else {
-                            messageEl.textContent = (result && result.message) || 'Invalid or expired code.';
-                            messageEl.style.color = '#b00020';
+                            classMessageEl.textContent = (result && result.message) || 'Code not found or expired.';
+                            classMessageEl.style.color = '#b00020';
                         }
                     } catch (err) {
                         console.error('[team_lead] Failed to mark attendance:', err);
-                        messageEl.textContent = 'Could not submit attendance. Please retry.';
-                        messageEl.style.color = '#b00020';
+                        classMessageEl.textContent = 'Could not submit attendance. Please try again.';
+                        classMessageEl.style.color = '#b00020';
                     }
                 }
 
-                submitBtn.addEventListener('click', handleSubmit);
-                input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleSubmit(); } });
+                async function handleTeamSubmit() {
+                    const code = (teamInput.value || '').trim().toUpperCase();
+                    if (!code) {
+                        teamMessageEl.textContent = 'Please enter a code.';
+                        teamMessageEl.style.color = '#b00020';
+                        return;
+                    }
+                    try {
+                        const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
+                            method: 'POST',
+                            body: JSON.stringify({ code, email, type: 'team_meeting' }),
+                        });
+                        if (result && result.success) {
+                            teamMessageEl.textContent = '✔ You are marked present for this team meeting.';
+                            teamMessageEl.style.color = '#0a7a30';
+                            teamInput.value = '';
+                            loadAttendanceHistory();
+                        } else {
+                            teamMessageEl.textContent = (result && result.message) || 'Code not found or expired.';
+                            teamMessageEl.style.color = '#b00020';
+                        }
+                    } catch (err) {
+                        console.error('[team_lead] Failed to mark attendance:', err);
+                        teamMessageEl.textContent = 'Could not submit attendance. Please try again.';
+                        teamMessageEl.style.color = '#b00020';
+                    }
+                }
+
+                classSubmitBtn.addEventListener('click', handleClassSubmit);
+                classInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleClassSubmit(); } });
+                teamSubmitBtn.addEventListener('click', handleTeamSubmit);
+                teamInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); handleTeamSubmit(); } });
+
+                function openDrawer() {
+                    drawer.setAttribute('aria-hidden', 'false');
+                    classInput.value = '';
+                    teamInput.value = '';
+                    classMessageEl.textContent = '';
+                    teamMessageEl.textContent = '';
+                    loadAttendanceHistory();
+                }
+                function closeDrawer() {
+                    drawer.setAttribute('aria-hidden', 'true');
+                }
+                if (openBtn) openBtn.addEventListener('click', openDrawer);
+                if (closeBtn) closeBtn.addEventListener('click', closeDrawer);
+                drawer.addEventListener('click', (e) => { if (e.target === drawer) closeDrawer(); });
             });
         </script>
+        <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Helper to detect UUID-like strings
+    function isUuidLike(str) {
+      if (!str || typeof str !== 'string') return false;
+      // Match UUID pattern or long strings of digits with dashes
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str) || 
+             /^\d{6,}/.test(str) ||
+             (str.includes('-') && str.replace(/-/g, '').length > 20);
+    }
+
+    function getCurrentCourseLabel() {
+      let courseLabel = 'CSE 210';
+      try {
+        if (window.ConductorAuth && typeof ConductorAuth.getCurrentUser === 'function') {
+          const user = ConductorAuth.getCurrentUser();
+          if (user && (user.courseCode || user.courseName)) {
+            return user.courseCode || user.courseName;
+          }
+        }
+        const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (stored) {
+          // Prefer courseName over courseCode
+          if (stored.courseName && !isUuidLike(stored.courseName)) return stored.courseName;
+          if (stored.courseCode && !isUuidLike(stored.courseCode)) return stored.courseCode;
+          // Skip classId as it's usually a UUID
+        }
+      } catch (e) {
+        console.warn('[team_lead] Could not read current course:', e);
+      }
+      return courseLabel;
+    }
+
+    const lbl = document.getElementById('teamLeadCourseLabel')
+      || document.querySelector('.dashboard-header small');
+
+    if (lbl) {
+      const baseText = 'Team Lead view';
+      const courseLabel = getCurrentCourseLabel();
+      lbl.textContent = `${baseText} · ${courseLabel}`;
+    }
+  });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  // View Attendance Plot for Team Lead
+  document.addEventListener('DOMContentLoaded', async () => {
+    const API_BASE = '/api';
+    const plotPanel = document.getElementById('attendancePlotPanel');
+    const viewBtn = document.getElementById('viewAttendanceBtn');
+    if (!plotPanel || !viewBtn) return;
+
+    async function fetchJSON(url) {
+      const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+    }
+
+    async function getUserTeamId() {
+      try {
+        const teams = await fetchJSON(`${API_BASE}/teams`);
+        return teams.length > 0 ? teams[0].id : null;
+      } catch (err) {
+        console.error('Failed to get team:', err);
+        return null;
+      }
+    }
+
+    async function loadPlots(teamId) {
+      if (!teamId) return;
+      try {
+        const [classData, teamData] = await Promise.all([
+          fetchJSON(`${API_BASE}/attendance/plot?teamId=${teamId}&type=class_meeting`),
+          fetchJSON(`${API_BASE}/attendance/plot?teamId=${teamId}&type=team_meeting`),
+        ]);
+        renderPlot('classAttendancePlot', classData, '#2196F3', 'classPlotSection');
+        renderPlot('teamAttendancePlot', teamData, '#4CAF50', 'teamPlotSection');
+      } catch (err) {
+        console.error('Failed to load plots:', err);
+      }
+    }
+
+    function renderPlot(containerId, data, color, sectionId) {
+      const container = document.getElementById(containerId);
+      const section = document.getElementById(sectionId);
+      if (!container || !data.periods || data.periods.length === 0) {
+        container.innerHTML = '<p style="color:#666;">No data available.</p>';
+        return;
+      }
+      const content = section.querySelector('[id$="PlotContent"]');
+      const statsEl = content ? content.querySelector('.plot-stats') : section.querySelector('.plot-stats');
+      if (statsEl) {
+        statsEl.innerHTML = `<strong>Average:</strong> ${data.averageRate}% | <strong>Members:</strong> ${data.totalMembers} | <strong>Periods:</strong> ${data.totalPeriods}`;
+      }
+      const canvas = document.createElement('canvas');
+      container.innerHTML = '';
+      container.appendChild(canvas);
+      if (window.Chart) {
+        new Chart(canvas.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: data.periods.map(p => p.label),
+            datasets: [{
+              label: 'Attendance Rate (%)',
+              data: data.periods.map(p => p.attendanceRate),
+              borderColor: color,
+              backgroundColor: color + '20',
+              fill: true,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true, max: 100 } },
+          },
+        });
+      }
+    }
+
+    document.getElementById('toggleClassPlot')?.addEventListener('click', () => {
+      const toggle = document.getElementById('toggleClassPlot');
+      const content = document.getElementById('classPlotContent');
+      const isCurrentlyHidden = toggle.textContent.trim() === 'Show';
+      
+      if (isCurrentlyHidden) {
+        content.style.display = 'block';
+        toggle.textContent = 'Hide';
+      } else {
+        content.style.display = 'none';
+        toggle.textContent = 'Show';
+      }
+    });
+    document.getElementById('toggleTeamPlot')?.addEventListener('click', () => {
+      const toggle = document.getElementById('toggleTeamPlot');
+      const content = document.getElementById('teamPlotContent');
+      const isCurrentlyHidden = toggle.textContent.trim() === 'Show';
+      
+      if (isCurrentlyHidden) {
+        content.style.display = 'block';
+        toggle.textContent = 'Hide';
+      } else {
+        content.style.display = 'none';
+        toggle.textContent = 'Show';
+      }
+    });
+
+    viewBtn.addEventListener('click', async () => {
+      plotPanel.setAttribute('aria-hidden', 'false');
+      const teamId = await getUserTeamId();
+      if (teamId) loadPlots(teamId);
+    });
+    document.querySelector('.close-attendance-plot')?.addEventListener('click', () => {
+      plotPanel.setAttribute('aria-hidden', 'true');
+    });
+    plotPanel.addEventListener('click', (e) => {
+      if (e.target === plotPanel) plotPanel.setAttribute('aria-hidden', 'true');
+    });
+  });
+</script>
 
 </body>
 </html>

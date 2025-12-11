@@ -2,8 +2,8 @@
 const db = require('./index');
 const { getCurrentCourseId } = require('./classDirectory');
 
-async function getTeamCard(teamId) {
-  const courseId = getCurrentCourseId();
+async function getTeamCard(teamId, courseIdOverride = null) {
+  const courseId = courseIdOverride || getCurrentCourseId();
   if (!courseId || !teamId) return null;
 
   // Base team info
@@ -67,91 +67,88 @@ async function getTeamCard(teamId) {
   };
 }
 
-async function getTeamsForUser({ email, userId }) {
-  const courseId = getCurrentCourseId();
-  if (!courseId || (!email && !userId)) return [];
 
-  let resolvedUserId = userId;
-  if (!resolvedUserId && email) {
-    const { rows } = await db.query(
-      `SELECT id FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1`,
-      [email]
-    );
-    if (!rows.length) return [];
-    resolvedUserId = rows[0].id;
+
+
+async function getTeamsForUser({ userId, email, courseId }) {
+  // Pick courseId from argument, falling back to global default
+  const effectiveCourseId = courseId || getCurrentCourseId();
+  if (!effectiveCourseId) {
+    return [];
   }
-  if (!resolvedUserId) return [];
 
-  const { rows: teamRows } = await db.query(
-    `SELECT t.id,
-            t.code,
-            t.name,
-            t.display_number,
-            t.status,
-            t.description,
-            t.status_description,
-            t.repo_url
-     FROM team_members tm
-     JOIN teams t ON t.id = tm.team_id
-     WHERE tm.user_id = $1 AND t.course_id = $2
-     ORDER BY t.created_at ASC`,
-    [resolvedUserId, courseId]
+  // Resolve userId from email if needed
+  let userIdToUse = userId;
+  if (!userIdToUse && email) {
+    const { rows: userRows } = await db.query(
+      'SELECT id FROM users WHERE LOWER(email) = LOWER($1) LIMIT 1',
+      [email.trim().toLowerCase()],
+    );
+    if (!userRows.length) {
+      return [];
+    }
+    userIdToUse = userRows[0].id;
+  }
+
+  if (!userIdToUse) {
+    return [];
+  }
+
+  const { rows } = await db.query(
+    `
+      SELECT
+        t.id,
+        t.code,
+        t.name,
+        t.display_number,
+        t.status,
+        t.description,
+        t.repo_url,
+        EXISTS (
+          SELECT 1
+          FROM team_members tm2
+          WHERE tm2.team_id = t.id
+            AND tm2.user_id = $2
+            AND tm2.is_leader = TRUE
+        ) AS is_leader
+      FROM teams t
+      JOIN team_members tm
+        ON tm.team_id = t.id
+      WHERE t.course_id = $1
+        AND tm.user_id = $2
+      ORDER BY t.display_number::int NULLS LAST, t.created_at ASC
+    `,
+    [effectiveCourseId, userIdToUse],
   );
 
-  if (!teamRows.length) return [];
-
-  // Preload all member lists & TA assignments for returned teams
-  const teamIds = teamRows.map(t => t.id);
-
-  const { rows: allMembers } = await db.query(
-    `SELECT tm.team_id,
-            tm.user_id AS id,
-            u.display_name AS name,
-            u.email,
-            tm.is_leader
-     FROM team_members tm
-     JOIN users u ON u.id = tm.user_id
-     WHERE tm.team_id = ANY($1::uuid[])`,
-    [teamIds]
-  );
-
-  const { rows: allTas } = await db.query(
-    `SELECT taa.team_id, u.id, u.display_name, u.email
-     FROM team_ta_assignments taa
-     JOIN users u ON u.id = taa.ta_user_id
-     WHERE taa.team_id = ANY($1::uuid[])`,
-    [teamIds]
-  );
-
-  return teamRows.map(t => ({
-    id: t.id,
-    code: t.code,
-    name: t.name,
-    displayNumber: t.display_number,
-    status: t.status,
-    description: t.description || '',
-    statusDescription: t.status_description || '',
-    repoUrl: t.repo_url || '',
-    ta: (allTas.find(x => x.team_id === t.id) ? {
-      id: allTas.find(x => x.team_id === t.id).id,
-      name: allTas.find(x => x.team_id === t.id).display_name,
-      email: allTas.find(x => x.team_id === t.id).email,
-    } : null),
-    members: allMembers.filter(m => m.team_id === t.id).map(m => ({
-      id: m.id,
-      name: m.name,
-      email: m.email,
-      isLeader: m.is_leader,
-    }))
+  return rows.map((r) => ({
+    id: r.id,
+    code: r.code,
+    name: r.name,
+    displayNumber: r.display_number,
+    status: r.status,
+    description: r.description,
+    repoUrl: r.repo_url || '',
+    isLeader: r.is_leader,
   }));
 }
 
+module.exports = {
+  // keep your other exports here:
+  // getTeamCard,
+  // updateTeamDescriptions,
+  getTeamsForUser,
+};
 /**
  * Update only the description and status_description for a team.
  * Returns the refreshed team card payload (same shape as getTeamCard).
  */
-async function updateTeamDescriptions(teamId, { description, statusDescription, repoUrl }) {
-  const courseId = getCurrentCourseId();
+async function updateTeamDescriptions(
+  teamId,
+  { description, statusDescription, repoUrl },
+  courseIdOverride = null,
+) {
+  const courseId = courseIdOverride || getCurrentCourseId();
   if (!courseId || !teamId) return null;
 
   // Perform partial update (skip columns if undefined)

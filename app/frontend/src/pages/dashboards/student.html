@@ -12,73 +12,74 @@
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+        
+  <header class="top-nav">
+      <div class="brand">
+          <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
+          <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
+
+      </div>
+      <div class="nav-actions">
+          <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
+              Teams Meetings and Tasks
+          </a>
+          <a href="/group_formation/student_group_form.html" class="nav-btn eval-btn">
+              Group Formation Form 
+          </a>
+          <a href="/student_ticket/student_ticket.html" class="nav-btn eval-btn">
+              Submit Tutor Ticket
+          </a>
+          <div class="profile">
+              <div class="profile-dropdown-container" style="position:relative;">
+                  <img
+                      id="dashboard-profile-img"
+                      src="/assets/logo/user.png"
+                      alt="Profile"
+                      style="width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;"
+                  />
+                  <div
+                      class="profile-dropdown"
+                      id="profileDropdown"
+                      style="
+                          display:none;
+                          position:absolute;
+                          top:40px;
+                          right:0;
+                          background:#fff;
+                          border:1px solid #ddd;
+                          border-radius:8px;
+                          box-shadow:0 2px 8px rgba(0,0,0,0.08);
+                          min-width:140px;
+                          z-index:10;
+                      "
+                  >
+                      <a
+                          href="/profile_page/profile.html"
+                          style="display:block; padding:10px 16px; color:#222; text-decoration:none;"
+                      >
+                          Profile
+                      </a>
+                      <a
+                          href="#"
+                          id="logoutBtn"
+                          style="display:block; padding:10px 16px; color:#d00; text-decoration:none;"
+                      >
+                          Log Out
+                      </a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </header>
+
     <div class="page" data-role="student">
-        <!-- ============================================================
-             TOP NAV
-        ============================================================ -->
-        <header class="top-nav">
-            <div class="brand">
-                <img src="../../../assets/logo/logo.png" alt="Conductor Tool Logo" class="logo-full">
-                <img src="../../../assets/logo/mini-logo.png" alt="Conductor Tool Logo" class="logo-mini">
-
-            </div>
-            <div class="nav-actions">
-                <a href="/team_meeting_task/team_meeting_task.html" class="nav-btn eval-btn">
-                    Teams Meetings and Tasks
-                </a>
-                <a href="/group_formation/student_group_form.html" class="nav-btn eval-btn">
-                    Group Formation Form 
-                </a>
-                <div class="profile">
-                    <div class="profile-dropdown-container" style="position:relative;">
-                        <img
-                            id="dashboard-profile-img"
-                            src="/assets/logo/user.png"
-                            alt="Profile"
-                            style="width:32px;height:32px;border-radius:50%;object-fit:cover;cursor:pointer;"
-                        />
-                        <div
-                            class="profile-dropdown"
-                            id="profileDropdown"
-                            style="
-                                display:none;
-                                position:absolute;
-                                top:40px;
-                                right:0;
-                                background:#fff;
-                                border:1px solid #ddd;
-                                border-radius:8px;
-                                box-shadow:0 2px 8px rgba(0,0,0,0.08);
-                                min-width:140px;
-                                z-index:10;
-                            "
-                        >
-                            <a
-                                href="/profile_page/profile.html"
-                                style="display:block; padding:10px 16px; color:#222; text-decoration:none;"
-                            >
-                                Profile
-                            </a>
-                            <a
-                                href="#"
-                                id="logoutBtn"
-                                style="display:block; padding:10px 16px; color:#d00; text-decoration:none;"
-                            >
-                                Log Out
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <!-- ============================================================
+               <!-- ============================================================
              HEADER
         ============================================================ -->
         <section class="dashboard-header">
             <div>
                 <h1>Student Dashboard</h1>
-                <small>Student view · CSE 210</small>
+                <small>Student view · </small>
             </div>
         </section>
 
@@ -162,6 +163,18 @@
                     <button id="openAttendanceDrawer" class="card-btn">Submit Attendance</button>
                 </div>
             </article>
+
+            <!-- View Attendance -->
+            <article class="dashboard-card">
+               <div class="card-icon">
+                    <img src="view.png" alt="Person Looking at Clock Icon">
+                </div> 
+                <div class="card-content">
+                    <h2>View Attendance</h2>
+                    <p>View attendance plots and statistics.</p>
+                    <button id="viewAttendanceBtn" class="card-btn">View Attendance</button>
+                </div>
+            </article>
         </section>
     </div>
 
@@ -186,29 +199,95 @@
                 <button class="close-attendance" aria-label="Close attendance drawer">×</button>
             </header>
 
-            <!-- Attendance Input -->
-            <div class="attendance-input-box">
-                <input id="attendanceInput" type="text" placeholder="Enter code…" />
-                <button id="attendanceSubmitBtn" class="submit-btn">Submit</button>
+            <!-- Class Meeting Attendance -->
+            <div class="attendance-section">
+                <h3 style="margin-bottom:0.5rem;">Class Meeting Attendance</h3>
+                <p style="font-size:0.85rem;color:#666;margin-bottom:0.75rem;">Enter code from professor</p>
+                <div class="attendance-input-box">
+                    <input id="classAttendanceInput" type="text" placeholder="Enter class code…" />
+                    <button id="classAttendanceSubmitBtn" class="submit-btn">Submit</button>
+                </div>
+                <p id="classAttendanceMessage" class="attendance-message"></p>
             </div>
 
-            <!-- Success/Error Message -->
-            <p id="attendanceMessage" class="attendance-message"></p>
+            <!-- Team Meeting Attendance -->
+            <div class="attendance-section" style="margin-top:1.5rem;">
+                <h3 style="margin-bottom:0.5rem;">Team Meeting Attendance</h3>
+                <p style="font-size:0.85rem;color:#666;margin-bottom:0.75rem;">Enter code from team lead</p>
+                <div class="attendance-input-box">
+                    <input id="teamAttendanceInput" type="text" placeholder="Enter team code…" />
+                    <button id="teamAttendanceSubmitBtn" class="submit-btn">Submit</button>
+                </div>
+                <p id="teamAttendanceMessage" class="attendance-message"></p>
+            </div>
 
             <!-- Attendance Record -->
             <div class="attendance-record-box">
                 <h3>Your Attendance Record</h3>
-                <p id="attendanceOverall" class="attendance-overall"></p>
+                
+                <!-- Class Meeting Attendance Section -->
+                <div style="margin-bottom: 2rem;">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Class Meeting Attendance</h4>
+                    <p id="classAttendanceOverall" class="attendance-overall" style="margin-bottom: 0.75rem;"></p>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classAttendanceRecordBody"></tbody>
+                    </table>
+                </div>
 
-                <table class="attendance-table">
-                    <thead>
-                        <tr>
-                            <th>Session</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="attendanceRecordBody"></tbody>
-                </table>
+                <!-- Team Meeting Attendance Section -->
+                <div>
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem; font-weight: 600;">Team Meeting Attendance</h4>
+                    <p id="teamAttendanceOverall" class="attendance-overall" style="margin-bottom: 0.75rem;"></p>
+                    <table class="attendance-table">
+                        <thead>
+                            <tr>
+                                <th>Session</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamAttendanceRecordBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <!-- View Attendance Plot Panel -->
+    <section class="attendance-panel" id="attendancePlotPanel" aria-hidden="true">
+        <article class="attendance-drawer">
+            <header>
+                <div>
+                    <p class="meta-label">Attendance</p>
+                    <h2>View Attendance</h2>
+                    <p>View attendance plots and statistics for your team.</p>
+                </div>
+                <button class="close-attendance-plot" aria-label="Close">×</button>
+            </header>
+            <div id="teamPlotSection">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <h3>Team Meeting Attendance</h3>
+                    <button id="toggleTeamPlot" style="padding:0.25rem 0.5rem;font-size:0.85rem;">Hide</button>
+                </div>
+                <div id="teamPlotContent">
+                    <div class="plot-stats" style="margin-bottom:0.5rem;font-size:0.9rem;color:#666;"></div>
+                    <div id="teamAttendancePlot" style="height:300px;"></div>
+                </div>
+            </div>
+            <div id="classPlotSection" style="margin-top:1.5rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+                    <h3>Class Meeting Attendance</h3>
+                    <button id="toggleClassPlot" style="padding:0.25rem 0.5rem;font-size:0.85rem;">Hide</button>
+                </div>
+                <div id="classPlotContent">
+                    <div class="plot-stats" style="margin-bottom:0.5rem;font-size:0.9rem;color:#666;"></div>
+                    <div id="classAttendancePlot" style="height:300px;"></div>
+                </div>
             </div>
         </article>
     </section>
@@ -262,7 +341,7 @@
     <!-- ============================================================
          MAIN DASHBOARD SCRIPT (existing behavior: open/close panels, etc.)
     ============================================================ -->
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
     <script src="../../shared/auth.js"></script>
     <!-- ============================================================
          STUDENT WEEKLY EVAL SCRIPT (calls /student/weekly-evaluation)
@@ -383,11 +462,10 @@
         const openBtn = document.getElementById('openAttendanceDrawer');
         const closeBtn = document.querySelector('.close-attendance');
 
-        const input = document.getElementById('attendanceInput');
-        const submitBtn = document.getElementById('attendanceSubmitBtn');
-        const messageEl = document.getElementById('attendanceMessage');
-        const recordBody = document.getElementById('attendanceRecordBody');
-        const overallEl = document.getElementById('attendanceOverall');
+        const classRecordBody = document.getElementById('classAttendanceRecordBody');
+        const classOverallEl = document.getElementById('classAttendanceOverall');
+        const teamRecordBody = document.getElementById('teamAttendanceRecordBody');
+        const teamOverallEl = document.getElementById('teamAttendanceOverall');
 
         const currentUser = getCurrentUser();
         const email =
@@ -399,15 +477,27 @@
           console.warn('[student] Attendance: missing currentUser email; attendance disabled.');
         }
 
+        const classInput = document.getElementById('classAttendanceInput');
+        const classSubmitBtn = document.getElementById('classAttendanceSubmitBtn');
+        const classMessageEl = document.getElementById('classAttendanceMessage');
+        const teamInput = document.getElementById('teamAttendanceInput');
+        const teamSubmitBtn = document.getElementById('teamAttendanceSubmitBtn');
+        const teamMessageEl = document.getElementById('teamAttendanceMessage');
+
         if (
           drawer &&
           openBtn &&
           closeBtn &&
-          input &&
-          submitBtn &&
-          messageEl &&
-          recordBody &&
-          overallEl &&
+          classInput &&
+          classSubmitBtn &&
+          classMessageEl &&
+          teamInput &&
+          teamSubmitBtn &&
+          teamMessageEl &&
+          classRecordBody &&
+          classOverallEl &&
+          teamRecordBody &&
+          teamOverallEl &&
           email
         ) {
           // ----------------------------
@@ -419,63 +509,111 @@
                 `${API_BASE}/attendance/history?email=${encodeURIComponent(email)}`,
               );
 
-              const sessions = Array.isArray(data.sessions) ? data.sessions : [];
-              const presentCount =
-                typeof data.presentCount === 'number' ? data.presentCount : 0;
-              const total =
-                typeof data.totalSessions === 'number'
-                  ? data.totalSessions
-                  : sessions.length;
+              // Get separated class and team meeting data
+              const classData = data.classMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
+              const teamData = data.teamMeetings || { sessions: [], presentCount: 0, totalSessions: 0 };
 
-              recordBody.innerHTML = '';
+              const classSessions = Array.isArray(classData.sessions) ? classData.sessions : [];
+              const teamSessions = Array.isArray(teamData.sessions) ? teamData.sessions : [];
 
-              if (!sessions.length) {
-                recordBody.innerHTML = `
+              const classPresentCount = typeof classData.presentCount === 'number' ? classData.presentCount : 0;
+              const classTotal = typeof classData.totalSessions === 'number' ? classData.totalSessions : classSessions.length;
+              const teamPresentCount = typeof teamData.presentCount === 'number' ? teamData.presentCount : 0;
+              const teamTotal = typeof teamData.totalSessions === 'number' ? teamData.totalSessions : teamSessions.length;
+
+              // Render class meeting attendance
+              classRecordBody.innerHTML = '';
+              if (!classSessions.length) {
+                classRecordBody.innerHTML = `
                   <tr>
-                    <td colspan="2">No attendance sessions have been created yet.</td>
+                    <td colspan="2">No class meeting sessions have been created yet.</td>
                   </tr>
                 `;
-                overallEl.textContent = '';
-                return;
+                classOverallEl.textContent = '';
+              } else {
+                const classPct = classTotal ? Math.round((classPresentCount / classTotal) * 100) : 0;
+                const sortedClass = classSessions
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime(),
+                  );
+
+                const classRowsHtml = sortedClass
+                  .map((s) => {
+                    const when = new Date(s.createdAt).toLocaleString();
+                    const status =
+                      (s.status || '').toLowerCase() === 'present'
+                        ? 'Present'
+                        : 'Absent';
+
+                    return `
+                      <tr>
+                        <td>Session on ${when}</td>
+                        <td>${status}</td>
+                      </tr>
+                    `;
+                  })
+                  .join('');
+
+                classRecordBody.innerHTML = classRowsHtml;
+                classOverallEl.textContent = `Present ${classPresentCount} out of ${classTotal} sessions (${classPct}%)`;
               }
 
-              const pct = total ? Math.round((presentCount / total) * 100) : 0;
+              // Render team meeting attendance
+              teamRecordBody.innerHTML = '';
+              if (!teamSessions.length) {
+                teamRecordBody.innerHTML = `
+                  <tr>
+                    <td colspan="2">No team meeting sessions have been created yet.</td>
+                  </tr>
+                `;
+                teamOverallEl.textContent = '';
+              } else {
+                const teamPct = teamTotal ? Math.round((teamPresentCount / teamTotal) * 100) : 0;
+                const sortedTeam = teamSessions
+                  .slice()
+                  .sort(
+                    (a, b) =>
+                      new Date(a.createdAt).getTime() -
+                      new Date(b.createdAt).getTime(),
+                  );
 
-              const sorted = sessions
-                .slice()
-                .sort(
-                  (a, b) =>
-                    new Date(a.createdAt).getTime() -
-                    new Date(b.createdAt).getTime(),
-                );
+                const teamRowsHtml = sortedTeam
+                  .map((s) => {
+                    const when = new Date(s.createdAt).toLocaleString();
+                    const status =
+                      (s.status || '').toLowerCase() === 'present'
+                        ? 'Present'
+                        : 'Absent';
 
-              const rowsHtml = sorted
-                .map((s) => {
-                  const when = new Date(s.createdAt).toLocaleString();
-                  const status =
-                    (s.status || '').toLowerCase() === 'present'
-                      ? 'Present'
-                      : 'Absent';
+                    return `
+                      <tr>
+                        <td>Session on ${when}</td>
+                        <td>${status}</td>
+                      </tr>
+                    `;
+                  })
+                  .join('');
 
-                  return `
-                    <tr>
-                      <td>Session on ${when}</td>
-                      <td>${status}</td>
-                    </tr>
-                  `;
-                })
-                .join('');
-
-              recordBody.innerHTML = rowsHtml;
-              overallEl.textContent = `Present ${presentCount} out of ${total} sessions (${pct}%)`;
+                teamRecordBody.innerHTML = teamRowsHtml;
+                teamOverallEl.textContent = `Present ${teamPresentCount} out of ${teamTotal} sessions (${teamPct}%)`;
+              }
             } catch (err) {
               console.error('[student] Failed to load attendance history:', err);
-              recordBody.innerHTML = `
+              classRecordBody.innerHTML = `
                 <tr>
                   <td colspan="2" style="color:#b00020;">Failed to load attendance history.</td>
                 </tr>
               `;
-              overallEl.textContent = '';
+              teamRecordBody.innerHTML = `
+                <tr>
+                  <td colspan="2" style="color:#b00020;">Failed to load attendance history.</td>
+                </tr>
+              `;
+              classOverallEl.textContent = '';
+              teamOverallEl.textContent = '';
             }
           }
 
@@ -484,9 +622,12 @@
           // ----------------------------
           function openDrawer() {
             drawer.setAttribute('aria-hidden', 'false');
-            input.value = '';
-            messageEl.textContent = '';
-            messageEl.style.color = '#333';
+            classInput.value = '';
+            teamInput.value = '';
+            classMessageEl.textContent = '';
+            teamMessageEl.textContent = '';
+            classMessageEl.style.color = '#333';
+            teamMessageEl.style.color = '#333';
             loadAttendanceHistory();
           }
 
@@ -497,7 +638,6 @@
           openBtn.addEventListener('click', openDrawer);
           closeBtn.addEventListener('click', closeDrawer);
 
-          // Optional: click backdrop closes
           drawer.addEventListener('click', (e) => {
             if (e.target === drawer) {
               closeDrawer();
@@ -505,47 +645,85 @@
           });
 
           // ----------------------------
-          // Submit code (POST to backend)
+          // Submit code handlers
           // ----------------------------
-          async function handleSubmit() {
-            const raw = input.value || '';
+          async function handleClassSubmit() {
+            const raw = classInput.value || '';
             const code = raw.trim().toUpperCase();
 
             if (!code) {
-              messageEl.textContent = 'Please enter a code.';
-              messageEl.style.color = '#b00020';
+              classMessageEl.textContent = 'Please enter a code.';
+              classMessageEl.style.color = '#b00020';
               return;
             }
 
             try {
               const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
                 method: 'POST',
-                body: JSON.stringify({ code, email }),
+                body: JSON.stringify({ code, email, type: 'class_meeting' }),
               });
 
               if (result && result.success) {
-                messageEl.textContent = '✔ You are marked present for this session.';
-                messageEl.style.color = '#0a7a30';
+                classMessageEl.textContent = '✔ You are marked present for this class session.';
+                classMessageEl.style.color = '#0a7a30';
+                classInput.value = '';
                 await loadAttendanceHistory();
               } else {
-                messageEl.textContent =
-                  (result && result.message) ||
-                  'Code not found or expired. Make sure you enter it during the class window.';
-                messageEl.style.color = '#b00020';
+                classMessageEl.textContent = (result && result.message) || 'Code not found or expired.';
+                classMessageEl.style.color = '#b00020';
               }
             } catch (err) {
               console.error('[student] Failed to mark attendance:', err);
-              messageEl.textContent =
-                'Could not submit attendance. Please check the code and try again.';
-              messageEl.style.color = '#b00020';
+              classMessageEl.textContent = 'Could not submit attendance. Please try again.';
+              classMessageEl.style.color = '#b00020';
             }
           }
 
-          submitBtn.addEventListener('click', handleSubmit);
-          input.addEventListener('keydown', (e) => {
+          async function handleTeamSubmit() {
+            const raw = teamInput.value || '';
+            const code = raw.trim().toUpperCase();
+
+            if (!code) {
+              teamMessageEl.textContent = 'Please enter a code.';
+              teamMessageEl.style.color = '#b00020';
+              return;
+            }
+
+            try {
+              const result = await fetchJSON(`${API_BASE}/attendance/mark`, {
+                method: 'POST',
+                body: JSON.stringify({ code, email, type: 'team_meeting' }),
+              });
+
+              if (result && result.success) {
+                teamMessageEl.textContent = '✔ You are marked present for this team meeting.';
+                teamMessageEl.style.color = '#0a7a30';
+                teamInput.value = '';
+                await loadAttendanceHistory();
+              } else {
+                teamMessageEl.textContent = (result && result.message) || 'Code not found or expired.';
+                teamMessageEl.style.color = '#b00020';
+              }
+            } catch (err) {
+              console.error('[student] Failed to mark attendance:', err);
+              teamMessageEl.textContent = 'Could not submit attendance. Please try again.';
+              teamMessageEl.style.color = '#b00020';
+            }
+          }
+
+          classSubmitBtn.addEventListener('click', handleClassSubmit);
+          classInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
               e.preventDefault();
-              handleSubmit();
+              handleClassSubmit();
+            }
+          });
+
+          teamSubmitBtn.addEventListener('click', handleTeamSubmit);
+          teamInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              handleTeamSubmit();
             }
           });
         } else {
@@ -555,6 +733,174 @@
         }
       });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script>
+      // View Attendance Plot
+      document.addEventListener('DOMContentLoaded', async () => {
+        const API_BASE = '/api';
+        const plotPanel = document.getElementById('attendancePlotPanel');
+        const viewBtn = document.getElementById('viewAttendanceBtn');
+        const closeBtn = document.querySelector('.close-attendance-plot');
+        if (!plotPanel || !viewBtn) return;
+
+        async function fetchJSON(url) {
+          const res = await fetch(url, { headers: { 'Content-Type': 'application/json' } });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        }
+
+        async function getUserTeamId() {
+          try {
+            const teams = await fetchJSON(`${API_BASE}/teams`);
+            return teams.length > 0 ? teams[0].id : null;
+          } catch (err) {
+            console.error('Failed to get team:', err);
+            return null;
+          }
+        }
+
+        async function loadPlots(teamId) {
+          if (!teamId) return;
+          try {
+            const [classData, teamData] = await Promise.all([
+              fetchJSON(`${API_BASE}/attendance/plot?teamId=${teamId}&type=class_meeting`),
+              fetchJSON(`${API_BASE}/attendance/plot?teamId=${teamId}&type=team_meeting`),
+            ]);
+            renderPlot('classAttendancePlot', classData, '#2196F3', 'classPlotSection');
+            renderPlot('teamAttendancePlot', teamData, '#4CAF50', 'teamPlotSection');
+          } catch (err) {
+            console.error('Failed to load plots:', err);
+          }
+        }
+
+        function renderPlot(containerId, data, color, sectionId) {
+          const container = document.getElementById(containerId);
+          const section = document.getElementById(sectionId);
+          if (!container || !data.periods || data.periods.length === 0) {
+            container.innerHTML = '<p style="color:#666;">No data available.</p>';
+            return;
+          }
+          const content = section.querySelector('[id$="PlotContent"]');
+          const statsEl = content ? content.querySelector('.plot-stats') : section.querySelector('.plot-stats');
+          if (statsEl) {
+            statsEl.innerHTML = `<strong>Average:</strong> ${data.averageRate}% | <strong>Members:</strong> ${data.totalMembers} | <strong>Periods:</strong> ${data.totalPeriods}`;
+          }
+          const canvas = document.createElement('canvas');
+          container.innerHTML = '';
+          container.appendChild(canvas);
+          if (window.Chart) {
+            new Chart(canvas.getContext('2d'), {
+              type: 'line',
+              data: {
+                labels: data.periods.map(p => p.label),
+                datasets: [{
+                  label: 'Attendance Rate (%)',
+                  data: data.periods.map(p => p.attendanceRate),
+                  borderColor: color,
+                  backgroundColor: color + '20',
+                  fill: true,
+                }],
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true, max: 100 } },
+              },
+            });
+          }
+        }
+
+        const classToggle = document.getElementById('toggleClassPlot');
+        const teamToggle = document.getElementById('toggleTeamPlot');
+        if (classToggle) {
+          classToggle.addEventListener('click', () => {
+            const content = document.getElementById('classPlotContent');
+            const isCurrentlyHidden = classToggle.textContent.trim() === 'Show';
+            
+            if (isCurrentlyHidden) {
+              // Show the plot
+              content.style.display = 'block';
+              classToggle.textContent = 'Hide';
+            } else {
+              // Hide the plot
+              content.style.display = 'none';
+              classToggle.textContent = 'Show';
+            }
+          });
+        }
+        if (teamToggle) {
+          teamToggle.addEventListener('click', () => {
+            const content = document.getElementById('teamPlotContent');
+            const isCurrentlyHidden = teamToggle.textContent.trim() === 'Show';
+            
+            if (isCurrentlyHidden) {
+              // Show the plot
+              content.style.display = 'block';
+              teamToggle.textContent = 'Hide';
+            } else {
+              // Hide the plot
+              content.style.display = 'none';
+              teamToggle.textContent = 'Show';
+            }
+          });
+        }
+
+        viewBtn.addEventListener('click', async () => {
+          plotPanel.setAttribute('aria-hidden', 'false');
+          const teamId = await getUserTeamId();
+          if (teamId) loadPlots(teamId);
+        });
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => plotPanel.setAttribute('aria-hidden', 'true'));
+        }
+        plotPanel.addEventListener('click', (e) => {
+          if (e.target === plotPanel) plotPanel.setAttribute('aria-hidden', 'true');
+        });
+      });
+    </script>
+    <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Helper to detect UUID-like strings
+    function isUuidLike(str) {
+      if (!str || typeof str !== 'string') return false;
+      // Match UUID pattern or long strings of digits with dashes
+      return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str) || 
+             /^\d{6,}/.test(str) ||
+             (str.includes('-') && str.replace(/-/g, '').length > 20);
+    }
+
+    function getCurrentCourseLabel() {
+      let courseLabel = 'CSE 210';
+      try {
+        if (window.ConductorAuth && typeof ConductorAuth.getCurrentUser === 'function') {
+          const user = ConductorAuth.getCurrentUser();
+          if (user && (user.courseCode || user.courseName)) {
+            return user.courseCode || user.courseName;
+          }
+        }
+        const stored = JSON.parse(localStorage.getItem('currentUser') || 'null');
+        if (stored) {
+          // Prefer courseName over courseCode
+          if (stored.courseName && !isUuidLike(stored.courseName)) return stored.courseName;
+          if (stored.courseCode && !isUuidLike(stored.courseCode)) return stored.courseCode;
+          // Skip classId as it's usually a UUID
+        }
+      } catch (e) {
+        console.warn('[student] Could not read current course:', e);
+      }
+      return courseLabel;
+    }
+
+    const headerSmall = document.querySelector('.dashboard-header small');
+    if (headerSmall) {
+      const raw = headerSmall.textContent || 'Student view';
+      const roleText = raw.split('·')[0].trim() || 'Student view';
+      const courseLabel = getCurrentCourseLabel();
+      headerSmall.textContent = `${roleText} · ${courseLabel}`;
+    }
+  });
+</script>
 
 </body>
 </html>
+

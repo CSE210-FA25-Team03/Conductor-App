@@ -2,11 +2,14 @@ name: Conductor CI/CD
 
 on:
   push:
-    branches: [ ci_cd_clean ]
+    branches: [ no_auth_cd_deployment ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  id-token: write   
+  contents: read
 jobs:
   # ========= CI: build & test =========
   ci:
@@ -45,13 +48,6 @@ jobs:
         with:
           name: backend-jsdoc
           path: app/backend/docs
-          
-      - name: Run Codacy code quality (backend only)
-        uses: codacy/codacy-analysis-cli-action@v4
-        with:
-          api-token: ${{ secrets.CODACY_API_TOKEN }}
-          directory: ${{ github.workspace }}/app/backend
-          verbose: true
 
       # ---- Frontend: basic check ----
       - name: Check frontend files exist
@@ -75,17 +71,40 @@ jobs:
   deploy:
     needs: ci
     runs-on: ubuntu-latest
-
+    environment:
+      name: conductor_env
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create deployment archive
-        run: |
-          tar -czf conductor-app.tar.gz app
-
-      - name: Upload deployment artifact
-        uses: actions/upload-artifact@v4
+      - name: Configure AWS credentials
+        id: aws-creds
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          name: conductor-app-build
-          path: conductor-app.tar.gz
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          output-credentials: true
+
+      - name: Create deployment zip for Elastic Beanstalk
+        run: |
+          cd app
+          zip -r ../conductor-eb.zip . \
+            -x "backend/node_modules/*" \
+            -x "frontend/node_modules/*" \
+            -x "specs/*" \
+            -x "document/*" \
+            -x "*.pdf" \
+            -x ".git/*" \
+            -x ".DS_Store"
+
+      - name: Deploy to Elastic Beanstalk
+        uses: einaregilsson/beanstalk-deploy@v22
+        with:
+          aws_access_key: ${{ steps.aws-creds.outputs.aws-access-key-id }}
+          aws_secret_key: ${{ steps.aws-creds.outputs.aws-secret-access-key }}
+          aws_session_token: ${{ steps.aws-creds.outputs.aws-session-token }}
+          region: ${{ secrets.AWS_REGION }}
+          application_name: ${{ secrets.EB_APP_NAME }}
+          environment_name: ${{ secrets.EB_ENV_NAME }}
+          version_label: github-${{ github.run_number }}-${{ github.sha }}
+          deployment_package: conductor-eb.zip
