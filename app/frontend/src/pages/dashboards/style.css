@@ -698,14 +698,9 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* .card-icon {
-  font-size: 2.2rem;
-  margin-bottom: 0.75rem;
-} */
-
 .card-icon img {
-  width: 5.2rem;   /* same visual size as your emoji */
-  height: auto;    /* keeps aspect ratio */
+  width: 5.2rem;   
+  height: auto;    
   display: block;
   object-fit: contain;
 }
@@ -717,11 +712,10 @@ body {
 
 @media (max-width: 500px) {
   .card-icon img {
-    width: 1.9rem; /* slightly smaller on tiny phones */
+    width: 1.9rem; 
   }
 }
 
-/* end of icon image replacement */ 
 .card-content {
   display: flex;
   flex-direction: column;
