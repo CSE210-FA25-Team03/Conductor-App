@@ -502,6 +502,15 @@ if (toInput) {
   });
 }
 
+// Keeps the typeahead dropdown attached to the "To:" field on scroll
+document.addEventListener('scroll', () => {
+  if (!typeaheadMenu || !toInput || typeaheadMenu.style.display === 'none') return;
+  const rect = toInput.getBoundingClientRect();
+  typeaheadMenu.style.left = `${rect.left + window.scrollX}px`;
+  typeaheadMenu.style.top = `${rect.bottom + window.scrollY + 4}px`;
+  typeaheadMenu.style.minWidth = `${rect.width}px`;
+}, true);
+
 /* Add Eval Note (DB-backed) */
 if (addBtn) {
   addBtn.onclick = async () => {

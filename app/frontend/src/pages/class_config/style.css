@@ -54,6 +54,27 @@ body {
     }
 }
 
+
+.file-icon {
+  width: 4.2rem;   
+  height: auto;    
+  display: block;
+  object-fit: contain;
+}
+
+@media (max-width: 500px) {
+  .file-icon {
+    display: none;
+  }
+}
+
+.file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* space between image and input */
+  margin-bottom: 1rem;
+}
+
 .nav-actions {
     display: flex;
     align-items: center;

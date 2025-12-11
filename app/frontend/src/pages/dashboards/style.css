@@ -690,6 +690,7 @@ body {
   flex-direction: column;
   align-items: flex-start;
   padding: 1.5rem;
+  height: 100%;
 }
 
 .dashboard-card:hover {
@@ -697,14 +698,9 @@ body {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* .card-icon {
-  font-size: 2.2rem;
-  margin-bottom: 0.75rem;
-} */
-
 .card-icon img {
-  width: 5.2rem;   /* same visual size as your emoji */
-  height: auto;    /* keeps aspect ratio */
+  width: 5.2rem;   
+  height: auto;    
   display: block;
   object-fit: contain;
 }
@@ -716,11 +712,17 @@ body {
 
 @media (max-width: 500px) {
   .card-icon img {
-    width: 1.9rem; /* slightly smaller on tiny phones */
+    width: 1.9rem; 
   }
 }
 
-/* end of icon image replacement */ 
+.card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+
 .card-content h2 {
   font-size: 1.25rem;
   margin: 0;
@@ -731,6 +733,7 @@ body {
   color: var(--text-muted, #6b7280);
   margin: 0.5rem 0 1.25rem;
   line-height: 1.5;
+  flex: 1;
 }
 
 .card-btn {
@@ -742,6 +745,7 @@ body {
   font-size: 0.95rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  margin-top: auto;
 }
 
 .card-btn:hover {
@@ -1016,6 +1020,13 @@ body {
     transform: translateX(0);
 }
 
+.close-attendance-plot{
+  border-color: black;
+  background-color: rgb(16, 93, 181);
+  color:white;
+  border-radius: 5px;
+  padding: 5px;
+}
 /* Header */
 
 .attendance-drawer header {
@@ -1320,6 +1331,8 @@ body {
   .faq-answer {
     font-size: 0.8rem;
   }
+}
+
 .team-card {
   justify-content: flex-start !important;
 }
@@ -1339,5 +1352,4 @@ body {
 
 .team-card .info-btn:hover {
   background: #1742b0 !important;
-}
 }
