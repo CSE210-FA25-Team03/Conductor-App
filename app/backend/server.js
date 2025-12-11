@@ -28,7 +28,7 @@
   const ticketsDb = require('./db/tickets');
   const faqDb = require('./db/faq');
   const profileDb = require('./db/profile');
-  const authRoutes = require('./routes/auth');
+  const { router: authRoutes } = require('./routes/auth');
   const app = express();
   const PORT = process.env.PORT || 3000;
 
@@ -3688,6 +3688,18 @@ app.get(
     }
   });
 
+  if (process.env.NODE_ENV === 'test') {
+    app.post('/test/fake-login', (req, res) => {
+      req.session.user = {
+        id: 'test-user-id',
+        email: 'student@school.edu',
+        name: 'Test Student',
+        role: 'student',
+        courseId: '22222222-2222-2222-2222-222222222222',
+      };
+      return res.status(204).end();
+    });
+  }
 
   // ------------------------------------------------------------
   // Root route
