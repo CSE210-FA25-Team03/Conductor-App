@@ -86,12 +86,9 @@ function showToast(message, type = 'info') {
     toast.style.left = '50%';
     toast.style.transform = 'translateX(-50%)';
     toast.style.zIndex = '9999';
-    // toast.style.maxWidth = '480px';
-    // toast.style.width = 'calc(100% - 32px)';
-    // toast.style.maxWidth = 'fit-content';
     toast.style.display = 'flex';
     toast.style.flexDirection = 'column';
-    toast.style.alignItems = 'center'; // ensures perfect centering
+    toast.style.alignItems = 'center'; 
     toast.style.maxWidth = '100%'; 
 
     toast.style.pointerEvents = 'none';
@@ -359,25 +356,8 @@ async function refreshTAsFromServer() {
           .toLowerCase()
           .replace(/\s+/g, '.')}@school.edu`,
       }));
-
-    // if (!taMembers.length) {
-    //   taMembers = FALLBACK_TAS.map((name, idx) => ({
-    //     id: `fallback-${idx + 1}`,
-    //     name,
-    //     email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
-    //   }));
-    //   showError('No TAs found in roster; using fallback list.');
-    // }
   } catch (err) {
     console.error('Failed to load TAs from server:', err);
-    // if (!taMembers.length) {
-    //   taMembers = FALLBACK_TAS.map((name, idx) => ({
-    //     id: `fallback-${idx + 1}`,
-    //     name,
-    //     email: `${name.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
-    //   }));
-    //   showError('Could not load TAs. Using fallback list.');
-    // }
   }
 }
 
@@ -489,15 +469,6 @@ function getStudentsForGrouping() {
     skills: Object.keys(s.ratings || {}),
   }));
 }
-
-// function getTaEmailsForGrouping() {
-//   if (taMembers && taMembers.length) {
-//     return taMembers.map((t) => t.email);
-//   }
-//   return FALLBACK_TAS.map(
-//     (ta) => `${ta.toLowerCase().replace(/\s+/g, '.')}@school.edu`,
-//   );
-// }
 
 function getRequiredSkillsForGrouping() {
   return skills && skills.length ? skills : [];
@@ -618,8 +589,6 @@ function smartGenerateGroups() {
 
   const allStudents = getStudentsForGrouping();
   const requiredSkills = getRequiredSkillsForGrouping();
-  // const tasList = getTaEmailsForGrouping();
-
   // Helper to map algorithm student back to real id/email
   const byEmail = new Map(
     allStudents.map((s) => [(s.email || '').toLowerCase(), s]),

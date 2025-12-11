@@ -53,7 +53,7 @@
 
     el.textContent = message || '';
     el.className = 'gf-status';
-    if (type) el.classList.add(type); // expects .gf-status.error / .gf-status.success in CSS
+    if (type) el.classList.add(type); 
   }
 
   // ------------------------------------------------------------

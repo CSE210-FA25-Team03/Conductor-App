@@ -40,7 +40,6 @@ body {
     display: none;
 }
 
-
 @media (max-width: 500px) {
     .logo-full {
         display: none ;
@@ -51,7 +50,6 @@ body {
         height: 2rem;
     }
 }
-
 
 .nav-actions {
   display: flex;

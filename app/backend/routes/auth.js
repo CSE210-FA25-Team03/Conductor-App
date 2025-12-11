@@ -132,7 +132,7 @@ router.get("/google/start", async (req, res) => {
 });
 
 
-// --- OAuth callback ---
+// OAuth callback
 router.get("/google/callback", async (req, res) => {
   try {
     const { state, code } = req.query;
@@ -154,7 +154,7 @@ router.get("/google/callback", async (req, res) => {
 
     const claims = tokenSet.claims();
 
-    // Look up enrollment + role in DB
+// Look up enrollment + role in DB
 const classCode = (req.session.pendingClassCode || "").trim();
 
 const { enrolled, role, user, course } = await findRoleForEmail(
@@ -162,14 +162,14 @@ const { enrolled, role, user, course } = await findRoleForEmail(
   classCode ? { classCode } : {}
 );
 
-// Not enrolled in this course →
+// Not enrolled in this course
 if (!enrolled) {
   console.warn("Login blocked: email not enrolled in course", claims.email);
   req.session = null;
   return res.redirect("/login/?error=not_enrolled");
 }
 
-// Enrolled but no role mapping →
+// Enrolled but no role mapping
 if (!role) {
   console.warn("Login blocked: enrolled but no role", claims.email);
   req.session = null;
@@ -217,7 +217,7 @@ req.session.user = safeUser;
 });
 
 
-// --- Logout ---
+// Logout
 router.post("/logout", (req, res) => {
   console.log("HIT /auth/logout before:", req.session);
   req.session = null; // cookie-session clears cookie
@@ -225,7 +225,7 @@ router.post("/logout", (req, res) => {
   return res.status(204).end(); // no body; frontend will redirect
 });
 
-// --- Return authenticated user ---
+// Return authenticated user
 router.get("/me", (req, res) => {
   const user = req.session?.user;
 

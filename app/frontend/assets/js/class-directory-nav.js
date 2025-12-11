@@ -20,7 +20,6 @@
   }
 
   // Removed unused functions: fetchCourseMeta and updateCtaContent
-
   document.addEventListener('DOMContentLoaded', async () => {
     removeCta();
     applyActiveNav();

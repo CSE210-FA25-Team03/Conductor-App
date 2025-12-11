@@ -177,8 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentUser = {
         id: user?.id || null,
         email: user?.email || email,
-        role: primaryRole,           // canonical role
-        legacyRoleLabel,             // for old UI text checks
+        role: primaryRole,           
+        legacyRoleLabel,             
         classId: courseId || null,
         givenName: firstName,
         familyName: lastName,

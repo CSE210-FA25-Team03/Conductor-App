@@ -12,15 +12,11 @@ body {
     min-height: 100vh;
     padding: 0 10px;
     display: flex;
-    /* background: #2563eb; */
-     background: radial-gradient(circle, #2563eb 20%, #1565c0 100%);
+    background: radial-gradient(circle, #2563eb 20%, #1565c0 100%);
     justify-content: center;
     align-items: center;
     font-size: 13px;
-
-
 }
-
 
 .logo-full {
     display: block;
@@ -30,8 +26,6 @@ body {
 
 /* Login form styling */
 .login_form {
-
-  
     width: 100%;
     max-width: 350px;
     background: #fff;
@@ -40,8 +34,6 @@ body {
     box-shadow: 0 8px 18px rgba(0, 0, 0, 0.13);
     margin: 0 auto;
 }
-
-
 
 .login_form h3 {
     font-size: 15px;
@@ -215,8 +207,8 @@ form button:hover {
 }
 .error-message {
   position: fixed;
-  top: 40px;                /* move down a bit */
-  left: 50%;                /* center horizontally */
+  top: 40px;                
+  left: 50%;                
   transform: translateX(-50%);
 
   background: #f56565;
@@ -226,11 +218,9 @@ form button:hover {
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
   font-size: 0.95rem;
 
-  display: none;            /* teammate's JS still controls display */
+  display: none;            
   z-index: 2000;
 }
-
-
 
 .error-message.visible {
   display: block;

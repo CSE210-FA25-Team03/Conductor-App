@@ -18,7 +18,7 @@ export default defineConfig([
     ignores: ["dist/**", "build/**", "eslint.config.mjs", "cypress/support/**"],
   },
 
-  // 1) Cypress support files - explicit file match to ensure it's processed
+  // 1a) Cypress support files - explicit file match to ensure it's processed
   {
     files: ["cypress/support/e2e.js"],
     ...js.configs.recommended,
@@ -37,7 +37,7 @@ export default defineConfig([
   // 1b) Other Cypress support files
   {
     files: ["cypress/support/**/*.js", "cypress/support/**/*.mjs"],
-    ignores: ["cypress/support/e2e.js"], // Already handled above
+    ignores: ["cypress/support/e2e.js"], 
     ...js.configs.recommended,
     languageOptions: {
       sourceType: "module",
@@ -111,7 +111,7 @@ export default defineConfig([
     },
   },
 
-  // 5) ES Module files (using import/export)
+  // 6) ES Module files (using import/export)
   {
     files: ["src/pages/common/auth.js", "src/pages/dashboards/script.js"],
     ...js.configs.recommended,

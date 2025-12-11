@@ -1,8 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
-/* ============================================================
-   ORIGINAL BASE STYLES — UNTOUCHED
-   ============================================================ */
 :root {
     --bg: #f5f5f7;
     --panel-bg: rgba(255,255,255,0.96);
@@ -43,7 +40,6 @@ body {
     display: none;
 }
 
-
 @media (max-width: 500px) {
     .logo-full {
         display: none ;
@@ -69,7 +65,6 @@ body {
     position: relative;
 }
 
-/* 🔧 FIX: renamed to kebab-case */
 #dashboard-profile-img {
     width: 44px;
     height: 44px;
@@ -115,7 +110,6 @@ body {
     color: #e53e3e !important;
 }
 
-/* 🔧 this is original, keep it */
 .eval-btn {
     display: inline-block;
     padding: 8px 20px;
@@ -131,10 +125,6 @@ body {
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-
-/* ============================================================
-   ATTENDANCE PAGE — CLEAN NON-DUPLICATED STYLES
-   ============================================================ */
 
 .attendance-container {
     max-width: 950px;

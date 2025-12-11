@@ -36,9 +36,6 @@
         </div>
     </header>
 <div class="page" data-role="ta">
-
-    
-
     <section class="dashboard-header">
         <div>
             <h1>Staff Dashboard</h1>
@@ -253,7 +250,6 @@ Object.entries(nav).forEach(([id, link]) => {
     if (btn) btn.onclick = () => (window.location.href = link);
 });
 
-
 // ---------------------------
 // ATTENDANCE DRAWER LOGIC
 // ---------------------------
@@ -270,7 +266,6 @@ if (closeBtn && drawer) {
 }
 
 // Week dropdown is initialized in the HTML
-
 const saveBtn = document.getElementById("saveAttendanceBtn");
 const saveMessage = document.getElementById("saveAttendanceMessage");
 
@@ -354,7 +349,6 @@ if (saveBtn) {
         }, 500);
     };
 }
-
 
 // ---------------------------
 // LOAD PREVIOUS ATTENDANCE

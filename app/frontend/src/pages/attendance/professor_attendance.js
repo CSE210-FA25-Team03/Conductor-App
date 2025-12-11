@@ -263,8 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // const now = new Date();
-
     const list = document.createElement('div');
     list.style.display = 'flex';
     list.style.flexDirection = 'column';

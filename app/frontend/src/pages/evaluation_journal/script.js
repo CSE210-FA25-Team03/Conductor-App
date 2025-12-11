@@ -417,7 +417,6 @@ async function loadEvalNotesForCurrentTarget() {
 }
 
 /* "To" input events: set target + load notes + load journals */
-// "To:" field is used for eval notes only; journals auto-load scoped feed
 if (toInput) {
   toInput.addEventListener('blur', () => {
     const raw = toInput.value.trim();
@@ -502,7 +501,7 @@ if (toInput) {
   });
 }
 
-/* Add Eval Note (DB-backed) */
+/* Add Eval Note */
 if (addBtn) {
   addBtn.onclick = async () => {
     if (!toInput) return;
@@ -643,7 +642,7 @@ if (closeModal && modal) {
 }
 
 /* --------------------------------------------------------------------------
-   WORK JOURNALS + REPLIES (DB-backed, already mostly working)
+   WORK JOURNALS + REPLIES
 --------------------------------------------------------------------------- */
 
 /**
@@ -902,11 +901,6 @@ async function renderWorkJournalCards() {
 }
 
 /**
- * Load replies for a single journal.
- */
-// Replies feature removed per request.
-
-/**
  * Handle reply submit (event delegation).
  */
 if (wjSections || workJournalBox) {
@@ -1027,8 +1021,6 @@ if (wjSections || workJournalBox) {
       }
       return;
     }
-
-    // Reply feature removed; no reply submission handling.
   });
 }
 

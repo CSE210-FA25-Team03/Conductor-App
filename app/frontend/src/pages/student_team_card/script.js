@@ -102,7 +102,6 @@
       return; // Not authorized for inline editing
     }
 
-    // Add edit buttons if not already added
     if (!document.getElementById('editDescBtn')) {
       const btn = document.createElement('button');
       btn.id = 'editDescBtn';

@@ -1,7 +1,7 @@
 const request = require('supertest');
 const app = require('../server');
 
-// --- Health check ---
+// Health check
 describe('Health API', () => {
   test('GET /api/health returns { status: "ok" }', async () => {
     const res = await request(app).get('/api/health');
@@ -11,7 +11,7 @@ describe('Health API', () => {
   });
 });
 
-// --- Teams endpoint ---
+// Teams endpoint
 describe('Teams API', () => {
   test('GET /api/teams returns an array', async () => {
     const res = await request(app).get('/api/teams');

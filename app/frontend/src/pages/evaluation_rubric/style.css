@@ -1,6 +1,4 @@
 /* Evaluation Rubric Styles */
-
-/* Evaluation Rubric Styles - Structured like profile.css */
 :root {
     --bg: #f5f5f7;
     --panel-bg: rgba(255,255,255,0.96);
@@ -55,7 +53,6 @@ body {
     }
 }
 
-
 /* --- Main Page Panel --- */
 .page[data-role="professor"] {
     max-width: 900px;
@@ -69,7 +66,7 @@ body {
 /* --- Dashboard Header --- */
 .dashboard-header h1 {
     font-size: 1.7rem;
-    text-align: center; /* Center the title */
+    text-align: center; 
     margin-bottom: 2rem;
     color: #2a3a5e;
 }
@@ -80,7 +77,7 @@ body {
 /* --- Evaluation Form Table --- */
 .evaluation-form {
     display: flex;
-    justify-content: center; /* Center the table horizontally */
+    justify-content: center; 
     margin-top: 2rem;
      padding: 0 16px;        
     box-sizing: border-box; 
@@ -89,7 +86,7 @@ body {
 .evaluation-form-table {
     
     width: 100%;
-    max-width: 1000px; /* Prevent table from stretching full width */
+    max-width: 1000px; 
     border-collapse: collapse;
     background: var(--table-row);
     border-radius: var(--radius);
@@ -184,7 +181,7 @@ body {
 .eval-btn {
     display: inline-block;
     padding: 8px 20px;
-    background-color: rgba(100, 100, 100, 0.15); /* transparent grey button */
+    background-color: rgba(100, 100, 100, 0.15); 
     color: black;
     font-weight: 600;
     border-radius: 6px;
@@ -212,8 +209,8 @@ body {
 /* --- Save Button --- */
 .evaluation-form-actions {
     display: flex;
-    justify-content: center; /* Center the button */
-    margin-top: 1.8rem; /* Space from the table */
+    justify-content: center; 
+    margin-top: 1.8rem; 
 }
 
 #save-btn {

@@ -764,7 +764,6 @@ body {
     display: none;
 }
 
-
 @media (max-width: 500px) {
     .logo-full {
         display: none ;
@@ -775,7 +774,6 @@ body {
         height: 2rem;
     }
 }
-
 
 .eval-btn {
     display: inline-block;
@@ -979,7 +977,6 @@ body {
 }
 
 /* Slide-in attendance drawer */
-
 .attendance-panel {
     position: fixed;
     top: 0;
@@ -1017,7 +1014,6 @@ body {
 }
 
 /* Header */
-
 .attendance-drawer header {
     display: flex;
     justify-content: space-between;
@@ -1064,7 +1060,6 @@ body {
 }
 
 /* Past Submissions */
-
 .past-attendance h3 {
     margin-bottom: 10px;
 }
@@ -1083,13 +1078,9 @@ body {
     background: #fafafa;
 }
 
-
-
-
 .attendance-panel.open {
     transform: translateX(0);
 }
-
 
 .attendance-input-box {
     display: flex;

@@ -347,7 +347,7 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw, expectedType = 
 
   const sessionRow = sessionRows[0];
 
-  // 3) Validate type matches expected type (if provided)
+  // 3a) Validate type matches expected type (if provided)
   if (expectedType && sessionRow.type !== expectedType) {
     return {
       success: false,
@@ -385,7 +385,7 @@ async function markAttendanceByCode(courseId, codeRaw, emailRaw, expectedType = 
     }
   }
 
-  // 4) Expiry check in JS (clearer errors)
+  // 4) Expiry check in JS
   const now = new Date();
   const expiresAt = new Date(sessionRow.expires_at);
   if (now > expiresAt) {

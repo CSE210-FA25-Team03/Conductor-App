@@ -18,10 +18,6 @@ body {
     color: #111;
 }
 
-/* ============================================================
-   TOP NAV
-   ============================================================ */
-
 .top-nav {
     display: flex;
     justify-content: space-between;
@@ -43,7 +39,6 @@ body {
     display: none;
 }
 
-
 @media (max-width: 500px) {
     .logo-full {
         display: none ;
@@ -54,7 +49,6 @@ body {
         height: 2rem;
     }
 }
-
 
 /* Task Tracker Section */
 .task-tracker-section {

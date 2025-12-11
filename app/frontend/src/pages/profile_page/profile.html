@@ -237,7 +237,7 @@
           console.error('Failed to load profile from backend:', err);
           showStatus('Could not load profile from server; using local data.', 'error');
 
-          // Fallback: use localStorage like before
+          // Fallback: use localStorage
           const firstName = localStorage.getItem('firstName') || '';
           const lastName = localStorage.getItem('lastName') || '';
           const role = localStorage.getItem('role') || 'Professor';

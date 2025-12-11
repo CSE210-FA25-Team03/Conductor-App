@@ -339,12 +339,9 @@ CREATE TABLE github_configs (
   CONSTRAINT github_configs_course_unique UNIQUE (course_id)
 );
 
-
 ------------------------------------------------------------
--- 8. FAQ + Submit Ticket Queue
+-- 9. FAQ + Submit Ticket Queue
 ------------------------------------------------------------
-
-
 -- Course Support Tickets
 CREATE TABLE IF NOT EXISTS support_tickets (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -366,7 +363,6 @@ CREATE TABLE IF NOT EXISTS support_ticket_replies (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
-
 -- Frequently Asked Questions for a course
 CREATE TABLE faq (
   id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -377,13 +373,8 @@ CREATE TABLE faq (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-
-
-
-
-
 ------------------------------------------------------------
--- 9. Helpful indexes
+-- 10. Helpful indexes
 ------------------------------------------------------------
 
 CREATE INDEX idx_course_memberships_course
@@ -449,11 +440,8 @@ CREATE INDEX IF NOT EXISTS idx_support_tickets_course_status
 CREATE INDEX IF NOT EXISTS idx_support_ticket_replies_ticket
   ON support_ticket_replies (ticket_id, created_at DESC);
 ------------------------------------------------------------
--- 10. SEED DATA (users, roles, course, team, skills)
+-- 11. SEED DATA (users, roles, course, team, skills)
 ------------------------------------------------------------
-
--- Fixed UUIDs so they are predictable between machines
--- (You must set DEFAULT_COURSE_ID to the course UUID below)
 
 -- Users
 INSERT INTO users (id, email, email_verified_at, given_name, family_name, display_name)

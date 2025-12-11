@@ -18,10 +18,6 @@ body {
     color: #111;
 }
 
-/* ============================================================
-   TOP NAV
-   ============================================================ */
-
 .top-nav {
     display: flex;
     justify-content: space-between;
@@ -43,7 +39,6 @@ body {
     display: none;
 }
 
-
 @media (max-width: 500px) {
     .logo-full {
         display: none ;
@@ -58,7 +53,7 @@ body {
 .eval-btn {
     display: inline-block;
     padding: 8px 20px;
-    background-color: rgba(100, 100, 100, 0.15); /* transparent grey button */
+    background-color: rgba(100, 100, 100, 0.15); 
     color: black;
     font-weight: 600;
     border-radius: 6px;
@@ -72,9 +67,6 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-/* ============================================================
-   Ticket Queue Grid
-   ============================================================ */
 .queue-container {
     max-width: 1000px;
     margin: 0 auto;
@@ -112,7 +104,6 @@ body {
 
 .empty { color: var(--text-muted); }
 
-
 .conversation-thread {
     display: flex;
     flex-direction: column;
@@ -145,9 +136,6 @@ body {
     overflow-wrap: break-word;
 }
 
-/* ============================================================
-   Modal for Answer
-   ============================================================ */
 .modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.5);
     display: none; align-items: center; justify-content: center;

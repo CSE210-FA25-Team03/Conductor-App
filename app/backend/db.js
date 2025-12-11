@@ -7,8 +7,6 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-// Prefer DATABASE_URL (easy for Docker / AWS / Render / etc.)
-// Fallback: local dev connection to "conductor" database.
 const connectionString =
   process.env.DATABASE_URL || 'postgres://postgres:postgres@localhost:5432/conductor';
 

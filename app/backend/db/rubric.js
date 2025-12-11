@@ -1,28 +1,29 @@
 // backend/db/rubric.js
-//
-// DB helpers for course rubric items, stored in `course_rubric_items`.
-//
-// Actual table structure (from schema.sql):
-//   course_rubric_items (
-//     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-//     course_id  uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-//     item_key   text NOT NULL,  -- 'attendance', 'work_journal', etc.
-//     label      text NOT NULL,
-//     enabled    boolean NOT NULL DEFAULT false,
-//     weight     numeric(5,2) NOT NULL DEFAULT 0 CHECK (weight >= 0),
-//     updated_at timestamptz NOT NULL DEFAULT now(),
-//     CONSTRAINT course_rubric_items_course_item_unique UNIQUE (course_id, item_key)
-//   );
-//
-// This module exposes a simple JSON shape compatible with the server:
-//   {
-//     id,
-//     courseId,
-//     itemKey,
-//     label,
-//     enabled,
-//     weight
-//   }
+
+/* DB helpers for course rubric items, stored in `course_rubric_items`.
+
+Actual table structure (from schema.sql):
+   course_rubric_items (
+     id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+     course_id  uuid NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+     item_key   text NOT NULL,  -- 'attendance', 'work_journal', etc.
+     label      text NOT NULL,
+     enabled    boolean NOT NULL DEFAULT false,
+     weight     numeric(5,2) NOT NULL DEFAULT 0 CHECK (weight >= 0),
+     updated_at timestamptz NOT NULL DEFAULT now(),
+     CONSTRAINT course_rubric_items_course_item_unique UNIQUE (course_id, item_key)
+   );
+
+ This module exposes a simple JSON shape compatible with the server:
+   {
+     id,
+     courseId,
+     itemKey,
+     label,
+     enabled,
+     weight
+   }
+*/
 
 const db = require('./index');
 

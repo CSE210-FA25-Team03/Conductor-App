@@ -343,11 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Course description saved', 'success');
       } catch (err) {
         console.error('Failed to save course description:', err);
-        // setStatus(
-        //   descStatus,
-        //   'Failed to save course description. Please try again.',
-        //   '#b91c1c',
-        // );
         showToast('Failed to save course description', 'error');
       }
     });

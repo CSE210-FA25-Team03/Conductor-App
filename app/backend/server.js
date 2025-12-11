@@ -1,7 +1,6 @@
   // backend/server.js
   require('dotenv').config();
 
-  // const db = require("../db");
   const path = require('path');
   const express = require('express');
 
@@ -208,7 +207,7 @@ const fetch =
     return true;
   }
 
-    /**
+  /**
    * Helper: get the current session user (or null).
    */
   function getSessionUser(req) {
@@ -374,7 +373,7 @@ const fetch =
         courseId: ctx.courseId || null,
         courseCode: ctx.courseCode || (rawClassCode || null),
         courseName: ctx.courseName || null,
-        emailVerified: true, // dummy login → treat as verified for now
+        emailVerified: true, // dummy login, treat as verified for now
         picture: null,
       };
 
@@ -745,11 +744,6 @@ const fetch =
   // ------------------------------------------------------------
   // Course Rosters API (upload from class_config page)
   // ------------------------------------------------------------
-
-  // ------------------------------------------------------------
-  // Course Rosters API (upload from class_config page)
-  // ------------------------------------------------------------
-
   app.post(
     '/api/courses/rosters',
     requireAuth,
@@ -770,7 +764,7 @@ const fetch =
           return res.status(400).json({ error: 'No roster data provided' });
         }
 
-        // (Optional but recommended) Restrict who can upload rosters:
+        // Restrict who can upload rosters
         const role = req.currentUser.role;
         if (!['admin', 'professor', 'ta'].includes(role)) {
           return res.status(403).json({ error: 'Not allowed to upload rosters' });
@@ -815,7 +809,7 @@ app.get(
 );
 
 
-  // POST (create/update) a skill
+// POST (create/update) a skill
 app.post(
   '/api/group-formation/skills',
   requireAuth,
@@ -833,9 +827,6 @@ app.post(
     }
   }
 );
-
-// etc. for PUT and DELETE using req.courseId
-
 
   // UPDATE a skill by id
   app.put('/api/group-formation/skills/:id', async (req, res) => {
@@ -880,7 +871,7 @@ app.post(
     }
   });
 
-  // GET student ratings
+// GET student ratings
 app.get(
   '/api/group-formation/student-ratings',
   requireAuth,
@@ -898,11 +889,6 @@ app.get(
     }
   }
 );
-
-
-  // ------------------------------------------------------------
-  // Group Formation – Groups (teams, members, TA assignments)
-  // ------------------------------------------------------------
   
   // ------------------------------------------------------------
   // FAQ API
@@ -1048,7 +1034,7 @@ app.get(
     }
   });
 
-  // GET existing groups for current course
+// GET existing groups for current course
 app.get(
   '/api/group-formation/groups',
   requireAuth,
@@ -1068,8 +1054,6 @@ app.get(
   }
 );
 
-  // POST save groups for current course
-  // body: { groups: [ { teamName?, taUserId?, members: [{ userId, role }] } ] }
 // POST save groups for current course
 // body: { groups: [ { teamName?, taUserId?, members: [{ userId, role }] } ] }
 app.post(
@@ -1100,8 +1084,6 @@ app.post(
     }
   }
 );
-
-
 
 app.get(
   '/api/group-formation/student-ratings/me',
@@ -1155,11 +1137,6 @@ app.post(
   }
 );
 
-// Similar for team-lead ratings: getTeamLeadRatings(req.courseId), upsertTeamLeadRating(req.courseId, ...)
-
-
-
-
   // GET team lead ratings
   app.get('/api/group-formation/team-lead-ratings', async (req, res) => {
     try {
@@ -1192,11 +1169,6 @@ app.post(
   // ------------------------------------------------------------
   // Teams API
   // ------------------------------------------------------------
-
-  // GET all teams
-
-  // GET all teams
-
   // GET all teams for the current course
   // Allow unauthenticated read-only access to return an empty array (for tests)
   app.get('/api/teams', async (req, res) => {
@@ -1264,7 +1236,7 @@ app.post(
     }
   });
 
-  // Team Card detailed info
+// Team Card detailed info
 app.get(
   '/api/team-card/:id',
   requireAuth,
@@ -1286,7 +1258,7 @@ app.get(
 );
 
 
-  // Update team card description / status description (team lead, TA, professor)
+// Update team card description / status description (team lead, TA, professor)
 // Update team card description / status description (team lead, TA, professor)
 app.put(
   '/api/team-card/:id',
@@ -1348,7 +1320,7 @@ app.put(
   }
 );
 
-  // Teams for current user (by email or userId)
+// Teams for current user (by email or userId)
 app.get(
   '/api/my-teams',
   requireAuth,
@@ -1376,8 +1348,6 @@ app.get(
   }
 );
 
-
-  // CREATE team
   // CREATE team for the current course
   app.post(
     '/api/teams',
@@ -1399,8 +1369,6 @@ app.get(
     }
   );
 
-
-  // UPDATE team
   // UPDATE team in the current course
   app.put(
     '/api/teams/:id',
@@ -1428,7 +1396,6 @@ app.get(
     }
   );
 
-  // DELETE team
   // DELETE team in the current course
   app.delete(
     '/api/teams/:id',
@@ -1456,10 +1423,9 @@ app.get(
     }
   );
 
-
-  // ------------------------------------------------------------
-  // Team Events API (Meetings & Tasks per team)
-  // ------------------------------------------------------------
+// ------------------------------------------------------------
+// Team Events API (Meetings & Tasks per team)
+// ------------------------------------------------------------
 // GET team events for current user's teams OR specific team via query
 // /api/team-events?teamId=... OR /api/team-events?email=user@school.edu
 app.get(
@@ -1582,7 +1548,6 @@ app.post(
   // ------------------------------------------------------------
   // Course Rubric API
   // ------------------------------------------------------------
-
   // Get the rubric for the current course
   app.get('/api/rubric', async (req, res) => {
     try {
@@ -1659,7 +1624,6 @@ app.post(
   // ------------------------------------------------------------
   // Evaluations API (per member)
   // ------------------------------------------------------------
-
   app.get('/api/evaluations/:memberId', async (req, res) => {
     try {
       // Read-only: if course missing, return empty shell for the UI
@@ -1705,13 +1669,9 @@ app.post(
   // Student Weekly Evaluation API
   // ------------------------------------------------------------
 
-
-
-
   // ------------------------------------------------------------
   // Evaluation Notes API (per member)
   // ------------------------------------------------------------
-
   // Get notes for a specific member
   app.get('/api/evaluations/:memberId/notes', async (req, res) => {
     try {
@@ -1748,11 +1708,10 @@ app.post(
 
 
 
-  // ------------------------------------------------------------
-  // Evaluation Notes API (by email, used by Evaluation Journal page)
-  // ------------------------------------------------------------
-
-  // GET /api/eval-notes?email=student@school.edu
+// ------------------------------------------------------------
+// Evaluation Notes API (by email, used by Evaluation Journal page)
+// ------------------------------------------------------------
+// GET /api/eval-notes?email=student@school.edu
 // GET /api/eval-notes?email=student@school.edu[&week=NUMBER]
 app.get(
   '/api/eval-notes',
@@ -1797,8 +1756,6 @@ app.get(
 );
 
 
-  // POST /api/eval-notes
-  // body: { targetEmail, privateText, publicText, mode, scores, email: authorEmail }
 // POST /api/eval-notes
 // body: { targetEmail, privateText, publicText, mode, scores, email: authorEmail, week }
 app.post(
@@ -1859,12 +1816,11 @@ app.post(
 
 
 
-  // ------------------------------------------------------------
-  // Work Journals API (for Evaluation Journal page)
-  // ------------------------------------------------------------
-
-  // GET /api/work-journals?forName=@student_or_team
-  // GET /api/work-journals?forName=@student_or_team&email=someone@school.edu
+// ------------------------------------------------------------
+// Work Journals API (for Evaluation Journal page)
+// ------------------------------------------------------------
+// GET /api/work-journals?forName=@student_or_team
+// GET /api/work-journals?forName=@student_or_team&email=someone@school.edu
 // Work Journals API (student view / personal view)
 app.get(
   '/api/work-journals',
@@ -1892,8 +1848,7 @@ app.get(
   }
 );
 
-  // CREATE a new work journal entry
-// CREATE work journal in the current course
+// CREATE a new work journal entry in the current course
 app.post(
   '/api/work-journals',
   requireAuth,
@@ -1914,8 +1869,7 @@ app.post(
   }
 );
 
-  // UPDATE an existing work journal entry
-// UPDATE work journal in the current course
+// UPDATE an existing work journal entry in the current course
 app.put(
   '/api/work-journals/:id',
   requireAuth,
@@ -1943,8 +1897,6 @@ app.put(
   }
 );
 
-
-  // DELETE a work journal entry
 // DELETE work journal in the current course
 app.delete(
   '/api/work-journals/:id',
@@ -1974,9 +1926,9 @@ app.delete(
 
 
 
-  // Reviewer view: Role-aware journals, split into new vs read
-  // GET /api/work-journals/review?to=@student_or_email&email=viewer@school.edu
-  // If `to` omitted, returns viewer-scoped recent journals (last 30 days)
+// Reviewer view: Role-aware journals, split into new vs read
+// GET /api/work-journals/review?to=@student_or_email&email=viewer@school.edu
+// If `to` omitted, returns viewer-scoped recent journals (last 30 days)
 app.get(
   '/api/work-journals/review',
   requireAuth,
@@ -2121,7 +2073,6 @@ app.get(
   // ------------------------------------------------------------
   // Work Journal Replies API
   // ------------------------------------------------------------
-
   // Get replies for a work journal entry
   app.get('/api/work-journals/:id/replies', async (req, res) => {
     try {
@@ -2197,14 +2148,9 @@ app.get(
   //   }
   // });
 
-
-// Student Weekly Evaluation API
-// GET /api/student/weekly-evaluation?email=student@school.edu
-
 // ------------------------------------------------------------
 // Student Weekly Evaluation API (course-scoped)
 // ------------------------------------------------------------
-
 // GET /api/student/weekly-evaluation?email=student@school.edu
 app.get(
   '/api/student/weekly-evaluation',
@@ -2245,11 +2191,10 @@ app.get(
   }
 );
 
-  // ------------------------------------------------------------
-  // Class directory (course + staff + teams) & events
-  // ------------------------------------------------------------
-
-  // Main class directory payload
+// ------------------------------------------------------------
+// Class directory (course + staff + teams) & events
+// ------------------------------------------------------------
+// Main class directory payload
 app.get(
   '/api/class_directory',
   requireAuth,
@@ -2275,8 +2220,7 @@ app.get(
   }
 );
 
-
-  // Course info only
+// Course info only
 app.get(
   '/api/class-directory/course',
   requireAuth,
@@ -2331,7 +2275,7 @@ app.put(
 );
 
 
-  // Individual staff lists
+// Individual staff lists
 app.get(
   '/api/class-directory/instructors',
   requireAuth,
@@ -2414,7 +2358,7 @@ app.get(
 );
 
 
-  // Class events
+// Class events
 app.get(
   '/api/class-directory/events',
   requireAuth,
@@ -2434,7 +2378,7 @@ app.get(
 );
 
 
-  // Aggregated class directory payload (fewer round trips, parallel queries)
+// Aggregated class directory payload (fewer round trips, parallel queries)
 app.get(
   '/api/class-directory/summary',
   requireAuth,
@@ -2476,7 +2420,6 @@ app.get(
   }
 );
 
-
 app.post(
   '/api/class-directory/events',
   requireAuth,
@@ -2494,7 +2437,6 @@ app.post(
     }
   }
 );
-
 
 app.put(
   '/api/class-directory/events/:id',
@@ -2518,7 +2460,6 @@ app.put(
   }
 );
 
-
 app.delete(
   '/api/class-directory/events/:id',
   requireAuth,
@@ -2541,11 +2482,9 @@ app.delete(
   }
 );
 
-  // ------------------------------------------------------------
-  // Members API (for task tracker & student directory)
-  // ------------------------------------------------------------
-
-// Members API (for task tracker, class directory, evaluation journal, etc.)
+// ------------------------------------------------------------
+// Members API (for task tracker & student directory)
+// ------------------------------------------------------------
 app.get(
   '/api/members',
   requireAuth,
@@ -2569,7 +2508,6 @@ app.get(
   // ------------------------------------------------------------
   // Tasks API (task board)
   // ------------------------------------------------------------
-
   app.get('/api/tasks', async (req, res) => {
     try {
       if (!ensureDb(res)) {
@@ -2597,11 +2535,10 @@ app.get(
     }
   });
 
-  // ------------------------------------------------------------
-  // Attendance API (professor & student)
-  // ------------------------------------------------------------
-
-  // GET all attendance sessions for the default course
+// ------------------------------------------------------------
+// Attendance API (professor & student)
+// ------------------------------------------------------------
+// GET all attendance sessions for the default course
 app.get(
   '/api/attendance/sessions',
   requireAuth,
@@ -2642,7 +2579,7 @@ app.get(
   }
 );
 
-  // CREATE a new attendance session (professor or team lead)
+// CREATE a new attendance session (professor or team lead)
 app.post(
   '/api/attendance/sessions',
   requireAuth,
@@ -2721,7 +2658,7 @@ app.post(
     }
   });
 
-  // Student marks themselves present using a code
+// Student marks themselves present using a code
 app.post(
   '/api/attendance/mark',
   requireAuth,
@@ -2763,7 +2700,7 @@ app.post(
   }
 );
 
-  // Get attendance plot data for a team
+// Get attendance plot data for a team
 app.get(
   '/api/attendance/plot',
   requireAuth,
@@ -2788,7 +2725,7 @@ app.get(
   }
 );
 
-  // Get attendance history for a student by email
+// Get attendance history for a student by email
 app.get(
   '/api/attendance/history',
   requireAuth,
@@ -2828,11 +2765,8 @@ app.get(
 
 
   // ------------------------------------------------------------
-  // Profile Page
+  // Profile Page API (create/update and feature a user's profile)
   // ------------------------------------------------------------
-  // Profile API (create/update and fetch)
-
-  // Create or update a user profile
   app.post('/api/profile', async (req, res) => {
     try {
       if (!ensureDb(res)) {
@@ -2885,7 +2819,6 @@ app.get(
   // Note: GitHub API functions are now in ./services/githubApi.js
   // Keeping old function definitions for backward compatibility during migration
   // TODO: Remove these and use githubApi module directly
-
   // Fetch GitHub issues for configured repo (REST API)
   async function fetchGitHubIssues(owner, repo, token = '') {
     const headers = {
@@ -3153,8 +3086,6 @@ app.get(
     // Handle both REST API format (single assignee) and GraphQL format (assignees array)
     const assigneeData = issue.assignee || (issue.assignees && issue.assignees.nodes && issue.assignees.nodes[0]);
     if (assigneeData) {
-  
-  
       const login = assigneeData.login || assigneeData;
       assignee = login;
 
@@ -3202,8 +3133,6 @@ app.get(
       group,
     };
   }
-
-
 
   // Create a GitHub issue from a task
   async function createGitHubIssue(owner, repo, token, task) {
@@ -3688,11 +3617,9 @@ app.get(
     }
   });
 
-
   // ------------------------------------------------------------
   // Root route
   // ------------------------------------------------------------
-
   app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/public/index.html'));
   });
@@ -3706,7 +3633,6 @@ app.get(
   // ------------------------------------------------------------
   // Server bootstrap
   // ------------------------------------------------------------
-
   if (require.main === module) {
     app.listen(PORT, () => {
       console.log(`Server running at http://localhost:${PORT}`);
