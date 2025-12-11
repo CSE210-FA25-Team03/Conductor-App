@@ -690,6 +690,7 @@ body {
   flex-direction: column;
   align-items: flex-start;
   padding: 1.5rem;
+  height: 100%;
 }
 
 .dashboard-card:hover {
@@ -721,6 +722,13 @@ body {
 }
 
 /* end of icon image replacement */ 
+.card-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+
 .card-content h2 {
   font-size: 1.25rem;
   margin: 0;
@@ -731,6 +739,7 @@ body {
   color: var(--text-muted, #6b7280);
   margin: 0.5rem 0 1.25rem;
   line-height: 1.5;
+  flex: 1;
 }
 
 .card-btn {
@@ -742,6 +751,7 @@ body {
   font-size: 0.95rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  margin-top: auto;
 }
 
 .card-btn:hover {
