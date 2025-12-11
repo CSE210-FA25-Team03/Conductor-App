@@ -1,6 +1,31 @@
 # Conductor-App
 Scalable Course Management Applications
 
+## Deployment website:
+https://conductor.bobbyzhu.com/
+
+### Getting Started:
+Roles:
+Professor: professor@school.edu
+
+TA: ta@school.edu
+
+Tutor: aws.management.capstone@gmail.com
+
+Students:
+
+- bobbyzhu.work@gmail.com 
+
+- student@school.edu
+
+- teamlead@school.edu (team lead)
+
+Course: CSE210 
+
+Login Page:
+1. Enter the email and the class code for login to the right dashboard
+2. Continue with Google (authenciate the google account)
+
 ## Prerequisites
 
 - Node.js 18+ (for global fetch support)
