@@ -134,3 +134,8 @@ This script will:
    * Password: postgres
 7. Tables
    * Servers, conductor, postgres, Databases, conductor, Schemas, public, Tables
+  
+## Presentation link
+1. Quick Software demo : https://www.youtube.com/watch?v=BHPU92J57qE
+2. Learning from CSE 210 Group Project : https://youtu.be/IHMtIuANs60
+3. More Technical Details about the project : https://www.youtube.com/watch?v=Ys7keatqIKQ
