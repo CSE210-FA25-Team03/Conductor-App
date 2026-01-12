@@ -44,6 +44,11 @@
             <h1>Staff Dashboard</h1>
             <small>Teaching Assistant view · </small>
         </div>
+        <div>
+            <button id="openAiAssistantBtn" class="nav-btn eval-btn">
+                AI Assistant
+            </button>
+        </div>
     </section>
 
     <section class="content-grid">
@@ -632,6 +637,129 @@ loadAttendanceHistory();
                 classToggle.textContent = isHidden ? 'Hide' : 'Show';
             });
         }
+    });
+</script>
+
+<!-- AI Assistant Sidebar -->
+<section class="ai-assistant-panel" id="aiAssistantPanel" aria-hidden="true">
+    <article class="ai-assistant-drawer">
+        <header>
+            <div>
+                <h2>Course Helper</h2>
+                <p>Ask me anything about your course, teams, or students!</p>
+            </div>
+            <button class="close-ai-assistant" aria-label="Close" id="closeAiAssistant">×</button>
+        </header>
+        <div class="ai-chat-container" id="aiChatContainer">
+            <div class="ai-chat-messages" id="aiChatMessages">
+                <div class="ai-message ai-bot-message">
+                    <div class="ai-message-content">
+                        Hello! I'm your AI assistant. I can help you with questions about:
+                        <ul>
+                            <li>Teams you are assigned to</li>
+                            <li>Team members and their details</li>
+                            <li>Course information</li>
+                            <li>Staff directory</li>
+                        </ul>
+                        What would you like to know?
+                    </div>
+                </div>
+            </div>
+            <div class="ai-chat-input-container">
+                <input type="text" id="aiChatInput" class="ai-chat-input" placeholder="Type your question..." />
+                <button id="aiSendBtn" class="ai-send-btn">Send</button>
+            </div>
+        </div>
+    </article>
+</section>
+
+<!-- AI Assistant Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const aiPanel = document.getElementById('aiAssistantPanel');
+        const openBtn = document.getElementById('openAiAssistantBtn');
+        const closeBtn = document.getElementById('closeAiAssistant');
+        const chatInput = document.getElementById('aiChatInput');
+        const sendBtn = document.getElementById('aiSendBtn');
+        const messagesContainer = document.getElementById('aiChatMessages');
+
+        if (!aiPanel || !openBtn) return;
+
+        function openAiPanel() {
+            aiPanel.setAttribute('aria-hidden', 'false');
+            chatInput.focus();
+        }
+
+        function closeAiPanel() {
+            aiPanel.setAttribute('aria-hidden', 'true');
+        }
+
+        openBtn.addEventListener('click', openAiPanel);
+        if (closeBtn) closeBtn.addEventListener('click', closeAiPanel);
+        
+        aiPanel.addEventListener('click', (e) => {
+            if (e.target === aiPanel) closeAiPanel();
+        });
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `ai-message ${isUser ? 'ai-user-message' : 'ai-bot-message'}`;
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'ai-message-content';
+            contentDiv.innerHTML = content;
+            messageDiv.appendChild(contentDiv);
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'ai-message ai-bot-message ai-typing';
+            typingDiv.id = 'aiTypingIndicator';
+            typingDiv.innerHTML = '<div class="ai-message-content"><span class="typing-dots">...</span></div>';
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            const typingIndicator = document.getElementById('aiTypingIndicator');
+            if (typingIndicator) typingIndicator.remove();
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            chatInput.value = '';
+            showTyping();
+
+            try {
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.error) {
+                    addMessage(`<span style="color: #d00;">Error: ${data.error}</span>`);
+                } else {
+                    addMessage(data.response || 'Sorry, I could not process your request.');
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage(`<span style="color: #d00;">Error connecting to the AI service. Please try again.</span>`);
+                console.error('AI Chat Error:', error);
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
     });
 </script>
 

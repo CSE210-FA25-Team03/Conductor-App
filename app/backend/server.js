@@ -17,6 +17,7 @@
   const tasksDb = require('./db/tasks');
   const githubDb = require('./db/github');
   const githubApi = require('./services/githubApi');
+  const aiAssistant = require('./services/aiAssistant');
   const workJournalsDb = require('./db/workJournals');
   const attendanceDb = require('./db/attendance');
   const rubricDb = require('./db/rubric');
@@ -959,6 +960,34 @@ app.get(
     } catch (err) {
       console.error('Error deleting FAQ:', err);
       return res.status(500).json({ error: 'Failed to delete FAQ' });
+    }
+  });
+
+  // ------------------------------------------------------------
+  // AI Assistant API
+  // ------------------------------------------------------------
+  app.post('/api/ai/chat', requireAuth, requireCourseContext, async (req, res) => {
+    try {
+      const { message } = req.body || {};
+      
+      if (!message || typeof message !== 'string' || !message.trim()) {
+        return res.status(400).json({ error: 'Message is required' });
+      }
+
+      // Pass user info to enable personalized responses (weekly evaluations, etc.)
+      const userInfo = {
+        email: req.currentUser?.email,
+        role: req.currentUser?.role,
+        id: req.currentUser?.id
+      };
+
+      const response = await aiAssistant.chat(message.trim(), req.courseId, userInfo);
+      return res.json({ response });
+    } catch (err) {
+      console.error('AI Chat Error:', err);
+      return res.status(500).json({ 
+        error: err.message || 'Failed to process AI request' 
+      });
     }
   });
 
